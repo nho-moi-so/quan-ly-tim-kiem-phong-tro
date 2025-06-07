@@ -1,1 +1,2 @@
-# quan-ly-tim-kiem-phong-tro
+# Quản lý và Tìm kiếm phòng trọ
+Author: Mỹ Ngọc & Trường Nguyên
