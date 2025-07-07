@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/label_select.dart';
-import '../widgets/search_placeholder.dart';
-import '../widgets/user_card.dart';
+import '/features/admin/widgets/widgets.dart';
 
 
 class HomeScreen extends StatelessWidget {
@@ -19,12 +17,8 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 100),
-              LabelSelect(),
-              SizedBox(height: 20),
-              SearchPlaceholder(),
-              UserCard(),
-              UserCard()
+              //wiget trong đây
+              TopBar(), 
             ],
           )
         ),
