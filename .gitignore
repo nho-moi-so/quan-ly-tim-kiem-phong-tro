@@ -1,0 +1,7 @@
+.idx/
+.vscode/
+quan_ly_tim_kiem_phong_tro_fe/pubspec.lock
+quan_ly_tim_kiem_phong_tro_fe/android/app/google-services.json
+quan_ly_tim_kiem_phong_tro_fe/macos/Flutter/GeneratedPluginRegistrant.swift
+quan_ly_tim_kiem_phong_tro_fe/windows/flutter/generated_plugin_registrant.cc
+quan_ly_tim_kiem_phong_tro_fe/windows/flutter/generated_plugins.cmake
