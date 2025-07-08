@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "450497142059",
+    "project_id": "management-seeking-apartment",
+    "storage_bucket": "management-seeking-apartment.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:450497142059:android:5b6a65445f95f7f65db96e",
+        "android_client_info": {
+          "package_name": "com.example.quan_ly_tim_kiem_phong_tro_fe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrXiN_6KcHioWjSvFxYgnuSnN9x3eDuGc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
