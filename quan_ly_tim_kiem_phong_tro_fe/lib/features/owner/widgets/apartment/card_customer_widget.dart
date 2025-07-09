@@ -48,6 +48,53 @@ class CardCustomerWidget extends StatelessWidget {
                 const SizedBox(height: 24),
                 _buildLabel('Địa Chỉ Thường Chú'),
                 _buildInputBox(height: 63),
+                const SizedBox(height: 32),
+                // Buttons Row
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: const Color(0xFF4285F4), width: 1),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'Hủy',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4285F4),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'Thêm',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),

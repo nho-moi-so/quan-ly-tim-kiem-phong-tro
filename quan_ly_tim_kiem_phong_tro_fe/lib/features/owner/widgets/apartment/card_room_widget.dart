@@ -3,246 +3,195 @@ import 'package:flutter/material.dart';
 class CardRoomWidget extends StatelessWidget {
   const CardRoomWidget({super.key});
 
+  Widget buildInfoRow(IconData icon, String text, Color color) {
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 18),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: TextStyle(
+            color: color,
+            fontSize: 16,
+            fontFamily: 'Noto Sans',
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildContractButton() {
+    return Container(
+      width: 130,
+      height: 30,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            top: 0,
+            child: Container(
+              width: 130,
+              height: 30,
+              decoration: BoxDecoration(
+                color: const Color(0xFF34A853),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+          ),
+          const Positioned(
+            left: 32,
+            top: 6,
+            child: Text(
+              'Hợp Đồng',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontFamily: 'Noto Sans',
+                fontWeight: FontWeight.w400,
+                height: 1.12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-    width: 368,
-    height: 228,
-    decoration: ShapeDecoration(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-        ),
-    ),
-    child: Stack(
+      margin: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xD8756A6A), width: 1),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            Positioned(
-                left: 0,
-                top: 0,
-                child: Container(
-                    width: 368,
-                    height: 228,
-                    clipBehavior: Clip.antiAlias,
-                    decoration: ShapeDecoration(
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                                width: 1,
-                                color: const Color(0xD8756A6A),
-                            ),
-                            borderRadius: BorderRadius.circular(15),
-                        ),
+          // Tiêu đề phòng và nút xem chi tiết
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: const [
+                  Icon(Icons.meeting_room, color: Colors.black, size: 20),
+                  SizedBox(width: 6),
+                  Text(
+                    'Phòng 101 - Khu 1',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontFamily: 'Noto Sans',
+                      fontWeight: FontWeight.w400,
                     ),
-                    child: Stack(
-                        children: [
-                            Positioned(
-                                left: 251,
-                                top: 179,
-                                child: Container(
-                                    width: 330,
-                                    height: 22,
-                                    child: Stack(
-                                        children: [
-                                            Positioned(
-                                                left: 212,
-                                                top: -0.21,
-                                                child: Text(
-                                                    'Xem Chi Tiết',
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 16,
-                                                        fontFamily: 'Noto Sans',
-                                                        fontWeight: FontWeight.w400,
-                                                        height: 1.12,
-                                                    ),
-                                                ),
-                                            ),
-                                        ],
-                                    ),
-                                ),
-                            ),
-                            Positioned(
-                                left: 128,
-                                top: 350,
-                                child: Container(width: 76, height: 17),
-                            ),
-                            Positioned(
-                                left: 251,
-                                top: 390,
-                                child: Text(
-                                    'Chi Tiết',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontFamily: 'Noto Sans',
-                                        fontWeight: FontWeight.w500,
-                                        height: 1.29,
-                                    ),
-                                ),
-                            ),
-                            Positioned(
-                                left: 193,
-                                top: 182,
-                                child: Container(
-                                    width: 168,
-                                    height: 29,
-                                    decoration: ShapeDecoration(
-                                        color: const Color(0xFF4285F4),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                            Positioned(
-                                left: 241,
-                                top: 188,
-                                child: Text(
-                                    'Chỉnh Sửa',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontFamily: 'Noto Sans',
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.29,
-                                    ),
-                                ),
-                            ),
-                            Positioned(
-                                left: 8,
-                                top: 183,
-                                child: Container(
-                                    width: 168,
-                                    height: 29,
-                                    decoration: ShapeDecoration(
-                                        color: const Color(0x354285F4),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                            Positioned(
-                                left: 72,
-                                top: 189,
-                                child: Text(
-                                    'Xóa ',
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 14,
-                                        fontFamily: 'Noto Sans',
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.29,
-                                    ),
-                                ),
-                            ),
-                            Positioned(
-                                left: 50,
-                                top: 21,
-                                child: Text(
-                                    'Phòng 101 - Khu 1',
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                        fontFamily: 'Noto Sans',
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.12,
-                                    ),
-                                ),
-                            ),
-                            Positioned(
-                                left: 50,
-                                top: 60,
-                                child: Text(
-                                    'Phạm Thị Loi',
-                                    style: TextStyle(
-                                        color: const Color(0xFF15B20A),
-                                        fontSize: 16,
-                                        fontFamily: 'Noto Sans',
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.12,
-                                    ),
-                                ),
-                            ),
-                            Positioned(
-                                left: 21,
-                                top: 99,
-                                child: Container(
-                                    width: 16,
-                                    height: 16,
-                                    clipBehavior: Clip.antiAlias,
-                                    decoration: BoxDecoration(),
-                                    child: Stack(),
-                                ),
-                            ),
-                            Positioned(
-                                left: 50,
-                                top: 99,
-                                child: Text(
-                                    '4.000.000đ',
-                                    style: TextStyle(
-                                        color: const Color(0xFFC70909),
-                                        fontSize: 16,
-                                        fontFamily: 'Noto Sans',
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.12,
-                                    ),
-                                ),
-                            ),
-                            Positioned(
-                                left: 231,
-                                top: 16,
-                                child: Container(
-                                    width: 130,
-                                    height: 30,
-                                    decoration: BoxDecoration(color: const Color(0xFF9E4F4F)),
-                                ),
-                            ),
-                            Positioned(
-                                left: 252,
-                                top: 22,
-                                child: Text(
-                                    'Xem Chi Tiết',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontFamily: 'Noto Sans',
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.12,
-                                    ),
-                                ),
-                            ),
-                            Positioned(
-                                left: 21,
-                                top: 134,
-                                child: Container(
-                                    width: 17,
-                                    height: 17,
-                                    decoration: ShapeDecoration(
-                                        color: const Color(0xFF34A853),
-                                        shape: OvalBorder(),
-                                    ),
-                                ),
-                            ),
-                            Positioned(
-                                left: 50,
-                                top: 134,
-                                child: Text(
-                                    'Đang ở',
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                        fontFamily: 'Noto Sans',
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.12,
-                                    ),
-                                ),
-                            ),
-                        ],
-                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF9E4F4F),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-            ),
+                child: const Text(
+                  'Xem Chi Tiết',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontFamily: 'Noto Sans',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              )
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // Người thuê + Hợp đồng
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              buildInfoRow(Icons.person, 'Phạm Thị Loi', const Color(0xFF15B20A)),
+              buildContractButton(),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // Giá tiền
+          buildInfoRow(Icons.attach_money, '4.000.000đ', const Color(0xFFC70909)),
+
+          const SizedBox(height: 8),
+
+          // Trạng thái
+          buildInfoRow(Icons.check_circle, 'Đang ở', Colors.black),
+
+          const SizedBox(height: 16),
+
+          // Nút Xóa và Chỉnh sửa
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0x354285F4),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.delete, color: Colors.black, size: 18),
+                      SizedBox(width: 4),
+                      Text(
+                        'Xóa',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontFamily: 'Noto Sans',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4285F4),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.edit, color: Colors.white, size: 18),
+                      SizedBox(width: 4),
+                      Text(
+                        'Chỉnh Sửa',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Noto Sans',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
-    ),
-);
+      ),
+    );
   }
-} //add container
+}

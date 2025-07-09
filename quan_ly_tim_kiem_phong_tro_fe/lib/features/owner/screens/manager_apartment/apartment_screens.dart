@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/widgets/apartment/label_status_widget.dart';
+
 import '../../widgets/widgets.dart';
 
 
@@ -18,22 +18,42 @@ class MainApartmentScreen extends StatelessWidget {
                 width: screenWidth,
           padding: const EdgeInsets.symmetric(horizontal: 16),
                 color: Colors.white,
-          child: Column(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //wiget trong đây
+              SizedBox(
+              height: screenHeight * 0.05,
+              ),
+              Center(child: LogoWidget()),
+              Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TagWithIconWidget(),
+                ButtonAddWidget(),
+              ],
+              ),
+              SizedBox(
+              height: screenHeight * 0.01,
+              ),
+              SizedBox(
+              height: screenHeight * 0.01,
+              ),
               LabelStatusWidget(),
-              LabelStatusWidget(),
+              SizedBox(
+              height: screenHeight * 0.01,
+              ),
+              LabelTitleWidget(),
               CardRoomWidget(),
-              CardCustomerWidget(),
-              CardRoomDetailWidget(),
-              
+              CardRoomWidget(),
+              CardRoomWidget(),
+              CardRoomWidget(),
             ],
-          )
-        ),
-      ),
-    );
-  }
+            ),
+          ),
+          ),
+          
+        );
+        }
+      }
 
-
-}
