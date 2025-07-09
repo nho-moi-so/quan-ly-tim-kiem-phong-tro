@@ -7,6 +7,7 @@ export 'apartment/logo_widget.dart';
 
 export 'apartment/label_title_widget.dart';
 export 'apartment/button_add_widget.dart';
+export 'apartment/label_title_and_quaylai_widget.dart';
 
 //widgets
 export 'menu_detail_widget.dart';

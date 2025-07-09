@@ -68,6 +68,39 @@ class CardRoomDetailWidget extends StatelessWidget {
                 _buildRadioOption('3 Phòng Ngủ'),
               ],
             ),
+            const SizedBox(height: 24),
+            Text(
+              'Chọn Trạng Thái Phòng',
+              style: TextStyle(
+              color: Colors.black,
+              fontSize: 14,
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w400,
+              height: 1.25,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Color(0xFF4285F4)),
+              borderRadius: BorderRadius.circular(10),
+              ),
+              child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: null,
+                hint: const Text('Chọn trạng thái'),
+                items: const [
+                DropdownMenuItem(value: 'Trống', child: Text('Trống')),
+                DropdownMenuItem(value: 'Đã thuê', child: Text('Đã thuê')),
+                DropdownMenuItem(value: 'Đang sửa', child: Text('Đang sửa')),
+                ],
+                onChanged: (value) {},
+              ),
+              ),
+            ),
+            
             const SizedBox(height: 32),
             Text(
               'Upload Images',
