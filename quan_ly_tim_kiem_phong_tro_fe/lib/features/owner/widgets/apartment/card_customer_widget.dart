@@ -22,16 +22,16 @@ class CardCustomerWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(
-                  child: Text(
-                    'Thêm Khách Thuê Mới',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: const Color(0xFF4B5563),
-                      fontSize: 23,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  // child: Text(
+                  //   'Thêm Khách Thuê Mới',
+                  //   textAlign: TextAlign.center,
+                  //   style: TextStyle(
+                  //     color: const Color(0xFF4B5563),
+                  //     fontSize: 23,
+                  //     fontFamily: 'Inter',
+                  //     fontWeight: FontWeight.w500,
+                  //   ),
+                  // ),
                 ),
                 const SizedBox(height: 24),
                 _buildLabel('Tên Khách Trọ'),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class LabelTitleWidget extends StatelessWidget {
-  const LabelTitleWidget({super.key});
+  final String title;
+  final String header;
+  const LabelTitleWidget({super.key, required this.title, this.header = ''});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +16,7 @@ class LabelTitleWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'Chung Cư Nam Long',
+            title,
             style: const TextStyle(
               color: Colors.black,
               fontSize: 20,
@@ -26,7 +28,7 @@ class LabelTitleWidget extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           Text(
-            '50, Trịnh Hoài Đức, Phường Vĩnh Thanh Vân TP. Rạch Giá',
+            header,
             style: const TextStyle(
               color: Color(0xFF4B5563),
               fontSize: 15,

@@ -9,6 +9,10 @@ export 'apartment/label_title_widget.dart';
 export 'apartment/button_add_widget.dart';
 export 'apartment/label_title_and_quaylai_widget.dart';
 
+//booking request widgets
+export 'booking_request/fliter_status_widget.dart';
+export 'booking_request/search_by_date_widget.dart';
+
 //widgets
 export 'menu_detail_widget.dart';
 export 'tag_with_icon_widget.dart';

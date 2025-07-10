@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/widgets/booking_request/card_booking_request_widget.dart';
 
 import '../../widgets/widgets.dart';
 
-class BookingRequestScreens extends StatelessWidget{
+class NewCustomerScreen  extends StatelessWidget {
   @override
-    Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -22,18 +21,14 @@ class BookingRequestScreens extends StatelessWidget{
               SizedBox(height: screenHeight * 0.05),              
               Center(child: LogoWidget()),
               TagWithIconWidget(),
-              LabelTitleWidget(title: 'Danh sách yêu cầu đặt phòng'),
-              FliterStatusWidget(),
-              SearchByDateWidget(),
-              CardBookingRequestWidget(),
-              CardBookingRequestWidget(),            
-              
+              const LabelTitleAndQuayLaiWidget(title: "Thêm khách hàng mới",),
+              CardCustomerWidget(),
             ],
           )
         ),
       ),
     );
-  
   }
-}
 
+
+}

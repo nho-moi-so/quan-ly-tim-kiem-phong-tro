@@ -20,8 +20,9 @@ class DetailApartmentScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: screenHeight * 0.05),
-              Center(child: LogoWidget()),
-              const LabelTitleAndQuayLaiWidget(),
+              const Center(child: LogoWidget()),
+              TagWithIconWidget(),
+              const LabelTitleAndQuayLaiWidget(title: 'Thêm Phòng Mới'),
               CardRoomDetailWidget()
             ],
           ),

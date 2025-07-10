@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class LabelTitleAndQuayLaiWidget extends StatelessWidget {
-  const LabelTitleAndQuayLaiWidget({super.key});
-
+  final String title;
+  const LabelTitleAndQuayLaiWidget({super.key, required this.title});
   @override
   Widget build(BuildContext context) {
   return SizedBox(
@@ -21,14 +21,14 @@ class LabelTitleAndQuayLaiWidget extends StatelessWidget {
         },
         ),
       ),
-      const Positioned(
-          left: 75,
+      Positioned(
+          left: 60,
           top: 8,
           child: SizedBox(
             width: 234,
             height: 19,
             child: Text(
-              'Thêm Phòng Mới',
+ title,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Color(0xFF4B5563),
@@ -44,5 +44,4 @@ class LabelTitleAndQuayLaiWidget extends StatelessWidget {
     ),
   );
 }
-
 }

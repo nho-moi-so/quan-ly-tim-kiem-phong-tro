@@ -43,7 +43,7 @@ class MainApartmentScreen extends StatelessWidget {
               SizedBox(
               height: screenHeight * 0.01,
               ),
-              LabelTitleWidget(),
+              LabelTitleWidget(title:"Chung Cư Nam Long", header:"50, Trịnh Hoài Đức, Phường Vĩnh Thanh Vân TP. Rạch Giá"),
               CardRoomWidget(),
               CardRoomWidget(),
               CardRoomWidget(),
