@@ -1,5 +1,5 @@
+
 import 'package:flutter/material.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/widgets/booking_request/card_booking_request_widget.dart';
 
 import '../../widgets/widgets.dart';
 
@@ -19,15 +19,40 @@ class BookingRequestScreens extends StatelessWidget{
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //wiget trong đây
-              SizedBox(height: screenHeight * 0.05),              
-              Center(child: LogoWidget()),
+              //widget trong đây
+              SizedBox(height: screenHeight * 0.05),
+              //logo
+              Center(child: LogoWidget(),),
               TagWithIconWidget(),
-              LabelTitleWidget(title: 'Danh sách yêu cầu đặt phòng'),
+              SizedBox(height: screenHeight * 0.02),
+              //label title
+              LabelTitleWidget(title: "Danh Sách Yêu Cầu Đặt Phòng",),
+              //filter status
               FliterStatusWidget(),
+              //search by date
               SearchByDateWidget(),
-              CardBookingRequestWidget(),
-              CardBookingRequestWidget(),            
+              SizedBox(height: screenHeight * 0.02),
+              //card booking request
+              Center(
+                child: Column(
+                  children: [
+                    CardBookingRequestWidget(),
+                    SizedBox(height: screenHeight * 0.02),
+                    CardBookingRequestWidget(),
+                    SizedBox(height: screenHeight * 0.02),
+                    CardBookingRequestWidget(),
+                    SizedBox(height: screenHeight * 0.02),
+                    CardBookingRequestWidget(),
+                    SizedBox(height: screenHeight * 0.02),
+                  ],
+                ),
+              )
               
+
+              
+              
+              
+
             ],
           )
         ),

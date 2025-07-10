@@ -1,2 +1,6 @@
+//apartment
 export 'manager_apartment/apartment_screens.dart';
 export 'manager_apartment/detail_apartment_screen.dart';
+
+//booking request
+export 'manager_booking_request/booking_request_screens.dart';
