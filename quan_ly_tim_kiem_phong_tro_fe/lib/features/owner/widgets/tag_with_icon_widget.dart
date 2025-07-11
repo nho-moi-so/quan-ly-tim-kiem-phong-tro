@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class TagWithIconWidget extends StatelessWidget {
+  // Constructor
+  // final String title;
+  // const TagWithIconWidget({super.key, required this.title});
   const TagWithIconWidget({super.key});
 
   @override
