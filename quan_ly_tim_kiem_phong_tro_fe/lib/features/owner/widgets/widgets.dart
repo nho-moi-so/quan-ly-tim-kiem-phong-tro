@@ -22,6 +22,7 @@ export 'logo_widget.dart';
 //post
 export 'post/search_bar_widget.dart';
 export 'post/room_post_item_widget.dart';
+export 'post/room_detail_card_widget.dart';
 
 //widgets
 export 'menu_detail_widget.dart';

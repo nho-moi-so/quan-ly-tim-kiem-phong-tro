@@ -11,7 +11,7 @@ class LabelTitleWidget extends StatelessWidget {
 
     return Container(
       width: screenWidth,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.fromLTRB(1, 0, 1, 4), // Giảm padding bottom
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -25,7 +25,6 @@ class LabelTitleWidget extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 5),
           Text(
             header,
             style: const TextStyle(
