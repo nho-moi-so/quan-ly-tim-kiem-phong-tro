@@ -14,6 +14,8 @@ export 'booking_request/fliter_status_widget.dart';
 export 'booking_request/search_by_date_widget.dart';
 export 'booking_request/card_booking_request_widget.dart';
 export 'booking_request/card_booking_request_detail_widget.dart';
+export 'booking_request/booking_schedule_widget.dart';
+export 'booking_request/note_booking_schedule_widget.dart';
 
 //widgets
 export 'menu_detail_widget.dart';
