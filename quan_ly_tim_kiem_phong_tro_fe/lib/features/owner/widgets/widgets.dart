@@ -18,6 +18,11 @@ export 'booking_request/search_by_date_widget.dart';
 export 'bottom_nav_widget.dart';
 export 'label_title_and_quaylai_widget.dart';
 export 'logo_widget.dart';
+
+//post
+export 'post/search_bar_widget.dart';
+export 'post/room_post_item_widget.dart';
+
 //widgets
 export 'menu_detail_widget.dart';
 export 'room_status_ratio_widget.dart';
