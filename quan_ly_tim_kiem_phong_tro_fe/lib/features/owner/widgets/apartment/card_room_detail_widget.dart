@@ -1,8 +1,75 @@
-//done
 import 'package:flutter/material.dart';
+import '../../viewmodel/room_detail.dart';
+import '../../../../service/owner/apartment_service.dart';
 
-class CardRoomDetailWidget extends StatelessWidget {
-  const CardRoomDetailWidget({super.key});
+
+class CardRoomDetailWidget extends StatefulWidget {
+  final RoomDetail initialData;
+
+  const CardRoomDetailWidget({super.key, required this.initialData});
+
+  @override
+  State<CardRoomDetailWidget> createState() => _CardRoomDetailWidgetState();
+}
+
+class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
+  late TextEditingController roomCodeController;
+  late TextEditingController areaController;
+  late TextEditingController checkinController;
+  late TextEditingController checkoutController;
+  late TextEditingController capacityController;
+  late TextEditingController statusController;
+  late TextEditingController priceController;
+  late TextEditingController descriptionController;
+
+  List<String> selectedUtilities = [];
+  String? selectedRoomType;
+  String? selectedRoomState;
+
+  final List<String> allUtilities = ApartmentService().getUtilities();
+
+  final List<String> roomTypes = [
+    '1 Phòng Ngủ',
+    '2 Phòng Ngủ',
+    'Studio',
+    '3 Phòng Ngủ',
+  ];
+
+  final List<String> roomStates = [
+    'Trống',
+    'Đã thuê',
+    'Đang sửa',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    roomCodeController = TextEditingController(text: widget.initialData.roomCode);
+    areaController = TextEditingController(text: widget.initialData.area);
+    checkinController = TextEditingController(text: widget.initialData.checkin);
+    checkoutController = TextEditingController(text: widget.initialData.checkout);
+    capacityController = TextEditingController(text: widget.initialData.maxCapacity);
+    statusController = TextEditingController(text: widget.initialData.room_status);
+    priceController = TextEditingController(text: widget.initialData.price);
+    descriptionController = TextEditingController(text: widget.initialData.description);
+
+    selectedUtilities = [...widget.initialData.utilities];
+    selectedRoomType = widget.initialData.roomType;
+    selectedRoomState = widget.initialData.roomState;
+  }
+
+  @override
+  void dispose() {
+    roomCodeController.dispose();
+    areaController.dispose();
+    checkinController.dispose();
+    checkoutController.dispose();
+    capacityController.dispose();
+    statusController.dispose();
+    priceController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,108 +79,52 @@ class CardRoomDetailWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Mã Phòng Mới',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.black.withOpacity(0.8),
-                fontSize: 15,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w400,
-                height: 1.47,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildInputBox(width: 363, height: 41),
+            _buildLabeledInput('Mã Phòng', roomCodeController),
             const SizedBox(height: 16),
-            _buildLabeledInput('Diện Tích ', height: 41),
+            _buildLabeledInput('Diện Tích', areaController),
             const SizedBox(height: 16),
             Row(
               children: [
-                Expanded(child: _buildLabeledInput('Checkin ', height: 41)),
+                Expanded(child: _buildLabeledInput('Checkin', checkinController)),
                 const SizedBox(width: 16),
-                Expanded(child: _buildLabeledInput('Checkout ', height: 41)),
+                Expanded(child: _buildLabeledInput('Checkout', checkoutController)),
               ],
             ),
             const SizedBox(height: 16),
-            _buildLabeledInput('Sức Chứa Tối Đa ', height: 45),
+            _buildLabeledInput('Sức Chứa Tối Đa', capacityController),
             const SizedBox(height: 16),
-            _buildLabeledInput('Trạng Thái Phòng', height: 41),
+            _buildLabeledInput('Trạng Thái Phòng', statusController),
             const SizedBox(height: 16),
-            _buildLabeledInput('Giá Phòng ', height: 37),
+            _buildLabeledInput('Giá Phòng', priceController),
             const SizedBox(height: 16),
-            _buildLabeledInput('Mô Tả Thêm', height: 64),
-            const SizedBox(height: 16),
-            _buildOptionRow('+ Thêm Tiện Ích'),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 16,
-              runSpacing: 8,
-              children: [
-                _buildCheckboxOption('Cho Nuôi Chó Mèo'),
-                _buildCheckboxOption('Có Khóa Vân Tay, Mật Khảu'),
-                _buildCheckboxOption('Bãi Đậu Xe'),
-                _buildCheckboxOption('Wifi miễn phí'),
-              ],
-            ),
+            _buildLabeledInput('Mô Tả Thêm', descriptionController, maxLines: 3),
             const SizedBox(height: 24),
-            _buildOptionRow('+ Loại Phòng', width: 120),
+            _buildOptionRow('+ Thêm Tiện Ích'),
             const SizedBox(height: 8),
             Wrap(
               spacing: 16,
-              children: [
-                _buildRadioOption('1 Phòng Ngủ'),
-                _buildRadioOption('2 Phòng Ngủ'),
-                _buildRadioOption('Studio'),
-                _buildRadioOption('3 Phòng Ngủ'),
-              ],
+              runSpacing: 8,
+              children: allUtilities.map((u) => _buildCheckboxOption(u)).toList(),
             ),
             const SizedBox(height: 24),
-            Text(
-              'Chọn Trạng Thái Phòng',
-              style: TextStyle(
-              color: Colors.black,
-              fontSize: 14,
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.w400,
-              height: 1.25,
-              ),
+            _buildOptionRow('+ Loại Phòng'),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 16,
+              children: roomTypes.map((t) => _buildRadioOption(t)).toList(),
             ),
+            const SizedBox(height: 24),
+            const Text('Chọn Trạng Thái Phòng'),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Color(0xFF4285F4)),
-              borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                border: Border.all(color: Color(0xFF4285F4)),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: null,
-                hint: const Text('Chọn trạng thái'),
-                items: const [
-                DropdownMenuItem(value: 'Trống', child: Text('Trống')),
-                DropdownMenuItem(value: 'Đã thuê', child: Text('Đã thuê')),
-                DropdownMenuItem(value: 'Đang sửa', child: Text('Đang sửa')),
-                ],
-                onChanged: (value) {},
-              ),
-              ),
+              child: _buildDropdownRoomState(),
             ),
-            
-            const SizedBox(height: 32),
-            Text(
-              'Upload Images',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w400,
-                height: 1.25,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildImageUploadBox(),
             const SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -128,162 +139,108 @@ class CardRoomDetailWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildInputBox({required double width, required double height}) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: const Color(0xFF4285F4)),
-        borderRadius: BorderRadius.circular(15),
-      ),
-    );
-  }
-
-  Widget _buildLabeledInput(String label, {required double height}) {
+  Widget _buildLabeledInput(String label, TextEditingController controller, {int maxLines = 1}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.black.withOpacity(0.8),
-            fontSize: 15,
-            fontFamily: 'Inter',
-            fontWeight: FontWeight.w400,
-            height: 1.47,
+        Text(label),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: const BorderSide(color: Color(0xFF4285F4)),
+            ),
+            filled: true,
+            fillColor: Colors.white,
           ),
         ),
-        const SizedBox(height: 8),
-        _buildInputBox(width: double.infinity, height: height),
       ],
     );
   }
 
-  Widget _buildOptionRow(String text, {double width = 167}) {
+  Widget _buildOptionRow(String text) {
     return Container(
-      width: width,
-      height: 30,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: const Color(0xC19E4F4F),
         borderRadius: BorderRadius.circular(10),
       ),
-      alignment: Alignment.center,
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-          fontFamily: 'Noto Sans',
-          fontWeight: FontWeight.w400,
-          height: 1.29,
-        ),
-      ),
+      child: Text(text, style: const TextStyle(color: Colors.white)),
     );
   }
 
   Widget _buildCheckboxOption(String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 17,
-          height: 17,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(width: 1),
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          text,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 12,
-            fontFamily: 'Noto Sans',
-            fontWeight: FontWeight.w400,
-            height: 1.5,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRadioOption(String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: const BoxDecoration(
-            color: Color(0xFFD9D9D9),
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          text,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 14,
-            fontFamily: 'Noto Sans',
-            fontWeight: FontWeight.w400,
-            height: 1.29,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildImageUploadBox() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: const Color(0xFF4285F4)),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+    final isSelected = selectedUtilities.contains(text);
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (isSelected) {
+            selectedUtilities.remove(text);
+          } else {
+            selectedUtilities.add(text);
+          }
+        });
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 8),
-          const Icon(Icons.image_outlined, size: 48),
-          const SizedBox(height: 8),
-          const Text(
-            'Drag and drop your images here, or click to browse',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Color(0xFF4B5563),
-              fontSize: 11.9,
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.w400,
-              height: 1.68,
-            ),
-          ),
-          const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            width: 17,
+            height: 17,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
+              color: isSelected ? const Color(0xFF4285F4) : Colors.white,
+              border: Border.all(width: 1),
+              borderRadius: BorderRadius.circular(4),
             ),
-            child: const Text(
-              'Upload files',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF2563EB),
-                fontSize: 11.9,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w500,
-                height: 1.68,
-              ),
+            child: isSelected ? const Icon(Icons.check, size: 12, color: Colors.white) : null,
+          ),
+          const SizedBox(width: 8),
+          Text(text),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRadioOption(String value) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedRoomType = value;
+        });
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: selectedRoomType == value ? const Color(0xFF4285F4) : const Color(0xFFD9D9D9),
             ),
           ),
+          const SizedBox(width: 8),
+          Text(value),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDropdownRoomState() {
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        value: selectedRoomState!.isEmpty ? null : selectedRoomState,
+        hint: const Text('Chọn trạng thái'),
+        items: roomStates.map((state) => DropdownMenuItem(value: state, child: Text(state))).toList(),
+        onChanged: (value) {
+          setState(() {
+            selectedRoomState = value;
+          });
+        },
       ),
     );
   }
@@ -292,22 +249,15 @@ class CardRoomDetailWidget extends StatelessWidget {
     return Container(
       width: width,
       height: 50.87,
-      padding: const EdgeInsets.symmetric(horizontal: 15),
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(7),
         border: color == Colors.white ? Border.all(color: const Color(0xFF4285F4)) : null,
       ),
-      alignment: Alignment.center,
       child: Text(
         text,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 19,
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.w600,
-          height: 0.95,
-        ),
+        style: TextStyle(color: textColor, fontSize: 19, fontWeight: FontWeight.w600),
       ),
     );
   }

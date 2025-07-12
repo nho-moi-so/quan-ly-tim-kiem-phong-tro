@@ -4,9 +4,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class TagWithIconWidget extends StatelessWidget {
   // Constructor
-  // final String title;
-  // const TagWithIconWidget({super.key, required this.title});
-  const TagWithIconWidget({super.key});
+  final String title;
+  const TagWithIconWidget({super.key, required this.title});
+  // const TagWithIconWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +49,8 @@ class TagWithIconWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                  'Nội dung thẻ',
+              Text(
+                  title,
                   style: TextStyle(fontSize: 14),
                 ),
               ],

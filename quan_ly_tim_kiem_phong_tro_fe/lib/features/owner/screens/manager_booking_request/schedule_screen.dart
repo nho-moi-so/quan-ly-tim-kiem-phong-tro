@@ -21,7 +21,7 @@ class ScheduleScreen extends StatelessWidget {
             children: [
               SizedBox(height: screenHeight * 0.05),
               Center(child: LogoWidget()),
-              TagWithIconWidget(),
+              // TagWithIconWidget(),
               SizedBox(height: screenHeight * 0.02),
               LabelTitleAndQuayLaiWidget(title: "Lịch Hẹn"),
               SizedBox(height: screenHeight * 0.02),

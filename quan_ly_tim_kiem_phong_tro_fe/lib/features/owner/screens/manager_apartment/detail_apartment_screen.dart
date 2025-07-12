@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../widgets/widgets.dart';
+import '../../../../service/owner/apartment_service.dart';
 
 class DetailApartmentScreen extends StatelessWidget {
   const DetailApartmentScreen({super.key});
@@ -9,6 +10,9 @@ class DetailApartmentScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    // Example data for testing
+    final roomDetailSample = ApartmentService().getRoomDetail();
+
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -21,9 +25,13 @@ class DetailApartmentScreen extends StatelessWidget {
             children: [
               SizedBox(height: screenHeight * 0.05),
               const Center(child: LogoWidget()),
-              TagWithIconWidget(),
-              const LabelTitleAndQuayLaiWidget(title: 'Thêm Phòng Mới'),
-              CardRoomDetailWidget()
+              // TagWithIconWidget(),
+              const LabelTitleAndQuayLaiWidget(title: 'Chi tiết phòng trọ'),
+
+              //===============test=================              
+              CardRoomDetailWidget(initialData: roomDetailSample),
+              //===============test=================
+
             ],
           ),
         ),

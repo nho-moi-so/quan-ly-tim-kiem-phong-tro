@@ -23,9 +23,9 @@ class DetailPostScreen extends StatelessWidget {
               Center(child: LogoWidget()),
               Row(
                 children: [
-                  const TagWithIconWidget(),
+                  // const TagWithIconWidget(),
                   const Spacer(),
-                  ButtonAddWidget(),
+                  // ButtonAddWidget(),
                 ],
               ),
               SizedBox(height: screenHeight * 0.01), // Giảm xuống

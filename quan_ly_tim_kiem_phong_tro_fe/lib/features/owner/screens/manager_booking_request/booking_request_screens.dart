@@ -23,7 +23,7 @@ class BookingRequestScreens extends StatelessWidget{
               SizedBox(height: screenHeight * 0.05),
               //logo
               Center(child: LogoWidget(),),
-              TagWithIconWidget(),
+              // TagWithIconWidget(),
               SizedBox(height: screenHeight * 0.02),
               //label title
               LabelTitleWidget(title: "Danh Sách Yêu Cầu Đặt Phòng",),

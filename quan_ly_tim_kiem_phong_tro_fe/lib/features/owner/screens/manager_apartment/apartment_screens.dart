@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../widgets/widgets.dart';
-
+import '../../viewmodel/room_card_info.dart';
+import '../../../../service/owner/apartment_service.dart';
 
 
 class MainApartmentScreen extends StatelessWidget {
@@ -11,6 +12,10 @@ class MainApartmentScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
+    //====get all list card infor
+    final List<RoomCardInfo> roomCards = ApartmentService().getAllRoomCards();
+
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -22,15 +27,15 @@ class MainApartmentScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //wiget trong đây
-              SizedBox(
+              SizedBox( 
               height: screenHeight * 0.05,
               ),
               Center(child: LogoWidget()),
               Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TagWithIconWidget(),
-                ButtonAddWidget(),
+                TagWithIconWidget(title: "Quảng lý căn hộ"),
+                ButtonAddWidget(title: "Thêm căn hộ mới",),
               ],
               ),
               SizedBox(
@@ -44,11 +49,11 @@ class MainApartmentScreen extends StatelessWidget {
               height: screenHeight * 0.01,
               ),
               LabelTitleWidget(title:"Chung Cư Nam Long", header:"50, Trịnh Hoài Đức, Phường Vĩnh Thanh Vân TP. Rạch Giá"),
-              CardRoomWidget(),
-              CardRoomWidget(),
-              CardRoomWidget(),
-              CardRoomWidget(),
+              
+              //===========List of room cards
+              ...roomCards.map((card) => CardRoomWidget(data: card,)).toList(),
             ],
+            
             ),
           ),
           ),

@@ -23,10 +23,10 @@ class PostScreen extends StatelessWidget {
               Center(child: LogoWidget()),
                 Row(
                 children: [
-                  const TagWithIconWidget(),
+                  // const TagWithIconWidget(),
                   const Spacer(),
                   // Button "Chủ trọ"
-                  ButtonAddWidget(),
+                  // ButtonAddWidget(),
                 ],
                 ),
               SizedBox(height: screenHeight * 0.02),

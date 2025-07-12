@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class ButtonAddWidget extends StatelessWidget {
-  const ButtonAddWidget({super.key});
+  final String title;
+  const ButtonAddWidget({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +32,7 @@ class ButtonAddWidget extends StatelessWidget {
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                'Thêm Phòng Trọ Mới',
+                title,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 style: const TextStyle(
