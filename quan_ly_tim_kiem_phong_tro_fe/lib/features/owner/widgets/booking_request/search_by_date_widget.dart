@@ -1,8 +1,32 @@
-//done
 import 'package:flutter/material.dart';
 
-class SearchByDateWidget extends StatelessWidget {
+class SearchByDateWidget extends StatefulWidget {
   const SearchByDateWidget({super.key});
+
+  @override
+  State<SearchByDateWidget> createState() => _SearchByDateWidgetState();
+}
+
+class _SearchByDateWidgetState extends State<SearchByDateWidget> {
+  String fromDate = '--/--/----';
+  String toDate = '--/--/----';
+
+  void _pickDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() {
+        fromDate =
+            "${picked.start.day}/${picked.start.month}/${picked.start.year}";
+        toDate =
+            "${picked.end.day}/${picked.end.month}/${picked.end.year}";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,19 +51,35 @@ class SearchByDateWidget extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: const Color(0xFF4285F4),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text(
-                  'Lịch Đặt Phòng',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontFamily: 'Noto Sans',
-                    fontWeight: FontWeight.w400,
-                    height: 1.29,
+                child: TextButton(
+                  onPressed: _pickDateRange,
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    foregroundColor: Colors.white,
+                    textStyle: const TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'Noto Sans',
+                      fontWeight: FontWeight.w400,
+                      height: 1.29,
+                    ),
+                  ),
+                  child: const Text(
+                    'Lịch Đặt Phòng',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontFamily: 'Noto Sans',
+                      fontWeight: FontWeight.w400,
+                      height: 1.29,
+                    ),
                   ),
                 ),
               )
@@ -64,7 +104,7 @@ class SearchByDateWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  _buildDateBox(),
+                  _buildDateBox(fromDate),
                 ],
               ),
               const SizedBox(width: 40),
@@ -82,7 +122,7 @@ class SearchByDateWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  _buildDateBox(),
+                  _buildDateBox(toDate),
                 ],
               ),
             ],
@@ -92,7 +132,7 @@ class SearchByDateWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildDateBox() {
+  Widget _buildDateBox(String dateText) {
     return Container(
       width: 96,
       height: 42,
@@ -102,9 +142,9 @@ class SearchByDateWidget extends StatelessWidget {
         border: Border.all(color: const Color(0xFF4285F4), width: 1),
         borderRadius: BorderRadius.circular(7),
       ),
-      child: const Text(
-        '--/--/----', // bạn có thể thay bằng date picker sau
-        style: TextStyle(fontSize: 14),
+      child: Text(
+        dateText,
+        style: const TextStyle(fontSize: 14),
       ),
     );
   }

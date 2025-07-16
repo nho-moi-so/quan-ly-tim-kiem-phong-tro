@@ -25,26 +25,26 @@ class CardRoomWidget extends StatelessWidget {
   }
 
   Widget buildContractButton() {
-    return InkWell(
-      onTap: data.onContract,
-      child: Container(
-        width: 130,
-        height: 30,
-        decoration: BoxDecoration(
-          color: const Color(0xFF34A853),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        alignment: Alignment.center,
-        child: const Text(
-          'Hợp Đồng',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontFamily: 'Noto Sans',
-            fontWeight: FontWeight.w400,
-            height: 1.12,
-          ),
-        ),
+    return ElevatedButton(
+      onPressed: data.onContract,
+      style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF34A853),
+      minimumSize: const Size(130, 30),
+      padding: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6),
+      ),
+      elevation: 0,
+      ),
+      child: const Text(
+      'Hợp Đồng',
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        fontFamily: 'Noto Sans',
+        fontWeight: FontWeight.w400,
+        height: 1.12,
+      ),
       ),
     );
   }
@@ -83,23 +83,28 @@ class CardRoomWidget extends StatelessWidget {
               ),
               InkWell(
                 onTap: data.onViewDetail,
-                child: Container(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF9E4F4F),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF9E4F4F),
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
                   ),
+                  elevation: 0,
+                  ),
+                  onPressed: data.onViewDetail,
                   child: const Text(
-                    'Xem Chi Tiết',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontFamily: 'Noto Sans',
-                      fontWeight: FontWeight.w400,
-                    ),
+                  'Xem Chi Tiết',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontFamily: 'Noto Sans',
+                    fontWeight: FontWeight.w400,
+                  ),
                   ),
                 ),
-              )
+                ),
+              
             ],
           ),
 
@@ -130,64 +135,53 @@ class CardRoomWidget extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: InkWell(
-                  onTap: data.onDelete,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0x354285F4),
+                child: OutlinedButton.icon(
+                  onPressed: data.onDelete,
+                  icon: const Icon(Icons.delete, color: Colors.black, size: 18),
+                  label: const Text(
+                    'Xóa',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14,
+                      fontFamily: 'Noto Sans',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0x354285F4), width: 1),
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    alignment: Alignment.center,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.delete, color: Colors.black, size: 18),
-                        SizedBox(width: 4),
-                        Text(
-                          'Xóa',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 14,
-                            fontFamily: 'Noto Sans',
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: const Color(0x354285F4),
                   ),
                 ),
               ),
+
               const SizedBox(width: 12),
               Expanded(
-                child: InkWell(
-                  onTap: data.onEdit,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4285F4),
+                child: ElevatedButton.icon(
+                  onPressed: data.onEdit,
+                  icon: const Icon(Icons.edit, color: Colors.white, size: 18),
+                  label: const Text(
+                    'Chỉnh Sửa',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontFamily: 'Noto Sans',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4285F4),
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    alignment: Alignment.center,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.edit, color: Colors.white, size: 18),
-                        SizedBox(width: 4),
-                        Text(
-                          'Chỉnh Sửa',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: 'Noto Sans',
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
+
             ],
           ),
         ],

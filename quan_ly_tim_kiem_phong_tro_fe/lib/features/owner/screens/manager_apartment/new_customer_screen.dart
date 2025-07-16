@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/apartment_service.dart';
 
 import '../../widgets/widgets.dart';
 
@@ -11,7 +9,7 @@ class NewCustomerScreen  extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
   //====get customer data
-    final customerData = ApartmentService().getCustomerInfo();
+    // final customerData = ApartmentService().getCustomerInfo();
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -23,10 +21,14 @@ class NewCustomerScreen  extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //wiget trong đây
-              SizedBox(height: screenHeight * 0.05),              
+              SizedBox(height: screenHeight * 0.05),
               Center(child: LogoWidget()),
               // TagWithIconWidget(),
               const LabelTitleAndQuayLaiWidget(title: "Thêm khách hàng mới",),
+              SizedBox(height: screenHeight * 0.02),
+              //===============test=================
+              const CardCustomerWidget(),
+              //===============test=================
               
               
             ],

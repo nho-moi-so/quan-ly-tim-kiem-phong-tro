@@ -27,8 +27,8 @@ class DetailApartmentScreen extends StatelessWidget {
               const Center(child: LogoWidget()),
               // TagWithIconWidget(),
               const LabelTitleAndQuayLaiWidget(title: 'Chi tiết phòng trọ'),
-
-              //===============test=================              
+              SizedBox(height: screenHeight * 0.02),
+              //===============test=================
               CardRoomDetailWidget(initialData: roomDetailSample),
               //===============test=================
 

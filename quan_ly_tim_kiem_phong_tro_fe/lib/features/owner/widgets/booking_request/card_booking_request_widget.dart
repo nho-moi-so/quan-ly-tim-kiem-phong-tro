@@ -175,33 +175,41 @@ class CardBookingRequestWidget extends StatelessWidget {
     required Color textColor,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 160,
-        height: 35,
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        alignment: Alignment.center,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 18, color: textColor),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontFamily: 'Noto Sans',
-                fontWeight: FontWeight.w400,
-                color: textColor,
+    return Builder(
+      builder: (context) => GestureDetector(
+        onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Bạn đã nhấn "$label"')),
+          );
+          onTap();
+        },
+        child: Container(
+          width: 160,
+          height: 35,
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18, color: textColor),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontFamily: 'Noto Sans',
+                  fontWeight: FontWeight.w400,
+                  color: textColor,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+
 }

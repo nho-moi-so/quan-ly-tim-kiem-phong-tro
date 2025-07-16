@@ -85,9 +85,19 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
             const SizedBox(height: 16),
             Row(
               children: [
-                Expanded(child: _buildLabeledInput('Checkin', checkinController)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildLabeledInput('Checkout', checkoutController)),
+              Expanded(
+                child: _buildDateTimePicker(
+                label: 'Checkin',
+                controller: checkinController,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildDateTimePicker(
+                label: 'Checkout',
+                controller: checkoutController,
+                ),
+              ),
               ],
             ),
             const SizedBox(height: 16),
@@ -138,6 +148,74 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
       ),
     );
   }
+
+  Widget _buildDateTimePicker({
+    required String label,
+    required TextEditingController controller,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          readOnly: true,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: const BorderSide(color: Color(0xFF4285F4)),
+            ),
+            filled: true,
+            fillColor: Colors.white,
+            suffixIcon: const Icon(Icons.calendar_today, size: 20),
+          ),
+          onTap: () async {
+          // Bắt đầu chọn ngày
+          DateTime? pickedDate = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2101),
+          );
+
+          if (pickedDate != null) {
+            // Sau khi chọn ngày xong, tiếp tục mở chọn giờ
+            TimeOfDay? pickedTime = await showTimePicker(
+              context: context,
+              initialTime: TimeOfDay.now(),
+            );
+
+            if (pickedTime != null) {
+              // Kết hợp ngày và giờ lại thành 1 đối tượng DateTime
+              final DateTime fullDateTime = DateTime(
+                pickedDate.year,
+                pickedDate.month,
+                pickedDate.day,
+                pickedTime.hour,
+                pickedTime.minute,
+              );
+
+              // Gán chuỗi ngày/giờ đã format vào controller
+              controller.text = _formatDateTime(fullDateTime);
+            }
+          }
+        }
+        ),
+      ],
+    );
+  }
+
+// Hàm format ngày + giờ theo định dạng dd/MM HH:mm
+String _formatDateTime(DateTime dateTime) {
+  final day = dateTime.day.toString().padLeft(2, '0');
+  final month = dateTime.month.toString().padLeft(2, '0');
+  final hour = dateTime.hour.toString().padLeft(2, '0');
+  final minute = dateTime.minute.toString().padLeft(2, '0');
+  return "$day/$month $hour:$minute";
+}
+
 
   Widget _buildLabeledInput(String label, TextEditingController controller, {int maxLines = 1}) {
     return Column(

@@ -37,13 +37,6 @@ class BookingRequestScreens extends StatelessWidget{
                 child: Column(
                   children: [
                     CardBookingRequestWidget(),
-                    SizedBox(height: screenHeight * 0.02),
-                    CardBookingRequestWidget(),
-                    SizedBox(height: screenHeight * 0.02),
-                    CardBookingRequestWidget(),
-                    SizedBox(height: screenHeight * 0.02),
-                    CardBookingRequestWidget(),
-                    SizedBox(height: screenHeight * 0.02),
                   ],
                 ),
               )

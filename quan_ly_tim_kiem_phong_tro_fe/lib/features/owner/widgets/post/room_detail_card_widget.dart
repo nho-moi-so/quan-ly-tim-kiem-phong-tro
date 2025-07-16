@@ -63,7 +63,7 @@ class RoomDetailCardWidget extends StatelessWidget {
                     height: 118,
                     decoration: BoxDecoration(
                       image: const DecorationImage(
-                        image: NetworkImage("https://placehold.co/157x118"),
+                        image: NetworkImage("https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"),
                         fit: BoxFit.cover,
                       ),
                       borderRadius: BorderRadius.circular(8),
