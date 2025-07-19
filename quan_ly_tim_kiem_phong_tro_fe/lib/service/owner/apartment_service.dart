@@ -8,13 +8,28 @@ class ApartmentService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   //get Utility
-  List<String> getUtilities() {
-    return [
-      'Cho Nuôi Chó Mèo',
-      'Có Khóa Vân Tay, Mật Khảu',
-      'Bãi Đậu Xe',
-      'Wifi miễn phí',
-    ];
+  Future<List<String>> getAmenities() async {
+    List<String> amenities = [];
+      try {
+    QuerySnapshot snapshot = await firestore.collection('amenity').get();
+        for (var doc in snapshot.docs) {
+        // Giả sử mỗi tài liệu có một trường 'Description' kiểu String
+        String? name = doc['Description'];
+        if (name != null) {
+            amenities.add(name);
+        }
+        }
+    } catch (e) {
+        print('Error getting amenities: $e');
+    }
+    
+    // return [
+    //   'Cho Nuôi Chó Mèo',
+    //   'Có Khóa Vân Tay, Mật Khảu',
+    //   'Bãi Đậu Xe',
+    //   'Wifi miễn phí',
+    // ];
+    return amenities;
   }
 
   // get Room Detail
