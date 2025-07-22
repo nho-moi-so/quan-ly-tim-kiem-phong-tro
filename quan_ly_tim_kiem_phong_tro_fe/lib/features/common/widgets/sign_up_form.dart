@@ -32,9 +32,23 @@ class _SignupFormState extends State<SignupForm> {
       return;
     }
     SignUpViewModel signUpViewModel = SignUpViewModel(username: _usernameController.text, phone: _phoneController.text, email: _emailController.text, password: _passwordController.text);
-    AuthService.registerUser(signUpViewModel);
 
-
+    AuthService authService = AuthService();
+    Future<bool> result = authService.registerUser(signUpViewModel);
+    result.then((value) {
+      if (value) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration successful!')),
+        );
+        // Optionally, navigate to another page
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration failed. Please try again.')),
+        );
+      }
+    }).catchError((error) {
+      // Handle registration error
+    });
   }
 
   @override

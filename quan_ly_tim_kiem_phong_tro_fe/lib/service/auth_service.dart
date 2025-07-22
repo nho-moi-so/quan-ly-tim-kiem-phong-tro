@@ -22,12 +22,12 @@ class AuthService {
   //====================HAM DANG KY==============
   Future<bool> registerUser(SignUpViewModel signUpViewModel) async {
     try {
-      // await firestore.collection('users').add({
-      //   'username': signUpViewModel.username,
-      //   'phone': signUpViewModel.phone,
-      //   'email': signUpViewModel.email,
-      //   'password': signUpViewModel.confirmPassword,
-      // });
+      await firestore.collection('users').add({
+        'username': signUpViewModel.username,
+        'phone': signUpViewModel.phone,
+        'email': signUpViewModel.email,
+        'password': signUpViewModel.password,
+      });
       return true; // Registration successful
     } catch (e) {
       print('Error registering user: $e');
