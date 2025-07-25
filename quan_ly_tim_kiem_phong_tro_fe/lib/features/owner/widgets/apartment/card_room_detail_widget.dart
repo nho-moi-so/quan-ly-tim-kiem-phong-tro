@@ -155,17 +155,13 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                 ),
                 GestureDetector(
                   onTap: () {
-                  print('Mã Phòng: ${roomCodeController.text}');
-                  print('Diện Tích: ${areaController.text}');
-                  print('Checkin: ${checkinController.text}');
-                  print('Checkout: ${checkoutController.text}');
-                  print('Sức Chứa Tối Đa: ${capacityController.text}');
-                  print('Trạng Thái Phòng: ${statusController.text}');
-                  print('Giá Phòng: ${priceController.text}');
-                  print('Mô Tả Thêm: ${descriptionController.text}');
-                  print('Tiện Ích: $selectedUtilities');
-                  print('Loại Phòng: $selectedRoomType');
-                  print('Trạng Thái Phòng: $selectedRoomState');
+                    final message = '''Mã Phòng: ${roomCodeController.text}\nDiện Tích: ${areaController.text}\nCheckin: ${checkinController.text}\nCheckout: ${checkoutController.text}\nSức Chứa Tối Đa: ${capacityController.text}\nTrạng Thái Phòng: ${statusController.text}\nGiá Phòng: ${priceController.text}\nMô Tả Thêm: ${descriptionController.text}\nTiện Ích: ${selectedUtilities.join(', ')}\nLoại Phòng: $selectedRoomType\nTrạng Thái Phòng: $selectedRoomState''';
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(message, style: const TextStyle(fontSize: 14)),
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
                   },
                   child: _buildActionButton('Cập Nhật', color: const Color(0xFF4285F4), textColor: Colors.white, width: 153),
                 ),

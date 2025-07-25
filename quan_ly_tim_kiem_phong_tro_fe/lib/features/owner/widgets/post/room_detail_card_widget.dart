@@ -1,7 +1,45 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
-class RoomDetailCardWidget extends StatelessWidget {
+
+
+class RoomDetailCardWidget extends StatefulWidget {
   const RoomDetailCardWidget({super.key});
+
+  @override
+  State<RoomDetailCardWidget> createState() => _RoomDetailCardWidgetState();
+}
+
+class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
+  late TextEditingController roomController;
+  late TextEditingController floorController;
+  late TextEditingController areaController;
+  late TextEditingController priceController;
+  late TextEditingController addressController;
+  late TextEditingController descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    roomController = TextEditingController(text: '403');
+    floorController = TextEditingController(text: 'Tầng 4');
+    areaController = TextEditingController(text: '30m2');
+    priceController = TextEditingController(text: '1.500.000');
+    addressController = TextEditingController(text: 'Chung cư nam long, hưng thạnh, cái răng');
+    descriptionController = TextEditingController(text: 'Phòng dành cho 4 người, có 2 phòng ngủ và 1 phòng khách, có phòng bếp và 3 wc');
+  }
+
+  @override
+  void dispose() {
+    roomController.dispose();
+    floorController.dispose();
+    areaController.dispose();
+    priceController.dispose();
+    addressController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,26 +62,21 @@ class RoomDetailCardWidget extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _infoField(label: 'Phòng', value: '403'),
+                    _infoField(label: 'Phòng', controller: roomController),
                     const SizedBox(width: 12),
-                    _infoField(label: 'Khu', value: 'Tầng 4'),
+                    _infoField(label: 'Khu', controller: floorController),
                   ],
                 ),
                 const SizedBox(height: 12),
-                _infoField(label: 'Diện Tích', value: '30m2', fullWidth: true),
+                _infoField(label: 'Diện Tích', controller: areaController, fullWidth: true),
                 const SizedBox(height: 12),
-                _infoField(label: 'Tiền Phòng', value: '1.500.000', fullWidth: true),
+                _infoField(label: 'Tiền Phòng', controller: priceController, fullWidth: true),
                 const SizedBox(height: 12),
-                _infoField(
-                  label: 'Địa Chỉ',
-                  value: 'Chung cư nam long, hưng thạnh, cái răng',
-                  fullWidth: true,
-                ),
+                _infoField(label: 'Địa Chỉ', controller: addressController, fullWidth: true),
                 const SizedBox(height: 12),
                 _infoField(
                   label: 'Mô Tả',
-                  value:
-                      'Phòng dành cho 4 người, có 2 phòng ngủ và 1 phòng khách, có phòng bếp và 3 wc',
+                  controller: descriptionController,
                   fullWidth: true,
                   multiline: true,
                 ),
@@ -58,15 +91,23 @@ class RoomDetailCardWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Center(
-                  child: Container(
-                    width: 157,
-                    height: 118,
-                    decoration: BoxDecoration(
-                      image: const DecorationImage(
-                        image: NetworkImage("https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"),
-                        fit: BoxFit.cover,
+                  child: GestureDetector(
+                    onTap: pickImage,
+                    child: Container(
+                      width: 157,
+                      height: 118,
+                      decoration: BoxDecoration(
+                        image: imageFile != null
+                            ? DecorationImage(image: FileImage(imageFile!), fit: BoxFit.cover)
+                            : const DecorationImage(
+                                image: NetworkImage("https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"),
+                                fit: BoxFit.cover,
+                              ),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      borderRadius: BorderRadius.circular(8),
+                      child: imageFile == null
+                          ? const Center(child: Icon(Icons.add_a_photo, size: 32, color: Colors.white))
+                          : null,
                     ),
                   ),
                 ),
@@ -88,7 +129,15 @@ class RoomDetailCardWidget extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          final info = '''Phòng: ${roomController.text}\nKhu: ${floorController.text}\nDiện Tích: ${areaController.text}\nTiền Phòng: ${priceController.text}\nĐịa Chỉ: ${addressController.text}\nMô Tả: ${descriptionController.text}''';
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(info, style: const TextStyle(fontSize: 14)),
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4285F4),
                           shape: RoundedRectangleBorder(
@@ -107,10 +156,20 @@ class RoomDetailCardWidget extends StatelessWidget {
       ),
     );
   }
+  File? imageFile;
 
+  Future<void> pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        imageFile = File(pickedFile.path);
+      });
+    }
+  }
   Widget _infoField({
     required String label,
-    required String value,
+    required TextEditingController controller,
     bool fullWidth = false,
     bool multiline = false,
   }) {
@@ -127,20 +186,36 @@ class RoomDetailCardWidget extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Container(
-          width: fullWidth ? double.infinity : 166,
+          width: fullWidth ? null : 166,
           height: multiline ? 94 : 41,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
           decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFF4285F4)),
             borderRadius: BorderRadius.circular(15),
             color: Colors.white,
           ),
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontFamily: 'Noto Sans',
+          alignment: Alignment.centerLeft,
+          child: TextFormField(
+            controller: controller,
+            maxLines: multiline ? 4 : 1,
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              isDense: true,
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: const BorderSide(color: Color(0xFF4285F4)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: const BorderSide(color: Color(0xFF4285F4)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: const BorderSide(color: Color(0xFF4285F4), width: 2),
+              ),
             ),
+            style: const TextStyle(fontSize: 14, fontFamily: 'Noto Sans'),
           ),
         ),
       ],

@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       //     '/': (context) => HomeScreens(),
       //     '/signup': (context) => RegisterScreens(), 
       //   },
-      home: MainApartmentScreen(), //==================
+      home: DetailPostScreen(), //==================
     );
   }
 }
