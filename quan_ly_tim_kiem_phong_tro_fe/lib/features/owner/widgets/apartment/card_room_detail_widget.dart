@@ -26,7 +26,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
   String? selectedRoomType;
   String? selectedRoomState;
 
-  final List<String> allUtilities = ApartmentService().getUtilities();
+  List<String> allUtilities = [];
 
   final List<String> roomTypes = [
     '1 Phòng Ngủ',
@@ -40,10 +40,18 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     'Đã thuê',
     'Đang sửa',
   ];
-
+  Future<void> loadAmenities() async {
+    final data = await ApartmentService().getAmenities();
+    setState(() {
+      allUtilities = data;
+    });
+  }
   @override
   void initState() {
     super.initState();
+    loadAmenities();
+
+
     roomCodeController = TextEditingController(text: widget.initialData.roomCode);
     areaController = TextEditingController(text: widget.initialData.area);
     checkinController = TextEditingController(text: widget.initialData.checkin);
