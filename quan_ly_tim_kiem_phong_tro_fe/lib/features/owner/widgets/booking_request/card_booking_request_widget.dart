@@ -1,8 +1,28 @@
 import 'package:flutter/material.dart';
 
-class CardBookingRequestWidget extends StatelessWidget {
-  const CardBookingRequestWidget({super.key});
+class CardBookingRequestWidget extends StatefulWidget {
+  final String bookingCode;
+  final String customerName;
+  final String checkinCheckout;
+  final String status;
+  final Color statusColor;
+  final IconData statusIcon;
 
+  const CardBookingRequestWidget({
+    super.key,
+    required this.bookingCode,
+    required this.customerName,
+    required this.checkinCheckout,
+    required this.status,
+    this.statusColor = const Color(0xFF34A853),
+    this.statusIcon = Icons.verified,
+  });
+
+  @override
+  State<CardBookingRequestWidget> createState() => _CardBookingRequestWidgetState();
+}
+
+class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -10,7 +30,7 @@ class CardBookingRequestWidget extends StatelessWidget {
       height: 228,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Color(0xD8756A6A)),
+        border: Border.all(color: const Color(0xD8756A6A)),
         color: Colors.white,
       ),
       padding: const EdgeInsets.all(16),
@@ -20,12 +40,12 @@ class CardBookingRequestWidget extends StatelessWidget {
           // Mã Đơn
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Row(
                 children: [
-                  Icon(Icons.receipt_long, size: 18, color: Colors.black54),
-                  SizedBox(width: 6),
-                  Text(
+                  const Icon(Icons.receipt_long, size: 18, color: Colors.black54),
+                  const SizedBox(width: 6),
+                  const Text(
                     'Mã Đơn:',
                     style: TextStyle(
                       fontSize: 16,
@@ -37,8 +57,8 @@ class CardBookingRequestWidget extends StatelessWidget {
                 ],
               ),
               Text(
-                '#023135',
-                style: TextStyle(
+                '#${widget.bookingCode}',
+                style: const TextStyle(
                   fontSize: 16,
                   fontFamily: 'Noto Sans',
                   fontWeight: FontWeight.w400,
@@ -51,12 +71,12 @@ class CardBookingRequestWidget extends StatelessWidget {
           // Tên khách
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Row(
                 children: [
-                  Icon(Icons.person, size: 18, color: Colors.black54),
-                  SizedBox(width: 6),
-                  Text(
+                  const Icon(Icons.person, size: 18, color: Colors.black54),
+                  const SizedBox(width: 6),
+                  const Text(
                     'Tên Khách:',
                     style: TextStyle(
                       fontSize: 16,
@@ -68,8 +88,8 @@ class CardBookingRequestWidget extends StatelessWidget {
                 ],
               ),
               Text(
-                'Mỹ Ngọc',
-                style: TextStyle(
+                widget.customerName,
+                style: const TextStyle(
                   fontSize: 16,
                   fontFamily: 'Noto Sans',
                   fontWeight: FontWeight.w400,
@@ -82,12 +102,12 @@ class CardBookingRequestWidget extends StatelessWidget {
           // Checkin - Checkout
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Row(
                 children: [
-                  Icon(Icons.calendar_today, size: 18, color: Colors.black54),
-                  SizedBox(width: 6),
-                  Text(
+                  const Icon(Icons.calendar_today, size: 18, color: Colors.black54),
+                  const SizedBox(width: 6),
+                  const Text(
                     'Checkin - Checkout:',
                     style: TextStyle(
                       fontSize: 16,
@@ -99,8 +119,8 @@ class CardBookingRequestWidget extends StatelessWidget {
                 ],
               ),
               Text(
-                '14/05 - 15/05',
-                style: TextStyle(
+                widget.checkinCheckout,
+                style: const TextStyle(
                   fontSize: 16,
                   fontFamily: 'Noto Sans',
                   fontWeight: FontWeight.w400,
@@ -112,12 +132,12 @@ class CardBookingRequestWidget extends StatelessWidget {
 
           // Trạng Thái
           Row(
-            children: const [
-              Icon(Icons.circle, color: Color(0xFF34A853), size: 14),
-              SizedBox(width: 6),
-              Icon(Icons.verified, size: 18, color: Color(0xFF34A853)),
-              SizedBox(width: 6),
-              Text(
+            children: [
+              Icon(Icons.circle, color: widget.statusColor, size: 14),
+              const SizedBox(width: 6),
+              Icon(widget.statusIcon, size: 18, color: widget.statusColor),
+              const SizedBox(width: 6),
+              const Text(
                 'Trạng Thái:',
                 style: TextStyle(
                   fontSize: 16,
@@ -126,10 +146,10 @@ class CardBookingRequestWidget extends StatelessWidget {
                   color: Colors.black87,
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               Text(
-                'Đã Thanh Toán',
-                style: TextStyle(
+                widget.status,
+                style: const TextStyle(
                   fontSize: 16,
                   fontFamily: 'Noto Sans',
                   fontWeight: FontWeight.w400,

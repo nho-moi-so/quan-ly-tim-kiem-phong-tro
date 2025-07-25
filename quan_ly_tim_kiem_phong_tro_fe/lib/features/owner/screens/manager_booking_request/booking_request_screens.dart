@@ -36,7 +36,12 @@ class BookingRequestScreens extends StatelessWidget{
               Center(
                 child: Column(
                   children: [
-                    CardBookingRequestWidget(),
+                    CardBookingRequestWidget(
+                      bookingCode: '123456',
+                      customerName: 'Nguyễn Văn A',
+                      checkinCheckout: '01/01 - 02/01',
+                      status: 'Đã Xác Nhận',
+                    ),
                   ],
                 ),
               )
