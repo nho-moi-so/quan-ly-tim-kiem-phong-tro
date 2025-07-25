@@ -138,9 +138,29 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
             const SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildActionButton('Hủy', color: Colors.white, textColor: Colors.black),
-                _buildActionButton('Cập Nhật', color: const Color(0xFF4285F4), textColor: Colors.white, width: 153),
+                children: [
+                GestureDetector(
+                  onTap: () {
+                  Navigator.of(context).maybePop();
+                  },
+                  child: _buildActionButton('Hủy', color: Colors.white, textColor: Colors.black),
+                ),
+                GestureDetector(
+                  onTap: () {
+                  print('Mã Phòng: ${roomCodeController.text}');
+                  print('Diện Tích: ${areaController.text}');
+                  print('Checkin: ${checkinController.text}');
+                  print('Checkout: ${checkoutController.text}');
+                  print('Sức Chứa Tối Đa: ${capacityController.text}');
+                  print('Trạng Thái Phòng: ${statusController.text}');
+                  print('Giá Phòng: ${priceController.text}');
+                  print('Mô Tả Thêm: ${descriptionController.text}');
+                  print('Tiện Ích: $selectedUtilities');
+                  print('Loại Phòng: $selectedRoomType');
+                  print('Trạng Thái Phòng: $selectedRoomState');
+                  },
+                  child: _buildActionButton('Cập Nhật', color: const Color(0xFF4285F4), textColor: Colors.white, width: 153),
+                ),
               ],
             ),
           ],

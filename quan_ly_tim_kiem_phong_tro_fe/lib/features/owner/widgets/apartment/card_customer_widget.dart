@@ -1,8 +1,37 @@
 //done
 import 'package:flutter/material.dart';
 
-class CardCustomerWidget extends StatelessWidget {
+class CardCustomerWidget extends StatefulWidget {
   const CardCustomerWidget({super.key});
+
+  @override
+  State<CardCustomerWidget> createState() => _CardCustomerWidgetState();
+}
+
+class _CardCustomerWidgetState extends State<CardCustomerWidget> {
+  late TextEditingController nameController;
+  late TextEditingController phoneController;
+  late TextEditingController idCardController;
+  late TextEditingController addressController;
+  String? selectedGender;
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController();
+    phoneController = TextEditingController();
+    idCardController = TextEditingController();
+    addressController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    idCardController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +63,11 @@ class CardCustomerWidget extends StatelessWidget {
                   // ),
                 ),
                 const SizedBox(height: 24),
-                _buildLabeledInput('Tên Khách Trọ'),
+                _buildLabeledInput('Tên Khách Trọ', nameController),
                 const SizedBox(height: 24),
-                _buildLabeledInput('Số Điện Thoại'),
+                _buildLabeledInput('Số Điện Thoại', phoneController),
                 const SizedBox(height: 24),
-                _buildLabeledInput('CCCD & Hộ Chiếu', inputHeight: 80),
+                _buildLabeledInput('CCCD & Hộ Chiếu', idCardController, inputHeight: 80),
                 const SizedBox(height: 24),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,12 +97,17 @@ class CardCustomerWidget extends StatelessWidget {
                     DropdownMenuItem(value: 'Nữ', child: Text('Nữ')),
                     DropdownMenuItem(value: 'Khác', child: Text('Khác')),
                     ],
-                    onChanged: (value) {},
+                    onChanged: (value) {
+                      setState(() {
+                        selectedGender = value;
+                      });
+                    },
+                    value: selectedGender,
                   ),
                   ],
                 ),
                 const SizedBox(height: 24),
-                _buildLabeledInput('Địa Chỉ Thường Chú', inputHeight: 63),
+                _buildLabeledInput('Địa Chỉ Thường Chú', addressController, inputHeight: 63),
                 const SizedBox(height: 32),
                 // Buttons Row
                 Row(
@@ -82,6 +116,7 @@ class CardCustomerWidget extends StatelessWidget {
                       child: OutlinedButton(
                         onPressed: () {
                           // TODO: Xử lý khi bấm nút Hủy
+                          Navigator.of(context).pop();
                         },
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -104,6 +139,13 @@ class CardCustomerWidget extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () {
                           // TODO: xử lý thêm dữ liệu
+                          print('=== THÔNG TIN KHÁCH THUÊ MỚI ===');
+                          print('Tên Khách Trọ: ${nameController.text}');
+                          print('Số Điện Thoại: ${phoneController.text}');
+                          print('CCCD & Hộ Chiếu: ${idCardController.text}');
+                          print('Giới Tính: $selectedGender');
+                          print('Địa Chỉ Thường Chú: ${addressController.text}');
+                          print('=====================================');
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4285F4),
@@ -148,11 +190,12 @@ class CardCustomerWidget extends StatelessWidget {
     );
   }
 
-Widget _buildInputBox({double height = 45}) {
+Widget _buildInputBox({double height = 45, TextEditingController? controller}) {
   return Container(
     margin: const EdgeInsets.only(top: 6),
     height: height,
     child: TextFormField(
+      controller: controller,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         border: OutlineInputBorder(
@@ -175,12 +218,12 @@ Widget _buildInputBox({double height = 45}) {
 }
 
 
-  Widget _buildLabeledInput(String label, {double inputHeight = 45}) {
+  Widget _buildLabeledInput(String label, TextEditingController controller, {double inputHeight = 45}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildLabel(label),
-        _buildInputBox(height: inputHeight),
+        _buildInputBox(height: inputHeight, controller: controller),
       ],
     );
   }

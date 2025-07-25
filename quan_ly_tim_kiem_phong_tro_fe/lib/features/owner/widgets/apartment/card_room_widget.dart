@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/new_customer_screen.dart';
 
 import '../../viewmodel/room_card_info.dart';
 class CardRoomWidget extends StatelessWidget {
@@ -161,10 +162,14 @@ class CardRoomWidget extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: data.onEdit,
+                  onPressed: () {
+                              Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => NewCustomerScreen()),
+                  );
+                  },
                   icon: const Icon(Icons.edit, color: Colors.white, size: 18),
                   label: const Text(
-                    'Chỉnh Sửa',
+                    'Thêm khách mới',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,

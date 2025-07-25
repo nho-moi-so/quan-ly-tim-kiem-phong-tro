@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/detail_apartment_screen.dart';
 
-import '../../widgets/widgets.dart';
-import '../../viewmodel/room_card_info.dart';
 import '../../../../service/owner/apartment_service.dart';
+import '../../viewmodel/room_card_info.dart';
+import '../../widgets/widgets.dart';
 
 
 class MainApartmentScreen extends StatelessWidget {
@@ -35,7 +36,7 @@ class MainApartmentScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TagWithIconWidget(title: "Quảng lý căn hộ"),
-                ButtonAddWidget(title: "Thêm căn hộ mới",),
+                ButtonAddWidget(title: "Thêm căn hộ mới", screen: DetailApartmentScreen(),),
               ],
               ),
               SizedBox(
