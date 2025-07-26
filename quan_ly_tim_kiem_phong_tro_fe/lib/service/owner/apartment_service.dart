@@ -52,47 +52,29 @@ class ApartmentService {
   }
 
   //List Room Summary
-  List<RoomCardInfo> getAllRoomCards() {
-    return [
-      RoomCardInfo(
-        roomName: 'Phòng 101',
-        tenantName: 'Nguyễn Văn A',
-        price: '2.500.000 VNĐ',
-        status: 'Trống',
-        onViewDetail: () {
-          // Handle view detail action
-        },
-        onDelete: () {
-          // Handle delete action
-        },
-        onEdit: () {
-          // Handle edit action
-        },
-        onContract: () {
-          // Handle contract action
-        },
-      ),
-      RoomCardInfo(
-        roomName: 'Phòng 102',
-        tenantName: 'Trần Thị B',
-        price: '3.000.000 VNĐ',
-        status: 'Đã thuê',
-        onViewDetail: () {
-          // Handle view detail action
-        },
-        onDelete: () {
-          // Handle delete action
-        },
-        onEdit: () {
-          // Handle edit action
-        },
-        onContract: () {
-          // Handle contract action
-        },
-      ),
-    ];
+  Future<List<RoomCardInfo>> getAllRoomCards(
+    {
+      required String userId,
+      String? status
+    }
+  ) async {
+    List<RoomCardInfo> roomCards = [];
+    QuerySnapshot snapshot = await firestore
+        .collection("apartment")
+        .where('UserId', isEqualTo: userId)
+        .get();
+    for (var doc in snapshot.docs) {
+      RoomCardInfo roomCard = RoomCardInfo(
+        roomName: doc['CodeApartment'],
+        tenantName: doc['UserId'],
+        price: doc['Decription'],
+        status: doc['UserId'], onViewDetail: () {  }, onDelete: () {  }, onEdit: () {  }, onContract: () {  }
+      );
+      roomCards.add(roomCard);
+    }
+    return roomCards;
+    }
+    
+    
   }
-
-
-}
 

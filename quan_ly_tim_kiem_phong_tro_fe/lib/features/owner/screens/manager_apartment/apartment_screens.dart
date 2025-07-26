@@ -4,18 +4,26 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apa
 import '../../../../service/owner/apartment_service.dart';
 import '../../viewmodel/room_card_info.dart';
 import '../../widgets/widgets.dart';
+import 'dart:developer';
 
 
-class MainApartmentScreen extends StatelessWidget {
+class MainApartmentScreen extends StatefulWidget {
   const MainApartmentScreen({super.key});
   
   @override
+  State<MainApartmentScreen> createState() => _MainApartmentScreenState();
+}
+
+class _MainApartmentScreenState extends State<MainApartmentScreen> {
+  //====get all list card infor
+  Future<List<RoomCardInfo>> roomCards = ApartmentService().getAllRoomCards(userId: "dYSjvUDL2vwRrSgqiDHy");
+
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
     //====get all list card infor
-    final List<RoomCardInfo> roomCards = ApartmentService().getAllRoomCards();
+    Future<List<RoomCardInfo>> roomCards = ApartmentService().getAllRoomCards(userId: "dYSjvUDL2vwRrSgqiDHy");
 
 
     return Scaffold(
@@ -49,10 +57,21 @@ class MainApartmentScreen extends StatelessWidget {
               SizedBox(
               height: screenHeight * 0.01,
               ),
-              LabelTitleWidget(title:"Chung Cư Nam Long", header:"50, Trịnh Hoài Đức, Phường Vĩnh Thanh Vân TP. Rạch Giá"),
+              // LabelTitleWidget(title:"Chung Cư Nam Long", header:"50, Trịnh Hoài Đức, Phường Vĩnh Thanh Vân TP. Rạch Giá"),
               
               //===========List of room cards
-              ...roomCards.map((card) => CardRoomWidget(data: card,)).toList(),
+               FutureBuilder<List<RoomCardInfo>>(
+                future: roomCards,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Column(
+                      children: snapshot.data!.map((card) => CardRoomWidget(data: card,)).toList(),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text("${snapshot.error}");
+                  }
+                  return const CircularProgressIndicator();
+                })
             ],
             
             ),
