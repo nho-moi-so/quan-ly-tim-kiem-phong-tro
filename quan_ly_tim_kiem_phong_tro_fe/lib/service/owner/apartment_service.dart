@@ -1,6 +1,10 @@
 
+import 'package:flutter/material.dart';
+
 import '../../features/owner/viewmodel/room_detail.dart';
 import '../../features/owner/viewmodel/room_card_info.dart';
+import '../../features/owner/screens/manager_apartment/detail_apartment_screen.dart';
+import '../../service/navigation_service.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 class ApartmentService {
@@ -64,11 +68,54 @@ class ApartmentService {
         .where('UserId', isEqualTo: userId)
         .get();
     for (var doc in snapshot.docs) {
+
+      // ==================================
+      String tenantName = '';
+      // Lấy thông tin user từ bảng 'users' dựa trên UserId
+      DocumentSnapshot userSnapshot = await firestore.collection('users').doc(doc['UserId']).get();
+      if (userSnapshot.exists && userSnapshot.data() != null) {
+        tenantName = userSnapshot['Username'] ?? '';
+      }
+      // ==================================
       RoomCardInfo roomCard = RoomCardInfo(
-        roomName: doc['CodeApartment'],
-        tenantName: doc['UserId'],
-        price: doc['Decription'],
-        status: doc['UserId'], onViewDetail: () {  }, onDelete: () {  }, onEdit: () {  }, onContract: () {  }
+        roomName: "Phòng: ${doc['CodeApartment']}",
+        
+
+        tenantName: tenantName,
+
+        price: '${doc['DailyRate'].toString()}/ngày',
+        status: doc['Status'], //=== này nữa check bên booking request nếu không có thì lấy status này 
+
+        onViewDetail: () { 
+              // Lấy id của document (chuỗi String mặc định của Firestore document)
+              String roomId = '${doc.id}';
+              //lấy thông tin chi tiết của phòng
+              RoomDetail roomDetail = RoomDetail(
+                roomCode: 'P102',
+                area: '25',
+                checkin: '14:00',
+                checkout: '12:00',
+                maxCapacity: '3',
+                room_status: 'Trống',
+                price: '2500000',
+                description: 'Phòng mới xây, có ban công thoáng mát.',
+                utilities: [
+                  'Ghế sofa 4 chỗ',
+                  'Máy lạnh mới',
+                ],
+                roomType: 'Studio',
+              );
+                navigationService.navigateTo(
+                DetailApartmentScreen(
+                  roomDetail: roomDetail,
+                ),
+              );
+            print('Room ID: $roomId');
+          
+        }, 
+        onDelete: () {  }, 
+        onEdit: () {  }, 
+        onContract: () {  }
       );
       roomCards.add(roomCard);
     }

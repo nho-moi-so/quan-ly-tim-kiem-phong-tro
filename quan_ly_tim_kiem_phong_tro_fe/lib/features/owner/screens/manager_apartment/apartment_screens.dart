@@ -15,15 +15,13 @@ class MainApartmentScreen extends StatefulWidget {
 }
 
 class _MainApartmentScreenState extends State<MainApartmentScreen> {
+  
   //====get all list card infor
   Future<List<RoomCardInfo>> roomCards = ApartmentService().getAllRoomCards(userId: "dYSjvUDL2vwRrSgqiDHy");
 
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
-    //====get all list card infor
-    Future<List<RoomCardInfo>> roomCards = ApartmentService().getAllRoomCards(userId: "dYSjvUDL2vwRrSgqiDHy");
 
 
     return Scaffold(

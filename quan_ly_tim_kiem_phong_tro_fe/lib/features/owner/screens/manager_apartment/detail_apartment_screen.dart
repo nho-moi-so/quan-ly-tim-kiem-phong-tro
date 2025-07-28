@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
 
 import '../../widgets/widgets.dart';
 import '../../../../service/owner/apartment_service.dart';
 
-class DetailApartmentScreen extends StatelessWidget {
-  const DetailApartmentScreen({super.key});
+class DetailApartmentScreen extends StatefulWidget {
+  final RoomDetail? roomDetail;
 
+  const DetailApartmentScreen({super.key, this.roomDetail});
+
+  @override
+  State<DetailApartmentScreen> createState() => _DetailApartmentScreenState();
+}
+
+class _DetailApartmentScreenState extends State<DetailApartmentScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    // Example data for testing
-    final roomDetailSample = ApartmentService().getRoomDetail();
-
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -25,13 +30,11 @@ class DetailApartmentScreen extends StatelessWidget {
             children: [
               SizedBox(height: screenHeight * 0.05),
               const Center(child: LogoWidget()),
-              // TagWithIconWidget(),
               const LabelTitleAndQuayLaiWidget(title: 'Chi tiết phòng trọ'),
               SizedBox(height: screenHeight * 0.02),
-              //===============test=================
-              CardRoomDetailWidget(initialData: roomDetailSample),
-              //===============test=================
-
+              CardRoomDetailWidget(
+                initialData: widget.roomDetail ?? RoomDetail(), // Provide a default RoomDetail if null
+              ),
             ],
           ),
         ),

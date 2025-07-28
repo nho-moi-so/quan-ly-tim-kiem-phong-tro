@@ -122,7 +122,10 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
             Wrap(
               spacing: 16,
               runSpacing: 8,
-              children: allUtilities.map((u) => _buildCheckboxOption(u)).toList(),
+              children: allUtilities.map((u) {
+              final isChecked = selectedUtilities.contains(u);
+              return _buildCheckboxOption(u);
+              }).toList(),
             ),
             const SizedBox(height: 24),
             _buildOptionRow('+ Loại Phòng'),

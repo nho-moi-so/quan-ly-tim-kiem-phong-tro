@@ -6,6 +6,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apa
 import 'features/owner/widgets/widgets.dart';
 import 'features/owner/screens/screens.dart';
 import 'features/common/screens.dart';
+import '../../service/navigation_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,12 +25,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
+      navigatorKey: navigationService.navigatorKey, // ← BẮT BUỘC
       // initialRoute: '/',
       // routes: {
       //     '/': (context) => HomeScreens(),
       //     '/signup': (context) => RegisterScreens(), 
       //   },
-      home: BookingRequestScreens(), //==================
+      home: MainApartmentScreen(), //==================
     );
   }
 }
