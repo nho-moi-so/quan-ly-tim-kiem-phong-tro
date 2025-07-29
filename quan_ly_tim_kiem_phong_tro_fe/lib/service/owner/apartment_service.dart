@@ -69,12 +69,25 @@ class ApartmentService {
         .get();
     for (var doc in snapshot.docs) {
 
-      // ==================================
+      // ==================================DONE================
       String tenantName = '';
-      // Lấy thông tin user từ bảng 'users' dựa trên UserId
-      DocumentSnapshot userSnapshot = await firestore.collection('users').doc(doc['UserId']).get();
-      if (userSnapshot.exists && userSnapshot.data() != null) {
-        tenantName = userSnapshot['Username'] ?? '';
+      String status = doc['Status']; //=== này nữa check bên booking request nếu không có thì lấy status này 
+      // Lấy thông tin user từ bảng 'users' dựa trên UserId và xài bảng Booking Request
+      QuerySnapshot bookingRequestSnapshot = await firestore.collection("bookingRequest")
+                                                      .where("ApartmentId", isEqualTo: doc.id)
+                                                      .limit(1)
+                                                      .get();
+      if(bookingRequestSnapshot.docs.isNotEmpty){
+        final UserId = bookingRequestSnapshot.docs.first["UserId"];
+        DocumentSnapshot userSnapshot = await firestore.collection('users').doc(UserId).get();
+        
+        if (userSnapshot.exists && userSnapshot.data() != null) {
+          tenantName = userSnapshot['Username'] ?? '';
+          status = bookingRequestSnapshot.docs.first["Status"];
+        }
+        else{
+          tenantName = 'Chưa có khách thuê';
+        }
       }
       // ==================================
       RoomCardInfo roomCard = RoomCardInfo(
@@ -84,12 +97,12 @@ class ApartmentService {
         tenantName: tenantName,
 
         price: '${doc['DailyRate'].toString()}/ngày',
-        status: doc['Status'], //=== này nữa check bên booking request nếu không có thì lấy status này 
+        status: status, 
 
         onViewDetail: () { 
               // Lấy id của document (chuỗi String mặc định của Firestore document)
               String roomId = '${doc.id}';
-              //lấy thông tin chi tiết của phòng
+              //lấy thông tin chi tiết của phòng === này là dữ liệu giả 
               RoomDetail roomDetail = RoomDetail(
                 roomCode: 'P102',
                 area: '25',

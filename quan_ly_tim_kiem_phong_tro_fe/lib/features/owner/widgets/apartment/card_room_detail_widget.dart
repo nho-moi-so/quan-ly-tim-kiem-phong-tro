@@ -127,13 +127,13 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
               return _buildCheckboxOption(u);
               }).toList(),
             ),
-            const SizedBox(height: 24),
-            _buildOptionRow('+ Loại Phòng'),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 16,
-              children: roomTypes.map((t) => _buildRadioOption(t)).toList(),
-            ),
+            //const SizedBox(height: 24),
+            //_buildOptionRow('+ Loại Phòng'),
+            //const SizedBox(height: 8),
+            //Wrap(
+            //  spacing: 16,
+            //  children: roomTypes.map((t) => _buildRadioOption(t)).toList(),
+            //),
             const SizedBox(height: 24),
             const Text('Chọn Trạng Thái Phòng'),
             const SizedBox(height: 8),
