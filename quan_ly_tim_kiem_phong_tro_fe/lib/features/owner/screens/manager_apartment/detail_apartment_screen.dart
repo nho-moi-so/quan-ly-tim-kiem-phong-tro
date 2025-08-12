@@ -30,8 +30,10 @@ class _DetailApartmentScreenState extends State<DetailApartmentScreen> {
             children: [
               SizedBox(height: screenHeight * 0.05),
               const Center(child: LogoWidget()),
-              const LabelTitleAndQuayLaiWidget(title: 'Chi tiết phòng trọ'),
-              SizedBox(height: screenHeight * 0.02),
+                LabelTitleAndQuayLaiWidget(
+                title: widget.roomDetail != null ? 'Chi tiết phòng trọ' : 'Tạo phòng trọ',
+                ),
+              // SizedBox(height: screenHeight * 0.02),
               CardRoomDetailWidget(
                 initialData: widget.roomDetail ?? RoomDetail(), // Provide a default RoomDetail if null
               ),

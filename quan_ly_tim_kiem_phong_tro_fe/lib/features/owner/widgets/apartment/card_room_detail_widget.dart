@@ -58,7 +58,9 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     checkoutController = TextEditingController(text: widget.initialData.checkout);
     capacityController = TextEditingController(text: widget.initialData.maxCapacity);
     statusController = TextEditingController(text: widget.initialData.room_status);
-    priceController = TextEditingController(text: widget.initialData.price);
+    priceController = TextEditingController(
+      text: _formatCurrency(widget.initialData.price.replaceAll(RegExp(r'[^0-9]'), '')),
+    );
     descriptionController = TextEditingController(text: widget.initialData.description);
 
     selectedUtilities = [...widget.initialData.utilities];
@@ -89,7 +91,27 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
           children: [
             _buildLabeledInput('Mã Phòng', roomCodeController),
             const SizedBox(height: 16),
-            _buildLabeledInput('Diện Tích', areaController),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              const Text('Diện Tích'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: areaController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                suffix: const Text('m²', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
+              ],
+            ),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -109,23 +131,144 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
               ],
             ),
             const SizedBox(height: 16),
-            _buildLabeledInput('Sức Chứa Tối Đa', capacityController),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              const Text('Sức Chứa Tối Đa'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: capacityController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                suffix: const Text('Người', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
+              ],
+            ),
+            // const SizedBox(height: 16),
+            // _buildLabeledInput('Trạng Thái Phòng', statusController),
             const SizedBox(height: 16),
-            _buildLabeledInput('Trạng Thái Phòng', statusController),
-            const SizedBox(height: 16),
-            _buildLabeledInput('Giá Phòng', priceController),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              const Text('Giá Phòng'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: priceController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                suffix: const Text('VND', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                onChanged: (value) {
+                String digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+                if (digits.isEmpty) {
+                  priceController.text = '';
+                  priceController.selection = TextSelection.collapsed(offset: 0);
+                  return;
+                }
+                final formatted = _formatCurrency(digits);
+                priceController.text = formatted;
+                priceController.selection = TextSelection.collapsed(offset: formatted.length);
+                },
+              ),
+              ],
+            ),
             const SizedBox(height: 16),
             _buildLabeledInput('Mô Tả Thêm', descriptionController, maxLines: 3),
             const SizedBox(height: 24),
-            _buildOptionRow('+ Thêm Tiện Ích'),
+            GestureDetector(
+              onTap: () async {
+                await showDialog(
+                  context: context,
+                  builder: (context) {
+                    String searchText = '';
+                    List<String> filteredUtilities = allUtilities;
+                    return StatefulBuilder(
+                      builder: (context, setState) {
+                        return AlertDialog(
+                          title: const Text('Thêm Tiện Ích'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextField(
+                                decoration: const InputDecoration(
+                                  hintText: 'Tìm kiếm tiện ích...',
+                                  prefixIcon: Icon(Icons.search),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    searchText = value;
+                                    filteredUtilities = allUtilities
+                                        .where((u) => u.toLowerCase().contains(searchText.toLowerCase()))
+                                        .toList();
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                height: 200,
+                                width: 300,
+                                child: ListView(
+                                  children: filteredUtilities.map((u) {
+                                    final isChecked = selectedUtilities.contains(u);
+                                    return CheckboxListTile(
+                                      title: Text(u),
+                                      value: isChecked,
+                                      onChanged: (checked) {
+                                        setState(() {
+                                          if (checked == true) {
+                                            if (!selectedUtilities.contains(u)) {
+                                              selectedUtilities.add(u);
+                                            }
+                                          } else {
+                                            selectedUtilities.remove(u);
+                                          }
+                                        });
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ],
+                          ),
+                            actions: [
+                              TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Thêm'),
+                              ),
+                              
+                            ],
+                        );
+                      },
+                    );
+                  },
+                );
+                setState(() {}); // cập nhật lại tiện ích đã chọn
+              },
+              child: _buildOptionRow('+ Thêm Tiện Ích'),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 16,
               runSpacing: 8,
-              children: allUtilities.map((u) {
-              final isChecked = selectedUtilities.contains(u);
-              return _buildCheckboxOption(u);
-              }).toList(),
+              children: allUtilities
+                  .where((u) => selectedUtilities.contains(u)) // chỉ hiển thị các tiện ích đã check
+                  .map((u) => _buildCheckboxOption(u))
+                  .toList(),
             ),
             //const SizedBox(height: 24),
             //_buildOptionRow('+ Loại Phòng'),
@@ -158,15 +301,20 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    final message = '''Mã Phòng: ${roomCodeController.text}\nDiện Tích: ${areaController.text}\nCheckin: ${checkinController.text}\nCheckout: ${checkoutController.text}\nSức Chứa Tối Đa: ${capacityController.text}\nTrạng Thái Phòng: ${statusController.text}\nGiá Phòng: ${priceController.text}\nMô Tả Thêm: ${descriptionController.text}\nTiện Ích: ${selectedUtilities.join(', ')}\nLoại Phòng: $selectedRoomType\nTrạng Thái Phòng: $selectedRoomState''';
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(message, style: const TextStyle(fontSize: 14)),
-                        duration: const Duration(seconds: 3),
-                      ),
-                    );
+                  final message = '''Mã Phòng: ${roomCodeController.text}\nDiện Tích: ${areaController.text}\nCheckin: ${checkinController.text}\nCheckout: ${checkoutController.text}\nSức Chứa Tối Đa: ${capacityController.text}\nTrạng Thái Phòng: ${statusController.text}\nGiá Phòng: ${priceController.text}\nMô Tả Thêm: ${descriptionController.text}\nTiện Ích: ${selectedUtilities.join(', ')}\nLoại Phòng: $selectedRoomType\nTrạng Thái Phòng: $selectedRoomState''';
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                    content: Text(message, style: const TextStyle(fontSize: 14)),
+                    duration: const Duration(seconds: 3),
+                    ),
+                  );
                   },
-                  child: _buildActionButton('Cập Nhật', color: const Color(0xFF4285F4), textColor: Colors.white, width: 153),
+                  child: _buildActionButton(
+                  widget.initialData.roomCode.isNotEmpty ? 'Cập Nhật' : 'Tạo',
+                  color: const Color(0xFF4285F4),
+                  textColor: Colors.white,
+                  width: 153,
+                  ),
                 ),
               ],
             ),
@@ -176,10 +324,24 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     );
   }
 
-  Widget _buildDateTimePicker({
-    required String label,
-    required TextEditingController controller,
-  }) {
+  // Hàm format số tiền theo định dạng có dấu phẩy phân cách hàng nghìn
+  String _formatCurrency(String digits) {
+    if (digits.isEmpty) return '';
+    final buffer = StringBuffer();
+    for (int i = 0; i < digits.length; i++) {
+      int position = digits.length - i;
+      buffer.write(digits[i]);
+      if (position > 1 && position % 3 == 1 && i != digits.length - 1) {
+        buffer.write(',');
+      }
+    }
+    return buffer.toString();
+  }
+  
+    Widget _buildDateTimePicker({
+      required String label,
+      required TextEditingController controller,
+    }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

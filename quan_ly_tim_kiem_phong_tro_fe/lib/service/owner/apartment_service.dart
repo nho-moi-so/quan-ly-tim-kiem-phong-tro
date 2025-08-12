@@ -99,19 +99,45 @@ class ApartmentService {
         price: '${doc['DailyRate'].toString()}/ngày',
         status: status, 
 
-        onViewDetail: () { 
+        onViewDetail: () async { 
               // Lấy id của document (chuỗi String mặc định của Firestore document)
               String roomId = '${doc.id}';
+              // print('Room ID: $roomId');
+
+              //lay thong tin cua apartment
+              DocumentSnapshot apartmentSnapshot = await firestore.collection('apartment').doc(roomId).get();
+              // print(apartmentSnapshot.data());
+
+              //lay id cua amenity cua apartment
+              List<String> amenities = [];
+              QuerySnapshot amenityInApartment = await firestore.collection('amenityInApartment')
+              .where('ApartmentId', isEqualTo: roomId)
+              .get();
+              print('Amenities snapshot: ${amenityInApartment.docs}');
+              
+              //lay thong tin cua amenity dua vao id cua amenity trong amenitySnapshot
+              for (var amenityDoc in amenityInApartment.docs) {
+                String amenityId = amenityDoc['AmenityId'];
+                DocumentSnapshot amenitySnapshot = await firestore.collection('amenity').doc(amenityId).get();
+                String? amenityName = amenitySnapshot['Description'];
+                if (amenityName != null) {
+                  amenities.add(amenityName);
+                }
+                break;
+              }
+              print('Amenities: $amenities');
+              
+
               //lấy thông tin chi tiết của phòng === này là dữ liệu giả 
               RoomDetail roomDetail = RoomDetail(
-                roomCode: 'P102',
+                roomCode: apartmentSnapshot['CodeApartment'],
                 area: '25',
                 checkin: '14:00',
                 checkout: '12:00',
-                maxCapacity: '3',
+                maxCapacity: apartmentSnapshot['maxOccupancy'].toString(),
                 room_status: 'Trống',
-                price: '2500000',
-                description: 'Phòng mới xây, có ban công thoáng mát.',
+                price: apartmentSnapshot['DailyRate'].toString(),
+                description: apartmentSnapshot['Decription'],
                 utilities: [
                   'Ghế sofa 4 chỗ',
                   'Máy lạnh mới',
