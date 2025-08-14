@@ -1,12 +1,10 @@
 
-import 'package:flutter/material.dart';
-
-import '../../features/owner/viewmodel/room_detail.dart';
-import '../../features/owner/viewmodel/room_card_info.dart';
-import '../../features/owner/screens/manager_apartment/detail_apartment_screen.dart';
-import '../../service/navigation_service.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../../features/owner/screens/manager_apartment/detail_apartment_screen.dart';
+import '../../features/owner/viewmodel/room_card_info.dart';
+import '../../features/owner/viewmodel/room_detail.dart';
+import '../../service/navigation_service.dart';
 class ApartmentService {
   //connect to firebase
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -137,12 +135,14 @@ class ApartmentService {
                 maxCapacity: apartmentSnapshot['maxOccupancy'].toString(),
                 room_status: 'Trống',
                 price: apartmentSnapshot['DailyRate'].toString(),
+                depositPrice: apartmentSnapshot['Deposit'].toString(),
                 description: apartmentSnapshot['Decription'],
                 utilities: [
                   'Ghế sofa 4 chỗ',
                   'Máy lạnh mới',
                 ],
                 roomType: 'Studio',
+                images: List<String>.from(apartmentSnapshot['PathImage'] ?? []),
               );
                 navigationService.navigateTo(
                 DetailApartmentScreen(
@@ -160,7 +160,35 @@ class ApartmentService {
     }
     return roomCards;
     }
+
+  //Create New Room
+  Future<void> createOrUpdateRoom(RoomDetail roomDetail, String userId, String method) async {
+    // try {
+    //   // Tạo một tài liệu mới trong Firestore
+    //   DocumentReference docRef = await firestore.collection('apartment').add({
+    //     'CodeApartment': roomDetail.roomCode,
+    //     'Area': roomDetail.area,
+    //     'Checkin': roomDetail.checkin,
+    //     'Checkout': roomDetail.checkout,
+    //     'MaxOccupancy': roomDetail.maxCapacity,
+    //     'Status': roomDetail.room_status,
+    //     'DailyRate': roomDetail.price,
+    //     'Decription': roomDetail.description,
+    //     'UserId': userId, // Lưu ID người dùng
+    //   });
+
+    //   // Lưu các tiện ích liên quan đến phòng
+    //   for (String utility in roomDetail.utilities) {
+    //     await firestore.collection('amenityInApartment').add({
+    //       'ApartmentId': docRef.id,
+    //       'AmenityId': utility, // Giả sử utility là ID của tiện ích
+    //     });
+    //   }
+    // } catch (e) {
+    //   print('Error creating new room: $e');
+    // }
+    print('New room created with code: ${roomDetail.roomCode}');
+  }    
     
-    
-  }
+}
 

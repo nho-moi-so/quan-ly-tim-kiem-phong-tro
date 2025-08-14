@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
 
 import '../../widgets/widgets.dart';
-import '../../../../service/owner/apartment_service.dart';
 
 class DetailApartmentScreen extends StatefulWidget {
   final RoomDetail? roomDetail;
@@ -31,7 +30,7 @@ class _DetailApartmentScreenState extends State<DetailApartmentScreen> {
               SizedBox(height: screenHeight * 0.05),
               const Center(child: LogoWidget()),
                 LabelTitleAndQuayLaiWidget(
-                title: widget.roomDetail != null ? 'Chi tiết phòng trọ' : 'Tạo phòng trọ',
+                title: widget.roomDetail != null ? 'Chi tiết căn hộ' : 'Tạo căn hộ',
                 ),
               // SizedBox(height: screenHeight * 0.02),
               CardRoomDetailWidget(

@@ -6,10 +6,12 @@ class RoomDetail {
   String maxCapacity;
   String room_status;
   String price;
+  String depositPrice;
   String description;
   List<String> utilities;
   String roomType;
   String roomState;
+  List<String> images;
 
   RoomDetail({
     this.roomCode = '',
@@ -19,9 +21,11 @@ class RoomDetail {
     this.maxCapacity = '',
     this.room_status = '',
     this.price = '',
+    this.depositPrice = '',
     this.description = '',
     this.utilities = const [],
     this.roomType = '',
     this.roomState = '',
+    this.images = const [],
   });
 }

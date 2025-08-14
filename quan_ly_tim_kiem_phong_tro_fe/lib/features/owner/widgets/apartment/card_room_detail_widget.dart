@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../viewmodel/room_detail.dart';
 import '../../../../service/owner/apartment_service.dart';
-
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class CardRoomDetailWidget extends StatefulWidget {
   final RoomDetail initialData;
@@ -12,6 +14,8 @@ class CardRoomDetailWidget extends StatefulWidget {
   State<CardRoomDetailWidget> createState() => _CardRoomDetailWidgetState();
 }
 
+
+
 class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
   late TextEditingController roomCodeController;
   late TextEditingController areaController;
@@ -20,13 +24,27 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
   late TextEditingController capacityController;
   late TextEditingController statusController;
   late TextEditingController priceController;
+  late TextEditingController depositPriceController;
   late TextEditingController descriptionController;
+  late List<String> initialImages;
 
   List<String> selectedUtilities = [];
   String? selectedRoomType;
   String? selectedRoomState;
 
   List<String> allUtilities = [];
+  late List<File> _images;
+
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImages() async {
+    final List<XFile>? pickedFiles = await _picker.pickMultiImage();
+    if (pickedFiles != null && pickedFiles.isNotEmpty) {
+      setState(() {
+        _images.addAll(pickedFiles.map((xfile) => File(xfile.path)));
+      });
+    }
+  }
 
   final List<String> roomTypes = [
     '1 Phòng Ngủ',
@@ -51,8 +69,11 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     super.initState();
     loadAmenities();
 
+    initialImages = widget.initialData.images;
+    print("================${initialImages}===========");
 
     roomCodeController = TextEditingController(text: widget.initialData.roomCode);
+    depositPriceController = TextEditingController(text: widget.initialData.depositPrice);
     areaController = TextEditingController(text: widget.initialData.area);
     checkinController = TextEditingController(text: widget.initialData.checkin);
     checkoutController = TextEditingController(text: widget.initialData.checkout);
@@ -66,6 +87,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     selectedUtilities = [...widget.initialData.utilities];
     selectedRoomType = widget.initialData.roomType;
     selectedRoomState = widget.initialData.roomState;
+    _images = [];
   }
 
   @override
@@ -112,24 +134,24 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
               ),
               ],
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-              Expanded(
-                child: _buildDateTimePicker(
-                label: 'Checkin',
-                controller: checkinController,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildDateTimePicker(
-                label: 'Checkout',
-                controller: checkoutController,
-                ),
-              ),
-              ],
-            ),
+            // const SizedBox(height: 16),
+            // Row(
+            //   children: [
+            //   Expanded(
+            //     child: _buildDateTimePicker(
+            //     label: 'Checkin',
+            //     controller: checkinController,
+            //     ),
+            //   ),
+            //   const SizedBox(width: 16),
+            //   Expanded(
+            //     child: _buildDateTimePicker(
+            //     label: 'Checkout',
+            //     controller: checkoutController,
+            //     ),
+            //   ),
+            //   ],
+            // ),
             const SizedBox(height: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,35 +180,85 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              const Text('Giá Phòng'),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: priceController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: const BorderSide(color: Color(0xFF4285F4)),
+              // const Text('Giá Phòng'),
+              // const SizedBox(height: 8),
+              Row(
+                children: [
+                // Giá Phòng
+                Expanded(
+                  child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Giá Phòng'),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                    controller: priceController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      suffix: const Text('VND', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    onChanged: (value) {
+                      String digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+                      if (digits.isEmpty) {
+                      priceController.text = '';
+                      priceController.selection = TextSelection.collapsed(offset: 0);
+                      return;
+                      }
+                      final formatted = _formatCurrency(digits);
+                      priceController.text = formatted;
+                      priceController.selection = TextSelection.collapsed(offset: formatted.length);
+                    },
+                    ),
+                  ],
+                  ),
                 ),
-                filled: true,
-                fillColor: Colors.white,
-                suffix: const Text('VND', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(width: 16),
+                // Giá Đặt Cọc
+                Expanded(
+                  child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Giá Đặt Cọc'),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                    controller: depositPriceController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      suffix: const Text('VND', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    onChanged: (value) {
+                      String digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+                      if (digits.isEmpty) {
+                        depositPriceController.text = '';
+                        depositPriceController.selection = TextSelection.collapsed(offset: 0);
+                        return;
+                      }
+                      final formatted = _formatCurrency(digits);
+                      if (depositPriceController.text != formatted) {
+                        depositPriceController.text = formatted;
+                        depositPriceController.selection = TextSelection.collapsed(offset: formatted.length);
+                      }
+                    },
+                    ),
+                  ],
+                  ),
                 ),
-                onChanged: (value) {
-                String digits = value.replaceAll(RegExp(r'[^0-9]'), '');
-                if (digits.isEmpty) {
-                  priceController.text = '';
-                  priceController.selection = TextSelection.collapsed(offset: 0);
-                  return;
-                }
-                final formatted = _formatCurrency(digits);
-                priceController.text = formatted;
-                priceController.selection = TextSelection.collapsed(offset: formatted.length);
-                },
+                ],
               ),
-              ],
-            ),
             const SizedBox(height: 16),
             _buildLabeledInput('Mô Tả Thêm', descriptionController, maxLines: 3),
             const SizedBox(height: 24),
@@ -289,6 +361,112 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
               ),
               child: _buildDropdownRoomState(),
             ),
+            const SizedBox(height: 24),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Hình Ảnh Phòng'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 110,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      // Hiển thị ảnh từ URL (initialImages)
+                      ...initialImages.map((url) => Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.network(
+                                    url,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => Container(
+                                      width: 100,
+                                      height: 100,
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.broken_image, color: Colors.grey),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 2,
+                                  right: 2,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        initialImages.remove(url);
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.close, color: Colors.white, size: 18),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
+                      // Hiển thị ảnh từ File (_images)
+                      ..._images.map((img) => Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.file(
+                                    img,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 2,
+                                  right: 2,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _images.remove(img);
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.close, color: Colors.white, size: 18),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
+                      // Nút thêm ảnh mới
+                      GestureDetector(
+                        onTap: _pickImages,
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0E0E0),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFF4285F4)),
+                          ),
+                          child: const Icon(Icons.add_a_photo, size: 36, color: Color(0xFF4285F4)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -300,7 +478,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                   child: _buildActionButton('Hủy', color: Colors.white, textColor: Colors.black),
                 ),
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                   final message = '''Mã Phòng: ${roomCodeController.text}\nDiện Tích: ${areaController.text}\nCheckin: ${checkinController.text}\nCheckout: ${checkoutController.text}\nSức Chứa Tối Đa: ${capacityController.text}\nTrạng Thái Phòng: ${statusController.text}\nGiá Phòng: ${priceController.text}\nMô Tả Thêm: ${descriptionController.text}\nTiện Ích: ${selectedUtilities.join(', ')}\nLoại Phòng: $selectedRoomType\nTrạng Thái Phòng: $selectedRoomState''';
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -308,6 +486,31 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     duration: const Duration(seconds: 3),
                     ),
                   );
+                  // Gọi service để cập nhật thông tin phòng
+                  RoomDetail createOrUpdateRoom = RoomDetail(
+                    roomCode: roomCodeController.text,
+                    area: areaController.text,
+                    maxCapacity: capacityController.text,
+                    room_status: statusController.text,
+                    price: priceController.text.replaceAll(',', ''),
+                    description: descriptionController.text,
+                    utilities: selectedUtilities,
+                    roomState: selectedRoomState ?? '',
+                    // Save all images to a writable directory with random names and return the new paths
+                    images: await Future.wait(_images.map((img) async {
+                      // Generate a random file name
+                      final ext = img.path.split('.').last;
+                      final newName = '${DateTime.now().millisecondsSinceEpoch}_${UniqueKey().toString()}.$ext';
+                      // Use the app's documents directory for saving images
+                      final directory = await getApplicationDocumentsDirectory();
+                      final newPath = '${directory.path}/$newName';
+
+                      // Copy file to the documents directory with the new name
+                      final newFile = await img.copy(newPath);
+                      return newFile.path;
+                    }).toList()),
+                  );
+                  ApartmentService().createOrUpdateRoom(createOrUpdateRoom, "1", "create");//====================
                   },
                   child: _buildActionButton(
                   widget.initialData.roomCode.isNotEmpty ? 'Cập Nhật' : 'Tạo',
@@ -320,7 +523,10 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
             ),
           ],
         ),
+        ]
+        )
       ),
+  
     );
   }
 
