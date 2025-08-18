@@ -1,6 +1,7 @@
 class BookingRequestDetail {
   String fullName;
   String roomNumber;
+  String email;
   String phoneNumber;
   int numberOfPeople;
   DateTime checkInDate;
@@ -13,6 +14,7 @@ class BookingRequestDetail {
   BookingRequestDetail({
     required this.fullName,
     required this.roomNumber,
+    required this.email,
     required this.phoneNumber,
     required this.numberOfPeople,
     required this.checkInDate,

@@ -16,6 +16,7 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
   BookingRequestDetail bookingRequestDetail = BookingRequestDetail(
     fullName: 'Mỹ Ngọc',
     roomNumber : '501',
+    email: 'abc@gmail',
     phoneNumber: '(123) 456-7890',
     numberOfPeople: 4,
     checkInDate: DateTime(2023, 5, 14),
@@ -78,17 +79,17 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
             const SizedBox(height: 16),
             ListTile(
               leading: CircleAvatar(backgroundColor: Color(0xFFEFF1F5)),
-              title: Text('Mỹ Ngọc'),
-              subtitle: Text('Phòng số 501 | Người thuê'),
+              title: Text(bookingRequestDetail.fullName),
+              subtitle: Text('Phòng số ${bookingRequestDetail.roomNumber} | Người thuê'),
             ),
             const SizedBox(height: 8),
-            buildInfoRow('Email', 'ltmn@example.com'),
-            buildInfoRow('Số điện thoại', '(123) 456-7890'),
-            buildInfoRow('Số người ở', '4 Người'),
+            buildInfoRow('Email', bookingRequestDetail.email),
+            buildInfoRow('Số điện thoại', bookingRequestDetail.phoneNumber),
+            buildInfoRow('Số người ở', '${bookingRequestDetail.numberOfPeople} Người'),
             buildInfoRow('Checkin - Checkout', '14/05 - 15/05'),
-            buildInfoRow('Trạng thái', 'Đã Thanh Toán'),
-            buildInfoRow('Tiền phòng', '2.400.000'),
-            buildInfoRow('Mã đơn phòng', '#023135'),
+            buildInfoRow('Trạng thái', bookingRequestDetail.status),
+            buildInfoRow('Tiền phòng', bookingRequestDetail.price),
+            buildInfoRow('Mã đơn phòng', bookingRequestDetail.codeRoom),
             Row(
               children: [
                 Expanded(
