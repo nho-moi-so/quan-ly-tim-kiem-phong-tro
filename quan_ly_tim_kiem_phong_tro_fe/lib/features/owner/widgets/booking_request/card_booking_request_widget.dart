@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/widgets/booking_request/card_booking_request_detail_widget.dart';
 
 class CardBookingRequestWidget extends StatefulWidget {
   final String bookingCode;
@@ -169,7 +170,18 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                 bgColor: const Color(0x354285F4),
                 textColor: Colors.black,
                 onTap: () {
-                  // Xử lý khi nhấn "Xem"
+                  showDialog(
+                    context: context,
+                    builder: (context) => Dialog(
+                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: SizedBox(
+                        width: 350,
+                        child: CardBookingRequestDetailWidget(
+                          // truyền các tham số cần thiết nếu widget này có constructor
+                        ),
+                      ),
+                    ),
+                  );
                 },
               ),
               _actionButton(

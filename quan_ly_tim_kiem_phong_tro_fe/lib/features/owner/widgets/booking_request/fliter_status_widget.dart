@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class FliterStatusWidget extends StatefulWidget {
-  const FliterStatusWidget({super.key});
+  final ValueChanged<String>? onStatusChanged; // thêm dòng này
+
+  const FliterStatusWidget({super.key, this.onStatusChanged});
 
   @override
   State<FliterStatusWidget> createState() => _FliterStatusWidgetState();
@@ -42,6 +44,10 @@ class _FliterStatusWidgetState extends State<FliterStatusWidget> {
             onTap: () {
               setState(() {
                 activeIndex = index;
+                // Gọi callback khi đổi tab
+                if (widget.onStatusChanged != null) {
+                  widget.onStatusChanged!(tabs[index]);
+                }
               });
             },
           );
