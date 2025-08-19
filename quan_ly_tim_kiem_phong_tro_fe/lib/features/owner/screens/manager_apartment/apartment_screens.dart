@@ -58,7 +58,7 @@ class _MainApartmentScreenState extends State<MainApartmentScreen> {
               // LabelTitleWidget(title:"Chung Cư Nam Long", header:"50, Trịnh Hoài Đức, Phường Vĩnh Thanh Vân TP. Rạch Giá"),
               
               //===========List of room cards
-               FutureBuilder<List<RoomCardInfo>>(
+              FutureBuilder<List<RoomCardInfo>>(
                 future: roomCards,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {

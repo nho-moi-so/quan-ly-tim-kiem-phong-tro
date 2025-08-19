@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class FliterStatusWidget extends StatefulWidget {
   final ValueChanged<String>? onStatusChanged; // thêm dòng này
-
-  const FliterStatusWidget({super.key, this.onStatusChanged});
+  final List<String> tabs;
+  
+  const FliterStatusWidget({super.key, this.onStatusChanged, required this.tabs});
 
   @override
   State<FliterStatusWidget> createState() => _FliterStatusWidgetState();
@@ -11,13 +12,6 @@ class FliterStatusWidget extends StatefulWidget {
 
 class _FliterStatusWidgetState extends State<FliterStatusWidget> {
   int activeIndex = 0;
-
-  final List<String> tabs = [
-    'Tất Cả',
-    'Yêu Cầu Mới',
-    'Đã Thanh Toán',
-    'Đã Hủy',
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -37,16 +31,16 @@ class _FliterStatusWidgetState extends State<FliterStatusWidget> {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
       child: Row(
-        children: List.generate(tabs.length, (index) {
+        children: List.generate(widget.tabs.length, (index) {
           return TabButton(
-            label: tabs[index],
+            label: widget.tabs[index],
             isActive: activeIndex == index,
             onTap: () {
               setState(() {
                 activeIndex = index;
                 // Gọi callback khi đổi tab
                 if (widget.onStatusChanged != null) {
-                  widget.onStatusChanged!(tabs[index]);
+                  widget.onStatusChanged!(widget.tabs[index]);
                 }
               });
             },

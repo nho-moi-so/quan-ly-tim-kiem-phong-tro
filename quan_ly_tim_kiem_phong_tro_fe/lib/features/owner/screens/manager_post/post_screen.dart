@@ -30,7 +30,7 @@ class PostScreen extends StatelessWidget {
                 ],
                 ),
               SizedBox(height: screenHeight * 0.02),
-              FliterStatusWidget(),
+              // FliterStatusWidget(),
               SizedBox(height: screenHeight * 0.02),
               LabelTitleWidget(title: "Danh sách bài đăng"),
               SearchBarWidget(),

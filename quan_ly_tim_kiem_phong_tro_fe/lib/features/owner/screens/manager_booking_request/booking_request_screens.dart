@@ -66,6 +66,12 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                     selectedStatus = status;
                   });
                 },
+                tabs: [
+                  'Tất Cả',
+                  'Yêu Cầu Mới',
+                  'Đã Thanh Toán',
+                  'Đã Hủy',
+                ],
               ),
               // //search by date
               // SearchByDateWidget(),

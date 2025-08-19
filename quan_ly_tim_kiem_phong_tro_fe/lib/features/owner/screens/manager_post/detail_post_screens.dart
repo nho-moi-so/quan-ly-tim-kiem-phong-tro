@@ -29,7 +29,7 @@ class DetailPostScreen extends StatelessWidget {
                 ],
               ),
               SizedBox(height: screenHeight * 0.01), // Giảm xuống
-              FliterStatusWidget(),
+              // FliterStatusWidget(),
               SizedBox(height: screenHeight * 0.01), // Giảm xuống
               LabelTitleWidget(title: "Thông tin bài đăng"),
               Center(child: RoomDetailCardWidget()),
