@@ -510,7 +510,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                       return newFile.path;
                     }).toList()),
                   );
-                  ApartmentService().createOrUpdateRoom(createOrUpdateRoom, "1", "create");//====================
+                  // ApartmentService().createOrUpdateRoom(createOrUpdateRoom, "1", "create");//====================
                   },
                   child: _buildActionButton(
                   widget.initialData.roomCode.isNotEmpty ? 'Cập Nhật' : 'Tạo',
