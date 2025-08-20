@@ -4,20 +4,20 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apa
 import '../../../../service/owner/apartment_service.dart';
 import '../../viewmodel/room_card_info.dart';
 import '../../widgets/widgets.dart';
-import 'dart:developer';
+import '../../controller/apartment_controller.dart';
 
 
-class MainApartmentScreen extends StatefulWidget {
-  const MainApartmentScreen({super.key});
+class ApartmentScreen extends StatefulWidget {
+  const ApartmentScreen({super.key});
   
   @override
-  State<MainApartmentScreen> createState() => _MainApartmentScreenState();
+  State<ApartmentScreen> createState() => _MainApartmentScreenState();
 }
 
-class _MainApartmentScreenState extends State<MainApartmentScreen> {
+class _MainApartmentScreenState extends State<ApartmentScreen> {
   
   //====get all list card infor
-  Future<List<RoomCardInfo>> roomCards = ApartmentService().getAllRoomCards(userId: "dYSjvUDL2vwRrSgqiDHy");
+  Future<List<RoomCardInfo>> roomCards = ApartmentController().getAllRoomCards(userId: "dYSjvUDL2vwRrSgqiDHy");
 
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;

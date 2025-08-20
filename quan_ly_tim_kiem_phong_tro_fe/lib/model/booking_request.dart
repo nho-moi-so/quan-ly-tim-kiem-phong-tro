@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 class BookingRequest {
+  final String apartmentID;
+  final String userId;
   final String bookingRequestID;
   final DateTime requestedDate;
   final DateTime checkinDate;
@@ -8,6 +10,8 @@ class BookingRequest {
 
   BookingRequest({
     required this.bookingRequestID,
+    required this.apartmentID,
+    required this.userId,
     required this.requestedDate,
     required this.checkinDate,
     required this.checkoutDate,
@@ -16,6 +20,8 @@ class BookingRequest {
 
   factory BookingRequest.fromMap(String id, Map<String, dynamic> map) => BookingRequest(
         bookingRequestID: id,
+        apartmentID: map['ApartmentId'] ?? '',
+        userId: map['UserId'] ?? '',
         requestedDate: (map['RequestedDate'] as Timestamp).toDate(),
         checkinDate: (map['CheckinDate'] as Timestamp).toDate(),
         checkoutDate: (map['CheckoutDate'] as Timestamp).toDate(),

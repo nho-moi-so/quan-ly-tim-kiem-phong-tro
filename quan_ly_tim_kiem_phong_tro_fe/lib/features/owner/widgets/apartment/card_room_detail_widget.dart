@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../viewmodel/room_detail.dart';
-import '../../../../service/owner/apartment_service.dart';
+import '../../../../service/owner/amenity_service.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -59,9 +59,9 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     'Đang sửa',
   ];
   Future<void> loadAmenities() async {
-    final data = await ApartmentService().getAmenities();
+    final data = await AmenityService().getAllAmenity();
     setState(() {
-      allUtilities = data;
+      allUtilities = data.cast<String>();
     });
   }
   @override

@@ -23,6 +23,20 @@ class BookingService {
     return BookingRequest.fromMap(snapshot.id, data);
   }
 
+  //========================getBookingRequestByApartmentId
+  Future<List<BookingRequest>> getBookingRequestByApartmentId(String apartmentId) async {
+    List<BookingRequest> bookingRequests = [];
+    QuerySnapshot snapshot = await firestore
+        .collection("bookingRequest")
+        .where('ApartmentId', isEqualTo: apartmentId)
+        .get();
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      bookingRequests.add(BookingRequest.fromMap(doc.id, data));
+    }
+    return bookingRequests;
+  }
+
   //===================createBookingRequest
   Future<BookingRequest> createBookingRequest(BookingRequest bookingRequest) async {
     DocumentReference docRef = await firestore.collection("bookingRequest").add(bookingRequest.toMap());
