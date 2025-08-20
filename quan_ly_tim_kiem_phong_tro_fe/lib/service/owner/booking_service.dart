@@ -2,6 +2,17 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/model/booking_request.dart';
 import '/model/booking_request.dart';
 
 class BookingService {
+  //getAllBookingRequest
+
+  //getBookingRequestById
+  
+  //createBookingRequest
+  
+  //updateBookingRequest
+  
+  //deleteBookingRequest
+
+
   Future<List<BookingRequest>> getAllBookingRequest({
     String? ownerId,
     String? status,
