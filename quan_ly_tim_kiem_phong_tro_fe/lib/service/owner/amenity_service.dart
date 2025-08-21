@@ -18,8 +18,11 @@ class AmenityService {
   //getAmenityById => Amenity
   Future<Amenity> getAmenityById(String id) async {
     DocumentSnapshot snapshot = await firestore.collection("amenity").doc(id).get();
-    final data = snapshot.data() as Map<String, dynamic>;
-    return Amenity.fromMap(snapshot.id, data);
+    final data = snapshot.data();
+    if (data == null) {
+      throw Exception('Amenity with id $id not found');
+    }
+    return Amenity.fromMap(snapshot.id, data as Map<String, dynamic>);
   }
 
   //createAmenity => Amenity

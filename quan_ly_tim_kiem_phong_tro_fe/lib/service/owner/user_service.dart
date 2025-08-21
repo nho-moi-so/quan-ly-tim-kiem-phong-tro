@@ -13,7 +13,7 @@ class UserService {
       users.add(
         User(
           userID: doc.id,
-          fullName: data['UserName'],
+          fullName: data['Username'],
           email: data['Email'],
           phone: data['Phone'],
         ),
@@ -29,7 +29,7 @@ class UserService {
     final data = snapshot.data() as Map<String, dynamic>;
     return User(
       userID: snapshot.id,
-      fullName: data['UserName'],
+      fullName: data['Username'],
       email: data['Email'],
       phone: data['Phone'],
     );

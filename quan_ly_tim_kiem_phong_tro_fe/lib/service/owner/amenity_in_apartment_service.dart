@@ -21,7 +21,15 @@ class AmenityInApartmentService {
     QuerySnapshot snapshot = await firestore.collection("amenityInApartment").where('ApartmentId', isEqualTo: apartmentId).get();
     for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
-      amenities.add(AmenityInApartment.fromMap(doc.id, data));
+      // amenities.add(AmenityInApartment.fromMap(doc.id, data));
+      amenities.add(
+        AmenityInApartment(
+          amenityInApartmentID: doc.id,
+          apartmentId: data['ApartmentId'],
+          amenityId: data['AmenityId'],
+          isAvailable: data['IsAvailable'],
+        ),
+      );
     }
     return amenities;
   }

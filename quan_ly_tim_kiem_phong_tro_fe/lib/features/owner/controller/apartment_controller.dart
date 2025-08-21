@@ -1,11 +1,9 @@
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/detail_apartment_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/amenities.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/amenity_in_apartment.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/booking_request.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/user.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/service/navigation_service.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/user_service.dart';
 
 import '../../../service/owner/amenity_in_apartment_service.dart';
@@ -21,7 +19,7 @@ class ApartmentController {
   final AmenityInApartmentService _amenityInApartmentService = AmenityInApartmentService();
   final AmenityService _amenityService = AmenityService();
 
-  //createApartment(RoomCardDetail) => RoomCardDetail
+  //createApartment(RoomCardDetail) => RoomCardDetail - done without image and user
   void createApartment(RoomDetail roomCardDetail) {
 
     try {
@@ -59,13 +57,97 @@ class ApartmentController {
       print('Error creating apartment: $e');
     }
   }
+  
   //updateApartment
   void updateApartment(RoomDetail roomCardDetail) {
     print('Updating apartment with details: ${roomCardDetail.toString()}');
   }
   //deleteApartment
-  //viewDetailApartment
 
+  //viewDetailApartment
+  Future<RoomDetail> viewDetailApartment(String apartmentId) async{
+              String roomId = apartmentId;
+
+              Apartment apartment = await _apartmentService.getApartmentById(roomId);
+              print("==============1============");
+              //lay id cua amenity cua apartment
+              List<String> amenities = [];
+              List<AmenityInApartment> amenityInApartment = await _amenityInApartmentService.getAmenityInApartmentByApartmentId(apartmentId);
+              print("==============2============");
+              //lay thong tin cua amenity dua vao id cua amenity trong amenitySnapshot
+              for (var amenityDoc in amenityInApartment) {
+                print(amenityDoc.amenityId);
+                Amenity amenitySnapshot = await _amenityService.getAmenityById(amenityDoc.amenityId);
+                print(amenitySnapshot.description);
+                amenities.add(amenitySnapshot.description);
+
+              }
+              print('Amenities: $amenities');
+              print("==============3============");
+              //lấy thông tin chi tiết của phòng === này là dữ liệu giả
+              RoomDetail roomDetail = RoomDetail(
+                roomCode: apartment.codeApartment,
+                area: '25',
+                maxCapacity: apartment.maxOccupancy.toString(),
+                room_status: apartment.status,
+                price: apartment.dailyRate.toString(),
+                depositPrice: apartment.deposit.toString(),
+                description: apartment.description,
+                utilities: amenities,
+                images: List<String>.from(apartment.pathImage as Iterable),
+              );
+              print("==============4============");
+    return roomDetail;
+  }
+
+
+
+  //getSummaryRoom
+  Future<List<RoomCardInfo>> getSummaryRoom(String userId) async{
+    List<RoomCardInfo> roomCards = [];
+    List<Apartment> apartmentsOfUser = await _apartmentService.getApartmentByUser(userId);
+    for(var apartment in apartmentsOfUser) {
+      String roomName = "Phòng: ${apartment.codeApartment}";
+      
+      String tenantName = "Chưa có khách thuê";
+      //xử lý lấy thông tin của người thuê:
+        // Lấy danh sách yêu cầu đặt phòng cho căn hộ này
+        // Gán tên khách thuê nếu có một bookingRequest có CheckoutDate ở tương lai
+        // Ngược lại gán "Chưa có khách thuê"
+        List<BookingRequest> bookingRequests = await _bookingService.getBookingRequestByApartmentId(apartment.apartmentID!);
+      if (bookingRequests.isNotEmpty) {
+        for(var booking in bookingRequests){
+          print(booking.status);
+          if (booking.checkoutDate.isAfter(DateTime.now())) {
+            // print(userId);
+            User user = await _userService.getUserById(booking.userId);
+            // print(user.email);
+            tenantName = user.fullName ?? 'Chưa có khách thuê';
+            break; // Chỉ cần lấy tên khách thuê đầu tiên có trạng thái hợp lệ
+          } else {
+            tenantName = "Chưa có khách thuê";
+          }
+        }
+      }
+
+
+      String price = '${apartment.dailyRate.toString()}/ngày';
+
+
+      RoomCardInfo infoApartment = RoomCardInfo(
+        roomName: roomName,
+        tenantName: tenantName,
+        price: price,
+        status: apartment.status,
+        onViewDetail: () => viewDetailApartment(apartment.apartmentID!),
+        onDelete: () {},
+        onEdit: () {},
+        onContract: () {});
+        
+        roomCards.add(infoApartment);
+    }
+    return roomCards;
+  }
 
 
 

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/apartment_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/detail_apartment_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/new_customer_screen.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
 
 import '../../viewmodel/room_card_info.dart';
 class CardRoomWidget extends StatelessWidget {
@@ -93,7 +96,16 @@ class CardRoomWidget extends StatelessWidget {
                   ),
                   elevation: 0,
                   ),
-                  onPressed: data.onViewDetail,
+                  onPressed: () async {
+                    RoomDetail roomDetail = await data.onViewDetail();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => DetailApartmentScreen(roomDetail: roomDetail),
+                      ),
+                      );
+                    },
+
                   child: const Text(
                   'Xem Chi Tiết',
                   style: TextStyle(
