@@ -20,7 +20,14 @@ class ApartmentController {
   final AmenityInApartmentService _amenityInApartmentService = AmenityInApartmentService();
   final AmenityService _amenityService = AmenityService();
 
-  //List Room Summary
+  //createApartment(RoomCardDetail) => RoomCardDetail
+  //updateApartment
+  //deteleApartment
+  //viewDetailApartment
+
+
+
+
   Future<List<RoomCardInfo>> getAllRoomCards(
     {
       required String userId,
@@ -38,12 +45,12 @@ class ApartmentController {
       
       if(bookingRequests.isNotEmpty){
         
-        final UserIdBooking = bookingRequests.first.userId;
-        if(UserIdBooking != null){
+        final userIdBooking = bookingRequests.first.userId;
+        if(userIdBooking == null){
           tenantName = 'Chưa có khách thuê';
         }
         else{
-          User userSnapshot = await _userService.getUserById(UserIdBooking);
+          User userSnapshot = await _userService.getUserById(userIdBooking);
           tenantName = userSnapshot.username ?? '';
           status = bookingRequests.first.status;
         }
