@@ -118,5 +118,14 @@ class ApartmentController {
     return roomCards;
     }
 
+  /// Lấy danh sách tất cả tiện nghi
+  Future<List<String>> getAllAmenity() async {
+    List<Amenity> amenities = await _amenityService.getAllAmenity();
+    List<String> allUtilities = [];
+    for (var amenity in amenities) {
+      allUtilities.add(amenity.description);
+    }
+    return allUtilities;
+  }
 
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/apartment_controller.dart';
 import '../../viewmodel/room_detail.dart';
-import '../../../../service/owner/amenity_service.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -13,8 +13,6 @@ class CardRoomDetailWidget extends StatefulWidget {
   @override
   State<CardRoomDetailWidget> createState() => _CardRoomDetailWidgetState();
 }
-
-
 
 class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
   late TextEditingController roomCodeController;
@@ -59,9 +57,9 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     'Đang sửa',
   ];
   Future<void> loadAmenities() async {
-    final data = await AmenityService().getAllAmenity();
+    final data = await ApartmentController().getAllAmenity();
     setState(() {
-      allUtilities = data.cast<String>();
+      allUtilities = data;
     });
   }
   @override
