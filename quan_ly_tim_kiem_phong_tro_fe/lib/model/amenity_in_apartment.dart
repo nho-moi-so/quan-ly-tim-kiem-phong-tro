@@ -1,15 +1,15 @@
 class AmenityInApartment {
-  final String amenityInApartmentID;
+  final String? amenityInApartmentID;
   final String amenityId;
   final String apartmentId;
-  final int quantity;
+  final int? quantity;
   final bool isAvailable;
 
   AmenityInApartment({
-    required this.amenityInApartmentID,
+    this.amenityInApartmentID,
     required this.apartmentId,
     required this.amenityId,
-    required this.quantity,
+    this.quantity,
     required this.isAvailable,
   });
 

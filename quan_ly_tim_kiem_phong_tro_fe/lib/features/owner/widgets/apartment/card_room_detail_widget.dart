@@ -491,6 +491,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     maxCapacity: capacityController.text,
                     room_status: statusController.text,
                     price: priceController.text.replaceAll(',', ''),
+                    depositPrice: depositPriceController.text.replaceAll(',', ''),
                     description: descriptionController.text,
                     utilities: selectedUtilities,
                     roomState: selectedRoomState ?? '',
@@ -508,7 +509,11 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                       return newFile.path;
                     }).toList()),
                   );
-                  // ApartmentService().createOrUpdateRoom(createOrUpdateRoom, "1", "create");//====================
+                    if (widget.initialData.roomCode.isNotEmpty) {
+                      ApartmentController().updateApartment(createOrUpdateRoom);
+                    } else {
+                      ApartmentController().createApartment(createOrUpdateRoom);
+                    }
                   },
                   child: _buildActionButton(
                   widget.initialData.roomCode.isNotEmpty ? 'Cập Nhật' : 'Tạo',

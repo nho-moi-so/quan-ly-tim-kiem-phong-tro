@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/detail_apartment_screen.dart';
-import '../../viewmodel/room_card_info.dart';
+
 import '../../widgets/widgets.dart';
-import '../../controller/apartment_controller.dart';
 
 
 class ApartmentScreen extends StatefulWidget {
@@ -15,7 +14,7 @@ class ApartmentScreen extends StatefulWidget {
 class _MainApartmentScreenState extends State<ApartmentScreen> {
   
   //====get all list card infor
-  Future<List<RoomCardInfo>> roomCards = ApartmentController().getAllRoomCards(userId: "dYSjvUDL2vwRrSgqiDHy");
+  // Future<List<RoomCardInfo>> roomCards = ApartmentController().getAllRoomCards(userId: "dYSjvUDL2vwRrSgqiDHy");
 
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -56,18 +55,18 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
               // LabelTitleWidget(title:"Chung Cư Nam Long", header:"50, Trịnh Hoài Đức, Phường Vĩnh Thanh Vân TP. Rạch Giá"),
               
               //===========List of room cards
-              FutureBuilder<List<RoomCardInfo>>(
-                future: roomCards,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Column(
-                      children: snapshot.data!.map((card) => CardRoomWidget(data: card,)).toList(),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Text("${snapshot.error}");
-                  }
-                  return const CircularProgressIndicator();
-                })
+              // FutureBuilder<List<RoomCardInfo>>(
+              //   future: roomCards,
+              //   builder: (context, snapshot) {
+              //     if (snapshot.hasData) {
+              //       return Column(
+              //         children: snapshot.data!.map((card) => CardRoomWidget(data: card,)).toList(),
+              //       );
+              //     } else if (snapshot.hasError) {
+              //       return Text("${snapshot.error}");
+              //     }
+              //     return const CircularProgressIndicator();
+              //   })
             ],
             
             ),

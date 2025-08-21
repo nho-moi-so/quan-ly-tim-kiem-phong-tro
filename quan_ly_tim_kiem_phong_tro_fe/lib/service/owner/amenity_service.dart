@@ -40,4 +40,14 @@ class AmenityService {
   Future<void> deleteAmenity(String amenityID) async {
     await firestore.collection("amenity").doc(amenityID).delete();
   }
+
+  //getAmenityByName
+  Future<Amenity?> getAmenityByName(String amenityName) async {
+    List<Amenity> amenities = await firestore.collection("amenity")
+        .where("Description", isEqualTo: amenityName)
+        .get()
+        .then((snapshot) => snapshot.docs.map((doc) => Amenity.fromMap(doc.id, doc.data())).toList());
+    return amenities.isNotEmpty ? amenities.first : null;
+  }
+
 }

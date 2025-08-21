@@ -1,24 +1,24 @@
 class Apartment {
-  final String apartmentID;
+  final String? apartmentID;
   final String codeApartment;
   final double dailyRate;
   final double deposit;
   final int maxOccupancy;
   final String description;
-  final List<String> pathImage;
+  final List<String>? pathImage;
   final String status;
-  final String password;
+  final String? password;
 
   Apartment({
-    required this.apartmentID,
+    this.apartmentID,
     required this.codeApartment,
     required this.dailyRate,
     required this.deposit,
     required this.maxOccupancy,
     required this.description,
-    required this.pathImage,
+    this.pathImage,
     required this.status,
-    required this.password,
+    this.password,
   });
 
   factory Apartment.fromMap(String id, Map<String, dynamic> map) => Apartment(
