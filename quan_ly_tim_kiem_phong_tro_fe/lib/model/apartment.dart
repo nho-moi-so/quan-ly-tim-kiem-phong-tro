@@ -1,13 +1,13 @@
 class Apartment {
-  final String? apartmentID;
-  final String? codeApartment;
-  final double? dailyRate;
-  final double? deposit;
-  final int? maxOccupancy;
-  final String? description;
-  final List<String>? pathImage;
-  final String? status;
-  final String? password;
+  String? apartmentID;
+  String? codeApartment;
+  double? dailyRate;
+  double? deposit;
+  int? maxOccupancy;
+  String? description;
+  List<String>? pathImage;
+  String? status;
+  String? password;
 
   Apartment({
     this.apartmentID,
