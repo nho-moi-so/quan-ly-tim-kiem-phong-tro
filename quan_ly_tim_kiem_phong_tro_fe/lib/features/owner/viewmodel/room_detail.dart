@@ -1,4 +1,5 @@
 class RoomDetail {
+  String roomId;
   String roomCode;
   String area;
   String checkin;
@@ -14,6 +15,7 @@ class RoomDetail {
   List<String> images;
 
   RoomDetail({
+    this.roomId = '',
     this.roomCode = '',
     this.area = '',
     this.checkin = '',

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/apartment_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/detail_apartment_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/new_customer_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
@@ -98,6 +97,14 @@ class CardRoomWidget extends StatelessWidget {
                   ),
                   onPressed: () async {
                     RoomDetail roomDetail = await data.onViewDetail();
+                    
+                    // // co id roi
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   SnackBar(
+                    //     content: Text(roomDetail.roomId.toString()),
+                    //   ),
+                    // );
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -149,7 +156,14 @@ class CardRoomWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: data.onDelete,
+                onPressed: (){
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Xoá thành công"),
+                      ),
+                    );
+
+                },
                   icon: const Icon(Icons.delete, color: Colors.black, size: 18),
                   label: const Text(
                     'Xóa',

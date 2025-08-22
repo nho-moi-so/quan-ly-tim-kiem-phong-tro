@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/apartment_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/apartment_screens.dart';
 import '../../viewmodel/room_detail.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -132,24 +133,6 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
               ),
               ],
             ),
-            // const SizedBox(height: 16),
-            // Row(
-            //   children: [
-            //   Expanded(
-            //     child: _buildDateTimePicker(
-            //     label: 'Checkin',
-            //     controller: checkinController,
-            //     ),
-            //   ),
-            //   const SizedBox(width: 16),
-            //   Expanded(
-            //     child: _buildDateTimePicker(
-            //     label: 'Checkout',
-            //     controller: checkoutController,
-            //     ),
-            //   ),
-            //   ],
-            // ),
             const SizedBox(height: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -340,13 +323,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                   .map((u) => _buildCheckboxOption(u))
                   .toList(),
             ),
-            //const SizedBox(height: 24),
-            //_buildOptionRow('+ Loại Phòng'),
-            //const SizedBox(height: 8),
-            //Wrap(
-            //  spacing: 16,
-            //  children: roomTypes.map((t) => _buildRadioOption(t)).toList(),
-            //),
+            
             const SizedBox(height: 24),
             const Text('Chọn Trạng Thái Phòng'),
             const SizedBox(height: 8),
@@ -486,6 +463,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                   );
                   // Gọi service để cập nhật thông tin phòng
                   RoomDetail createOrUpdateRoom = RoomDetail(
+                    roomId: widget.initialData.roomId,
                     roomCode: roomCodeController.text,
                     area: areaController.text,
                     maxCapacity: capacityController.text,
@@ -510,9 +488,18 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     }).toList()),
                   );
                     if (widget.initialData.roomCode.isNotEmpty) {
-                      ApartmentController().updateApartment(createOrUpdateRoom);
+                      final success = await ApartmentController().updateApartment(createOrUpdateRoom);
                     } else {
-                      ApartmentController().createApartment(createOrUpdateRoom);
+                      final success = await ApartmentController().createApartment(createOrUpdateRoom);
+                       ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Tạo phòng thành công!')),
+                      );
+                      Navigator.of(context).pop();
+                      if (success) {
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) => const ApartmentScreen()));
+                      }
                     }
                   },
                   child: _buildActionButton(

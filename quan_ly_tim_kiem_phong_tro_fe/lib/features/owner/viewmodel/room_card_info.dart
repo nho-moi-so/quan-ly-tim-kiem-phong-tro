@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
 
 class RoomCardInfo {
   final String roomName;
@@ -8,8 +9,7 @@ class RoomCardInfo {
   final String price;
   final String status;
   final Future<RoomDetail> Function() onViewDetail;
-  final VoidCallback onDelete;
-  final VoidCallback onEdit;
+  final Future<bool> Function() onDelete;
   final VoidCallback onContract;
 
   RoomCardInfo({
@@ -19,7 +19,6 @@ class RoomCardInfo {
     this.status = '',
     required this.onViewDetail,
     required this.onDelete,
-    required this.onEdit,
     required this.onContract,
   });
 }

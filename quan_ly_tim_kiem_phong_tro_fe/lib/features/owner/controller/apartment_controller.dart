@@ -20,8 +20,7 @@ class ApartmentController {
   final AmenityService _amenityService = AmenityService();
 
   //createApartment(RoomCardDetail) => RoomCardDetail - done without image and user
-  void createApartment(RoomDetail roomCardDetail) {
-
+  Future<bool> createApartment(RoomDetail roomCardDetail) async {
     try {
       Apartment apartment = Apartment(
         codeApartment: roomCardDetail.roomCode,
@@ -29,42 +28,53 @@ class ApartmentController {
         deposit: double.parse(roomCardDetail.depositPrice),
         maxOccupancy: int.parse(roomCardDetail.maxCapacity),
         description: roomCardDetail.description,
-      status: roomCardDetail.room_status,
-    );
+        status: roomCardDetail.room_status,
+      );
 
-      Future<Apartment> createdApartment = _apartmentService.createApartment(apartment);
-      createdApartment.then((apartment) {
-        print('Apartment created with ID: ${apartment.apartmentID}');
-        //dò amenity để thêm vào amenityInApartment
-        for (String amenityName in roomCardDetail.utilities) {
-          // print('Amenity: $amenityName'); //done
-          Future<Amenity?> amenity = _amenityService.getAmenityByName(amenityName);
-          amenity.then((value) {
-            if (value != null) {
-              // print('Amenity found: ${value.description}'); //done
-              _amenityInApartmentService.createAmenityInApartment(AmenityInApartment(
-                apartmentId: apartment.apartmentID!,
-                amenityId: value.amenityID,
-                isAvailable: true,
-              ));
-            }
-          });
+      Apartment createdApartment = await _apartmentService.createApartment(apartment);
+      print('Apartment created with ID: ${createdApartment.apartmentID}');
+
+      // dò amenity để thêm vào amenityInApartment
+      for (String amenityName in roomCardDetail.utilities) {
+        Amenity? amenity = await _amenityService.getAmenityByName(amenityName);
+        if (amenity != null) {
+          await _amenityInApartmentService.createAmenityInApartment(
+            AmenityInApartment(
+              apartmentId: createdApartment.apartmentID!,
+              amenityId: amenity.amenityID,
+              isAvailable: true,
+            ),
+          );
         }
-      }).catchError((error) {
-        print('Error creating apartment: $error');
-      });
+      }
+      return true; // thành công
     } catch (e) {
       print('Error creating apartment: $e');
+      return false; // thất bại
     }
   }
+
   
   //updateApartment
-  void updateApartment(RoomDetail roomCardDetail) {
-    print('Updating apartment with details: ${roomCardDetail.toString()}');
+  Future<bool> updateApartment(RoomDetail roomCardDetail) async{
+      print(roomCardDetail.roomId);
+      print(roomCardDetail.roomCode);
+
+    return false;
   }
   //deleteApartment
+  Future<bool> deleteApartment(String apartmentId) async{
+    try{
+      await _apartmentService.deleteApartment("wDcTehYPI2siB6cj6cle");
+      return true;
+    }
+    catch(e){
+      print('Error deleting apartment: $e');
+      return false;
+    }
+  }
 
-  //viewDetailApartment
+  //viewDetailApartment - done
   Future<RoomDetail> viewDetailApartment(String apartmentId) async{
               String roomId = apartmentId;
 
@@ -86,23 +96,25 @@ class ApartmentController {
               print("==============3============");
               //lấy thông tin chi tiết của phòng === này là dữ liệu giả
               RoomDetail roomDetail = RoomDetail(
-                roomCode: apartment.codeApartment,
+                roomId: apartmentId,
+                roomCode: apartment.codeApartment!,
                 area: '25',
                 maxCapacity: apartment.maxOccupancy.toString(),
-                room_status: apartment.status,
+                room_status: apartment.status!,
                 price: apartment.dailyRate.toString(),
                 depositPrice: apartment.deposit.toString(),
-                description: apartment.description,
+                description: apartment.description!,
                 utilities: amenities,
                 images: List<String>.from(apartment.pathImage as Iterable),
               );
               print("==============4============");
+              print(roomDetail.roomId); //done
     return roomDetail;
   }
 
 
 
-  //getSummaryRoom
+  //getSummaryRoom - done
   Future<List<RoomCardInfo>> getSummaryRoom(String userId) async{
     List<RoomCardInfo> roomCards = [];
     List<Apartment> apartmentsOfUser = await _apartmentService.getApartmentByUser(userId);
@@ -129,19 +141,14 @@ class ApartmentController {
           }
         }
       }
-
-
       String price = '${apartment.dailyRate.toString()}/ngày';
-
-
       RoomCardInfo infoApartment = RoomCardInfo(
         roomName: roomName,
         tenantName: tenantName,
         price: price,
-        status: apartment.status,
+        status: apartment.status!,
         onViewDetail: () => viewDetailApartment(apartment.apartmentID!),
-        onDelete: () {},
-        onEdit: () {},
+        onDelete: () => deleteApartment(apartment.apartmentID!),
         onContract: () {});
         
         roomCards.add(infoApartment);
@@ -149,106 +156,7 @@ class ApartmentController {
     return roomCards;
   }
 
-
-
-  // Future<List<RoomCardInfo>> getAllRoomCards(
-  //   {
-  //     required String userId,
-  //     String? status
-  //   }
-  // ) async {
-  //   List<RoomCardInfo> roomCards = [];
-  //   List<Apartment> snapshot = await _apartmentService.getApartmentByUser(userId);
-  //   for (var doc in snapshot) {
-  //     String tenantName = '';
-  //     String status = doc.status; //=== này nữa check bên booking request nếu không có thì lấy status này 
-  //     // Lấy thông tin user từ bảng 'users' dựa trên UserId và xài bảng Booking Request
-
-  //     List<BookingRequest> bookingRequests = await _bookingService.getBookingRequestByApartmentId(doc.apartmentID ?? '');
-      
-  //     if(bookingRequests.isNotEmpty){
-        
-  //       final userIdBooking = bookingRequests.first.userId;
-  //       if(userIdBooking == null){
-  //         tenantName = 'Chưa có khách thuê';
-  //       }
-  //       else{
-  //         User userSnapshot = await _userService.getUserById(userIdBooking);
-  //         tenantName = userSnapshot.username ?? '';
-  //         status = bookingRequests.first.status;
-  //       }
-
-  //     }
-  //     // ==================================
-  //     RoomCardInfo roomCard = RoomCardInfo(
-  //       roomName: "Phòng: ${doc.codeApartment}",       
-
-  //       tenantName: tenantName,
-
-  //       price: '${doc.dailyRate.toString()}/ngày',
-  //       status: status, 
-
-  //       onViewDetail: () async { 
-  //             // Lấy id của document (chuỗi String mặc định của Firestore document)
-  //             String roomId = '${doc.apartmentID}';
-  //             // print('Room ID: $roomId');
-
-  //             //lay thong tin cua apartment
-  //             Apartment apartmentSnapshot = await _apartmentService.getApartmentById(roomId);
-  //             // print(apartmentSnapshot.data());
-
-  //             //lay id cua amenity cua apartment
-  //             List<String> amenities = [];
-  //             List<AmenityInApartment> amenityInApartment = _amenityInApartmentService.getAmenityInApartmentByApartmentId(roomId) as List<AmenityInApartment>;
-              
-  //             //lay thong tin cua amenity dua vao id cua amenity trong amenitySnapshot
-  //             for (var amenityDoc in amenityInApartment) {
-  //               String amenityId = amenityDoc.amenityId;
-  //               Amenity amenitySnapshot = _amenityService.getAmenityById( amenityId) as Amenity;
-  //               // print(amenitySnapshot.data())
-  //               String? amenityName = amenitySnapshot.description;
-  //                 amenities.add(amenityName);
-  //               break;
-  //             }
-  //             print('Amenities: $amenities');
-              
-
-  //             //lấy thông tin chi tiết của phòng === này là dữ liệu giả 
-  //             RoomDetail roomDetail = RoomDetail(
-  //               roomCode: apartmentSnapshot.codeApartment,
-  //               area: '25',
-  //               checkin: '14:00',
-  //               checkout: '12:00',
-  //               maxCapacity: apartmentSnapshot.maxOccupancy.toString(),
-  //               room_status: 'Trống',
-  //               price: apartmentSnapshot.dailyRate.toString(),
-  //               depositPrice: apartmentSnapshot.deposit.toString(),
-  //               description: apartmentSnapshot.description,
-  //               utilities: [
-  //                 'Ghế sofa 4 chỗ',
-  //                 'Máy lạnh mới',
-  //               ],
-  //               roomType: 'Studio',
-  //               images: List<String>.from(apartmentSnapshot.pathImage),
-  //             );
-  //               navigationService.navigateTo(
-  //               DetailApartmentScreen(
-  //                 roomDetail: roomDetail,
-  //               ),
-  //             );
-  //           print('Room ID: $roomId');
-          
-  //       }, 
-  //       onDelete: () {  }, 
-  //       onEdit: () {  }, 
-  //       onContract: () {  }
-  //     );
-  //     roomCards.add(roomCard);
-  //   }
-  //   return roomCards;
-  //   }
-
-  /// Lấy danh sách tất cả tiện nghi
+  /// Lấy danh sách tất cả tiện nghi - done
   Future<List<String>> getAllAmenity() async {
     List<Amenity> amenities = await _amenityService.getAllAmenity();
     List<String> allUtilities = [];
