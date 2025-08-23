@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/booking_request_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/booking_request_summary.dart';
 
 import '../../widgets/widgets.dart';
 
@@ -8,31 +10,30 @@ class BookingRequestScreens extends StatefulWidget {
 }
 
 class _BookingRequestScreensState extends State<BookingRequestScreens> {
-  String selectedStatus = 'Tất Cả';
+  String selectedStatus = 'All';
+  final BookingRequestController _bookingRequestController = BookingRequestController();
 
-  // Ví dụ danh sách booking request mẫu
-  final List<Map<String, String>> allRequests = [
-    {
-      'bookingCode': '123456',
-      'customerName': 'Nguyễn Văn A',
-      'checkinCheckout': '01/01 - 02/01',
-      'status': 'Đã Hủy',
-    },
-    {
-      'bookingCode': '654321',
-      'customerName': 'Trần Văn B',
-      'checkinCheckout': '03/01 - 04/01',
-      'status': 'Đã Thanh Toán',
-    },
-    // ... thêm dữ liệu khác
-  ];
+  List<BookingRequestSummary> allRequests = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBookingRequests();
+  }
+
+  Future<void> _loadBookingRequests() async {
+    final summaries = await _bookingRequestController.getAllBookingRequestsSummaries("dYSjvUDL2vwRrSgqiDHy");
+    setState(() {
+      allRequests = summaries;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     // Lọc danh sách theo selectedStatus
-    final filteredRequests = selectedStatus == 'Tất Cả'
+    final filteredRequests = selectedStatus == 'All'
         ? allRequests
-        : allRequests.where((r) => r['status'] == selectedStatus).toList();
+        : allRequests.where((r) => r.status == selectedStatus).toList();
 
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -67,14 +68,12 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                   });
                 },
                 tabs: [
-                  'Tất Cả',
-                  'Yêu Cầu Mới',
-                  'Đã Thanh Toán',
-                  'Đã Hủy',
+                  'All',
+                  ..._bookingRequestController.getStatusList(),
                 ],
               ),
               // //search by date
-              // SearchByDateWidget(),
+              SearchByDateWidget(),
               SizedBox(height: screenHeight * 0.02),
               //card booking request
               Center(
@@ -82,10 +81,10 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                   children: filteredRequests
                       .map(
                         (req) => CardBookingRequestWidget(
-                          bookingCode: req['bookingCode'] ?? '',
-                          customerName: req['customerName'] ?? '',
-                          checkinCheckout: req['checkinCheckout'] ?? '',
-                          status: req['status'] ?? '',
+                          bookingCode: req.bookingCode ?? '',
+                          customerName: req.customerName ?? '',
+                          checkinCheckout: req.checkinCheckout ?? '',
+                          status: req.status ?? '',
                         ),
                       )
                       .toList(),

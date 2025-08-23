@@ -9,12 +9,12 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/user_service.dart';
 import '../../../service/owner/amenity_in_apartment_service.dart';
 import '../../../service/owner/amenity_service.dart';
 import '../../../service/owner/apartment_service.dart';
-import '../../../service/owner/booking_service.dart';
+import '../../../service/owner/booking_request_service.dart';
 import '../viewmodel/room_card_info.dart';
 
 class ApartmentController {
   final ApartmentService _apartmentService = ApartmentService();
-  final BookingService _bookingService = BookingService();
+  final BookingRequestService _bookingService = BookingRequestService();
   final UserService _userService = UserService();
   final AmenityInApartmentService _amenityInApartmentService = AmenityInApartmentService();
   final AmenityService _amenityService = AmenityService();

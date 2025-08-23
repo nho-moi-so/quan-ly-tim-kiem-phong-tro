@@ -1,12 +1,12 @@
 import '/model/booking_request.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class BookingService {
+class BookingRequestService {
   //connect to firebase
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  //=================getAllBookingRequest
-  Future<List<BookingRequest>> getAllBookingRequest() async {
+  //=================getAllBookingRequests
+  Future<List<BookingRequest>> getAllBookingRequests() async {
     List<BookingRequest> bookingRequests = [];
     QuerySnapshot snapshot = await firestore.collection("bookingRequest").get();
     for (var doc in snapshot.docs) {

@@ -1,9 +1,15 @@
 //done
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/booking_request_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/booking_request_detail.dart';
 
 class CardBookingRequestDetailWidget extends StatefulWidget {
-  const CardBookingRequestDetailWidget({super.key});
+  final String bookingRequestId;
+
+  const CardBookingRequestDetailWidget({
+    super.key,
+    required this.bookingRequestId,
+  });
 
   @override
   State<CardBookingRequestDetailWidget> createState() => _CardBookingRequestDetailWidgetState();
@@ -11,35 +17,33 @@ class CardBookingRequestDetailWidget extends StatefulWidget {
 
 class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetailWidget> {
   bool isEditing = false;
-
+  final BookingRequestController _bookingRequestController = BookingRequestController();
+  
   //================================
-  BookingRequestDetail bookingRequestDetail = BookingRequestDetail(
-    fullName: 'Mỹ Ngọc',
-    roomNumber : '501',
-    email: 'abc@gmail',
-    phoneNumber: '(123) 456-7890',
-    numberOfPeople: 4,
-    checkInDate: DateTime(2023, 5, 14),
-    checkOutDate: DateTime(2023, 5, 15),
-    status: 'Đã Thanh Toán',
-    price: '2.400.000',
-    codeRoom: '#023135',
-    password: '01012457',
-  );
+  BookingRequestDetail? bookingRequestDetail;
   //============================================
-  late TextEditingController passwordController;
+  
+  TextEditingController? passwordController;
 
   @override
   void initState() {
     super.initState();
-    passwordController = TextEditingController(text: bookingRequestDetail.password);
+    _loadBookingRequestDetail();
   }
 
-  
-
+  Future<void> _loadBookingRequestDetail() async {
+    bookingRequestDetail = await _bookingRequestController.getBookingRequestById(widget.bookingRequestId);
+    print("==1==${bookingRequestDetail?.roomNumber}");
+    passwordController = TextEditingController(text: bookingRequestDetail!.password);
+    print("==2==${bookingRequestDetail!.password}");
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (bookingRequestDetail == null || passwordController == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.all(16),
@@ -79,17 +83,17 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
             const SizedBox(height: 16),
             ListTile(
               leading: CircleAvatar(backgroundColor: Color(0xFFEFF1F5)),
-              title: Text(bookingRequestDetail.fullName),
-              subtitle: Text('Phòng số ${bookingRequestDetail.roomNumber} | Người thuê'),
+              title: Text(bookingRequestDetail!.fullName ?? ''),
+              subtitle: Text('Phòng số ${bookingRequestDetail!.roomNumber ?? ''} | Người thuê'),
             ),
             const SizedBox(height: 8),
-            buildInfoRow('Email', bookingRequestDetail.email),
-            buildInfoRow('Số điện thoại', bookingRequestDetail.phoneNumber),
-            buildInfoRow('Số người ở', '${bookingRequestDetail.numberOfPeople} Người'),
+            buildInfoRow('Email', bookingRequestDetail!.email!),
+            buildInfoRow('Số điện thoại', bookingRequestDetail!.phoneNumber!),
+            buildInfoRow('Số người ở', '${bookingRequestDetail!.numberOfPeople} Người'),
             buildInfoRow('Checkin - Checkout', '14/05 - 15/05'),
-            buildInfoRow('Trạng thái', bookingRequestDetail.status),
-            buildInfoRow('Tiền phòng', bookingRequestDetail.price),
-            buildInfoRow('Mã đơn phòng', bookingRequestDetail.codeRoom),
+            buildInfoRow('Trạng thái', bookingRequestDetail!.status ?? ''),
+            buildInfoRow('Tiền phòng', bookingRequestDetail!.price ?? ''),
+            buildInfoRow('Mã đơn phòng', bookingRequestDetail!.bookingCode ?? ''),
             Row(
               children: [
                 Expanded(
@@ -117,7 +121,7 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
                     if (isEditing) {
                       // Lưu mật khẩu
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Đã lưu mật khẩu: ${passwordController.text}')),
+                        SnackBar(content: Text('Đã lưu mật khẩu: ${passwordController?.text}')),
                       );
                     }
                     setState(() {

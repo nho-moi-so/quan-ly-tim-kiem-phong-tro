@@ -177,7 +177,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                       child: SizedBox(
                         width: 350,
                         child: CardBookingRequestDetailWidget(
-                          // truyền các tham số cần thiết nếu widget này có constructor
+                          bookingRequestId: widget.bookingCode,
                         ),
                       ),
                     ),

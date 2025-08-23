@@ -1,27 +1,31 @@
 class BookingRequestDetail {
-  String fullName;
-  String roomNumber;
-  String email;
-  String phoneNumber;
-  int numberOfPeople;
-  DateTime checkInDate;
-  DateTime checkOutDate;
-  String status;
-  String price;
-  String codeRoom;
-  String password;
+  String? bookingCode;
+  String? fullName;
+  String? roomNumber;
+  String? email;
+  String? phoneNumber;
+  int? numberOfPeople;
+  DateTime? checkInDate;
+  DateTime? checkOutDate;
+  String? checkinCheckout;
+  String? status;
+  String? price;
+  String? codeRoom;
+  String? password;
 
   BookingRequestDetail({
-    required this.fullName,
-    required this.roomNumber,
-    required this.email,
-    required this.phoneNumber,
-    required this.numberOfPeople,
-    required this.checkInDate,
-    required this.checkOutDate,
-    required this.status,
-    required this.price,
-    required this.codeRoom,
+    this.bookingCode,
+    this.fullName,
+    this.roomNumber,
+    this.email,
+    this.phoneNumber,
+    this.numberOfPeople,
+    this.checkInDate,
+    this.checkOutDate,
+    this.checkinCheckout,
+    this.status,
+    this.price,
+    this.codeRoom,
     this.password = '',
   });
 }
