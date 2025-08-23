@@ -57,8 +57,21 @@ class ApartmentController {
   
   //updateApartment
   Future<bool> updateApartment(RoomDetail roomCardDetail) async{
-      print(roomCardDetail.roomId);
-      print(roomCardDetail.roomCode);
+      // print(roomCardDetail.roomId);
+      // print(roomCardDetail.roomCode);
+
+      //tìm thông tin của apartment
+      Apartment foundApartment = await _apartmentService.getApartmentById(roomCardDetail.roomId);
+      foundApartment.codeApartment = roomCardDetail.roomCode;
+      foundApartment.dailyRate = double.parse(roomCardDetail.price);
+      foundApartment.deposit = double.parse(roomCardDetail.depositPrice);
+      foundApartment.maxOccupancy = int.parse(roomCardDetail.maxCapacity);
+      foundApartment.description = roomCardDetail.description;
+      foundApartment.status = roomCardDetail.room_status;
+
+      Apartment updatedApartment = await _apartmentService.updateApartment(foundApartment);
+      print('Apartment updated with ID: ${updatedApartment.apartmentID}');
+      // tìm thông tin của amenity của apartment
 
     return false;
   }
