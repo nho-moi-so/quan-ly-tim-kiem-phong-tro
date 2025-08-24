@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/widgets/booking_request/card_booking_request_detail_widget.dart';
 
+// Thêm enum để phân biệt hành động
+enum BookingAction { approved, canceled, pending }
+
 class CardBookingRequestWidget extends StatefulWidget {
   final String bookingCode;
   final String customerName;
@@ -8,6 +11,7 @@ class CardBookingRequestWidget extends StatefulWidget {
   final String status;
   final Color statusColor;
   final IconData statusIcon;
+  final void Function(BookingAction action)? onConfirm;
 
   const CardBookingRequestWidget({
     super.key,
@@ -17,13 +21,15 @@ class CardBookingRequestWidget extends StatefulWidget {
     required this.status,
     this.statusColor = const Color(0xFF34A853),
     this.statusIcon = Icons.verified,
+    this.onConfirm,
   });
-
+  
   @override
   State<CardBookingRequestWidget> createState() => _CardBookingRequestWidgetState();
 }
 
 class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -184,20 +190,66 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                   );
                 },
               ),
-              _actionButton(
-                label: 'Xác Nhận',
-                icon: Icons.check_circle,
-                bgColor: const Color(0xFF4285F4),
-                textColor: Colors.white,
-                onTap: () {
-                  
-                },
-              ),
+              ..._buildActionButtons(),
             ],
           ),
         ],
       ),
     );
+  }
+
+  List<Widget> _buildActionButtons() {
+    List<Widget> actionButtons = [];
+
+    if (widget.status == 'Pending') {
+      actionButtons.add(
+        _actionButton(
+          label: 'Xác Nhận',
+          icon: Icons.check_circle,
+          bgColor: const Color(0xFF4285F4),
+          textColor: Colors.white,
+          onTap: () {
+            widget.onConfirm?.call(BookingAction.approved);
+          },
+        ),
+      );
+    } else if (widget.status == 'Approved') {
+      actionButtons.addAll([
+        _actionButton(
+          label: 'Hủy',
+          icon: Icons.cancel,
+          bgColor: Colors.red,
+          textColor: Colors.white,
+          onTap: () {
+            widget.onConfirm?.call(BookingAction.canceled);
+          },
+        ),
+        const SizedBox(width: 8),
+        _actionButton(
+          label: 'Hoàn tác',
+          icon: Icons.undo,
+          bgColor: Colors.grey,
+          textColor: Colors.white,
+          onTap: () {
+            widget.onConfirm?.call(BookingAction.pending);
+          },
+        ),
+      ]);
+    } else if (widget.status == 'Canceled') {
+      actionButtons.add(
+        _actionButton(
+          label: 'Hoàn tác',
+          icon: Icons.undo,
+          bgColor: Colors.grey,
+          textColor: Colors.white,
+          onTap: () {
+            widget.onConfirm?.call(BookingAction.pending);
+          },
+        ),
+      );
+    }
+
+    return actionButtons;
   }
 
   Widget _actionButton({
@@ -216,8 +268,9 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
           onTap();
         },
         child: Container(
-          width: 160,
+          width: 100,
           height: 35,
+          margin: const EdgeInsets.symmetric(horizontal: 2),
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(10),

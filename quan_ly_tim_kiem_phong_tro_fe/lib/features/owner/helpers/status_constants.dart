@@ -35,22 +35,22 @@ class ApartmentStatus {
   }
 }
 
-//Kiểm tra status của yêu cầu đặt phòng: pending( chờ xác nhận), approved(đã được duyệt), completed(đặt phòng TC),
+//Kiểm tra status của yêu cầu đặt phòng: pending( chờ xác nhận), approved(đã được duyệt), canceled(đã hủy),
 class BookingRequestStatus {
   static const pending = "Pending";
   static const approved = "Approved";
-  static const completed = "Completed";
+  static const canceled = "Canceled";
 
   static const values = [
     pending,
     approved,
-    completed,
+    canceled,
   ];
 
   static const localized = {
     pending: "Đang chờ xác nhận",
     approved: "Đã được duyệt",
-    completed: "Đã hoàn thành",
+    canceled: "Đã hủy",
   };
 
   static String toVietnamese(String status) {

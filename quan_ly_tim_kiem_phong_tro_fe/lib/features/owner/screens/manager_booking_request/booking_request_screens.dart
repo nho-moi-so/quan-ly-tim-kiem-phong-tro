@@ -105,6 +105,34 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                             customerName: req.customerName ?? '',
                             checkinCheckout: req.checkinCheckout ?? '',
                             status: req.status ?? '',
+                            onConfirm: (action) async {
+                              if (action == BookingAction.approved) {
+                                //== Xác nhận
+                                final result = await _bookingRequestController
+                                    .updateBookingRequestStatus(req.bookingCode ?? '', 'Approved'); // này là bấm xác nhận -> chuyển đến approved
+                                if (result) {
+                                  // Nếu cập nhật thành công, tải lại danh sách
+                                  print('Booking request approved: ${req.bookingCode}');
+                                  _loadBookingRequests();
+                                }
+                              } else if (action == BookingAction.canceled) {
+                                //== Hủy
+                                final result = await _bookingRequestController
+                                    .updateBookingRequestStatus(req.bookingCode ?? '', 'Canceled'); // này là bấm hủy -> Chuyển về Hủy
+                                if (result) {
+                                  // Nếu cập nhật thành công, tải lại danh sách
+                                  _loadBookingRequests();
+                                }
+                              } else if (action == BookingAction.pending) {
+                                //== Hoàn tác
+                                final result = await _bookingRequestController
+                                    .updateBookingRequestStatus(req.bookingCode ?? '', 'Pending'); // này là bấm hoàn tác -> chuyển về Pending
+                                if (result) {
+                                  // Nếu cập nhật thành công, tải lại danh sách
+                                  _loadBookingRequests();
+                                }
+                              }
+                            },
                           ))
                       .toList(),
                 ),

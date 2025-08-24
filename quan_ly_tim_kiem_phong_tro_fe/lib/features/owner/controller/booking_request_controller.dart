@@ -78,6 +78,9 @@ class BookingRequestController {
     var bookingRequest = await _bookingRequestService.getBookingRequestById(bookingRequestId);
     try {
        //-> cập nhật status 
+      if (!BookingRequestStatus.values.contains(status)) {
+        throw Exception("Invalid status");
+      }
       bookingRequest.status = status;
       await _bookingRequestService.updateBookingRequest(bookingRequest);
       //-> trả về bool
@@ -114,7 +117,7 @@ class BookingRequestController {
   //sendBookingRequestPassword() => bool //==
 
 
-  //searchBookingRequestByStartDateAndEndDate(String ownerId, DateTime startDate, DateTime endDate) => List<BookingRequestSummary>
+  //searchBookingRequestByStartDateAndEndDate(String ownerId, DateTime startDate, DateTime endDate) => List<BookingRequestSummary> - done
   Future<List<BookingRequestSummary>> searchBookingRequestByStartDateAndEndDate (String ownerId, DateTime? startDate, DateTime? endDate) async {
     //lấy startDate và endDate
     //lấy apartment của ownerId
