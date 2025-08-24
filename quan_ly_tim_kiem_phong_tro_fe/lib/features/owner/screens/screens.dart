@@ -10,6 +10,10 @@ export 'manager_booking_request/schedule_screen.dart';
 export 'manager_post/post_screen.dart';
 export 'manager_post/detail_post_screens.dart';
 
+//contract
+export 'manager_contract/contract_detail_screen.dart';
+
 //dashboard
 export 'dashboard_screen.dart';
+
 

@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 
 class RoomPostItemWidget extends StatelessWidget {
+  final String postId;
   final String roomName;
   final String postDate;
   final String status;
   final String imageUrl;
+  final void Function(String postId, String action)? onAction; // thêm dòng này
 
   const RoomPostItemWidget({
     Key? key,
+    required this.postId,
     required this.roomName,
     required this.postDate,
     required this.status,
     required this.imageUrl,
+    this.onAction, // thêm dòng này
   }) : super(key: key);
 
   @override
@@ -78,7 +82,14 @@ class RoomPostItemWidget extends StatelessWidget {
                       Positioned(
                         left: details.globalPosition.dx - 100,
                         top: details.globalPosition.dy + 5,
-                        child: _ActionMenuCard(), // <-- Đặt widget con ở đây
+                        child: _ActionMenuCard(
+                          onAction: (action) {
+                            Navigator.pop(context);
+                            if (onAction != null) {
+                              onAction!(postId, action);
+                            }
+                          },
+                        ),
                       ),
                     ],
                   );
@@ -94,8 +105,8 @@ class RoomPostItemWidget extends StatelessWidget {
   }
 }
 class _ActionMenuCard extends StatelessWidget {
-  final Offset? offset;
-  const _ActionMenuCard({this.offset});
+  final void Function(String action)? onAction;
+  const _ActionMenuCard({this.onAction});
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +134,7 @@ class _ActionMenuCard extends StatelessWidget {
               icon: Icons.visibility_outlined,
               label: 'Xem chi tiết',
               color: Colors.blue[600],
+              action: 'view',
             ),
             _divider(),
             _item(
@@ -130,6 +142,7 @@ class _ActionMenuCard extends StatelessWidget {
               icon: Icons.edit_outlined,
               label: 'Chỉnh sửa',
               color: Colors.orange[700],
+              action: 'edit',
             ),
             _divider(),
             _item(
@@ -137,6 +150,7 @@ class _ActionMenuCard extends StatelessWidget {
               icon: Icons.delete_outline,
               label: 'Xóa bài viết',
               color: Colors.red[600],
+              action: 'delete',
             ),
           ],
         ),
@@ -146,7 +160,7 @@ class _ActionMenuCard extends StatelessWidget {
 
   Widget _divider() => const Divider(height: 1, thickness: 1, color: Color(0xFFE0E0E0));
 
-  Widget _item(BuildContext context, {required IconData icon, required String label, Color? color}) {
+  Widget _item(BuildContext context, {required IconData icon, required String label, Color? color, required String action}) {
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: () {
@@ -154,6 +168,7 @@ class _ActionMenuCard extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Bạn chọn: $label')),
         );
+        if (onAction != null) onAction!(action);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
