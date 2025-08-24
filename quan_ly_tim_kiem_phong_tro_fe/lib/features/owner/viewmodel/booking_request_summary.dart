@@ -5,12 +5,14 @@
 class BookingRequestSummary {
   final String? bookingCode;
   final String? customerName;
+  final DateTime? checkinDate;
   final String? checkinCheckout;
   final String? status;
 
   BookingRequestSummary({
     this.bookingCode,
     this.customerName,
+    this.checkinDate,
     this.checkinCheckout,
     this.status,
   });

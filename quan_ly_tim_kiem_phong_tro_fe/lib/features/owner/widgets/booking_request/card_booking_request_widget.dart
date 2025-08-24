@@ -190,7 +190,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                 bgColor: const Color(0xFF4285F4),
                 textColor: Colors.white,
                 onTap: () {
-                  // Xử lý khi nhấn "Xác Nhận"
+                  
                 },
               ),
             ],

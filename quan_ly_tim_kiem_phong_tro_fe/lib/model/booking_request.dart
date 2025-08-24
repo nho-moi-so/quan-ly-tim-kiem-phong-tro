@@ -6,7 +6,7 @@ class BookingRequest {
   final DateTime requestedDate;
   final DateTime checkinDate;
   final DateTime checkoutDate;
-  final String status;
+  String status;
 
   BookingRequest({
     required this.bookingRequestID,

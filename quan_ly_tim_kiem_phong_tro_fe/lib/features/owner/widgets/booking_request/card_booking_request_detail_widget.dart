@@ -117,12 +117,19 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
                 ),
                 IconButton(
                   icon: Icon(isEditing ? Icons.check : Icons.edit),
-                  onPressed: () {
+                  onPressed: () async {
                     if (isEditing) {
+                      // Cập nhật mật khẩu
+                      bool result = await BookingRequestController().updateBookingRequestPassword(bookingRequestDetail?.bookingCode!, passwordController?.text);
                       // Lưu mật khẩu
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Đã lưu mật khẩu: ${passwordController?.text}')),
                       );
+                      if(result){
+                        print("Cập nhật mật khẩu thành công");
+                      } else {
+                        print("Cập nhật mật khẩu thất bại");
+                      }
                     }
                     setState(() {
                       isEditing = !isEditing;

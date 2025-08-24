@@ -58,9 +58,14 @@ class ApartmentService {
     return apartment;
   }
 
-  //deleteApartment => Apartment
-  Future<void> deleteApartment(String apartmentID) async {
-    await firestore.collection("apartment").doc(apartmentID).delete();
+  //deleteApartment => bool
+  Future<bool> deleteApartment(String apartmentID) async {
+    try {
+      await firestore.collection("apartment").doc(apartmentID).delete();
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
 

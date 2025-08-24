@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class SearchByDateWidget extends StatefulWidget {
-  const SearchByDateWidget({super.key});
+  final void Function(DateTime? from, DateTime? to)? onDateRangeChanged;
+  const SearchByDateWidget({super.key, this.onDateRangeChanged});
 
   @override
   State<SearchByDateWidget> createState() => _SearchByDateWidgetState();
@@ -25,6 +26,9 @@ class _SearchByDateWidgetState extends State<SearchByDateWidget> {
         toDate =
             "${picked.end.day}/${picked.end.month}/${picked.end.year}";
       });
+      if (widget.onDateRangeChanged != null) {
+        widget.onDateRangeChanged!(picked.start, picked.end); //== trả về start và end date
+      }
     }
   }
 
@@ -51,15 +55,15 @@ class _SearchByDateWidgetState extends State<SearchByDateWidget> {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: const Color(0xFF4285F4),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: TextButton(
-                  onPressed: _pickDateRange,
-                  style: TextButton.styleFrom(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
                     padding: EdgeInsets.zero,
                     minimumSize: Size(0, 0),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -71,6 +75,13 @@ class _SearchByDateWidgetState extends State<SearchByDateWidget> {
                       height: 1.29,
                     ),
                   ),
+                  onPressed: () async {
+                    _pickDateRange();
+                    print('Start date: $fromDate');
+                    print('End date: $toDate');
+                    // List<BookingRequestSummary> bookingRequestSummaries = await _bookingRequestController.searchBookingRequestByStartDateAndEndDate("ownerId", DateTime.now(), DateTime.now()); //==ownerId đang cố định
+
+                  },
                   child: const Text(
                     'Lịch Đặt Phòng',
                     style: TextStyle(

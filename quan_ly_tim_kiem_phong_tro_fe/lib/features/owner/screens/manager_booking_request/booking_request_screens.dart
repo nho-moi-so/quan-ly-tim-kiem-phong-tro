@@ -15,6 +15,9 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
 
   List<BookingRequestSummary> allRequests = [];
 
+  DateTime? filterFrom;
+  DateTime? filterTo;
+
   @override
   void initState() {
     super.initState();
@@ -30,10 +33,18 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
 
   @override
   Widget build(BuildContext context) {
-    // Lọc danh sách theo selectedStatus
-    final filteredRequests = selectedStatus == 'All'
-        ? allRequests
-        : allRequests.where((r) => r.status == selectedStatus).toList();
+    // Lọc theo status và ngày
+    var filteredRequests = allRequests.where((r) {
+      final statusMatch = selectedStatus == 'All' || r.status == selectedStatus;
+      final date = r.checkinDate;
+      // Nếu chưa chọn filter ngày thì luôn true
+      if (filterFrom == null && filterTo == null) return statusMatch;
+      // Nếu có filter ngày thì kiểm tra date
+      final dateMatch = (date != null) &&
+        (filterFrom == null || date.isAfter(filterFrom!.subtract(const Duration(days: 1)))) &&
+        (filterTo == null || date.isBefore(filterTo!.add(const Duration(days: 1))));
+      return statusMatch && dateMatch;
+    }).toList();
 
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -73,20 +84,28 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                 ],
               ),
               // //search by date
-              SearchByDateWidget(),
+              SearchByDateWidget(
+                onDateRangeChanged: (from, to) async {
+                  filterFrom = from;
+                  filterTo = to;
+                  final results = await _bookingRequestController
+                      .searchBookingRequestByStartDateAndEndDate("dYSjvUDL2vwRrSgqiDHy", from, to);
+                  setState(() {
+                    allRequests = results; // hoặc filteredRequests = results nếu bạn muốn dùng biến này
+                  });
+                },
+              ),
               SizedBox(height: screenHeight * 0.02),
               //card booking request
               Center(
                 child: Column(
                   children: filteredRequests
-                      .map(
-                        (req) => CardBookingRequestWidget(
-                          bookingCode: req.bookingCode ?? '',
-                          customerName: req.customerName ?? '',
-                          checkinCheckout: req.checkinCheckout ?? '',
-                          status: req.status ?? '',
-                        ),
-                      )
+                      .map((req) => CardBookingRequestWidget(
+                            bookingCode: req.bookingCode ?? '',
+                            customerName: req.customerName ?? '',
+                            checkinCheckout: req.checkinCheckout ?? '',
+                            status: req.status ?? '',
+                          ))
                       .toList(),
                 ),
               ),
