@@ -1,27 +1,25 @@
 import 'package:flutter/material.dart';
 
 class SummaryWidget extends StatelessWidget {
-  const SummaryWidget({super.key});
+  late String? imageUrl;
+  late String? price;
+  late String? deposit;
+  late String? title;
+  late String? address;
+  late List<String>? features;
+
+  SummaryWidget({
+    super.key,
+    required this.imageUrl,
+    required this.price,
+    required this.deposit,
+    required this.title,
+    required this.address,
+    required this.features,
+    });
 
   @override
   Widget build(BuildContext context) {
-    final String imageUrl = "https://placehold.co/148x111";
-    final String price = "4.500.000đ";
-    final String oldPrice = "5.200.000đ";
-    final int discountPercent = 21;
-    final String title = "MiniHouse Cần Thơ";
-    final String address = "45 Nguyễn Văn Cừ, Cần Thơ";
-
-    final List<String> features = [
-      "Miễn phí wifi",
-      "Có hồ bơi vô cực",
-      "Có bãi đỗ xe",
-      "Hỗ trợ trên 24/24",
-      "Hỗ trợ mang hành lý tận phòng",
-      "2 giường đơn",
-      "Đặt và thanh toán tiền ngay",
-      "Khuyến mãi chớp nhoáng",
-    ];
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -37,7 +35,7 @@ class SummaryWidget extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.network(
-              imageUrl,
+              imageUrl!,
               width: 148,
               height: 111,
               fit: BoxFit.cover,
@@ -57,7 +55,7 @@ class SummaryWidget extends StatelessWidget {
               children: [
                 // Tên
                 Text(
-                  title,
+                  title!,
                   style: const TextStyle(
                     color: Colors.black,
                     fontSize: 22,
@@ -70,18 +68,18 @@ class SummaryWidget extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      oldPrice,
+                      deposit!,
                       style: TextStyle(
                         color: Colors.black.withOpacity(0.65),
                         fontSize: 14,
                         fontFamily: 'Inter',
                         fontWeight: FontWeight.w600,
-                        decoration: TextDecoration.lineThrough,
+                        // decoration: TextDecoration.lineThrough,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      price,
+                      price!,
                       style: const TextStyle(
                         color: Color(0xFFF7210F),
                         fontSize: 18,
@@ -90,22 +88,6 @@ class SummaryWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade600,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        "-$discountPercent%",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -116,7 +98,7 @@ class SummaryWidget extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        address,
+                        address!,
                         style: const TextStyle(
                           color: Color(0xFF4B5563),
                           fontSize: 15,
@@ -131,7 +113,7 @@ class SummaryWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 // Các tiện ích
-                ...features.map(
+                ...features!.map(
                   (f) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2),
                     child: Row(

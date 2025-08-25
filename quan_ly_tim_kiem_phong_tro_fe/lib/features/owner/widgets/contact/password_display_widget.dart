@@ -17,7 +17,7 @@ class _PasswordDisplayWidgetState extends State<PasswordDisplayWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Mật khẩu nhận Phòng",
+          "Mật khẩu nhận phòng",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
