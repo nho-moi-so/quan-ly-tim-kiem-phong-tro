@@ -1,31 +1,35 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 class BookingRequest {
-  final String bookingRequestID;
-  final DateTime requestedDate;
+  final String id;
+  final String userId;
+  final String apartmentId;
   final DateTime checkinDate;
   final DateTime checkoutDate;
   final String status;
 
   BookingRequest({
-    required this.bookingRequestID,
-    required this.requestedDate,
+    required this.id,
+    required this.userId,
+    required this.apartmentId,
     required this.checkinDate,
     required this.checkoutDate,
     required this.status,
   });
 
-  factory BookingRequest.fromMap(String id, Map<String, dynamic> map) => BookingRequest(
-        bookingRequestID: id,
-        requestedDate: (map['RequestedDate'] as Timestamp).toDate(),
-        checkinDate: (map['CheckinDate'] as Timestamp).toDate(),
-        checkoutDate: (map['CheckoutDate'] as Timestamp).toDate(),
-        status: map['Status'] ?? '',
-      );
-
-  Map<String, dynamic> toMap() => {
-        'RequestedDate': Timestamp.fromDate(requestedDate),
-        'CheckinDate': Timestamp.fromDate(checkinDate),
-        'CheckoutDate': Timestamp.fromDate(checkoutDate),
-        'Status': status,
-      };
+  factory BookingRequest.fromFirestore(String id, Map<String, dynamic> data) {
+    return BookingRequest(
+      id: id,
+      userId: data['UserId'] ?? '', // an toàn nếu null
+      apartmentId: data['ApartmentId'] ?? '',
+      status: data['Status'] ?? '',
+      checkinDate: data['checkinDate'] != null
+          ? (data['checkinDate'] as Timestamp).toDate()
+          : DateTime.now(),
+      checkoutDate: data['checkoutDate'] != null
+          ? (data['checkoutDate'] as Timestamp).toDate()
+          : DateTime.now(),
+      // thêm các field khác tương tự
+    );
+  }
 }

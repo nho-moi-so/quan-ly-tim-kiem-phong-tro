@@ -1,9 +1,10 @@
 // file: booking_detail_dialog.dart
 
 import 'package:flutter/material.dart';
-
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/booking_request.dart';
 class BookingDetailDialog extends StatelessWidget {
-  const BookingDetailDialog({super.key});
+  final BookingRequest booking;
+  const BookingDetailDialog({super.key, required this.booking});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,10 @@ class BookingDetailDialog extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
-                      Text("Mỹ Ngọc", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        "Mỹ Ngọc",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       Text("Phòng số 501 | Người thuê"),
                     ],
                   ),
@@ -51,7 +55,11 @@ class BookingDetailDialog extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              _infoText("Địa chỉ:", "45 Nguyễn Văn Cừ, An Bình, Cần Thơ", fontSize),
+              _infoText(
+                "Địa chỉ:",
+                "45 Nguyễn Văn Cừ, An Bình, Cần Thơ",
+                fontSize,
+              ),
               _infoText("SĐT chủ căn hộ:", "(123) 456-7890", fontSize),
               _infoText("Số người ở:", "4 Người", fontSize),
               _infoText("Checkin:", "14h, 14/05", fontSize),
@@ -67,8 +75,13 @@ class BookingDetailDialog extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () {},
-                      style: OutlinedButton.styleFrom(side: BorderSide(color: Colors.green)),
-                      child: const Text("Trở Về", style: TextStyle(color: Colors.green)),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.green),
+                      ),
+                      child: const Text(
+                        "Trở Về",
+                        style: TextStyle(color: Colors.green),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -93,8 +106,16 @@ class BookingDetailDialog extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 120, child: Text(label, style: TextStyle(fontSize: fontSize))),
-          Expanded(child: Text(value, style: TextStyle(fontWeight: FontWeight.w500, fontSize: fontSize))),
+          SizedBox(
+            width: 120,
+            child: Text(label, style: TextStyle(fontSize: fontSize)),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontWeight: FontWeight.w500, fontSize: fontSize),
+            ),
+          ),
         ],
       ),
     );
