@@ -29,7 +29,7 @@ class UserService {
     final data = snapshot.data() as Map<String, dynamic>;
     return User(
       userID: snapshot.id,
-      fullName: data['Username'],
+      fullName: data['Fullname'],
       email: data['Email'],
       phone: data['Phone'],
     );

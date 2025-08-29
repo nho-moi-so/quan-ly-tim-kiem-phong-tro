@@ -28,7 +28,7 @@ class ApartmentService {
     List<Apartment> apartments = [];
     QuerySnapshot snapshot = await firestore
         .collection("apartment")
-        .where('UserId', isEqualTo: userId)
+        .where('UserID', isEqualTo: userId)
         .get();
     for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;

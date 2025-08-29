@@ -28,7 +28,7 @@ class BookingRequestService {
     List<BookingRequest> bookingRequests = [];
     QuerySnapshot snapshot = await firestore
         .collection("bookingRequest")
-        .where('ApartmentId', isEqualTo: apartmentId)
+        .where('ApartmentID', isEqualTo: apartmentId)
         .get();
     for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;

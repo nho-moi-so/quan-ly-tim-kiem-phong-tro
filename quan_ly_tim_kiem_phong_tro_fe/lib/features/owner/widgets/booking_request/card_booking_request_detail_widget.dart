@@ -89,7 +89,7 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
             const SizedBox(height: 8),
             buildInfoRow('Email', bookingRequestDetail!.email!),
             buildInfoRow('Số điện thoại', bookingRequestDetail!.phoneNumber!),
-            buildInfoRow('Số người ở', '${bookingRequestDetail!.numberOfPeople} Người'),
+            buildInfoRow('Số người ở tối đa', '${bookingRequestDetail!.numberOfPeople} Người'),
             buildInfoRow('Checkin - Checkout', '14/05 - 15/05'),
             buildInfoRow('Trạng thái', bookingRequestDetail!.status ?? ''),
             buildInfoRow('Tiền phòng', bookingRequestDetail!.price ?? ''),

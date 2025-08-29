@@ -15,8 +15,8 @@ class AmenityInApartment {
 
   factory AmenityInApartment.fromMap(String id, Map<String, dynamic> map) => AmenityInApartment(
         amenityInApartmentID: id,
-        apartmentId: map['ApartmentId'] ?? '',
-        amenityId: map['AmenityId'] ?? '',
+        apartmentId: map['ApartmentID'] ?? '',
+        amenityId: map['AmenityID'] ?? '',
         quantity: map['Quantity'] ?? 0,
         isAvailable: map['IsAvailable'] ?? false,
       );

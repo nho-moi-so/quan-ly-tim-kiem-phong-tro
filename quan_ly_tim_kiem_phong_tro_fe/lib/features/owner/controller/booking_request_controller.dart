@@ -13,6 +13,7 @@ class BookingRequestController {
 
   //getAllBookingRequestsSummary() => List<BookingRequestDetail> - done
   Future<List<BookingRequestSummary>> getAllBookingRequestsSummaries(String ownerId) async {
+    print("==ownerId==$ownerId");
     //lấy các apartment của chủ căn hộ
     List<Apartment> apartments = await _apartmentService.getApartmentByUser(ownerId);
     print("==1==${apartments}");

@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       //     '/': (context) => HomeScreens(),
       //     '/signup': (context) => RegisterScreens(), 
       //   },
-      home: ContractDetailScreen(contractId: '1',), //==================
+      home: BookingRequestScreens(), //==================
     );
   }
 }

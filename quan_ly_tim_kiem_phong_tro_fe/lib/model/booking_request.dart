@@ -20,8 +20,8 @@ class BookingRequest {
 
   factory BookingRequest.fromMap(String id, Map<String, dynamic> map) => BookingRequest(
         bookingRequestID: id,
-        apartmentID: map['ApartmentId'] ?? '',
-        userId: map['UserId'] ?? '',
+        apartmentID: map['ApartmentID'] ?? '',
+        userId: map['UserID'] ?? '',
         requestedDate: (map['RequestedDate'] as Timestamp).toDate(),
         checkinDate: (map['CheckinDate'] as Timestamp).toDate(),
         checkoutDate: (map['CheckoutDate'] as Timestamp).toDate(),

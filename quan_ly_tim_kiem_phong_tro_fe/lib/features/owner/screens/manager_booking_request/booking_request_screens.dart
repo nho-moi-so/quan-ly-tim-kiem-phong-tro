@@ -25,7 +25,7 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
   }
 
   Future<void> _loadBookingRequests() async {
-    final summaries = await _bookingRequestController.getAllBookingRequestsSummaries("dYSjvUDL2vwRrSgqiDHy");
+    final summaries = await _bookingRequestController.getAllBookingRequestsSummaries("dYSjvUDL2vwRrSgqiDHy"); //==UserId cứng tạm thời
     setState(() {
       allRequests = summaries;
     });
