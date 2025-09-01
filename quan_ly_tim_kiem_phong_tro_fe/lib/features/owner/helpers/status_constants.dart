@@ -33,6 +33,15 @@ class ApartmentStatus {
   static String toVietnamese(String status) {
     return localized[status] ?? status;
   }
+
+  static String fromVietnamese(String vietnamese) {
+    return localized.entries
+        .firstWhere(
+          (entry) => entry.value == vietnamese,
+          orElse: () => MapEntry(vietnamese, vietnamese),
+        )
+        .key;
+  }
 }
 
 //Kiểm tra status của yêu cầu đặt phòng: pending( chờ xác nhận), approved(đã được duyệt), canceled(đã hủy),

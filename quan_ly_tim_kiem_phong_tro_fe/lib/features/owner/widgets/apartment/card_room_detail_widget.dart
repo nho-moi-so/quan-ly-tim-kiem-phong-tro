@@ -9,8 +9,15 @@ import 'package:path_provider/path_provider.dart';
 
 class CardRoomDetailWidget extends StatefulWidget {
   final RoomDetail initialData;
+  final List<Map<String, String>> roomStates;
+  final List<String> roomTypes;
 
-  const CardRoomDetailWidget({super.key, required this.initialData, required List<Map<String, String>> roomStates, required List<String> roomTypes});
+  const CardRoomDetailWidget({
+    super.key,
+    required this.initialData,
+    required this.roomStates,
+    required this.roomTypes,
+  });
 
   @override
   State<CardRoomDetailWidget> createState() => _CardRoomDetailWidgetState();
@@ -26,6 +33,8 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
   late TextEditingController priceController;
   late TextEditingController depositPriceController;
   late TextEditingController descriptionController;
+  late TextEditingController addressController;
+  late TextEditingController requirementController;
   late List<String> initialImages;
 
   List<String> selectedUtilities = [];
@@ -46,18 +55,18 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     }
   }
 
-  final List<String> roomTypes = [
-    '1 Phòng Ngủ',
-    '2 Phòng Ngủ',
-    'Studio',
-    '3 Phòng Ngủ',
-  ];
+  // final List<String> roomTypes = [
+  //   '1 Phòng Ngủ',
+  //   '2 Phòng Ngủ',
+  //   'Studio',
+  //   '3 Phòng Ngủ',
+  // ];
 
-  final List<String> roomStates = [
-    'Trống',
-    'Đã thuê',
-    'Đang sửa',
-  ];
+  // final List<String> roomStates = [
+  //   'Trống',
+  //   'Đã thuê',
+  //   'Đang sửa',
+  // ];
   Future<void> loadAmenities() async {
     final data = await ApartmentController().getAllAmenity();
     setState(() {
@@ -90,9 +99,11 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
       text: _formatCurrency(widget.initialData.price.replaceAll(RegExp(r'[^0-9]'), '')),
     );
     descriptionController = TextEditingController(text: widget.initialData.description);
+  addressController = TextEditingController(text: widget.initialData.address);
+  requirementController = TextEditingController(text: widget.initialData.requirement);
 
-    selectedUtilities = [...widget.initialData.utilities];
-    selectedRoomType = widget.initialData.roomType;
+  selectedUtilities = [...widget.initialData.utilities];
+  selectedRoomType = widget.initialData.roomType.isNotEmpty ? widget.initialData.roomType : (widget.roomTypes.isNotEmpty ? widget.roomTypes.first : null);
     // selectedRoomState = widget.initialData.roomState;
     _images = [];
   }
@@ -107,6 +118,8 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     statusController.dispose();
     priceController.dispose();
     descriptionController.dispose();
+    addressController.dispose();
+    requirementController.dispose();
     super.dispose();
   }
 
@@ -120,28 +133,28 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
           children: [
             _buildLabeledInput('Mã Phòng', roomCodeController),
             const SizedBox(height: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              const Text('Diện Tích'),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: areaController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: const BorderSide(color: Color(0xFF4285F4)),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                suffix: const Text('m²', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ),
-              ],
-            ),
-            const SizedBox(height: 16),
+            // Column(
+            //   crossAxisAlignment: CrossAxisAlignment.start,
+            //   children: [
+            //   const Text('Diện Tích'),
+            //   const SizedBox(height: 8),
+            //   TextFormField(
+            //     controller: areaController,
+            //     keyboardType: TextInputType.number,
+            //     decoration: InputDecoration(
+            //     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            //     border: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(15),
+            //       borderSide: const BorderSide(color: Color(0xFF4285F4)),
+            //     ),
+            //     filled: true,
+            //     fillColor: Colors.white,
+            //     suffix: const Text('m²', style: TextStyle(fontWeight: FontWeight.bold)),
+            //     ),
+            //   ),
+            //   ],
+            // ),
+            // const SizedBox(height: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -250,6 +263,38 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
               ),
             const SizedBox(height: 16),
             _buildLabeledInput('Mô Tả Thêm', descriptionController, maxLines: 3),
+            const SizedBox(height: 16),
+            _buildLabeledInput('Địa chỉ', addressController),
+            const SizedBox(height: 16),
+            _buildLabeledInput('Yêu cầu', requirementController, maxLines: 2),
+            const SizedBox(height: 16),
+            const Text('Loại phòng'),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Color(0xFF4285F4)),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedRoomType,
+                  hint: const Text('Chọn loại phòng'),
+                  items: widget.roomTypes.map((type) {
+                    return DropdownMenuItem<String>(
+                      value: type,
+                      child: Text(type),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedRoomType = value;
+                    });
+                  },
+                ),
+              ),
+            ),
             const SizedBox(height: 24),
             GestureDetector(
               onTap: () async {
@@ -481,6 +526,8 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     description: descriptionController.text,
                     utilities: selectedUtilities,
                     roomState: selectedRoomState ?? '',
+                    address: addressController.text,
+                    requirement: requirementController.text,
                     // Save all images to a writable directory with random names and return the new paths
                     images: await Future.wait(_images.map((img) async {
                       // Generate a random file name

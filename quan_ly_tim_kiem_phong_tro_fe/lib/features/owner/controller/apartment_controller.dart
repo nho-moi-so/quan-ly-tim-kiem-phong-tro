@@ -122,9 +122,15 @@ class ApartmentController {
                 description: apartment.description!,
                 utilities: amenities,
                 images: List<String>.from(apartment.pathImage as Iterable),
+                address: apartment.address ?? '',
+                // roomType: apartment.type ?? 'Studio',
+                requirement: (apartment.requirement != null && apartment.requirement is List<String>)
+                  ? (apartment.requirement as List<String>).join(', ')
+                  : '',
+                roomType: apartment.type ?? '',
               );
               print("==============4============");
-              print(roomDetail.room_status); //done
+              print(roomDetail.roomType); //done
     return roomDetail;
   }
 
@@ -197,12 +203,15 @@ class ApartmentController {
 
   // Lấy danh sách tất cả loại phòng
   Future<List<String>> getAllRoomTypes() async {
+    //==đang lấy theo tiếng việt
     List<String> roomTypes = [
-      '1 Phòng Ngủ',
-      '2 Phòng Ngủ',
-      'Studio',
-      '3 Phòng Ngủ',
+      'Căn hộ 2 phòng ngủ',
+      'Căn hộ 1 phòng ngủ',
+      'Căn hộ Studio',
+      'Căn hộ 3 phòng ngủ',
     ];
     return roomTypes;
   }
+
+  
 }

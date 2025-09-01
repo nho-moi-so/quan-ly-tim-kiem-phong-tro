@@ -18,15 +18,15 @@ class AmenityInApartmentService {
   //getAmenityInApartmentByApartmentId
   Future<List<AmenityInApartment>> getAmenityInApartmentByApartmentId(String apartmentId) async {
     List<AmenityInApartment> amenities = [];
-    QuerySnapshot snapshot = await firestore.collection("amenityInApartment").where('ApartmentId', isEqualTo: apartmentId).get();
+    QuerySnapshot snapshot = await firestore.collection("amenityInApartment").where('ApartmentID', isEqualTo: apartmentId).get();
     for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
       // amenities.add(AmenityInApartment.fromMap(doc.id, data));
       amenities.add(
         AmenityInApartment(
           amenityInApartmentID: doc.id,
-          apartmentId: data['ApartmentId'],
-          amenityId: data['AmenityId'],
+          apartmentId: data['ApartmentID'],
+          amenityId: data['AmenityID'],
           isAvailable: data['IsAvailable'],
         ),
       );
