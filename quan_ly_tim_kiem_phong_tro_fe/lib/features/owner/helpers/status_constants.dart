@@ -11,10 +11,10 @@
 // ApartmentStatus.toVietnamese(apartment.status)
 
 class ApartmentStatus {
-  static const available = "available";
-  static const pending = "pending";
-  static const booked = "booked";
-  static const occupied = "occupied";
+  static const available = "Available";
+  static const pending = "Pending";
+  static const booked = "Booked";
+  static const occupied = "Occupied";
 
   static const values = [
     available,

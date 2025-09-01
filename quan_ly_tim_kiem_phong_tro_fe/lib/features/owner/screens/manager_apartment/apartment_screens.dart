@@ -15,8 +15,8 @@ class ApartmentScreen extends StatefulWidget {
 
 class _MainApartmentScreenState extends State<ApartmentScreen> {
   
-  //====get all list card infor
-  Future<List<RoomCardInfo>> roomCards = ApartmentController().getSummaryRoom( "dYSjvUDL2vwRrSgqiDHy");
+  //get all list card infor
+  Future<List<RoomCardInfo>> roomCards = ApartmentController().getSummaryRoom( "dYSjvUDL2vwRrSgqiDHy"); //==UserId cứng tạm thời
 
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;

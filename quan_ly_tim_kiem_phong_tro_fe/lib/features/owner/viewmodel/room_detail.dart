@@ -14,6 +14,10 @@ class RoomDetail {
   String roomState;
   List<String> images;
 
+  String address;
+
+  String requirement;
+
   RoomDetail({
     this.roomId = '',
     this.roomCode = '',
@@ -29,5 +33,7 @@ class RoomDetail {
     this.roomType = '',
     this.roomState = '',
     this.images = const [],
+    this.address = '',
+    this.requirement = '',
   });
 }

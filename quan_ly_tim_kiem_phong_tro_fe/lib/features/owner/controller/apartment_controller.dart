@@ -1,3 +1,5 @@
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/amenities.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/amenity_in_apartment.dart';
@@ -97,6 +99,7 @@ class ApartmentController {
               List<String> amenities = [];
               List<AmenityInApartment> amenityInApartment = await _amenityInApartmentService.getAmenityInApartmentByApartmentId(apartmentId);
               print("==============2============");
+              print(amenityInApartment.length);
               //lay thong tin cua amenity dua vao id cua amenity trong amenitySnapshot
               for (var amenityDoc in amenityInApartment) {
                 print(amenityDoc.amenityId);
@@ -114,14 +117,14 @@ class ApartmentController {
                 area: '25',
                 maxCapacity: apartment.maxOccupancy.toString(),
                 room_status: apartment.status!,
-                price: apartment.dailyRate.toString(),
-                depositPrice: apartment.deposit.toString(),
+                price: formatCurrency(apartment.dailyRate!).toString(),
+                depositPrice: formatCurrency(apartment.deposit!).toString(),
                 description: apartment.description!,
                 utilities: amenities,
                 images: List<String>.from(apartment.pathImage as Iterable),
               );
               print("==============4============");
-              print(roomDetail.roomId); //done
+              print(roomDetail.room_status); //done
     return roomDetail;
   }
 
@@ -143,7 +146,9 @@ class ApartmentController {
       if (bookingRequests.isNotEmpty) {
         for(var booking in bookingRequests){
           print(booking.status);
+          print(booking.userId);
           if (booking.checkoutDate.isAfter(DateTime.now())) {
+            //nếu có booking và checkoutDate ở tương lai
             // print(userId);
             User user = await _userService.getUserById(booking.userId);
             // print(user.email);
@@ -154,7 +159,7 @@ class ApartmentController {
           }
         }
       }
-      String price = '${apartment.dailyRate.toString()}/ngày';
+      String price = '${formatCurrency(apartment.dailyRate!).toString()}/ngày';
       RoomCardInfo infoApartment = RoomCardInfo(
         roomName: roomName,
         tenantName: tenantName,
@@ -179,4 +184,25 @@ class ApartmentController {
     return allUtilities;
   }
 
+  //trạng thái phòng
+  Future<List<Map<String, String>>> getRoomStatusWithKey() async {
+  return ApartmentStatus.values.map((status) {
+    return {
+      "key": status,
+      "label": ApartmentStatus.toVietnamese(status),
+    };
+  }).toList();
+}
+
+
+  // Lấy danh sách tất cả loại phòng
+  Future<List<String>> getAllRoomTypes() async {
+    List<String> roomTypes = [
+      '1 Phòng Ngủ',
+      '2 Phòng Ngủ',
+      'Studio',
+      '3 Phòng Ngủ',
+    ];
+    return roomTypes;
+  }
 }

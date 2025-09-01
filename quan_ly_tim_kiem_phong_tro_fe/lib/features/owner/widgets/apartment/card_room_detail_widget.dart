@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/apartment_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/apartment_screens.dart';
 import '../../viewmodel/room_detail.dart';
 import 'dart:io';
@@ -9,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 class CardRoomDetailWidget extends StatefulWidget {
   final RoomDetail initialData;
 
-  const CardRoomDetailWidget({super.key, required this.initialData});
+  const CardRoomDetailWidget({super.key, required this.initialData, required List<Map<String, String>> roomStates, required List<String> roomTypes});
 
   @override
   State<CardRoomDetailWidget> createState() => _CardRoomDetailWidgetState();
@@ -78,6 +79,13 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     checkoutController = TextEditingController(text: widget.initialData.checkout);
     capacityController = TextEditingController(text: widget.initialData.maxCapacity);
     statusController = TextEditingController(text: widget.initialData.room_status);
+
+    // Nếu statusController.text có dữ liệu thì gán cho selectedRoomState
+    if (statusController.text.isNotEmpty) {
+      selectedRoomState = statusController.text;
+    } else {
+      selectedRoomState = null;
+    }
     priceController = TextEditingController(
       text: _formatCurrency(widget.initialData.price.replaceAll(RegExp(r'[^0-9]'), '')),
     );
@@ -85,7 +93,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
 
     selectedUtilities = [...widget.initialData.utilities];
     selectedRoomType = widget.initialData.roomType;
-    selectedRoomState = widget.initialData.roomState;
+    // selectedRoomState = widget.initialData.roomState;
     _images = [];
   }
 
@@ -696,9 +704,16 @@ String _formatDateTime(DateTime dateTime) {
   Widget _buildDropdownRoomState() {
     return DropdownButtonHideUnderline(
       child: DropdownButton<String>(
-        value: selectedRoomState!.isEmpty ? null : selectedRoomState,
+        value: (selectedRoomState != null && selectedRoomState!.isNotEmpty)
+            ? selectedRoomState
+            : null,
         hint: const Text('Chọn trạng thái'),
-        items: roomStates.map((state) => DropdownMenuItem(value: state, child: Text(state))).toList(),
+        items: ApartmentStatus.values.map((status) {
+          return DropdownMenuItem<String>(
+            value: status,
+            child: Text(ApartmentStatus.toVietnamese(status)),
+          );
+        }).toList(),
         onChanged: (value) {
           setState(() {
             selectedRoomState = value;
