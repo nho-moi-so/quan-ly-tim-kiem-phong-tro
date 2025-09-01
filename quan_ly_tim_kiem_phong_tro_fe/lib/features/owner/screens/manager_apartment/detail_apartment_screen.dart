@@ -13,6 +13,25 @@ class DetailApartmentScreen extends StatefulWidget {
 }
 
 class _DetailApartmentScreenState extends State<DetailApartmentScreen> {
+  final ApartmentController _apartmentController = ApartmentController();
+  List<Map<String, String>> roomStates = [];
+  List<String> roomTypes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    final fetchedRoomStates = await _apartmentController.getRoomStatusWithKey();
+    final fetchedRoomTypes = await _apartmentController.getAllRoomTypes();
+    setState(() {
+      roomStates = fetchedRoomStates;
+      roomTypes = fetchedRoomTypes;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -35,6 +54,8 @@ class _DetailApartmentScreenState extends State<DetailApartmentScreen> {
               // SizedBox(height: screenHeight * 0.02),
               CardRoomDetailWidget(
                 initialData: widget.roomDetail ?? RoomDetail(), // Provide a default RoomDetail if null
+                roomStates: roomStates,
+                roomTypes: roomTypes,
               ),
             ],
           ),
