@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/detail_apartment_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/new_customer_screen.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_contract/contract_detail_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
 
 import '../../viewmodel/room_card_info.dart';
@@ -27,27 +28,35 @@ class CardRoomWidget extends StatelessWidget {
     );
   }
 
-  Widget buildContractButton() {
+  Widget buildContractButton(BuildContext context) {
     return ElevatedButton(
-      onPressed: data.onContract,
+      onPressed: () async {
+        String contractId = await data.onContract();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ContractDetailScreen(contractId: contractId),
+          ),
+        );
+      },
       style: ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFF34A853),
-      minimumSize: const Size(130, 30),
-      padding: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6),
-      ),
-      elevation: 0,
+        backgroundColor: const Color(0xFF34A853),
+        minimumSize: const Size(130, 30),
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6),
+        ),
+        elevation: 0,
       ),
       child: const Text(
-      'Hợp Đồng',
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 16,
-        fontFamily: 'Noto Sans',
-        fontWeight: FontWeight.w400,
-        height: 1.12,
-      ),
+        'Hợp Đồng',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontFamily: 'Noto Sans',
+          fontWeight: FontWeight.w400,
+          height: 1.12,
+        ),
       ),
     );
   }
@@ -135,7 +144,7 @@ class CardRoomWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               buildInfoRow(Icons.person, data.tenantName, const Color(0xFF15B20A)),
-              buildContractButton(),
+              buildContractButton(context),
             ],
           ),
 
@@ -186,32 +195,39 @@ class CardRoomWidget extends StatelessWidget {
               ),
 
               const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                              Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => NewCustomerScreen()),
-                  );
-                  },
-                  icon: const Icon(Icons.edit, color: Colors.white, size: 18),
-                  label: const Text(
-                    'Thêm khách mới',
-                    style: TextStyle(
+                  Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                    if (data.tenantName == "Chưa có khách thuê") {
+                      Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => NewCustomerScreen()),
+                      );
+                    } else {
+                      RoomDetail roomDetail = await data.onViewDetail();
+                      Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => DetailApartmentScreen(roomDetail: roomDetail)),
+                      );
+                    }
+                    },
+                    icon: const Icon(Icons.edit, color: Colors.white, size: 18),
+                    label: Text(
+                    data.tenantName == "Chưa có khách thuê" ? 'Thêm khách mới' : 'Chỉnh sửa',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
                       fontFamily: 'Noto Sans',
                       fontWeight: FontWeight.w400,
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
+                    ),
+                    style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4285F4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
                   ),
-                ),
-              ),
+                  ),
 
             ],
           ),

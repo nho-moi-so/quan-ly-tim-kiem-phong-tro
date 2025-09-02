@@ -1,3 +1,4 @@
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/contract_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
@@ -20,6 +21,8 @@ class ApartmentController {
   final UserService _userService = UserService();
   final AmenityInApartmentService _amenityInApartmentService = AmenityInApartmentService();
   final AmenityService _amenityService = AmenityService();
+
+  final ContractController _contractController = ContractController();
 
   //createApartment(RoomCardDetail) => RoomCardDetail - done without image and user
   Future<bool> createApartment(RoomDetail roomCardDetail) async {
@@ -173,9 +176,13 @@ class ApartmentController {
         status: apartment.status!,
         onViewDetail: () => viewDetailApartment(apartment.apartmentID!),
         onDelete: () => deleteApartment(apartment.apartmentID!),
-        onContract: () {});
-        
-        roomCards.add(infoApartment);
+        onContract: () async {
+          //==lấy id của contract của phòng này
+          return "exampleContractId";
+        },
+      );
+
+      roomCards.add(infoApartment);
     }
     return roomCards;
   }
