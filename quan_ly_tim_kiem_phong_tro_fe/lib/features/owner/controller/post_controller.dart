@@ -69,7 +69,27 @@ class PostController {
     return postSummaries;
   }
 
-  //viewDetail(String postId) => PostDetail
+  //viewDetail(String postId) => PostDetail //done /==dữ liệu giả
+  Future<PostDetail> viewDetail(String postId) async {
+    //==hiện tại cho dữ liệu giả
+    PostDetail postDetail = PostDetail(
+      postId: "1",
+      room: "Phòng 101",
+      price: "3,000,000 VND",
+      deposit: "3,000,000 VND",
+      address: "123 Đường ABC, Quận 1, TP.HCM",
+      postTitle: "Phòng trọ đẹp, sạch sẽ, an ninh",
+      postDescription: "Phòng rộng rãi, có ban công, gần chợ, siêu thị, trường học.",
+      status: "Đang cho thuê",
+      imageUrls: [
+        "https://via.placeholder.com/300",
+        "https://via.placeholder.com/300",
+        "https://via.placeholder.com/300",
+      ],
+    );
+    //===============================
+    return postDetail;
+  }
 
   //updateInfo(PostDetail postDetail) => PostDetail
 

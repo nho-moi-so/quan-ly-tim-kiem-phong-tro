@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/post_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_post/detail_post_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/post_summary.dart';
 
 import '../../widgets/widgets.dart';
@@ -76,6 +77,12 @@ class _PostScreenState extends State<PostScreen> {
                         if (action == 'view') {
                           // Xử lý xem chi tiết
                           print("Xem chi tiết bài viết: $postId");
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailPostScreen(postId: postId),
+                            ),
+                          );
                         } else if (action == 'edit') {
                           // Xử lý chỉnh sửa
                           print("Chỉnh sửa bài viết: $postId");

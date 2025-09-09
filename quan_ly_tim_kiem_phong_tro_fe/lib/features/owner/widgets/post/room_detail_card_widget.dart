@@ -1,11 +1,13 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
- 
-
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/post_detail.dart';
 
 class RoomDetailCardWidget extends StatefulWidget {
-  const RoomDetailCardWidget({super.key});
+  final PostDetail postDetail; // Thêm dòng này
+
+  const RoomDetailCardWidget(this.postDetail, {super.key});
 
   @override
   State<RoomDetailCardWidget> createState() => _RoomDetailCardWidgetState();
@@ -13,143 +15,156 @@ class RoomDetailCardWidget extends StatefulWidget {
 
 class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
   late TextEditingController roomController;
-  late TextEditingController floorController;
-  late TextEditingController areaController;
   late TextEditingController priceController;
+  late TextEditingController depositController;
   late TextEditingController addressController;
-  late TextEditingController descriptionController;
+  late TextEditingController postTitleController;
+  late TextEditingController postDescriptionController;
+  late TextEditingController statusController;
+  
+  List<String> imageUrls = [];
 
   @override
   void initState() {
     super.initState();
-    roomController = TextEditingController(text: '403');
-    floorController = TextEditingController(text: 'Tầng 4');
-    areaController = TextEditingController(text: '30m2');
-    priceController = TextEditingController(text: '1.500.000');
-    addressController = TextEditingController(text: 'Chung cư nam long, hưng thạnh, cái răng');
-    descriptionController = TextEditingController(text: 'Phòng dành cho 4 người, có 2 phòng ngủ và 1 phòng khách, có phòng bếp và 3 wc');
+    roomController = TextEditingController(text: widget.postDetail.room ?? '');
+    priceController = TextEditingController(text: widget.postDetail.price ?? '');
+    depositController = TextEditingController(text: widget.postDetail.deposit ?? '');
+    addressController = TextEditingController(text: widget.postDetail.address ?? '');
+    postTitleController = TextEditingController(text: widget.postDetail.postTitle ?? '');
+    postDescriptionController = TextEditingController(text: widget.postDetail.postDescription ?? '');
+    statusController = TextEditingController(text: widget.postDetail.status ?? '');
+    imageUrls = widget.postDetail.imageUrls ?? [];
   }
 
   @override
   void dispose() {
-    roomController.dispose();
-    floorController.dispose();
-    areaController.dispose();
-    priceController.dispose();
-    addressController.dispose();
-    descriptionController.dispose();
+  roomController.dispose();
+  priceController.dispose();
+  depositController.dispose();
+  addressController.dispose();
+  postTitleController.dispose();
+  postDescriptionController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return SafeArea(
       child: SingleChildScrollView(
-        child: Container(
-          width: 378,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(
-              color: const Color(0xD8756A6A),
-              width: 1,
+        child: Center(
+          child: Container(
+            width: screenWidth < 400 ? screenWidth * 0.98 : 378,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: const Color(0xD8756A6A),
+                width: 1,
+              ),
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    _infoField(label: 'Phòng', controller: roomController),
-                    const SizedBox(width: 12),
-                    _infoField(label: 'Khu', controller: floorController),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _infoField(label: 'Diện Tích', controller: areaController, fullWidth: true),
-                const SizedBox(height: 12),
-                _infoField(label: 'Tiền Phòng', controller: priceController, fullWidth: true),
-                const SizedBox(height: 12),
-                _infoField(label: 'Địa Chỉ', controller: addressController, fullWidth: true),
-                const SizedBox(height: 12),
-                _infoField(
-                  label: 'Mô Tả',
-                  controller: descriptionController,
-                  fullWidth: true,
-                  multiline: true,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Upload Images',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w400,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Thông tin bài đăng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 12),
+                  _infoField(label: 'Tiêu đề', controller: postTitleController, fullWidth: true, icon: Icons.title, hint: 'Nhập tiêu đề bài đăng...'),
+                  
+                  const SizedBox(height: 12),
+                  _infoField(label: 'Mô tả', controller: postDescriptionController, fullWidth: true, multiline: true, icon: Icons.description, hint: 'Nhập mô tả bài đăng...'),
+                  const SizedBox(height: 12),
+                  _infoField(label: 'Trạng Thái', controller: TextEditingController(text: 'Đang chờ duyệt'), fullWidth: true, icon: Icons.info, hint: '', readOnly: true),
+                  const SizedBox(height: 20),
+                  const Text('Thông tin phòng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: _infoField(label: 'Phòng', controller: roomController, icon: Icons.meeting_room, hint: 'Số phòng...', readOnly: true)),
+                      const SizedBox(width: 12),
+                      Expanded(child: _infoField(label: 'Trạng Thái', controller: statusController, icon: Icons.info_outline, hint: 'Nhập trạng thái...', readOnly: true)),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 8),
-                Center(
-                  child: GestureDetector(
-                    onTap: pickImage,
-                    child: Container(
-                      width: 157,
-                      height: 118,
-                      decoration: BoxDecoration(
-                        image: imageFile != null
-                            ? DecorationImage(image: FileImage(imageFile!), fit: BoxFit.cover)
-                            : const DecorationImage(
-                                image: NetworkImage("https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"),
-                                fit: BoxFit.cover,
-                              ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: imageFile == null
-                          ? const Center(child: Icon(Icons.add_a_photo, size: 32, color: Colors.white))
-                          : null,
-                    ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: _infoField(label: 'Tiền Phòng', controller: priceController, icon: Icons.attach_money, hint: 'Nhập tiền phòng...', readOnly: true)),
+                      const SizedBox(width: 12),
+                      Expanded(child: _infoField(label: 'Tiền Đặt Cọc', controller: depositController, icon: Icons.savings, hint: 'Nhập tiền đặt cọc...', readOnly: true)),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0x354285F4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text('Hủy', style: TextStyle(color: Colors.black)),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final info = '''Phòng: ${roomController.text}\nKhu: ${floorController.text}\nDiện Tích: ${areaController.text}\nTiền Phòng: ${priceController.text}\nĐịa Chỉ: ${addressController.text}\nMô Tả: ${descriptionController.text}''';
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(info, style: const TextStyle(fontSize: 14)),
-                              duration: const Duration(seconds: 3),
+                  const SizedBox(height: 12),
+                  _infoField(label: 'Địa Chỉ', controller: addressController, fullWidth: true, icon: Icons.location_on, hint: 'Nhập địa chỉ phòng...', readOnly: true),
+                  const SizedBox(height: 20),
+                  const Text('Hình ảnh phòng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 120,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: imageUrls.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 8),
+                          width: 160,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.grey[200],
+                            image: DecorationImage(
+                              image: NetworkImage(imageUrls[index]),
+                              fit: BoxFit.cover,
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4285F4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
                           ),
-                        ),
-                        child: const Text('Cập Nhật'),
-                      ),
+                        );
+                      },
                     ),
-                  ],
-                )
-              ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[300],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text('Hủy', style: TextStyle(color: Colors.black)),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            final info = '''Tiêu đề: ${postTitleController.text}\nMô tả: ${postDescriptionController.text}\nPhòng: ${roomController.text}\nTiền phòng: ${priceController.text}\nTiền đặt cọc: ${depositController.text}\nĐịa chỉ: ${addressController.text}''';
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('Xác nhận cập nhật'),
+                                content: Text(info),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Đóng')),
+                                ],
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF4285F4),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text('Cập Nhật'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -172,6 +187,9 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
     required TextEditingController controller,
     bool fullWidth = false,
     bool multiline = false,
+    IconData? icon,
+    String? hint,
+    bool readOnly = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,9 +197,10 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.black.withOpacity(0.6),
+            color: Colors.black.withOpacity(0.7),
             fontSize: 14,
             fontFamily: 'Noto Sans',
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 4),
@@ -197,7 +216,10 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
           child: TextFormField(
             controller: controller,
             maxLines: multiline ? 4 : 1,
+            readOnly: readOnly,
             decoration: InputDecoration(
+              prefixIcon: icon != null ? Icon(icon, color: Color(0xFF4285F4)) : null,
+              hintText: hint,
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               isDense: true,
               filled: true,

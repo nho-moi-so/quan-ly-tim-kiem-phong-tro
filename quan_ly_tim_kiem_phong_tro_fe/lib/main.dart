@@ -1,12 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/common/widgets/sign_up_form.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/new_customer_screen.dart';
 
-import 'features/owner/widgets/widgets.dart';
-import 'features/owner/screens/screens.dart';
-import 'features/common/screens.dart';
 import '../../service/navigation_service.dart';
+import 'features/owner/screens/screens.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +27,7 @@ class MyApp extends StatelessWidget {
       //     '/': (context) => HomeScreens(),
       //     '/signup': (context) => RegisterScreens(), 
       //   },
-      home: ApartmentScreen(), //==================
+      home: PostScreen(), //==================
     );
   }
 }
