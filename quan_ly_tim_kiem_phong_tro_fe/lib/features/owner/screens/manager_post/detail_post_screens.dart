@@ -5,9 +5,10 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/post_deta
 import '../../widgets/widgets.dart';
 
 class DetailPostScreen extends StatelessWidget {
-  final String postId; // Thêm dòng này
+  final String postId;
+  final String? apartmentId; // Thêm dòng này
 
-  const DetailPostScreen({super.key, required this.postId}); // Sửa lại constructor
+  const DetailPostScreen({super.key, required this.postId, this.apartmentId}); // Sửa lại constructor
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +16,19 @@ class DetailPostScreen extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final PostController _postController = PostController();
 
+    // Nếu postId là "new", tạo bài đăng mới
+    var postDetail;
+    if (postId == "new") {
+      // Tạo bài đăng mới
+      print("Creating new post for apartmentId: $apartmentId");
+      postDetail = _postController.create(apartmentId!); // Sử dụng apartmentId để tạo bài đăng mới
+    } else {
+      postDetail = _postController.viewDetail(postId);
+    }
+
     return Scaffold(
       body: FutureBuilder<PostDetail>(
-        future: _postController.viewDetail(postId),
+        future: postDetail,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());

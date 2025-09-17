@@ -68,5 +68,18 @@ class ApartmentService {
     }
   }
 
+  Future getApartmentsByOwnerId(String ownerId) async {
+    List<Apartment> apartments = [];
+    QuerySnapshot snapshot = await firestore
+        .collection("apartment")
+        .where('UserID', isEqualTo: ownerId)
+        .get();
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      apartments.add(Apartment.fromMap(doc.id, data));
+    }
+    return apartments;
+  }
+
 
 }

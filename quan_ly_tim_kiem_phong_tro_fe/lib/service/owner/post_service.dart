@@ -1,5 +1,5 @@
-import 'package:quan_ly_tim_kiem_phong_tro_fe/model/post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/post.dart';
 class PostService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   //=====getAllPost
@@ -80,5 +80,26 @@ class PostService {
   //===========deletePost
   Future<void> deletePost(String id) async {
     await firestore.collection("posts").doc(id).delete();
+  }
+
+  Future getPostByApartmentId(String apartmentId) async {
+    List<Post> posts = [];
+    QuerySnapshot snapshot = await firestore
+        .collection("posts")
+        .where("ApartmentID", isEqualTo: apartmentId)
+        .get();
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      posts.add(
+        Post(
+          postID: doc.id,
+          header: data['Header'] ?? '',
+          status: data['Status'] ?? '',
+          description: data['Description'] ?? '',
+          creationDate: (data['CreationDate'] as Timestamp).toDate(),
+        ),
+      );
+    }
+    return posts;
   }
 }

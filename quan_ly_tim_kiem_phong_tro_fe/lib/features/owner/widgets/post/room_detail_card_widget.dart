@@ -18,22 +18,24 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
   late TextEditingController priceController;
   late TextEditingController depositController;
   late TextEditingController addressController;
+  late TextEditingController statusController;
   late TextEditingController postTitleController;
   late TextEditingController postDescriptionController;
-  late TextEditingController statusController;
+  late TextEditingController postStatusController;
   
   List<String> imageUrls = [];
 
   @override
   void initState() {
     super.initState();
-    roomController = TextEditingController(text: widget.postDetail.room ?? '');
+    roomController = TextEditingController(text: widget.postDetail.roomNumber ?? '');
     priceController = TextEditingController(text: widget.postDetail.price ?? '');
     depositController = TextEditingController(text: widget.postDetail.deposit ?? '');
     addressController = TextEditingController(text: widget.postDetail.address ?? '');
+    statusController = TextEditingController(text: widget.postDetail.status ?? '');
     postTitleController = TextEditingController(text: widget.postDetail.postTitle ?? '');
     postDescriptionController = TextEditingController(text: widget.postDetail.postDescription ?? '');
-    statusController = TextEditingController(text: widget.postDetail.status ?? '');
+    postStatusController = TextEditingController(text: widget.postDetail.postStatus ?? 'Nháp....');
     imageUrls = widget.postDetail.imageUrls ?? [];
   }
 
@@ -76,7 +78,7 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                   const SizedBox(height: 12),
                   _infoField(label: 'Mô tả', controller: postDescriptionController, fullWidth: true, multiline: true, icon: Icons.description, hint: 'Nhập mô tả bài đăng...'),
                   const SizedBox(height: 12),
-                  _infoField(label: 'Trạng Thái', controller: TextEditingController(text: 'Đang chờ duyệt'), fullWidth: true, icon: Icons.info, hint: '', readOnly: true),
+                  _infoField(label: 'Trạng Thái', controller: postStatusController, fullWidth: true, icon: Icons.info, hint: '', readOnly: true),
                   const SizedBox(height: 20),
                   const Text('Thông tin phòng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),

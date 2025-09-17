@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/detail_apartment_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/new_customer_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_contract/contract_detail_screen.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_post/detail_post_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
 
 import '../../viewmodel/room_card_info.dart';
@@ -60,6 +61,44 @@ class CardRoomWidget extends StatelessWidget {
       ),
     );
   }
+
+  Widget buildContractOrPostButton(BuildContext context) {
+  if (data.tenantName == "Chưa có khách thuê") {
+    return ElevatedButton(
+      onPressed: () async {
+        RoomDetail roomDetail = await data.onViewDetail();
+        // Chuyển sang màn đăng bài
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DetailPostScreen(postId: "new", apartmentId: roomDetail.roomId),
+          ),
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF4285F4),
+        minimumSize: const Size(130, 30),
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6),
+        ),
+        elevation: 0,
+      ),
+      child: const Text(
+        'Đăng Bài',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontFamily: 'Noto Sans',
+          fontWeight: FontWeight.w400,
+          height: 1.12,
+        ),
+      ),
+    );
+  } else {
+    return buildContractButton(context);
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +183,7 @@ class CardRoomWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               buildInfoRow(Icons.person, data.tenantName, const Color(0xFF15B20A)),
-              buildContractButton(context),
+              buildContractOrPostButton(context),
             ],
           ),
 

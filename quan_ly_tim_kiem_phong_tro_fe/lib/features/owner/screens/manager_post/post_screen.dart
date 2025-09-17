@@ -24,8 +24,8 @@ class _PostScreenState extends State<PostScreen> {
   }
 
   Future<void> _loadPosts() async {
-    // Thay "ownerId" bằng id thực tế nếu có
-    final posts = await _postController.viewSummary("ownerId");
+    //== Thay "ownerId" bằng id thực tế nếu có
+    final posts = await _postController.viewSummary("dYSjvUDL2vwRrSgqiDHy");
     setState(() {
       _posts = posts;
       _isLoading = false;
@@ -49,14 +49,13 @@ class _PostScreenState extends State<PostScreen> {
               SizedBox(height: screenHeight * 0.05),
               Center(child: LogoWidget()),
               Row(
-                children: [
-                  // const TagWithIconWidget(),
-                  const Spacer(),
-                  // Button "Chủ trọ"
-                  // ButtonAddWidget(),
-                ],
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TagWithIconWidget(title: "Quảng lý bài đăng"),
+                // ButtonAddWidget(title: "Thêm bài đăng mới", screen: DetailPostScreen(postId: "new"),),
+              ],
               ),
-              SizedBox(height: screenHeight * 0.02),
+              // SizedBox(height: screenHeight * 0.02),
               // FliterStatusWidget(),
               SizedBox(height: screenHeight * 0.02),
               LabelTitleWidget(title: "Danh sách bài đăng"),
