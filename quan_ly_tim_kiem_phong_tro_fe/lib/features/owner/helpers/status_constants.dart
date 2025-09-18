@@ -70,6 +70,39 @@ class BookingRequestStatus {
 //kiểm tra status của hóa đơn
 
 //kiểm tra status của post
+class PostStatus {
+  static const draft = "Draft";
+  static const pending = "Pending";
+  static const approved = "Approved";
+  static const rejected = "Rejected";
+
+  static const values = [
+    draft,
+    pending,
+    approved,
+    rejected,
+  ];
+
+  static const localized = {
+    draft: "Nháp",
+    pending: "Đang chờ duyệt",
+    approved: "Đã duyệt",
+    rejected: "Bị từ chối",
+  };
+
+  static String toVietnamese(String status) {
+    return localized[status] ?? status;
+  }
+
+  static String fromVietnamese(String vietnamese) {
+    return localized.entries
+        .firstWhere(
+          (entry) => entry.value == vietnamese,
+          orElse: () => MapEntry(vietnamese, vietnamese),
+        )
+        .key;
+  }
+}
 
 //kiểm tra status của user
 

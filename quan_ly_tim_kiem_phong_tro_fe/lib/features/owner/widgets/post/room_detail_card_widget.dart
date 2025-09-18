@@ -2,12 +2,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/post_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/post_detail.dart';
 
 class RoomDetailCardWidget extends StatefulWidget {
-  final PostDetail postDetail; // Thêm dòng này
+  final PostDetail postDetail;
+  final void Function(bool isCreate, PostDetail data)? onSubmit;
+  final void Function(String status, PostDetail data)? onStatusChanged;
+  
 
-  const RoomDetailCardWidget(this.postDetail, {super.key});
+  const RoomDetailCardWidget(this.postDetail, {super.key, this.onSubmit, this.onStatusChanged});
 
   @override
   State<RoomDetailCardWidget> createState() => _RoomDetailCardWidgetState();
@@ -37,6 +42,7 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
     postDescriptionController = TextEditingController(text: widget.postDetail.postDescription ?? '');
     postStatusController = TextEditingController(text: widget.postDetail.postStatus ?? 'Nháp....');
     imageUrls = widget.postDetail.imageUrls ?? [];
+    List<String> allStatuses = PostController().getAllPostStatus();
   }
 
   @override
@@ -78,7 +84,47 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                   const SizedBox(height: 12),
                   _infoField(label: 'Mô tả', controller: postDescriptionController, fullWidth: true, multiline: true, icon: Icons.description, hint: 'Nhập mô tả bài đăng...'),
                   const SizedBox(height: 12),
-                  _infoField(label: 'Trạng Thái', controller: postStatusController, fullWidth: true, icon: Icons.info, hint: '', readOnly: true),
+                  DropdownButtonFormField<String>(
+                    value: postStatusController.text.isNotEmpty ? postStatusController.text : 'Draft',
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.info, color: Color(0xFF4285F4)),
+                      labelText: 'Trạng Thái',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFF4285F4), width: 2),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      isDense: true,
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    items: PostStatus.values.map((status) {
+                      return DropdownMenuItem<String>(
+                        value: status,
+                        child: Text(status),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        postStatusController.text = value ?? 'Draft';
+                      });
+                      if (widget.onStatusChanged != null && value != null) {
+                        widget.onStatusChanged!(value, widget.postDetail);
+                      }
+                    },
+                    disabledHint: Text(
+                      postStatusController.text.isNotEmpty ? postStatusController.text : 'Nháp',
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   const Text('Thông tin phòng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
@@ -143,10 +189,14 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                         child: ElevatedButton(
                           onPressed: () {
                             final info = '''Tiêu đề: ${postTitleController.text}\nMô tả: ${postDescriptionController.text}\nPhòng: ${roomController.text}\nTiền phòng: ${priceController.text}\nTiền đặt cọc: ${depositController.text}\nĐịa chỉ: ${addressController.text}''';
+                            bool isCreate = widget.postDetail.postId == null || widget.postDetail.postId!.isEmpty || widget.postDetail.postId == "new";
+                            if (widget.onSubmit != null) {
+                              widget.onSubmit!(isCreate, widget.postDetail);
+                            }
                             showDialog(
                               context: context,
                               builder: (ctx) => AlertDialog(
-                                title: const Text('Xác nhận cập nhật'),
+                                title: Text(isCreate ? 'Xác nhận tạo bài viết' : 'Xác nhận cập nhật'),
                                 content: Text(info),
                                 actions: [
                                   TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Đóng')),
@@ -160,7 +210,9 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Text('Cập Nhật'),
+                          child: Text(
+                            widget.postDetail.postId == null || widget.postDetail.postId!.isEmpty || widget.postDetail.postId == "new" ? 'Tạo' : 'Cập Nhật',
+                          ),
                         ),
                       ),
                     ],

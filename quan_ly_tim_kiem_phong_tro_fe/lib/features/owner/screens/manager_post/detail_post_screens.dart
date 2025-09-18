@@ -21,7 +21,7 @@ class DetailPostScreen extends StatelessWidget {
     if (postId == "new") {
       // Tạo bài đăng mới
       print("Creating new post for apartmentId: $apartmentId");
-      postDetail = _postController.create(apartmentId!); // Sử dụng apartmentId để tạo bài đăng mới
+      postDetail = _postController.getCreatePost(apartmentId!); // Sử dụng apartmentId để tạo bài đăng mới
     } else {
       postDetail = _postController.viewDetail(postId);
     }
@@ -51,7 +51,31 @@ class DetailPostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: screenHeight * 0.01),
                   LabelTitleWidget(title: "Thông tin bài đăng"),
-                  Center(child: RoomDetailCardWidget(postDetail)), // Truyền postDetail vào đây
+                  Center(child: RoomDetailCardWidget(
+                    postDetail,
+                    onSubmit: (isCreate, data) async {
+                      if (isCreate) {
+                        // Gọi API tạo mới bài đăng
+                        print("Tạo mới bài đăng: ${data.postTitle}");
+                        bool result = await _postController.create(data);
+                        if(result){
+                          print("Tạo bài đăng thành công");
+                        }
+                      } else {
+                        // Gọi API cập nhật bài đăng
+                        print("Cập nhật bài đăng: ${data.postId}");
+                        bool result = await _postController.updateInfo(data);
+                        if(result){
+                          print("Cập nhật bài đăng thành công");
+                        }
+                      }
+                      
+                    },
+                    onStatusChanged: (status, data) {
+                      print("Trạng thái bài đăng thay đổi: $status");
+                      _postController.updateStatus(data.postId!, status);
+                    },
+                  )),
                 ],
               ),
             ),

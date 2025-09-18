@@ -2,12 +2,14 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_curr
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/post_detail.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/post_summary.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/post.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/apartment_service.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/post_service.dart';
 
 class PostController {
   //create
-  Future<PostDetail> create(String apartmentID) async {
+  ////lay giao dien tao bai dang moi
+  Future<PostDetail> getCreatePost(String apartmentID) async {
     // Tạo bài đăng mới cho apartmentID
     PostDetail postDetail = PostDetail();
     // Gọi service để tạo bài đăng mới
@@ -17,13 +19,32 @@ class PostController {
     postDetail.status = ApartmentStatus.toVietnamese(apartment.status!);
     postDetail.price = formatCurrency(apartment.dailyRate!);
     postDetail.deposit = formatCurrency(apartment.deposit!);
+    postDetail.apartmentId = apartmentID;
     postDetail.address = apartment.address;
     postDetail.imageUrls = apartment.pathImage;
     
     return postDetail;
-  } 
+  }
+  ////gọi service tạo bài đăng mới
+  Future<bool> create(PostDetail postDetail) async {
+    try{
+      // Gọi service để tạo bài đăng mới
+      PostService postService = PostService();
+      postService.createPost(Post(
+        apartmentID: postDetail.apartmentId!,
+        header: postDetail.postTitle!, //header la title
+        description: postDetail.postDescription!,
+        status: "Approved", //===mặc định là Approved
+        creationDate: DateTime.now(),
+      ));
+      return true;
+    } catch (e) {
+      print("Error creating post: $e");
+      return false;
+    }
+  }
 
-  //viewSummary(String ownerId) => List<PostSummary> -done /==dữ liệu giả
+  //viewSummary(String ownerId) => List<PostSummary> -done 
   Future<List<PostSummary>> viewSummary(String ownerId) async {
     List<PostSummary> postSummaries = [];
     //lấy danh sách apartment của ownerId
@@ -53,62 +74,6 @@ class PostController {
       }
       // print(apartment.apartmentID);
     }
-    //==hiện tại cho dữ liệu giả
-    // postSummaries = [
-    //   PostSummary(
-    //     postId: "1",
-    //     roomNumber: "Phòng 101",
-    //     postDate: DateTime(2023, 1, 1),
-    //     status: "Đang cho thuê",
-    //     imageUrl: "https://via.placeholder.com/150",
-    //     onEdit: () async {
-    //       return PostDetail();
-    //     },
-    //     onDelete: () async {
-    //       return false;
-    //     },
-    //   ),
-    //   PostSummary(
-    //     postId: "2",
-    //     roomNumber: "Phòng 102",
-    //     postDate: DateTime(2023, 1, 2),
-    //     status: "Đã cho thuê",
-    //     imageUrl: "https://via.placeholder.com/150",
-    //     onEdit: () async {
-    //       return PostDetail();
-    //     },
-    //     onDelete: () async {
-    //       return false;
-    //     },
-    //   ),
-    //   PostSummary(
-    //     postId: "3",
-    //     roomNumber: "Phòng 103",
-    //     postDate: DateTime(2023, 1, 3),
-    //     status: "Đang cho thuê",
-    //     imageUrl: "https://via.placeholder.com/150",
-    //     onEdit: () async {
-    //       return PostDetail();
-    //     },
-    //     onDelete: () async {
-    //       return false;
-    //     },
-    //   ),
-    //   PostSummary(
-    //     postId: "4",
-    //     roomNumber: "Phòng 104",
-    //     postDate: DateTime(2023, 1, 4),
-    //     status: "Đang cho thuê",
-    //     imageUrl: "https://via.placeholder.com/150",
-    //     onEdit: () async {
-    //       return PostDetail();
-    //     },
-    //     onDelete: () async {
-    //       return false;
-    //     },
-    //   ),
-    // ];
-    //===============================
 
 
     return postSummaries;
@@ -140,8 +105,44 @@ class PostController {
   }
 
   //updateInfo(PostDetail postDetail) => PostDetail
+  Future<bool> updateInfo(PostDetail postDetail) async {
+    try{
+      // Gọi service để cập nhật bài đăng
+      PostService postService = PostService();
+      postService.updatePost(Post(
+        postID: postDetail.postId!,
+        apartmentID: postDetail.apartmentId!,
+        header: postDetail.postTitle!, //header la title
+        description: postDetail.postDescription!,
+        status: "Approved", //===mặc định là Approved
+        creationDate: DateTime.now(),
+      ));
+      return true;
+    } catch (e) {
+      print("Error updating post: $e");
+      return false;
+    }
+  }
 
-  //updateStatus(String postId) => bool
+  //updateStatus(String postId, String status) => bool
+  Future<bool> updateStatus(String postId, String status) async {
+    try{
+      // Gọi service để cập nhật trạng thái bài đăng
+      PostService postService = PostService();
+      var post = await postService.getPostById(postId);
+      post.status = status;
+      await postService.updatePost(post);
+      return true;
+    } catch (e) {
+      print("Error updating post status: $e");
+      return false;
+    }
+  }
 
   //delete(String postId) => bool
+
+  //getAllPostStatus () => List<String>
+  List<String> getAllPostStatus() {
+    return PostStatus.values;
+  }
 }

@@ -1,5 +1,6 @@
 class PostDetail {
   String? postId;
+  String? apartmentId;
   String? roomNumber;
   String? price;
   String? deposit;
@@ -12,6 +13,7 @@ class PostDetail {
 
   PostDetail({
     this.postId,
+    this.apartmentId,
     this.roomNumber,
     this.price,
     this.deposit,

@@ -65,10 +65,11 @@ class PostService {
     // Trả về Post mới, dùng fromJson (không cần sửa model)
     return Post(
       postID: docRef.id,
-      header: data['header'] ?? '',
-      status: data['status'] ?? '',
-      description: data['description'] ?? '',
-      creationDate: (data['creationDate'] as Timestamp).toDate(),
+      apartmentID: data['ApartmentID'] ?? '',
+      header: data['Header'] ?? '',
+      status: data['Status'] ?? '',
+      description: data['Desciption'] ?? '',
+      creationDate: (data['CreationDate'] as Timestamp).toDate(),
     );
   }
   //===========updatePost
@@ -82,6 +83,7 @@ class PostService {
     await firestore.collection("posts").doc(id).delete();
   }
 
+  //===========getPostByApartmentId
   Future getPostByApartmentId(String apartmentId) async {
     List<Post> posts = [];
     QuerySnapshot snapshot = await firestore
