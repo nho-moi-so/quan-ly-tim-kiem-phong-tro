@@ -17,25 +17,25 @@ class Post {
     required this.creationDate,
   });
 
-  factory Post.fromJson(Map<String, dynamic> json) {
+  factory Post.fromJson(String id, Map<String, dynamic> json) {
     return Post(
-      postID: json['postID'],
-      apartmentID: json['apartmentID'],
-      header: json['header'],
-      status: json['status'],
-      description: json['description'],
-      creationDate: (json['creationDate'] as Timestamp).toDate(),
+      postID: id,
+      apartmentID: json['ApartmentID'],
+      header: json['Header'],
+      status: json['Status'],
+      description: json['Description'],
+      creationDate: (json['CreationDate'] as Timestamp).toDate(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'postID': postID,
-      'apartmentID': apartmentID,
-      'header': header,
-      'status': status,
-      'description': description,
-      'creationDate': creationDate,
+      'ApartmentID': apartmentID,
+      'Header': header,
+      'Status': status,
+      'Description': description,
+      'CreationDate': creationDate,
     };
   }
 }

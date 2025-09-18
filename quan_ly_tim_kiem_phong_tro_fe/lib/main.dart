@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/post.dart';
 
 import '../../service/navigation_service.dart';
 import 'features/owner/screens/screens.dart';
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
       //     '/': (context) => HomeScreens(),
       //     '/signup': (context) => RegisterScreens(), 
       //   },
-      home: PostScreen(), //==================
+      home: ApartmentScreen(), //==================
     );
   }
 }

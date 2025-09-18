@@ -61,6 +61,9 @@ class DetailPostScreen extends StatelessWidget {
                         if(result){
                           print("Tạo bài đăng thành công");
                         }
+                        else{
+                          print("Tạo bài đăng thất bại");
+                        }
                       } else {
                         // Gọi API cập nhật bài đăng
                         print("Cập nhật bài đăng: ${data.postId}");

@@ -1,9 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/post_controller.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/post_detail.dart';
 
 class RoomDetailCardWidget extends StatefulWidget {
@@ -40,9 +38,9 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
     statusController = TextEditingController(text: widget.postDetail.status ?? '');
     postTitleController = TextEditingController(text: widget.postDetail.postTitle ?? '');
     postDescriptionController = TextEditingController(text: widget.postDetail.postDescription ?? '');
-    postStatusController = TextEditingController(text: widget.postDetail.postStatus ?? 'Nháp....');
+    postStatusController = TextEditingController(text: widget.postDetail.postStatus);
     imageUrls = widget.postDetail.imageUrls ?? [];
-    List<String> allStatuses = PostController().getAllPostStatus();
+    List<Map<String, String>> allStatuses = PostController().getAllPostStatus();
   }
 
   @override
@@ -106,10 +104,10 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                       filled: true,
                       fillColor: Colors.white,
                     ),
-                    items: PostStatus.values.map((status) {
+                    items: PostController().getAllPostStatus().map((status) {
                       return DropdownMenuItem<String>(
-                        value: status,
-                        child: Text(status),
+                        value: status['value'],
+                        child: Text(status['label'] ?? status['value'] ?? ''),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -190,16 +188,30 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                           onPressed: () {
                             final info = '''Tiêu đề: ${postTitleController.text}\nMô tả: ${postDescriptionController.text}\nPhòng: ${roomController.text}\nTiền phòng: ${priceController.text}\nTiền đặt cọc: ${depositController.text}\nĐịa chỉ: ${addressController.text}''';
                             bool isCreate = widget.postDetail.postId == null || widget.postDetail.postId!.isEmpty || widget.postDetail.postId == "new";
-                            if (widget.onSubmit != null) {
-                              widget.onSubmit!(isCreate, widget.postDetail);
-                            }
                             showDialog(
                               context: context,
                               builder: (ctx) => AlertDialog(
                                 title: Text(isCreate ? 'Xác nhận tạo bài viết' : 'Xác nhận cập nhật'),
                                 content: Text(info),
                                 actions: [
-                                  TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Đóng')),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: const Text('Đóng'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(ctx);
+                                      // Cập nhật lại dữ liệu PostDetail từ controller trước khi submit
+                                      widget.postDetail.postTitle = postTitleController.text;
+                                      widget.postDetail.postDescription = postDescriptionController.text;
+                                      widget.postDetail.postStatus = postStatusController.text;
+                                      // Các trường khác nếu cần
+                                      if (widget.onSubmit != null) {
+                                        widget.onSubmit!(isCreate, widget.postDetail);
+                                      }
+                                    },
+                                    child: const Text('OK'),
+                                  ),
                                 ],
                               ),
                             );

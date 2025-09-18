@@ -27,10 +27,11 @@ class PostService {
     final data = snapshot.data() as Map<String, dynamic>;
     return Post(
       postID: snapshot.id,
-      header: data['header'] ?? '',
-      status: data['status'] ?? '',
-      description: data['description'] ?? '',
-      creationDate: (data['creationDate'] as Timestamp).toDate(),
+      apartmentID: data['ApartmentID'] ?? '',
+      header: data['Header'] ?? '',
+      status: data['Status'] ?? '',
+      description: data['Desciption'] ?? '',
+      creationDate: (data['CreationDate'] as Timestamp).toDate(),
     );
   }
   //=========getPostByUserId

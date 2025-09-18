@@ -7,8 +7,9 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/apartment_service.da
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/post_service.dart';
 
 class PostController {
+
   //create
-  ////lay giao dien tao bai dang moi
+  ////lay giao dien tao bai dang moi -done
   Future<PostDetail> getCreatePost(String apartmentID) async {
     // Tạo bài đăng mới cho apartmentID
     PostDetail postDetail = PostDetail();
@@ -27,7 +28,6 @@ class PostController {
   }
   ////gọi service tạo bài đăng mới
   Future<bool> create(PostDetail postDetail) async {
-    try{
       // Gọi service để tạo bài đăng mới
       PostService postService = PostService();
       postService.createPost(Post(
@@ -38,10 +38,6 @@ class PostController {
         creationDate: DateTime.now(),
       ));
       return true;
-    } catch (e) {
-      print("Error creating post: $e");
-      return false;
-    }
   }
 
   //viewSummary(String ownerId) => List<PostSummary> -done 
@@ -79,27 +75,49 @@ class PostController {
     return postSummaries;
   }
 
-  //viewDetail(String postId) => PostDetail //done /==dữ liệu giả
+  //viewDetail(String postId) => PostDetail //done 
   Future<PostDetail> viewDetail(String postId) async {
     PostDetail postDetail = PostDetail();
-    
-    //==hiện tại cho dữ liệu giả
+    // print("Viewing post detail for postId: $postId");
+    // Gọi service để lấy chi tiết bài đăng
+    PostService postService = PostService();
+    var post = await postService.getPostById(postId);
+    // print("Post fetched: ${post.postID}, ${post.header}");
+    //lay thong tin apartment
+    ApartmentService apartmentService = ApartmentService();
+    var apartment = await apartmentService.getApartmentById(post.apartmentID!);
+    // tao PostDetail
     postDetail = PostDetail(
-      postId: "1",
-      roomNumber: "Phòng 101",
-      price: "3,000,000 VND",
-      deposit: "3,000,000 VND",
-      address: "123 Đường ABC, Quận 1, TP.HCM",
-      status: "Trống",
-      postTitle: "Phòng trọ đẹp, sạch sẽ, an ninh",
-      postDescription: "Phòng rộng rãi, có ban công, gần chợ, siêu thị, trường học.",
-      postStatus: "Đang chờ duyệt nha",
-      imageUrls: [
-        "https://via.placeholder.com/300",
-        "https://via.placeholder.com/300",
-        "https://via.placeholder.com/300",
-      ],
+      postId: post.postID,
+      apartmentId: post.apartmentID,
+      roomNumber: "Phòng ${apartment.codeApartment}",
+      price: formatCurrency(apartment.dailyRate!),
+      deposit: formatCurrency(apartment.deposit!),
+      address: apartment.address,
+      status: ApartmentStatus.toVietnamese(apartment.status!),
+      postTitle: post.header,
+      postDescription: post.description,
+      postStatus: post.status,
+      imageUrls: apartment.pathImage,
     );
+
+    //==hiện tại cho dữ liệu giả
+    // postDetail = PostDetail(
+    //   postId: "1",
+    //   roomNumber: "Phòng 101",
+    //   price: "3,000,000 VND",
+    //   deposit: "3,000,000 VND",
+    //   address: "123 Đường ABC, Quận 1, TP.HCM",
+    //   status: "Trống",
+    //   postTitle: "Phòng trọ đẹp, sạch sẽ, an ninh",
+    //   postDescription: "Phòng rộng rãi, có ban công, gần chợ, siêu thị, trường học.",
+    //   postStatus: "Draft",
+    //   imageUrls: [
+    //     "https://via.placeholder.com/300",
+    //     "https://via.placeholder.com/300",
+    //     "https://via.placeholder.com/300",
+    //   ],
+    // );
     //===============================
     return postDetail;
   }
@@ -142,7 +160,10 @@ class PostController {
   //delete(String postId) => bool
 
   //getAllPostStatus () => List<String>
-  List<String> getAllPostStatus() {
-    return PostStatus.values;
+  List<Map<String, String>> getAllPostStatus() {
+    return PostStatus.values.map((status) => {
+      'value': status,
+      'label': PostStatus.toVietnamese(status),
+    }).toList();
   }
 }
