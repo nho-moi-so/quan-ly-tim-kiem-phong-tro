@@ -528,6 +528,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     roomState: selectedRoomState ?? '',
                     address: addressController.text,
                     requirement: requirementController.text,
+                    roomType: selectedRoomType ?? '',
                     // Save all images to a writable directory with random names and return the new paths
                     images: await Future.wait(_images.map((img) async {
                       // Generate a random file name

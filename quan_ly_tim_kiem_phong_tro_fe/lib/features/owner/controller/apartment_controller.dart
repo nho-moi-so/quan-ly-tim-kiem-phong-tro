@@ -33,7 +33,11 @@ class ApartmentController {
         deposit: double.parse(roomCardDetail.depositPrice),
         maxOccupancy: int.parse(roomCardDetail.maxCapacity),
         description: roomCardDetail.description,
-        status: roomCardDetail.room_status,
+        status: roomCardDetail.room_status == '' ? 'Available' : roomCardDetail.room_status,
+        address: roomCardDetail.address,
+        type: roomCardDetail.roomType,
+        requirement: roomCardDetail.requirement.split(',').map((e) => e.trim()).toList(),
+        userID: "exampleUserId", //===chưa có user nên tạm thời để vậy
       );
 
       Apartment createdApartment = await _apartmentService.createApartment(apartment);
