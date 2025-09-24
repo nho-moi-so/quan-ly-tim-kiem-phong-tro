@@ -36,6 +36,9 @@ export 'contact/location_review_widget.dart';
 export 'contact/extend_info_widget.dart';
 export 'contact/password_display_widget.dart';
 
+//message
+export 'message/chat_item_widget.dart';
+
 Future<void> showDateTimePicker({
   required BuildContext context,
   required DateTime initialDateTime,

@@ -13,6 +13,10 @@ export 'manager_post/detail_post_screens.dart';
 //contract
 export 'manager_contract/contract_detail_screen.dart';
 
+//message
+export 'manager_message/message_screen.dart';
+export 'manager_message/chat_screens.dart';
+
 //dashboard
 export 'dashboard_screen.dart';
 
