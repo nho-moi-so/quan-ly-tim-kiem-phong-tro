@@ -66,6 +66,16 @@ class _ChatScreenState extends State<ChatScreen> {
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.blue,
+                      size: 24,
+                    ),
+                  ),
                   CircleAvatar(
                     radius: 30,
                     backgroundImage: NetworkImage("https://placehold.co/60x75"),
