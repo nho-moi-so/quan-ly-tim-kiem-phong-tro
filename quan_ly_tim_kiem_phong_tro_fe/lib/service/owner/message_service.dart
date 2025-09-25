@@ -1,5 +1,8 @@
-import 'package:quan_ly_tim_kiem_phong_tro_fe/model/message.dart';
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/message.dart';
+
 class MessageService {
   //connect to firebase
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -43,5 +46,54 @@ class MessageService {
   //==========================deleteMessage
   Future<void> deleteMessage(String messageID) async {
     await firestore.collection("messages").doc(messageID).delete();
+  }
+
+  //==========================getConversation
+  Stream<List<Message>> getConversation(String userA, String userB) {
+    final controller = StreamController<List<Message>>();
+    List<Message> sent = [];
+    List<Message> received = [];
+
+    StreamSubscription? sentSub;
+    StreamSubscription? receivedSub;
+
+    void emit() {
+      final merged = [...sent, ...received]
+        ..sort((a, b) => a.sentDate.compareTo(b.sentDate));
+      controller.add(merged);
+    }
+
+    sentSub = firestore
+        .collection('messages')
+        .where('SenderID', isEqualTo: userA)
+        .where('ReceiverID', isEqualTo: userB)
+        .orderBy('SentDate')
+        .snapshots()
+        .listen((snapshot) {
+      sent = snapshot.docs
+          .map((doc) => Message.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+          .toList();
+      emit();
+    });
+
+    receivedSub = firestore
+        .collection('messages')
+        .where('SenderID', isEqualTo: userB)
+        .where('ReceiverID', isEqualTo: userA)
+        .orderBy('SentDate')
+        .snapshots()
+        .listen((snapshot) {
+      received = snapshot.docs
+          .map((doc) => Message.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+          .toList();
+      emit();
+    });
+
+    controller.onCancel = () {
+      sentSub?.cancel();
+      receivedSub?.cancel();
+    };
+
+    return controller.stream;
   }
 }

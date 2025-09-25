@@ -33,6 +33,8 @@ class _MessageScreenState extends State<MessageScreen> {
                 name: msg.name,
                 message: msg.message,
                 status: msg.status,
+                ownerId: msg.ownerId,
+                tenantId: msg.tenantId,
               ))
           .toList();
       _isLoading = false;

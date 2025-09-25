@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/message_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/message.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/chat_item_viewmodel.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key, required ChatItemViewModel chatItem});
+  final ChatItemViewModel chatItem;
+
+  const ChatScreen({super.key, required this.chatItem});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -10,19 +14,30 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
-  final List<Map<String, dynamic>> _messages = [
-    {"fromMe": false, "text": "Tôi có thể giúp gì cho bạn?"},
-    {"fromMe": true, "text": "Dạ Phòng 203 còn trống ko ạ"},
-    {"fromMe": false, "text": "Dạ Phòng 203 vẫn còn trống ạ, bạn muốn xem phòng vào ngày mai ko ạ?"},
-    {"fromMe": true, "text": "Dạ em sẽ xem xét và nhắn lại ạ"},
-  ];
+  final MessageController _messageController = MessageController();
 
-  void _sendMessage() {
-    if (_controller.text.trim().isEmpty) return;
-    setState(() {
-      _messages.add({"fromMe": true, "text": _controller.text.trim()});
+  String get _currentUserId => widget.chatItem.ownerId;   // id chủ trọ
+  String get _partnerId => widget.chatItem.tenantId;       // id khách thuê
+
+  Future<void> _sendMessage() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    final isSent = await _messageController.sendMessage(
+      content: text,
+      senderID: _currentUserId,
+      receiverID: _partnerId,
+    );
+
+    if (isSent) {
       _controller.clear();
-    });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gửi tin nhắn thất bại. Vui lòng thử lại.'),
+        ),
+      );
+    }
   }
 
   Widget _buildMessage(String text, bool fromMe) {
@@ -97,11 +112,30 @@ class _ChatScreenState extends State<ChatScreen> {
 
             // Tin nhắn
             Expanded(
-              child: ListView.builder(
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final msg = _messages[index];
-                  return _buildMessage(msg["text"], msg["fromMe"]);
+              child: StreamBuilder<List<Message>>(
+                stream: _messageController.getConversation(_currentUserId, _partnerId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Lỗi tải tin nhắn'));
+                  }
+
+                  final messages = snapshot.data ?? [];
+                  if (messages.isEmpty) {
+                    return const Center(child: Text('Chưa có tin nhắn'));
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final msg = messages[index];
+                      final fromMe = msg.senderID == _currentUserId;
+                      return _buildMessage(msg.content, fromMe);
+                    },
+                  );
                 },
               ),
             ),
@@ -136,7 +170,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
-                    onPressed: _sendMessage,
+                    onPressed: () => _sendMessage(),
                     icon: const Icon(Icons.send, size: 16, color: Colors.white),
                     label: const Text(
                       "Gửi",
