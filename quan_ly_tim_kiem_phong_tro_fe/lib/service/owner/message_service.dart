@@ -10,7 +10,7 @@ class MessageService {
   //=================getAllMessages
   Future<List<Message>> getAllMessages() async {
     List<Message> messages = [];
-    QuerySnapshot snapshot = await firestore.collection("messages").get();
+    QuerySnapshot snapshot = await firestore.collection("message").get();
     for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
       messages.add(Message.fromMap(doc.id, data));
@@ -20,14 +20,14 @@ class MessageService {
 
   //=======================getMessageById
   Future<Message> getMessageById(String id) async {
-    DocumentSnapshot snapshot = await firestore.collection("messages").doc(id).get();
+    DocumentSnapshot snapshot = await firestore.collection("message").doc(id).get();
     final data = snapshot.data() as Map<String, dynamic>;
     return Message.fromMap(snapshot.id, data);
   }
 
   //===================createMessage
   Future<Message> createMessage(Message message) async {
-    DocumentReference docRef = await firestore.collection("messages").add(message.toMap());
+    DocumentReference docRef = await firestore.collection("message").add(message.toMap());
 
     // Lấy lại dữ liệu vừa add từ Firestore
     DocumentSnapshot snapshot = await docRef.get();
@@ -39,13 +39,13 @@ class MessageService {
 
   //===================updateMessage
   Future<Message> updateMessage(Message message) async {
-    await firestore.collection("messages").doc(message.messageID).update(message.toMap());
+    await firestore.collection("message").doc(message.messageID).update(message.toMap());
     return message;
   }
 
   //==========================deleteMessage
   Future<void> deleteMessage(String messageID) async {
-    await firestore.collection("messages").doc(messageID).delete();
+    await firestore.collection("message").doc(messageID).delete();
   }
 
   //==========================getConversation
@@ -64,7 +64,7 @@ class MessageService {
     }
 
     sentSub = firestore
-        .collection('messages')
+        .collection('message')
         .where('SenderID', isEqualTo: userA)
         .where('ReceiverID', isEqualTo: userB)
         .orderBy('SentDate')
@@ -77,7 +77,7 @@ class MessageService {
     });
 
     receivedSub = firestore
-        .collection('messages')
+        .collection('message')
         .where('SenderID', isEqualTo: userB)
         .where('ReceiverID', isEqualTo: userA)
         .orderBy('SentDate')

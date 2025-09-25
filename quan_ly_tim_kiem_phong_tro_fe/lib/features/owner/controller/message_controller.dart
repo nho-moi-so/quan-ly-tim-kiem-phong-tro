@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/chat_item_viewmodel.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/message.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/message_service.dart';
@@ -7,7 +9,9 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/message_service.dart
 class MessageController {
   final MessageService _messageService = MessageService();
 
-  //getSummaryMessage - == fake data - done 
+  get firestore => _messageService.firestore;
+
+  //getSummaryMessage - //== fake data - done 
   List<ChatItemViewModel> getSummaryMessage(String ownerId) {
     return [
       ChatItemViewModel(
@@ -15,8 +19,8 @@ class MessageController {
         name: "Pamiuoi",
         message: "Dạ Phòng 203 còn trống ko ạ",
         status: "Online",
-        ownerId: "U002",
-        tenantId: "U001",
+        ownerId: "U001",
+        tenantId: "U002",
       ),
       ChatItemViewModel(
         avatarUrl: "https://placehold.co/36x45",
@@ -45,8 +49,9 @@ class MessageController {
     ];
   }
 
-  //getConversation(String senderId, String receiverId) => List<Message> //== fake data
+  //getConversation(String senderId, String receiverId) => List<Message> - done
   Stream<List<Message>> getConversation(String senderId, String receiverId) {
+    
     return _messageService.getConversation(senderId, receiverId);
   }
 
