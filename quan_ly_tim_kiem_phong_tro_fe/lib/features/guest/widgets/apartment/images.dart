@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
 
 class Images extends StatelessWidget {
-  const Images({super.key});
+  final Apartment apartment;
+
+  const Images({super.key, required this.apartment});
 
   @override
   Widget build(BuildContext context) {
-    final List<String> thumbnailImages = [
-      'assets/images/tro1.png',
-      'assets/images/tro1-1.png',
-      'assets/images/tro1-2.png',
-      'assets/images/tro1-3.png',
-    ];
+    final List<String> thumbnailImages = apartment.PathImage;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AspectRatio(
           aspectRatio: 4 / 3,
-          child: Image.asset(thumbnailImages[0], fit: BoxFit.cover),
+          child: Image.network(
+            thumbnailImages[0],
+            fit: BoxFit.cover,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
@@ -30,7 +31,7 @@ class Images extends StatelessWidget {
               itemBuilder: (context, index) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
+                  child: Image.network(
                     thumbnailImages[index],
                     width: 80,
                     height: 80,

@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
+// chú ý: nhớ import file model Apartment của bạn
 
 class ApartmentDetail extends StatelessWidget {
-  const ApartmentDetail({super.key});
+  final Apartment apartment;
+  const ApartmentDetail({super.key, required this.apartment});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+
+    // lấy giá phòng và đặt cọc
+    final daily = apartment.DailyRate;
+    final deposit = apartment.Deposit;
+
+    // convert requirements list -> string
+    final reqText =
+        (apartment.Requirements != null && apartment.Requirements!.isNotEmpty)
+        ? apartment.Requirements!.join(', ')
+        : '-';
 
     return SingleChildScrollView(
       child: Padding(
@@ -13,8 +26,9 @@ class ApartmentDetail extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // tên phòng
             Text(
-              'MiniHouse Cần Thơ',
+              apartment.Type ?? 'Tên phòng',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: screenWidth * 0.06,
@@ -22,56 +36,31 @@ class ApartmentDetail extends StatelessWidget {
               ),
             ),
             SizedBox(height: screenWidth * 0.02),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  '5.200.000đ',
-                  style: TextStyle(
-                    color: Colors.black.withOpacity(0.65),
-                    fontSize: screenWidth * 0.035,
-                    fontWeight: FontWeight.w600,
-                    decoration: TextDecoration.lineThrough,
-                  ),
-                ),
-                SizedBox(width: screenWidth * 0.02),
-                Text(
-                  '4.500.000đ',
-                  style: TextStyle(
-                    color: const Color(0xFFF7210F),
-                    fontSize: screenWidth * 0.05,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(width: screenWidth * 0.02),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.02,
-                    vertical: screenWidth * 0.01,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.redAccent,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '-21%',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: screenWidth * 0.035,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+
+            // hiển thị giá phòng
+            Text(
+              daily != null ? formatVND(daily.toInt()) : '-',
+              style: TextStyle(
+                color: const Color(0xFFF7210F),
+                fontSize: screenWidth * 0.05,
+                fontWeight: FontWeight.bold,
+              ),
             ),
+
             SizedBox(height: screenWidth * 0.03),
+
+            // địa chỉ
             Row(
               children: [
-                Icon(Icons.location_on, size: screenWidth * 0.045, color: Colors.grey),
+                Icon(
+                  Icons.location_on,
+                  size: screenWidth * 0.045,
+                  color: Colors.grey,
+                ),
                 SizedBox(width: screenWidth * 0.01),
                 Expanded(
                   child: Text(
-                    '45 Nguyễn Văn Cừ, Cần Thơ',
+                    apartment.address ?? "Chưa có địa chỉ",
                     style: TextStyle(
                       color: const Color(0xFF4B5563),
                       fontSize: screenWidth * 0.038,
@@ -81,45 +70,75 @@ class ApartmentDetail extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: screenWidth * 0.03),
-            // Rating and info row
+
+            SizedBox(height: screenWidth * 0.04),
+
+            // info items
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: List.generate(
-                    5,
-                    (index) => Icon(Icons.star, color: Colors.amber, size: screenWidth * 0.04),
-                  ),
+                InfoItem(
+                  icon: Icons.bed,
+                  text: "2 Giường", // set cứng
                 ),
-                SizedBox(width: screenWidth * 0.02),
-                Text(
-                  '9.2 Trên cả tuyệt vời',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.035,
-                    fontWeight: FontWeight.w500,
-                  ),
+                InfoItem(
+                  icon: Icons.bathtub,
+                  text: "1 Phòng Tắm", // set cứng
                 ),
-                SizedBox(width: screenWidth * 0.02),
-                Text(
-                  '126 nhận xét',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.03,
-                    color: Colors.blue,
-                  ),
+                InfoItem(
+                  icon: Icons.people,
+                  text: "${apartment.maxOccupancy ?? 0} người", // vẫn động
                 ),
               ],
             ),
-            SizedBox(height: screenWidth * 0.04),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                InfoItem(icon: Icons.bed, text: '1 Giường'),
-                InfoItem(icon: Icons.bathtub, text: '1 Phòng Tắm'),
-                InfoItem(icon: Icons.people, text: '2 người'),
-              ],
+
+            SizedBox(height: screenWidth * 0.03),
+
+            // đặt cọc
+            Text(
+              "Đặt cọc: ${deposit != null ? formatVND(deposit.toInt()) : '-'}",
+              style: TextStyle(
+                fontSize: screenWidth * 0.04,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+
+            SizedBox(height: screenWidth * 0.02),
+
+            // yêu cầu
+            buildRow(
+              context,
+              Icons.pets,
+              'Yêu Cầu',
+              reqText,
+              TextStyle(fontWeight: FontWeight.w500),
+              TextStyle(),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget buildRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+    TextStyle labelStyle,
+    TextStyle valueStyle,
+  ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: screenWidth * 0.01),
+      child: Row(
+        children: [
+          Icon(icon, size: screenWidth * 0.04, color: const Color(0xFF4B5563)),
+          SizedBox(width: screenWidth * 0.02),
+          Text(label, style: labelStyle),
+          SizedBox(width: screenWidth * 0.02),
+          Expanded(child: Text(value, style: valueStyle)),
+        ],
       ),
     );
   }
@@ -134,7 +153,6 @@ class InfoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
     return Row(
       children: [
         Icon(icon, color: const Color(0xFF4B5563), size: screenWidth * 0.04),
@@ -149,4 +167,9 @@ class InfoItem extends StatelessWidget {
       ],
     );
   }
+}
+
+// Hàm format tiền VND (nếu bạn chưa có)
+String formatVND(int value) {
+  return "${value.toString()} ₫";
 }

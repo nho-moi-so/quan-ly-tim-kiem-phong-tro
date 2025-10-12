@@ -68,7 +68,7 @@ class SearchService {
     print('Step1 (after firestore query): ${apartments.length}');
     for (var apt in apartments) {
       print(
-        '  [S1] id=${apt.apartmentID}, code=${apt.codeApartment}, type=${apt.type}, status=${apt.status}, address=${apt.address}, maxOcc=${apt.maxOccupancy}, dailyRate=${apt.dailyRate}',
+        '  [S1] id=${apt.ApartmentID}, code=${apt.CodeApartment}, type=${apt.Type}, status=${apt.status}, address=${apt.address}, maxOcc=${apt.maxOccupancy}, dailyRate=${apt.DailyRate}',
       );
     }
 
@@ -133,11 +133,11 @@ class SearchService {
 
       final requiredSet = reqAmenityIds.toSet();
       apartments = apartments.where((apt) {
-        final have = aptToAmenity[apt.apartmentID] ?? <String>{};
+        final have = aptToAmenity[apt.ApartmentID] ?? <String>{};
         final ok = requiredSet.difference(have).isEmpty;
         if (!ok) {
           print(
-            '  [amenity filter] dropping ${apt.apartmentID} (have=$have, need=$requiredSet)',
+            '  [amenity filter] dropping ${apt.ApartmentID} (have=$have, need=$requiredSet)',
           );
         }
         return ok;
@@ -145,7 +145,7 @@ class SearchService {
     }
     print('Step3 (after amenities): ${apartments.length}');
     for (var apt in apartments) {
-      print('  [S3] id=${apt.apartmentID}, code=${apt.codeApartment}');
+      print('  [S3] id=${apt.ApartmentID}, code=${apt.CodeApartment}');
     }
     if (criteria.address != null && criteria.address!.trim().isNotEmpty) {
       final keyword = normalize(criteria.address!);
@@ -155,7 +155,7 @@ class SearchService {
         final matched = na.contains(keyword);
         if (!matched) {
           print(
-            '  [addr filter] dropping ${apt.apartmentID} (addr="$na", keyword="$keyword")',
+            '  [addr filter] dropping ${apt.ApartmentID} (addr="$na", keyword="$keyword")',
           );
         }
         return matched;
@@ -163,7 +163,7 @@ class SearchService {
     }
     print('Step4 (after address): ${apartments.length}');
     for (var apt in apartments) {
-      print('  [S4] id=${apt.apartmentID}, addr=${apt.address}');
+      print('  [S4] id=${apt.ApartmentID}, addr=${apt.address}');
     }
 
     return apartments;

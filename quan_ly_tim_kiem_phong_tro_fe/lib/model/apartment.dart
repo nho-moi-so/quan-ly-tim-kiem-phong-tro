@@ -1,32 +1,38 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Apartment {
-  final String apartmentID;
-  final String codeApartment;
-  final double dailyRate;
-  final double deposit;
+  final String ApartmentID;
+  final String CodeApartment;
+  final double DailyRate;
+  final double Deposit;
   final int maxOccupancy;
   final String description;
   final String userId;
-  final List<String> pathImage;
+  final List<String> PathImage;
   final String status;
   final String password;
   final String address;
-  final String type;
+  final String Type;
+  final List<String> Requirements;
+  final String Bedroom;
+  final String Bathroom;
 
   Apartment({
-    required this.apartmentID,
-    required this.codeApartment,
-    required this.dailyRate,
-    required this.deposit,
+    required this.ApartmentID,
+    required this.CodeApartment,
+    required this.DailyRate,
+    required this.Deposit,
     required this.maxOccupancy,
     required this.description,
-    required this.pathImage,
+    required this.PathImage,
     required this.status,
     required this.password,
     required this.userId,
     required this.address,
-    required this.type,
+    required this.Type,
+    required this.Requirements,
+    required this.Bathroom,
+    required this.Bedroom,
   });
 
   static String _getString(Map<String, dynamic> d, List<String> keys) {
@@ -65,18 +71,34 @@ class Apartment {
     final data = (doc.data() ?? {}) as Map<String, dynamic>;
 
     return Apartment(
-      apartmentID: doc.id,
-      codeApartment: _getString(data, ['CodeApartment', 'codeApartment']),
+      ApartmentID: doc.id,
+      CodeApartment: _getString(data, ['CodeApartment', 'codeApartment']),
       description: _getString(data, ['Description', 'Decription', 'description', 'decription']),
       status: _getString(data, ['Status', 'status']),
       userId: _getString(data, ['UserId', 'userId']),
-      pathImage: (data['PathImage'] is List) ? List<String>.from(data['PathImage']) : <String>[],
-      dailyRate: _getDouble(data, ['DailyRate', 'dailyRate']),
-      deposit: _getDouble(data, ['Deposit', 'deposit']),
+      PathImage: (data['PathImage'] is List) ? List<String>.from(data['PathImage']) : <String>[],
+      DailyRate: _getDouble(data, ['DailyRate', 'dailyRate']),
+      Deposit: _getDouble(data, ['Deposit', 'deposit']),
       maxOccupancy: _getInt(data, ['MaxOccupancy', 'maxOccupancy']),
       password: _getString(data, ['Password', 'password']),
       address: _getString(data, ['Address', 'address']),
-      type: _getString(data, ['Type', 'type']),
+      Type: _getString(data, ['Type', 'type']),
+      Requirements: (data['Requirements'] is List) ? List<String>.from(data['Requirements']) : <String>[],
+      Bathroom: _getString(data, ['Bathroom', 'bathroom']), 
+      Bedroom: _getString(data, ['Bedroom', 'bedroom']), 
     );
   }
+}
+String formatVND(int? value) {
+  if (value == null) return '-';
+  final s = value.toString();
+  final rev = s.split('').reversed.join();
+  final groups = <String>[];
+  for (var i = 0; i < rev.length; i += 3) {
+    final end = (i + 3 > rev.length) ? rev.length : i + 3;
+    groups.add(rev.substring(i, end));
+  }
+  final joined = groups.join('.');
+  final normal = joined.split('').reversed.join();
+  return '$normalđ';
 }

@@ -5,7 +5,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/apartment/a
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/apartment/apartment_cart.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/bottom_tabbar.dart';
-
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/view_apartment_screens.dart';
 class SearchApartmentScreens extends StatelessWidget {
   final SearchCriteria criteria;
   final List<Apartment> results;
@@ -45,15 +45,26 @@ class SearchApartmentScreens extends StatelessWidget {
             
             // Phần danh sách
             Expanded(
-              child: results.isEmpty
-                  ? const Center(child: Text("Không tìm thấy phòng trọ nào"))
-                  : ListView.builder(
-                      itemCount: results.length,
-                      itemBuilder: (context, index) {
-                        return ApartmentCart(apartment: results[index]);
-                      },
-                    ),
-            ),
+            child: results.isEmpty
+                ? const Center(child: Text("Không tìm thấy phòng trọ nào"))
+                : ListView.builder(
+                    itemCount: results.length,
+                    itemBuilder: (context, index) {
+                      final apartment = results[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ViewApartmentScreens(apartment: apartment),
+                            ),
+                          );
+                        },
+                        child: ApartmentCart(apartment: apartment),
+                      );
+                    },
+                  ),
+          ),
             const BottomTabbar(),
           ],
         ),

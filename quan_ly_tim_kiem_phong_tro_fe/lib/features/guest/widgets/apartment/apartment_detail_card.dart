@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
 
 class ApartmentDetailCard extends StatelessWidget {
-  const ApartmentDetailCard({super.key});
+  final Apartment apartment;
+
+  const ApartmentDetailCard({super.key, required this.apartment});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +35,7 @@ class ApartmentDetailCard extends StatelessWidget {
         children: [
           Center(
             child: Text(
-              'Chi tiết MiniHouse',
+              'Chi tiết ${apartment.Type ?? "Căn hộ"}',
               style: TextStyle(
                 color: Colors.black.withOpacity(0.71),
                 fontSize: screenWidth * 0.05,
@@ -41,18 +44,71 @@ class ApartmentDetailCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: padding),
-          buildRow(context, Icons.confirmation_number, 'Mã Phòng', '1', labelStyle, valueStyle),
-          buildRow(context, Icons.bed, 'Giường', '1', labelStyle, valueStyle),
-          buildRow(context, Icons.group, 'Số người', '2', labelStyle, valueStyle),
-          buildRow(context, Icons.pets, 'Yêu Cầu', 'Không mang thú cưng', labelStyle, valueStyle),
-          buildRow(context, Icons.meeting_room, 'Tên Phòng', 'Phòng 002-KV1', labelStyle, valueStyle),
-          buildRow(context, Icons.bathtub, 'Phòng Tắm', 'Có', labelStyle, valueStyle),
+          buildRow(
+            context,
+            Icons.confirmation_number,
+            'Mã Phòng',
+            apartment.CodeApartment ?? "-",
+            labelStyle,
+            valueStyle,
+          ),
+          buildRow(
+            context,
+            Icons.bed,
+            'Giường',
+            "2 Giường", // set cứng
+            labelStyle,
+            valueStyle,
+          ),
+          buildRow(
+            context,
+            Icons.group,
+            'Số người',
+            apartment.maxOccupancy?.toString() ?? "-",
+            labelStyle,
+            valueStyle,
+          ),
+          buildRow(
+            context,
+            Icons.pets,
+            'Yêu Cầu',
+            (apartment.Requirements != null &&
+                    apartment.Requirements!.isNotEmpty)
+                ? apartment.Requirements!.join(", ")
+                : "-",
+            labelStyle,
+            valueStyle,
+          ),
+
+          buildRow(
+            context,
+            Icons.meeting_room,
+            'Tên Phòng',
+            apartment.Type ?? "-",
+            labelStyle,
+            valueStyle,
+          ),
+          buildRow(
+            context,
+            Icons.bathtub,
+            'Phòng Tắm',
+            "1 Phòng tắm", // set cứng
+            labelStyle,
+            valueStyle,
+          ),
         ],
       ),
     );
   }
 
-  Widget buildRow(BuildContext context, IconData icon, String label, String value, TextStyle labelStyle, TextStyle valueStyle) {
+  Widget buildRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+    TextStyle labelStyle,
+    TextStyle valueStyle,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
       child: Row(

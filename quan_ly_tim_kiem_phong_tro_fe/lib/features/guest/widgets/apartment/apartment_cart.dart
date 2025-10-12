@@ -37,7 +37,7 @@ class ApartmentCart extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                   child: Image.network(
-                    apartment.pathImage.first,
+                    apartment.PathImage.first,
                     width: cardWidth,
                     height: imageHeight,
                     fit: BoxFit.cover,
@@ -76,7 +76,7 @@ class ApartmentCart extends StatelessWidget {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          "Đặt cọc: ${apartment.deposit}",
+                          "Đặt cọc: ${apartment.Deposit}",
                           style: TextStyle(
                             fontSize: 12,
                             color: const Color.fromARGB(255, 48, 54, 58),
@@ -84,7 +84,7 @@ class ApartmentCart extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "Giá phòng: ${apartment.dailyRate}",
+                          "Giá phòng: ${apartment.DailyRate}",
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.red,
@@ -103,7 +103,7 @@ class ApartmentCart extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    apartment.type,
+                    apartment.Type,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Text("Sức chứa: ${apartment.maxOccupancy} người"),
@@ -127,7 +127,7 @@ class ApartmentCart extends StatelessWidget {
                   StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('amenityInApartment')
-                        .where('ApartmentID', isEqualTo: apartment.apartmentID)
+                        .where('ApartmentID', isEqualTo: apartment.ApartmentID)
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {

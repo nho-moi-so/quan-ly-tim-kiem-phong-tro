@@ -9,48 +9,26 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/apartment/a
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/apartment/images.dart';
 
 class ViewApartmentScreens extends StatelessWidget {
-  const ViewApartmentScreens({super.key});
+  final Apartment apartment;
 
-  Future<Apartment> fetchApartment() async {
-    final data = await FirebaseFirestore.instance
-        .collection('apartment')
-        .doc('4wqOPjLk65V4GcSpw7c4') 
-        .get();
-
-    return Apartment.fromFirestore(data);
-  }
+  const ViewApartmentScreens({super.key, required this.apartment});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Trang chủ")),
-      body: FutureBuilder<Apartment>(
-        future: fetchApartment(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(child: Text('Lỗi: ${snapshot.error}'));
-          }
-
-          final apartment = snapshot.data!;
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Images(),
-                ApartmentDetail(),
-                ApartmentDetailCard(),
-                ApartmentAmenities(),
-                ApartmentMap(),
-                ApartmentDetailContact(),
-              ],
-            ),
-          );
-        },
+      appBar: AppBar(title: Text(apartment.Type ?? "Chi tiết căn hộ")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Images(apartment: apartment),
+            ApartmentDetail(apartment: apartment),
+            ApartmentDetailCard(apartment: apartment),
+            ApartmentAmenities(),
+            ApartmentMap(),
+            ApartmentDetailContact(),
+          ],
+        ),
       ),
     );
   }

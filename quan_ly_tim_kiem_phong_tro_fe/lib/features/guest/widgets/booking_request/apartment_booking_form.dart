@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
 
 class ApartmentBookingForm extends StatelessWidget {
-  const ApartmentBookingForm({super.key});
+  final Apartment apartment;
+
+  const ApartmentBookingForm({super.key, required this.apartment});
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Container(
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(12),
@@ -16,6 +21,7 @@ class ApartmentBookingForm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /// --- Hình + tiêu đề ---
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -24,9 +30,11 @@ class ApartmentBookingForm extends StatelessWidget {
                 height: 80,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  image: const DecorationImage(
+                  image: DecorationImage(
                     image: NetworkImage(
-                      'assets/images/1696583537720.png', 
+                      (apartment.PathImage.isNotEmpty)
+                          ? apartment.PathImage.first
+                          : "https://via.placeholder.com/100x80.png?text=No+Image",
                     ),
                     fit: BoxFit.cover,
                   ),
@@ -37,48 +45,43 @@ class ApartmentBookingForm extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("MiniHouse Cần Thơ",
-                        style: TextStyle(
+                    Text(apartment.Type ?? "Tên căn hộ",
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         )),
                     Row(
-                      children: const [
-                        Text(
-                          '5.200.000đ',
-                          style: TextStyle(
-                            decoration: TextDecoration.lineThrough,
-                            color: Colors.grey,
-                            fontSize: 13,
+                      children: [
+                        if (apartment.Deposit != null)
+                          Text(
+                            '${apartment.Deposit}đ',
+                            style: const TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.grey,
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
-                          '4.500.000đ',
-                          style: TextStyle(
+                          '${apartment.DailyRate ?? 0}đ',
+                          style: const TextStyle(
                             color: Colors.red,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
-                        SizedBox(width: 4),
-                        Chip(
-                          backgroundColor: Colors.redAccent,
-                          label: Text('-21%',
-                              style: TextStyle(color: Colors.white, fontSize: 12)),
-                          padding: EdgeInsets.zero,
-                          visualDensity: VisualDensity.compact,
-                        ),
                       ],
                     ),
                     Row(
-                      children: const [
-                        Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
-                        SizedBox(width: 4),
+                      children: [
+                        const Icon(Icons.location_on_outlined,
+                            size: 14, color: Colors.grey),
+                        const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            "45 Nguyễn Văn Cừ, Cần Thơ",
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            apartment.address ?? "Địa chỉ",
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -89,19 +92,31 @@ class ApartmentBookingForm extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 12),
-          // Danh sách tiện nghi
+
+          /// --- Tiện ích (Requirements) ---
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              InfoRow(text: "Miễn phí wifi"),
-              InfoRow(text: "Có hồ bơi vô cực"),
-              InfoRow(text: "Có bãi đỗ xe"),
-              InfoRow(text: "Hỗ trợ trên 24/24"),
-              InfoRow(text: "Hỗ trợ mang hành lý tận phòng"),
-              InfoRow(text: "2 giường đơn"),
-              InfoRow(text: "Đặt và thanh toán tiền ngay"),
-              InfoRow(text: "Khuyến mãi chớp nhoáng"),
+            children: (apartment.Requirements.isNotEmpty)
+                ? apartment.Requirements
+                    .map((r) => InfoRow(text: r))
+                    .toList()
+                : [const InfoRow(text: "Không có yêu cầu")],
+          ),
+
+          const SizedBox(height: 12),
+
+          /// --- Mật khẩu phòng ---
+          Row(
+            children: [
+              const Text("Mật khẩu nhận phòng: ",
+                  style: TextStyle(fontWeight: FontWeight.w500)),
+              Text(apartment.password ?? "---",
+                  style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue)),
             ],
           ),
         ],
