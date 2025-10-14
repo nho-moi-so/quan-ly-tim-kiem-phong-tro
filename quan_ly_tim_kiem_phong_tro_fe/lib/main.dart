@@ -1,9 +1,8 @@
   import 'package:firebase_core/firebase_core.dart';
-  import 'package:flutter/material.dart';
-  import 'package:quan_ly_tim_kiem_phong_tro_fe/model/post.dart';
+import 'package:flutter/material.dart';
 
-  import '../../service/navigation_service.dart';
-  import 'features/owner/screens/screens.dart';
+import '../../service/navigation_service.dart';
+import 'features/owner/screens/screens.dart';
 
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -23,12 +22,44 @@
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
         navigatorKey: navigationService.navigatorKey, // ← BẮT BUỘC
-        // initialRoute: '/',
-        // routes: {
-        //     '/': (context) => HomeScreens(),
-        //     '/signup': (context) => RegisterScreens(), 
-        //   },
-        home: MessageScreen(), //==================
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const DashboardScreen(),
+          '/messages': (context) => const MessageScreen(),
+          '/apartments': (context) => const ApartmentScreen(),
+          '/posts': (context) => const PostScreen(),
+          '/bookings': (context) => BookingRequestScreens(),
+  },
+  // Handle parameterized routes (post detail, chat with args)
+        onGenerateRoute: (settings) {
+          if (settings.name == '/post/detail') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            final postId = args?['postId'] as String?;
+            return MaterialPageRoute(
+              builder: (_) => DetailPostScreen(postId: postId ?? ''),
+            );
+          }
+
+          if (settings.name == '/chat') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            final chatItem = args?['chatItem'];
+            // Expect caller to pass ChatItemViewModel instance
+            return MaterialPageRoute(
+              builder: (_) => ChatScreen(chatItem: chatItem),
+            );
+          }
+
+          if (settings.name == '/contract/detail') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            final contractId = args?['contractId'] as String?;
+            return MaterialPageRoute(
+              builder: (_) => ContractDetailScreen(contractId: contractId ?? ''),
+            );
+          }
+
+          return null;
+        },
+        
       );
     }
   }
