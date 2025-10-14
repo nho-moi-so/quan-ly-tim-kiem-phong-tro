@@ -1,4 +1,4 @@
-  import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import '../../service/navigation_service.dart';
@@ -17,18 +17,19 @@ import 'features/owner/screens/screens.dart';
     @override
     Widget build(BuildContext context) {
       return MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Quản lý phòng trọ',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
         navigatorKey: navigationService.navigatorKey, // ← BẮT BUỘC
-        initialRoute: '/',
+        initialRoute: '/main', // Đổi từ '/' sang '/main'
         routes: {
-          '/': (context) => const DashboardScreen(),
+          '/main': (context) => const MainScreen(), // Thêm route mới
           '/messages': (context) => const MessageScreen(),
           '/apartments': (context) => const ApartmentScreen(),
           '/posts': (context) => const PostScreen(),
           '/bookings': (context) => BookingRequestScreens(),
+          '/dashboard': (context) => const DashboardScreen(),
   },
   // Handle parameterized routes (post detail, chat with args)
         onGenerateRoute: (settings) {

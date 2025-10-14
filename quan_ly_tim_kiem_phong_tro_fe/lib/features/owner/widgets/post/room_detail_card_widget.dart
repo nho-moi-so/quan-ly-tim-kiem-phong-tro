@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/post_controller.dart';
@@ -170,18 +171,20 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                   const SizedBox(height: 24),
                   Row(
                     children: [
-                      Expanded(
+                        Expanded(
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                          Navigator.pop(context);
+                          },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[300],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                          backgroundColor: Colors.grey[300],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                           ),
                           child: const Text('Hủy', style: TextStyle(color: Colors.black)),
                         ),
-                      ),
+                        ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
