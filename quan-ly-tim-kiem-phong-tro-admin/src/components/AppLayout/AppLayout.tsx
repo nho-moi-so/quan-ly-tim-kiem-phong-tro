@@ -6,14 +6,13 @@ import {
   AppstoreOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  MailOutlined,
-  SettingOutlined,
-  UploadOutlined,
   UserOutlined,
-  VideoCameraOutlined,
+  DashboardOutlined,
 } from "@ant-design/icons";
 import type { GetProps, MenuProps } from "antd";
-import { Avatar, Input, Space, Button, Layout, Menu, theme } from "antd";
+import { Avatar, Input, Button, Layout, Menu, theme } from "antd";
+import { redirect } from "next/navigation";
+
 type MenuItem = Required<MenuProps>["items"][number];
 type SearchProps = GetProps<typeof Input.Search>;
 const { Header, Sider, Content } = Layout;
@@ -62,64 +61,62 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   } = theme.useToken();
   const items: MenuItem[] = [
     {
-      key: "sub1",
+      key: "thong-keyt",
+      label: "Thống Kê",
+      icon: <DashboardOutlined />,
+      onClick: () => {
+        redirect("/admin");
+      },
+    },
+    {
+      key: "quan-ly-tai-khoan",
       label: "Quản Lý Tài Khoản",
-      icon: <MailOutlined />,
+      icon: <UserOutlined />,
       children: [
         {
-          key: "g1",
-          label: "Danh Sách TK",
-          type: "group",
-          children: [
-            { key: "1", label: "Owner" },
-            { key: "2", label: "Guest" },
-          ],
+          key: "quan-ly-owner",
+          label: "Owner",
+          onClick: () => {
+            redirect("/admin/quan-ly-tai-khoan/owner")
+          },
+        },
+        {
+          key: "quan-ly-guest",
+          label: "Guest",
+          onClick: () => {
+            redirect("/admin/quan-ly-tai-khoan/guest");
+          },
         },
       ],
     },
     {
-      key: "sub2",
+      key: "quan-ly-bai-dang",
       label: "Quản Lý Bài Đăng",
       icon: <AppstoreOutlined />,
       children: [
         {
-          key: "sub3",
-          label: "Danh sách Bài Đăng",
-          children: [
-            { key: "7", label: "DS Chờ Duyệt" },
-            { key: "8", label: "Chi Tiết Bài Đăng" },
-            { key: "9", label: "Báo cáo vi phạm" },
-          ],
+          key: "danh-sach-bai-dang",
+          label: "Danh Sách Bài Đăng",
+          onClick: () => {
+            redirect("/admin/quan-ly-bai-dang");
+          },
+        },
+        {
+          key: "bao-cao-vi-pham",
+          label: "Báo cáo vi phạm",
+          onClick: () => {
+            redirect("/admin/quan-ly-bai-dang/bao-cao");
+          },
         },
       ],
     },
-    {
-      type: "divider",
-    },
-    {
-      key: "grp",
-      label: "Thống Kê",
-      icon: <AppstoreOutlined />,
-      children: [
-            { key: "1", label: "Xem Chi Tiết" },
-          ],
-    },
   ];
-  const App: React.FC = () => (
-    <Space direction="vertical">
-      <Search
-        placeholder="input search text"
-        allowClear
-        enterButton="Search"
-        size="large"
-        onSearch={onSearch}
-      />
-    </Space>
-  );
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
         trigger={null}
+        width={240}
         collapsible
         collapsed={collapsed}
         style={{
@@ -149,7 +146,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         />
       </Sider>
       <Layout>
-         <Header
+        <Header
           style={{
             height: 64,
             padding: "0 24px",

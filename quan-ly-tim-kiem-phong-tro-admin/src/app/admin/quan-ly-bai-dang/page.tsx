@@ -1,13 +1,9 @@
 "use client";
 import React from "react";
-import { Table, Button, Space, Input } from "antd";
+import { Table, Button, Space, Input, Typography, Flex } from "antd";
 import type { TableColumnsType } from "antd";
 
 const { Search } = Input;
-
-const onSearch = (value: string) => {
-  console.log("Tìm kiếm:", value);
-};
 
 const columns: TableColumnsType<any> = [
   {
@@ -99,25 +95,23 @@ const data = [
   },
 ];
 
-export default function DanhSachBaiDang() {
+export default function Page() {
+  const onSearch = (value: string) => {
+    console.log("Tìm kiếm:", value);
+    // TODO: Call api
+  };
+
   return (
     <div style={{ padding: 24 }}>
-      <h2>Danh sách bài đăng</h2>
-      <div
-        style={{
-          maxWidth: "100%",
-          marginBottom: 16,
-          display: "flex", 
-          justifyContent: "flex-end", 
-        }}
-      >
+      <Typography.Title level={2}>Danh sách bài đăng</Typography.Title>
+      <Flex justify="flex-end" style={{ marginBottom: 16 }}>
         <Search
-          placeholder="input search text"
+          placeholder="Input search text"
           allowClear
           onSearch={onSearch}
           style={{ width: 200 }}
         />
-      </div>
+      </Flex>
 
       <Table
         columns={columns}
