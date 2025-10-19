@@ -1,9 +1,17 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Descriptions, Badge, Card, Image } from "antd";
 import type { DescriptionsProps } from "antd";
+import { useParams } from "next/navigation";
 
-const ChiTietBaiDang: React.FC = () => {
+export default function Page() {
+  const { id } = useParams<{ id: string }>();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  console.log("Mã bài đăng: ", id);
+
   const items: DescriptionsProps["items"] = [
     {
       key: "1",
@@ -62,10 +70,33 @@ const ChiTietBaiDang: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // TODO: update api
+        const response = await fetch("/api/chi-tiet-bai-dang");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) return <p>Loading</p>;
+  // if (error) return <p>Error</p>;
+
   return (
     <div style={{ padding: 24 }}>
       <h2 style={{ textAlign: "center", marginBottom: 24 }}>
-        Chi Tiết Bài Đăng
+        Chi Tiết Bài Đăng #{id}
       </h2>
 
       {/* Thông tin bài đăng */}
@@ -98,6 +129,4 @@ const ChiTietBaiDang: React.FC = () => {
       </Card>
     </div>
   );
-};
-
-export default ChiTietBaiDang;
+}

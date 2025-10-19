@@ -11,7 +11,7 @@ import {
 } from "@ant-design/icons";
 import type { GetProps, MenuProps } from "antd";
 import { Avatar, Input, Button, Layout, Menu, theme } from "antd";
-import { useRouter } from "next/navigation"; // ✅ Dùng useRouter thay cho redirect()
+import { useRouter } from "next/navigation";
 
 type MenuItem = Required<MenuProps>["items"][number];
 type SearchProps = GetProps<typeof Input.Search>;
@@ -48,7 +48,7 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const router = useRouter(); // ✅ Thêm dòng này
+  const router = useRouter();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -58,7 +58,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       key: "thong-ke",
       label: "Thống Kê",
       icon: <DashboardOutlined />,
-      onClick: () => router.push("/admin"), // ✅ chuyển route
+      onClick: () => router.push("/admin"),
     },
     {
       key: "quan-ly-tai-khoan",
