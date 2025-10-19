@@ -6,50 +6,41 @@ import {
   AppstoreOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  MailOutlined,
-  SettingOutlined,
-  UploadOutlined,
   UserOutlined,
-  VideoCameraOutlined,
+  DashboardOutlined,
 } from "@ant-design/icons";
 import type { GetProps, MenuProps } from "antd";
-import { Avatar, Input, Space, Button, Layout, Menu, theme } from "antd";
+import { Avatar, Input, Button, Layout, Menu, theme } from "antd";
+import { useRouter } from "next/navigation"; // ✅ Dùng useRouter thay cho redirect()
+
 type MenuItem = Required<MenuProps>["items"][number];
 type SearchProps = GetProps<typeof Input.Search>;
 const { Header, Sider, Content } = Layout;
 const { Search } = Input;
+
+// Avatar
 const UserList = ["U", "Lucy", "Tom", "Edward"];
 const ColorList = ["#f56a00", "#7265e6", "#ffbf00", "#00a2ae"];
 const GapList = [4, 3, 2, 1];
+
 const UserAvatar: React.FC = () => {
-  const [user, setUser] = useState(UserList[0]);
-  const [color, setColor] = useState(ColorList[0]);
-  const [gap, setGap] = useState(GapList[0]);
+  const [user] = useState(UserList[0]);
+  const [color] = useState(ColorList[0]);
+  const [gap] = useState(GapList[0]);
 
   return (
-    <>
-      <Avatar
-        style={{ backgroundColor: color, verticalAlign: "middle" }}
-        size="large"
-        gap={gap}
-      >
-        {user}
-      </Avatar>
-    </>
+    <Avatar
+      style={{ backgroundColor: color, verticalAlign: "middle" }}
+      size="large"
+      gap={gap}
+    >
+      {user}
+    </Avatar>
   );
 };
 
-const suffix = (
-  <AudioOutlined
-    style={{
-      fontSize: 16,
-      color: "#1677ff",
-    }}
-  />
-);
-
-const onSearch: SearchProps["onSearch"] = (value, _e, info) =>
-  console.log(info?.source, value);
+const onSearch: SearchProps["onSearch"] = (value) =>
+  console.log("Searching for:", value);
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -57,69 +48,60 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const router = useRouter(); // ✅ Thêm dòng này
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
   const items: MenuItem[] = [
     {
-      key: "sub1",
+      key: "thong-ke",
+      label: "Thống Kê",
+      icon: <DashboardOutlined />,
+      onClick: () => router.push("/admin"), // ✅ chuyển route
+    },
+    {
+      key: "quan-ly-tai-khoan",
       label: "Quản Lý Tài Khoản",
-      icon: <MailOutlined />,
+      icon: <UserOutlined />,
       children: [
         {
-          key: "g1",
-          label: "Danh Sách TK",
-          type: "group",
-          children: [
-            { key: "1", label: "Owner" },
-            { key: "2", label: "Guest" },
-          ],
+          key: "owner",
+          label: "Owner",
+          onClick: () => router.push("/admin/quan-ly-tai-khoan/owner"),
+        },
+        {
+          key: "guest",
+          label: "Guest",
+          onClick: () => router.push("/admin/quan-ly-tai-khoan/guest"),
         },
       ],
     },
     {
-      key: "sub2",
+      key: "quan-ly-bai-dang",
       label: "Quản Lý Bài Đăng",
       icon: <AppstoreOutlined />,
       children: [
         {
-          key: "sub3",
-          label: "Danh sách Bài Đăng",
-          children: [
-            { key: "7", label: "DS Chờ Duyệt" },
-            { key: "8", label: "Chi Tiết Bài Đăng" },
-            { key: "9", label: "Báo cáo vi phạm" },
-          ],
+          key: "ds-baidang",
+          label: "Danh Sách Bài Đăng",
+          onClick: () => router.push("/admin/quan-ly-bai-dang"),
+        },
+        {
+          key: "bcvp",
+          label: "Báo cáo vi phạm",
+          onClick: () =>
+            router.push("/admin/quan-ly-bai-dang/bao-cao"),
         },
       ],
     },
-    {
-      type: "divider",
-    },
-    {
-      key: "grp",
-      label: "Thống Kê",
-      icon: <AppstoreOutlined />,
-      children: [
-            { key: "1", label: "Xem Chi Tiết" },
-          ],
-    },
   ];
-  const App: React.FC = () => (
-    <Space direction="vertical">
-      <Search
-        placeholder="input search text"
-        allowClear
-        enterButton="Search"
-        size="large"
-        onSearch={onSearch}
-      />
-    </Space>
-  );
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
         trigger={null}
+        width={240}
         collapsible
         collapsed={collapsed}
         style={{
@@ -142,14 +124,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={["1"]}
-          defaultOpenKeys={["sub1"]}
           items={items}
           onClick={(e) => console.log("clicked", e)}
         />
       </Sider>
+
       <Layout>
-         <Header
+        <Header
           style={{
             height: 64,
             padding: "0 24px",
@@ -163,7 +144,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
           }}
         >
-          {/* Bên trái */}
+          {/* Nút thu gọn + tiêu đề */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <Button
               type="text"
@@ -173,23 +154,20 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 fontSize: "16px",
                 width: 48,
                 height: 48,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
               }}
             />
             <h3 style={{ margin: 0, fontWeight: 600 }}>Admin Dashboard</h3>
           </div>
 
-          {/* Thanh tìm kiếm ở giữa */}
+          {/* Thanh tìm kiếm */}
           <div
             style={{
               position: "absolute",
               left: "50%",
               transform: "translateX(-50%)",
               width: "400px",
-              display: "flex",
-              alignItems: "center",
+              display:"flex",
+              justifyContent:"center"
             }}
           >
             <Search
@@ -201,7 +179,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             />
           </div>
 
-          {/* Bên phải: Avatar */}
+          {/* Avatar */}
           <UserAvatar />
         </Header>
 
