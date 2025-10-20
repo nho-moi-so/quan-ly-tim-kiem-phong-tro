@@ -45,60 +45,71 @@ const data = [
 ];
 
 export default function Page() {
-  const router = useRouter()
-  
+  const router = useRouter();
 
-const columns: TableColumnsType<any> = [
-  {
-    title: "Mã bài đăng",
-    dataIndex: "maBaiDang",
-    key: "maBaiDang",
-    align: "center",
-  },
-  { title: "Tiêu đề", dataIndex: "tieuDe", key: "tieuDe" },
-  {
-    title: "Người đăng",
-    dataIndex: "nguoiDang",
-    key: "nguoiDang",
-    align: "center",
-  },
-  {
-    title: "Ngày đăng",
-    dataIndex: "ngayDang",
-    key: "ngayDang",
-    align: "center",
-  },
-  {
-    title: "Trạng thái",
-    dataIndex: "trangThai",
-    key: "trangThai",
-    align: "center",
-  },
-  {
-    title: "Hành động",
-    key: "action",
-    align: "center",
-    render: (_, record) => (
-      <Space>
-        <Button
-          type="link"
-          onClick={() => console.log("Xem", record.maBaiDang)}
-        >
-          Xem
-        </Button>
-        <Button
-          type="primary"
-          onClick={() => console.log("Duyệt", record.maBaiDang)}
-        >
-          Duyệt
-        </Button>
-        <Button danger onClick={() => console.log("Từ chối", record.maBaiDang)}>
-          Từ chối
-        </Button>
-      </Space>
-    ),
-  },
-];
+  const columns: TableColumnsType<any> = [
+    {
+      title: "Mã bài đăng",
+      dataIndex: "maBaiDang",
+      key: "maBaiDang",
+      align: "center",
+    },
+    { title: "Tiêu đề", dataIndex: "tieuDe", key: "tieuDe" },
+    {
+      title: "Người đăng",
+      dataIndex: "nguoiDang",
+      key: "nguoiDang",
+      align: "center",
+    },
+    {
+      title: "Ngày đăng",
+      dataIndex: "ngayDang",
+      key: "ngayDang",
+      align: "center",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "trangThai",
+      key: "trangThai",
+      align: "center",
+    },
+    {
+      title: "Hành động",
+      key: "action",
+      align: "center",
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="link"
+            onClick={() => {
+              console.log("Xem", record.maBaiDang);
+              router.push(`/admin/quan-ly-bai-dang/${record.maBaiDang}`);
+            }}
+          >
+            Xem
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              // TODO: call api
+              console.log("Duyệt", record.maBaiDang);
+            }}
+          >
+            Duyệt
+          </Button>
+          <Button
+            danger
+            onClick={() => {
+              // TODO: call api
+              console.log("Từ chối", record.maBaiDang);
+            }}
+          >
+            Từ chối
+          </Button>
+        </Space>
+      ),
+    },
+  ];
   const onSearch = (value: string) => {
     console.log("Tìm kiếm:", value);
     // TODO: Call api
