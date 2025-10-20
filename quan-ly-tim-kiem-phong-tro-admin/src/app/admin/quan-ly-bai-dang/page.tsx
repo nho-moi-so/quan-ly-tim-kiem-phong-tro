@@ -1,51 +1,75 @@
 "use client";
-import React from "react";
-import { Table, Button, Space, Input, Typography, Flex } from "antd";
 import type { TableColumnsType } from "antd";
+import { Button, Flex, Input, message, Space, Table, Typography } from "antd";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const { Search } = Input;
 
-const data = [
-  {
-    maBaiDang: "BD01",
-    tieuDe: "Phòng cho thuê Q1",
-    nguoiDang: "Ngọc",
-    ngayDang: "2025-10-14",
-    trangThai: "Chờ duyệt",
-  },
-  {
-    maBaiDang: "BD02",
-    tieuDe: "Căn hộ mini Bình Thạnh",
-    nguoiDang: "Hải",
-    ngayDang: "2025-10-12",
-    trangThai: "Chờ duyệt",
-  },
-  {
-    maBaiDang: "BD03",
-    tieuDe: "Phòng giá rẻ Q7",
-    nguoiDang: "Lan",
-    ngayDang: "2025-10-10",
-    trangThai: "Đang duyệt",
-  },
-  {
-    maBaiDang: "BD04",
-    tieuDe: "Chung cư Quận 2",
-    nguoiDang: "Minh",
-    ngayDang: "2025-10-08",
-    trangThai: "Đã duyệt",
-  },
-  {
-    maBaiDang: "BD05",
-    tieuDe: "Phòng cao cấp Q3",
-    nguoiDang: "Trâm",
-    ngayDang: "2025-10-05",
-    trangThai: "Bị từ chối",
-  },
-];
+interface Post {
+  codePost: string;
+  title: string;
+  author: string;
+  createdAt: {
+    _seconds: number;
+    _nanoseconds: number;
+  };
+  status: string;
+}
+
+interface TableData {
+  maBaiDang: string;
+  tieuDe: string;
+  nguoiDang: string;
+  ngayDang: string;
+  trangThai: string;
+}
 
 export default function Page() {
   const router = useRouter();
+  const [data, setData] = useState<TableData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [originalData, setOriginalData] = useState<TableData[]>([]);
+
+  // Fetch posts from API
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/posts");
+      const result = await response.json();
+
+      if (result.status === "success" && result.data) {
+        // Transform API data to table format
+        const transformedData: TableData[] = result.data.map((post: Post) => {
+          // Convert timestamp to date string
+          const date = new Date(post.createdAt._seconds * 1000);
+          const dateStr = date.toLocaleDateString("vi-VN");
+
+          return {
+            maBaiDang: post.codePost,
+            tieuDe: post.title,
+            nguoiDang: post.author,
+            ngayDang: dateStr,
+            trangThai: post.status,
+          };
+        });
+
+        setData(transformedData);
+        setOriginalData(transformedData);
+      } else {
+        message.error("Không thể tải danh sách bài đăng");
+      }
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      message.error("Lỗi khi tải dữ liệu");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   const columns: TableColumnsType<any> = [
     {
@@ -112,7 +136,21 @@ export default function Page() {
   ];
   const onSearch = (value: string) => {
     console.log("Tìm kiếm:", value);
-    // TODO: Call api
+    
+    if (!value.trim()) {
+      // If search is empty, restore original data
+      setData(originalData);
+      return;
+    }
+
+    // Filter data based on search term
+    const filtered = originalData.filter((item) =>
+      item.tieuDe.toLowerCase().includes(value.toLowerCase()) ||
+      item.maBaiDang.toLowerCase().includes(value.toLowerCase()) ||
+      item.nguoiDang.toLowerCase().includes(value.toLowerCase())
+    );
+    
+    setData(filtered);
   };
 
   return (
@@ -120,10 +158,10 @@ export default function Page() {
       <Typography.Title level={2}>Danh sách bài đăng</Typography.Title>
       <Flex justify="flex-end" style={{ marginBottom: 16 }}>
         <Search
-          placeholder="Input search text"
+          placeholder="Tìm kiếm bài đăng..."
           allowClear
           onSearch={onSearch}
-          style={{ width: 200 }}
+          style={{ width: 300 }}
         />
       </Flex>
 
@@ -131,7 +169,8 @@ export default function Page() {
         columns={columns}
         dataSource={data}
         rowKey="maBaiDang"
-        pagination={{ pageSize: 5 }}
+        pagination={{ pageSize: 10 }}
+        loading={loading}
       />
     </div>
   );

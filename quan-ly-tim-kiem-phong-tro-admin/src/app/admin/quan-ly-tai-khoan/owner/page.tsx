@@ -1,19 +1,85 @@
 "use client";
-import React from "react";
-import { Table, Button, Space, Input, Tag } from "antd";
 import type { TableColumnsType } from "antd";
+import { Button, Input, Space, Table, Tag, message } from "antd";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const { Search } = Input;
 
+interface OwnerData {
+  userCode: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  status: string;
+  registeredAt: string;
+}
+
+interface TableData {
+  maTaiKhoan: string;
+  tenNguoiDung: string;
+  email: string;
+  soDienThoai: string;
+  trangThai: string;
+  ngayTao: string;
+}
+
 export default function DanhSachTaiKhoanOwner() {
   const router = useRouter();
+  const [data, setData] = useState<TableData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [originalData, setOriginalData] = useState<TableData[]>([]);
 
-  const onSearch = (value: string) => {
-    console.log("Tìm kiếm:", value);
+  // Fetch owners from API
+  const fetchOwners = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/users/owners");
+      const result = await response.json();
+
+      if (result.status === "success" && result.data) {
+        const transformedData: TableData[] = result.data.map((owner: OwnerData) => ({
+          maTaiKhoan: owner.userCode,
+          tenNguoiDung: owner.fullName,
+          email: owner.email,
+          soDienThoai: owner.phone,
+          trangThai: owner.status,
+          ngayTao: owner.registeredAt,
+        }));
+
+        setData(transformedData);
+        setOriginalData(transformedData);
+      } else {
+        message.error("Không thể tải danh sách owner");
+      }
+    } catch (error) {
+      console.error("Error fetching owners:", error);
+      message.error("Lỗi khi tải dữ liệu");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const columns: TableColumnsType<any> = [
+  useEffect(() => {
+    fetchOwners();
+  }, []);
+
+  const onSearch = (value: string) => {
+    if (!value.trim()) {
+      setData(originalData);
+      return;
+    }
+
+    const filtered = originalData.filter((item) =>
+      item.tenNguoiDung.toLowerCase().includes(value.toLowerCase()) ||
+      item.email.toLowerCase().includes(value.toLowerCase()) ||
+      item.maTaiKhoan.toLowerCase().includes(value.toLowerCase())
+    );
+    
+    setData(filtered);
+  };
+
+  const columns: TableColumnsType<TableData> = [
     {
       title: "Mã tài khoản",
       dataIndex: "maTaiKhoan",
@@ -66,7 +132,7 @@ export default function DanhSachTaiKhoanOwner() {
           <Button
             type="link"
             onClick={() =>
-              router.push(`/admin/quan-ly-tai-khoan/${record.maTaiKhoan}`)
+              router.push(`/admin/quan-ly-tai-khoan/${record.maTaiKhoan}?type=owner`)
             }
           >
             Xem
@@ -85,41 +151,6 @@ export default function DanhSachTaiKhoanOwner() {
           </Button>
         </Space>
       ),
-    },
-  ];
-
-  const data = [
-    {
-      maTaiKhoan: "TK001",
-      tenNguoiDung: "Nguyễn Văn A",
-      email: "owner.a@gmail.com",
-      soDienThoai: "0912123456",
-      trangThai: "Hoạt động",
-      ngayTao: "2025-05-10",
-    },
-    {
-      maTaiKhoan: "TK002",
-      tenNguoiDung: "Trần Thị B",
-      email: "owner.b@gmail.com",
-      soDienThoai: "0933123456",
-      trangThai: "Hoạt động",
-      ngayTao: "2025-06-18",
-    },
-    {
-      maTaiKhoan: "TK003",
-      tenNguoiDung: "Phạm Minh C",
-      email: "owner.c@gmail.com",
-      soDienThoai: "0987654321",
-      trangThai: "Bị khóa",
-      ngayTao: "2025-04-03",
-    },
-    {
-      maTaiKhoan: "TK004",
-      tenNguoiDung: "Lê Thị D",
-      email: "owner.d@gmail.com",
-      soDienThoai: "0905456789",
-      trangThai: "Hoạt động",
-      ngayTao: "2025-03-12",
     },
   ];
 
@@ -146,7 +177,11 @@ export default function DanhSachTaiKhoanOwner() {
         columns={columns}
         dataSource={data}
         rowKey="maTaiKhoan"
-        pagination={{ pageSize: 5 }}
+        loading={loading}
+        pagination={{ 
+          pageSize: 5,
+          showTotal: (total) => `Tổng số ${total} tài khoản`
+        }}
       />
     </div>
   );

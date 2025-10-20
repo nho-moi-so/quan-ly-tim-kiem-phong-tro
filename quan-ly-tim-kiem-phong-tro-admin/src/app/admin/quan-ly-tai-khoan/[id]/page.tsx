@@ -1,69 +1,117 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Card, Descriptions, Avatar, Spin, message } from "antd";
-import type { DescriptionsProps } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import { useParams } from "next/navigation";
+import type { DescriptionsProps } from "antd";
+import { Avatar, Card, Descriptions, Spin, message } from "antd";
+import { useParams, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
+interface UserDetail {
+  userCode: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  status: string;
+  registeredAt: string;
+}
+
 export default function Page() {
   const { id } = useParams<{ id: string }>();
-  const [data, setData] = useState<any>(null);
+  const searchParams = useSearchParams();
+  const type = searchParams.get('type'); // 'owner' or 'guest'
+  
+  const [data, setData] = useState<UserDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  console.log("Mã tài khoản: ", id);
-  const items: DescriptionsProps["items"] = [
-    {
-      key: "1",
-      label: "Mã tài khoản",
-      children: "TK001",
-    },
-    {
-      key: "2",
-      label: "Họ và tên",
-      children: "Ngọc Ngọc",
-    },
-    {
-      key: "3",
-      label: "Email",
-      children: "ngocngoc310@gmail.com",
-    },
-    {
-      key: "4",
-      label: "Số điện thoại",
-      children: "0866907310",
-    },
-    {
-      key: "5",
-      label: "Ngày đăng ký",
-      children: "2025-2-10-16",
-    },
-  ];
   useEffect(() => {
     const fetchData = async () => {
+      if (!id || !type) {
+        message.error("Thiếu thông tin tài khoản");
+        setLoading(false);
+        return;
+      }
+
       try {
-        // TODO: update api
-        const response = await fetch("/api/chi-tiet-tai-khoan");
+        const apiUrl = type === 'owner' 
+          ? `/api/users/owners/${id}`
+          : `/api/users/guests/${id}`;
+          
+        const response = await fetch(apiUrl);
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
         const result = await response.json();
-        setData(result);
+        
+        if (result.status === "success" && result.data) {
+          setData(result.data);
+        } else {
+          message.error("Không thể tải thông tin tài khoản");
+        }
       } catch (error) {
-        setError(error);
+        console.error("Error fetching user detail:", error);
+        message.error("Lỗi khi tải dữ liệu");
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [id, type]);
 
-  if (loading) return <p>Loading</p>;
-  // if (error) return <p>Error</p>;
- return (
+  if (loading) {
+    return (
+      <div style={{ padding: 24, textAlign: "center" }}>
+        <Spin size="large" tip="Đang tải dữ liệu..." />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div style={{ padding: 24, textAlign: "center" }}>
+        <p>Không tìm thấy thông tin tài khoản</p>
+      </div>
+    );
+  }
+
+  const items: DescriptionsProps["items"] = [
+    {
+      key: "1",
+      label: "Mã tài khoản",
+      children: data.userCode,
+    },
+    {
+      key: "2",
+      label: "Họ và tên",
+      children: data.fullName,
+    },
+    {
+      key: "3",
+      label: "Email",
+      children: data.email,
+    },
+    {
+      key: "4",
+      label: "Số điện thoại",
+      children: data.phone,
+    },
+    {
+      key: "5",
+      label: "Trạng thái",
+      children: data.status,
+    },
+    {
+      key: "6",
+      label: "Ngày đăng ký",
+      children: data.registeredAt,
+    },
+  ];
+
+  return (
     <div style={{ padding: 24 }}>
       <h2 style={{ textAlign: "center", marginBottom: 24 }}>
-        Thông Tin Tài Khoản
+        Thông Tin Tài Khoản {type === 'owner' ? 'Owner' : 'Guest'}
       </h2>
 
       <Card bordered style={{ maxWidth: 800, margin: "0 auto" }}>
@@ -77,12 +125,11 @@ export default function Page() {
         >
           <Avatar
             size={100}
-            src={data?.anhDaiDien}
-            icon={!data?.anhDaiDien && <UserOutlined />}
+            icon={<UserOutlined />}
           />
           <div>
-            <h3 style={{ margin: 0 }}>{data?.hoTen}</h3>
-            <p style={{ margin: 0, color: "gray" }}>{data?.email}</p>
+            <h3 style={{ margin: 0 }}>{data.fullName}</h3>
+            <p style={{ margin: 0, color: "gray" }}>{data.email}</p>
           </div>
         </div>
         <Descriptions

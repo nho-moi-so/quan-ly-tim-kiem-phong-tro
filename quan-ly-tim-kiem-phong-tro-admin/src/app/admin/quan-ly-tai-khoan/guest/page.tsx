@@ -1,19 +1,85 @@
 "use client";
-import React from "react";
-import { Table, Button, Space, Input, Tag } from "antd";
 import type { TableColumnsType } from "antd";
-import { useRouter } from "next/navigation"; 
+import { Button, Input, Space, Table, Tag, message } from "antd";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const { Search } = Input;
 
+interface GuestData {
+  userCode: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  status: string;
+  registeredAt: string;
+}
+
+interface TableData {
+  maTaiKhoan: string;
+  tenNguoiDung: string;
+  email: string;
+  soDienThoai: string;
+  trangThai: string;
+  ngayTao: string;
+}
+
 export default function DanhSachTaiKhoanGuest() {
   const router = useRouter();
+  const [data, setData] = useState<TableData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [originalData, setOriginalData] = useState<TableData[]>([]);
 
-  const onSearch = (value: string) => {
-    console.log("Tìm kiếm:", value);
+  // Fetch guests from API
+  const fetchGuests = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/users/guests");
+      const result = await response.json();
+
+      if (result.status === "success" && result.data) {
+        const transformedData: TableData[] = result.data.map((guest: GuestData) => ({
+          maTaiKhoan: guest.userCode,
+          tenNguoiDung: guest.fullName,
+          email: guest.email,
+          soDienThoai: guest.phone,
+          trangThai: guest.status,
+          ngayTao: guest.registeredAt,
+        }));
+
+        setData(transformedData);
+        setOriginalData(transformedData);
+      } else {
+        message.error("Không thể tải danh sách guest");
+      }
+    } catch (error) {
+      console.error("Error fetching guests:", error);
+      message.error("Lỗi khi tải dữ liệu");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const columns: TableColumnsType<any> = [
+  useEffect(() => {
+    fetchGuests();
+  }, []);
+
+  const onSearch = (value: string) => {
+    if (!value.trim()) {
+      setData(originalData);
+      return;
+    }
+
+    const filtered = originalData.filter((item) =>
+      item.tenNguoiDung.toLowerCase().includes(value.toLowerCase()) ||
+      item.email.toLowerCase().includes(value.toLowerCase()) ||
+      item.maTaiKhoan.toLowerCase().includes(value.toLowerCase())
+    );
+    
+    setData(filtered);
+  };
+
+  const columns: TableColumnsType<TableData> = [
     {
       title: "Mã tài khoản",
       dataIndex: "maTaiKhoan",
@@ -66,9 +132,9 @@ export default function DanhSachTaiKhoanGuest() {
         <Space>
           <Button
             type="link"
-            onClick={() => {
-              router.push(`/admin/quan-ly-tai-khoan/${record.maTaiKhoan}`);
-            }}
+            onClick={() =>
+              router.push(`/admin/quan-ly-tai-khoan/${record.maTaiKhoan}?type=guest`)
+            }
           >
             Xem
           </Button>
@@ -86,49 +152,6 @@ export default function DanhSachTaiKhoanGuest() {
           </Button>
         </Space>
       ),
-    },
-  ];
-
-  const data = [
-    {
-      maTaiKhoan: "TK001",
-      tenNguoiDung: "Ngọc",
-      email: "ngoc@gmail.com",
-      soDienThoai: "0905123456",
-      trangThai: "Hoạt động",
-      ngayTao: "2025-09-12",
-    },
-    {
-      maTaiKhoan: "TK002",
-      tenNguoiDung: "Minh",
-      email: "minh@gmail.com",
-      soDienThoai: "0909123456",
-      trangThai: "Hoạt động",
-      ngayTao: "2025-08-25",
-    },
-    {
-      maTaiKhoan: "TK003",
-      tenNguoiDung: "Hải",
-      email: "hai@gmail.com",
-      soDienThoai: "0912345678",
-      trangThai: "Hoạt động",
-      ngayTao: "2025-07-01",
-    },
-    {
-      maTaiKhoan: "TK004",
-      tenNguoiDung: "Lan",
-      email: "lan@gmail.com",
-      soDienThoai: "0978123456",
-      trangThai: "Bị khóa",
-      ngayTao: "2025-09-30",
-    },
-    {
-      maTaiKhoan: "TK005",
-      tenNguoiDung: "Trâm",
-      email: "tram@gmail.com",
-      soDienThoai: "0987654321",
-      trangThai: "Bị Khóa",
-      ngayTao: "2025-10-01",
     },
   ];
 
@@ -156,7 +179,11 @@ export default function DanhSachTaiKhoanGuest() {
         columns={columns}
         dataSource={data}
         rowKey="maTaiKhoan"
-        pagination={{ pageSize: 5 }}
+        loading={loading}
+        pagination={{ 
+          pageSize: 5,
+          showTotal: (total) => `Tổng số ${total} tài khoản`
+        }}
       />
     </div>
   );

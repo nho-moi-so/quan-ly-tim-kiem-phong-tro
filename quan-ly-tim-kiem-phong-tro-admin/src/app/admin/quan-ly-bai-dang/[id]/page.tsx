@@ -1,102 +1,147 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Descriptions, Badge, Card, Image } from "antd";
 import type { DescriptionsProps } from "antd";
+import { Badge, Card, Descriptions, Image, message, Spin } from "antd";
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
+interface PostDetail {
+  codePost: string;
+  roomNumber: string;
+  location: string;
+  area: string;
+  dailyRate: number;
+  address: string;
+  publishDate: string;
+  status: string;
+  description: string;
+  imgPath: string[];
+}
 
 export default function Page() {
   const { id } = useParams<{ id: string }>();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  console.log("Mã bài đăng: ", id);
-
-  const items: DescriptionsProps["items"] = [
-    {
-      key: "1",
-      label: "Mã bài đăng",
-      children: "BD01",
-    },
-    {
-      key: "2",
-      label: "Phòng",
-      children: "403",
-    },
-    {
-      key: "3",
-      label: "Khu",
-      children: "Tầng 4",
-    },
-    {
-      key: "4",
-      label: "Diện tích",
-      children: "30m²",
-    },
-    {
-      key: "5",
-      label: "Giá thuê",
-      children: "1.500.000 VND / tháng",
-    },
-    {
-      key: "6",
-      label: "Địa chỉ",
-      span: 2,
-      children: "Chung cư Nam Long, Hưng Thạnh, Cái Răng",
-    },
-    {
-      key: "7",
-      label: "Ngày đăng",
-      children: "2025-10-16",
-    },
-    {
-      key: "8",
-      label: "Trạng thái",
-      children: <Badge status="processing" text="Đang duyệt" />,
-    },
-    {
-      key: "9",
-      label: "Mô tả chi tiết",
-      span: 3,
-      children: (
-        <>
-          Phòng mới xây, nội thất đầy đủ, gần trung tâm, thuận tiện đi lại.
-          <br />
-          Bao nước, có chỗ để xe miễn phí.
-          <br />
-          Phù hợp cho sinh viên hoặc nhân viên văn phòng.
-        </>
-      ),
-    },
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        // TODO: update api
-        const response = await fetch("/api/chi-tiet-bai-dang");
+        const response = await fetch(`/api/posts/${id}`);
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
         const result = await response.json();
-        setData(result);
+        
+        if (result.status === "success" && result.data) {
+          setData(result.data);
+        } else {
+          message.error("Không thể tải chi tiết bài đăng");
+        }
       } catch (error) {
-        setError(error);
+        console.error("Error fetching post detail:", error);
+        message.error("Lỗi khi tải dữ liệu");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, []);
+    if (id) {
+      fetchData();
+    }
+  }, [id]);
 
-  if (loading) return <p>Loading</p>;
-  // if (error) return <p>Error</p>;
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
+  // Get badge status
+  const getStatusBadge = (status: string) => {
+    const statusMap: { [key: string]: { status: any; text: string } } = {
+      Approved: { status: "success", text: "Đã duyệt" },
+      Pending: { status: "processing", text: "Chờ duyệt" },
+      Rejected: { status: "error", text: "Bị từ chối" },
+    };
+    
+    const statusInfo = statusMap[status] || { status: "default", text: status };
+    return <Badge status={statusInfo.status} text={statusInfo.text} />;
+  };
+
+  if (loading) {
+    return (
+      <div style={{ padding: 24, textAlign: "center" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div style={{ padding: 24, textAlign: "center" }}>
+        <p>Không tìm thấy bài đăng</p>
+      </div>
+    );
+  }
+
+  const items: DescriptionsProps["items"] = [
+    {
+      key: "1",
+      label: "Mã bài đăng",
+      children: data.codePost,
+    },
+    {
+      key: "2",
+      label: "Phòng",
+      children: data.roomNumber,
+    },
+    {
+      key: "3",
+      label: "Khu",
+      children: data.location,
+    },
+    {
+      key: "4",
+      label: "Diện tích",
+      children: data.area,
+    },
+    {
+      key: "5",
+      label: "Giá thuê",
+      children: formatCurrency(data.dailyRate),
+    },
+    {
+      key: "6",
+      label: "Địa chỉ",
+      span: 2,
+      children: data.address,
+    },
+    {
+      key: "7",
+      label: "Ngày đăng",
+      children: data.publishDate,
+    },
+    {
+      key: "8",
+      label: "Trạng thái",
+      children: getStatusBadge(data.status),
+    },
+    {
+      key: "9",
+      label: "Mô tả chi tiết",
+      span: 3,
+      children: data.description,
+    },
+  ];
 
   return (
     <div style={{ padding: 24 }}>
       <h2 style={{ textAlign: "center", marginBottom: 24 }}>
-        Chi Tiết Bài Đăng #{id}
+        Chi Tiết Bài Đăng #{data.codePost}
       </h2>
 
       {/* Thông tin bài đăng */}
@@ -112,20 +157,21 @@ export default function Page() {
 
       {/* Hình ảnh bài đăng */}
       <Card title="Hình ảnh bài đăng" bordered>
-        <Image.PreviewGroup>
-          <Image
-            width={200}
-            src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800"
-          />
-          <Image
-            width={200}
-            src="https://images.unsplash.com/photo-1560448075-bb485b067938?w=800"
-          />
-          <Image
-            width={200}
-            src="https://images.unsplash.com/photo-1616486701727-9bdb6b96e1b1?w=800"
-          />
-        </Image.PreviewGroup>
+        {data.imgPath && data.imgPath.length > 0 ? (
+          <Image.PreviewGroup>
+            {data.imgPath.map((img, index) => (
+              <Image
+                key={index}
+                width={200}
+                src={img}
+                alt={`Hình ${index + 1}`}
+                style={{ marginRight: 8, marginBottom: 8 }}
+              />
+            ))}
+          </Image.PreviewGroup>
+        ) : (
+          <p>Không có hình ảnh</p>
+        )}
       </Card>
     </div>
   );
