@@ -3,7 +3,7 @@ export const IOTService = {
         //== set cung mat khau la "123456" de test
         return {
             status: password === "123456" ? "success" : "fail",
-            message: password === "123456" ? "welcome IOT" : "byebye IOT"
+            message: password === "123456" ? "Hiii IOT" : "byebye IOT"
         }
     }
 }
