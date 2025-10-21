@@ -17,7 +17,7 @@ Có các API bên hệ thống cần triển khai:
 - []: test FE + BE
     - body: `{ "roomCode": "MÃ PHÒNG" }`
     - header: `{ "Content-Type": "application/json" }`
-    - response: `{ "status": "success", "message": "Connected to Ma_phong }` hoặc `{ "status": "fail", "message": "LÝ DO LỖI" }`
+    - response: `{ "status": "success", "message": "OTP in {ma_phong} is: {OTP}" }` hoặc `{ "status": "fail", "message": "LÝ DO LỖI" }`
 
 ---
 
