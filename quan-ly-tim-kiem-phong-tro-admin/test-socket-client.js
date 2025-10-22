@@ -3,7 +3,7 @@ const socket = io("http://localhost:3000", { transports: ["websocket"] });
 
 socket.on("connect", () => {
   console.log("Connected", socket.id);
-  socket.emit("join_room", "A101"); // join room A102
+  socket.emit("join_room", "A102"); // join room A102
 });
 
 socket.on("otp_received", (data) => {

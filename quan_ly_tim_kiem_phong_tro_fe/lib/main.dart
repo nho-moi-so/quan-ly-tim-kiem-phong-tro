@@ -1,13 +1,26 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/socket_service.dart';
 
-import '../../service/navigation_service.dart';
+import 'features/owner/screens/otp_display_screen.dart';
 import 'features/owner/screens/screens.dart';
+import 'service/navigation_service.dart';
 
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
-    runApp(const MyApp());
+    
+    // Khởi tạo SocketService trước khi chạy app
+    final socketService = SocketService();
+    print('🚀 Main: SocketService created');
+    
+    runApp(
+      ChangeNotifierProvider.value(
+        value: socketService,
+        child: const MyApp(),
+      ),
+    );
   }
 
   class MyApp extends StatelessWidget {
@@ -30,6 +43,7 @@ import 'features/owner/screens/screens.dart';
           '/posts': (context) => const PostScreen(),
           '/bookings': (context) => BookingRequestScreens(),
           '/dashboard': (context) => const DashboardScreen(),
+          '/iot-test': (context) => const OtpDisplayScreen(), // ← Test IOT screen
   },
   // Handle parameterized routes (post detail, chat with args)
         onGenerateRoute: (settings) {

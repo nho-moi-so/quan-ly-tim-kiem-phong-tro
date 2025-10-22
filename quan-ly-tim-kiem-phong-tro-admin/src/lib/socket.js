@@ -10,23 +10,31 @@ function initSocket(server) {
   }
 
   const io = new Server(server, {
-    cors: { origin: '*' },
+    cors: { 
+      origin: '*',
+      methods: ['GET', 'POST'],
+      credentials: true
+    },
+    transports: ['websocket', 'polling'],
+    allowEIO3: true
   });
 
   io.on('connection', (socket) => {
-    console.log('Socket connected', socket.id);
+    console.log('✅ Socket connected:', socket.id);
 
     socket.on('join_room', (roomCode) => {
       socket.join(roomCode);
-      console.log(`${socket.id} joined ${roomCode}`);
+      console.log(`✅ ${socket.id} joined room: ${roomCode}`);
+      socket.emit('joined', { roomCode, success: true });
     });
 
     socket.on('leave_room', (roomCode) => {
       socket.leave(roomCode);
+      console.log(`👋 ${socket.id} left room: ${roomCode}`);
     });
 
     socket.on('disconnect', () => {
-      console.log('Socket disconnected', socket.id);
+      console.log('❌ Socket disconnected:', socket.id);
     });
   });
 
