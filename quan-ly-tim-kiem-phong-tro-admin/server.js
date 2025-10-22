@@ -8,6 +8,7 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 
 app.prepare().then(() => {
   const server = express();
@@ -36,7 +37,7 @@ app.prepare().then(() => {
 
   const io = initSocket(httpServer);
 
-  httpServer.listen(PORT, () => {
-    console.log(`> Server listening on http://localhost:${PORT}`);
+  httpServer.listen(PORT, HOST, () => {
+    console.log(`> Server listening on http://${HOST}:${PORT}`);
   });
 });
