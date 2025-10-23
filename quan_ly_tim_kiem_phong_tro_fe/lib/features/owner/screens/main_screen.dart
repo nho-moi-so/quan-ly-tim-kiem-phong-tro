@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/socket_room_helper.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/screens.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/socket_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -10,6 +13,23 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Join tất cả rooms của user khi app khởi động
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final socketService = Provider.of<SocketService>(context, listen: false);
+      
+      //== Hardcode userId tạm thời để test
+      const userId = "dYSjvUDL2vwRrSgqiDHy";
+      
+      print('🔄 MainScreen: Đang join rooms cho user $userId...');
+      await SocketRoomHelper.joinUserRooms(socketService, userId);
+      print('✅ MainScreen: Đã join rooms thành công');
+    });
+  }
 
   // Danh sách các màn hình tương ứng với từng tab
   final List<Widget> _screens = [

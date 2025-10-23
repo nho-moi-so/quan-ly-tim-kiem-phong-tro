@@ -228,8 +228,11 @@ class ApartmentController {
 
   //lấy danh sách các roomcCode của người dùng
   Future<List<String>> getRoomCodesByUser(String userId) async {
-    List<RoomCardInfo> roomCards = await getSummaryRoom(userId);
-    return roomCards.map((room) => room.roomName).toList();
+    List<Apartment> apartments = await _apartmentService.getApartmentByUser(userId);
+    return apartments
+        .where((apt) => apt.codeApartment != null && apt.codeApartment!.isNotEmpty)
+        .map((apt) => apt.codeApartment!)
+        .toList();
   }
 
   //==check ổ khóa có kết nối không để tạm ở đây

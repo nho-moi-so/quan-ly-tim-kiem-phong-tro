@@ -53,9 +53,8 @@ class SocketService with ChangeNotifier {
         _connectionStatus = 'Connected';
         notifyListeners();
 
-        //== Join room A101 giống test-socket-client.js
-        socket.emit('join_room', 'A101');
-        print('📤 Sent join_room event with roomCode: A101');
+        //== Join rooms sẽ được gọi từ bên ngoài sau khi lấy danh sách phòng
+        // Không join ngay ở đây nữa
       });
 
       // ⚠️ QUAN TRỌNG: Event name phải khớp với server
@@ -139,6 +138,32 @@ class SocketService with ChangeNotifier {
   void closeSocket() {
     socket.disconnect();
     socket.dispose();
+  }
+
+  // Join nhiều rooms cùng lúc
+  void joinRooms(List<String> roomCodes) {
+    if (!socket.connected) {
+      print('⚠️ Socket chưa kết nối, không thể join rooms');
+      return;
+    }
+
+    print('📤 Joining ${roomCodes.length} rooms: ${roomCodes.join(", ")}');
+    
+    for (String roomCode in roomCodes) {
+      socket.emit('join_room', roomCode);
+      print('  ✅ Joined room: $roomCode');
+    }
+  }
+
+  // Join một room đơn lẻ
+  void joinRoom(String roomCode) {
+    if (!socket.connected) {
+      print('⚠️ Socket chưa kết nối, không thể join room');
+      return;
+    }
+
+    socket.emit('join_room', roomCode);
+    print('📤 Joined room: $roomCode');
   }
 
   // Reset OTP sau khi đã hiển thị hoặc verify
