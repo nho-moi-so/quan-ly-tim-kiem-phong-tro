@@ -1,11 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/apartment_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/apartment_screens.dart';
+
 import '../../viewmodel/room_detail.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 
 class CardRoomDetailWidget extends StatefulWidget {
   final RoomDetail initialData;
@@ -376,7 +378,74 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                   .map((u) => _buildCheckboxOption(u))
                   .toList(),
             ),
-            
+            const SizedBox(height: 24),
+            // Trạng thái kết nối Khóa IOT (đơn giản)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              const Text('Trạng thái Khóa IOT'),
+              const SizedBox(height: 8),
+              GestureDetector(
+                child: FutureBuilder<bool>(
+                  future: ApartmentController().checkIOTConnection(roomCodeController.text),
+                  builder: (context, snapshot) {
+                    final bool isConnected = snapshot.data == true;
+                    Color bg;
+                    Color border;
+                    IconData icon;
+                    String title;
+                    String subtitle;
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      bg = Colors.grey.shade200;
+                      border = Colors.grey.shade700;
+                      icon = Icons.lock;
+                      title = 'Đang kiểm tra';
+                      subtitle = 'Vui lòng chờ...';
+                    } else {
+                      bg = isConnected ? Colors.green.shade50 : Colors.red.shade50;
+                      border = isConnected ? Colors.green.shade700 : Colors.red.shade700;
+                      icon = isConnected ? Icons.lock_open : Icons.lock;
+                      title = isConnected ? 'Đã kết nối' : 'Chưa kết nối';
+                      subtitle = isConnected ? 'Khóa sẵn sàng' : 'Không thể kết nối';
+                    }
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: bg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: border, width: 1),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: border,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(icon, color: Colors.white, size: 20),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: border)),
+                                const SizedBox(height: 4),
+                                Text(subtitle, style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              ],
+            ),
             const SizedBox(height: 24),
             const Text('Chọn Trạng Thái Phòng'),
             const SizedBox(height: 8),

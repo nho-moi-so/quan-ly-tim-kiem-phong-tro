@@ -19,6 +19,7 @@ export async function POST(request: Request) {
             // 2) lưu OTP vào Firestore (collection iot_otps, document ID = roomCode)
         await db.collection("iot_otps").doc(roomCode).set({
             otp,
+            status:"pending",
             createdAt: admin.firestore.Timestamp.now(), // nếu dùng admin
         });
             // 3) emit OTP qua socket theo roomCode (nếu socket đã init)

@@ -13,6 +13,7 @@ import '../../../service/owner/amenity_in_apartment_service.dart';
 import '../../../service/owner/amenity_service.dart';
 import '../../../service/owner/apartment_service.dart';
 import '../../../service/owner/booking_request_service.dart';
+import '../../../service/owner/iot_otp_service.dart';
 import '../viewmodel/room_card_info.dart';
 
 class ApartmentController {
@@ -21,6 +22,7 @@ class ApartmentController {
   final UserService _userService = UserService();
   final AmenityInApartmentService _amenityInApartmentService = AmenityInApartmentService();
   final AmenityService _amenityService = AmenityService();
+  final IotOtpService _iotOtpService = IotOtpService();
 
   final ContractController _contractController = ContractController();
 
@@ -224,5 +226,20 @@ class ApartmentController {
     return roomTypes;
   }
 
-  
+  //lấy danh sách các roomcCode của người dùng
+  Future<List<String>> getRoomCodesByUser(String userId) async {
+    List<RoomCardInfo> roomCards = await getSummaryRoom(userId);
+    return roomCards.map((room) => room.roomName).toList();
+  }
+
+  //==check ổ khóa có kết nối không để tạm ở đây
+  Future<bool> checkIOTConnection(String codeRoom) async {
+    IOTOtp otp = await _iotOtpService.getOTPbyId(codeRoom);
+    if(otp.status == "verified"){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
 }

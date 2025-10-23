@@ -53,7 +53,7 @@ class SocketService with ChangeNotifier {
         _connectionStatus = 'Connected';
         notifyListeners();
 
-        // Join room A101 giống test-socket-client.js
+        //== Join room A101 giống test-socket-client.js
         socket.emit('join_room', 'A101');
         print('📤 Sent join_room event with roomCode: A101');
       });
@@ -81,8 +81,18 @@ class SocketService with ChangeNotifier {
       socket.on('iot-verified', (data) {
         print('🎉 Verification Success: $data');
         _connectionStatus = 'Verification Successful';
+        
+        // Reset OTP
         _otp = null;
+        _roomCode = null;
+        _roomName = null;
+        _apartmentName = null;
+        
         notifyListeners();
+        
+        // Tự động đóng màn hình OTP (pop back)
+        print('🚪 Closing OTP screen...');
+        navigationService.navigatorKey.currentState?.pop();
       });
 
       // Lắng nghe khi join room thành công

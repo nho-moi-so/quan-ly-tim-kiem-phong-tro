@@ -1,4 +1,5 @@
 import { db } from "@/lib/firebase/admin";
+import { getIO } from "@/lib/socket";
 import { NextResponse } from "next/server";
 import z from "zod";
 
@@ -26,8 +27,21 @@ export async function POST(request: Request) {
         return NextResponse.json({ status: "error", message: "Invalid OTP" }, { status: 401 });
         }
 
-        // // (optional) mark verified, delete OTP doc or add audit log
-        // await docRef.delete();
+        // Cập nhật trạng thái OTP thành 'verified'
+        await docRef.update({ status: "verified" });
+
+        // Emit event về Flutter để đóng màn hình OTP
+        try {
+            const io = getIO();
+            io.to(roomCode).emit("iot-verified", { 
+                roomCode, 
+                status: "success",
+                message: "OTP verified successfully" 
+            });
+            console.log(`✅ Emitted iot-verified to room: ${roomCode}`);
+        } catch (e) {
+            console.warn("Socket emit failed", e);
+        }
 
         return NextResponse.json({ status: "success", message: `verified success to roomCode is ${roomCode}` });
     }
