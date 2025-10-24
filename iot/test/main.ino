@@ -1,171 +1,127 @@
-// #include <WiFi.h>
-// #include <HTTPClient.h>
-
-// // Thông tin mạng WiFi
-// const char* ssid = "POCO M6 Pro";       // Tên WiFi
-// const char* password = "212804@#*";     // Mật khẩu WiFi
-
-// void setup() {
-//   Serial.begin(115200);
-//   delay(1000);
-//   Serial.println();
-//   Serial.println("Dang ket noi WiFi...");
-
-//   WiFi.begin(ssid, password);
-
-//   while (WiFi.status() != WL_CONNECTED) {
-//     delay(500);
-//     Serial.print(".");
-//   }
-
-//   Serial.println("");
-//   Serial.println("Da ket noi WiFi!");
-//   Serial.print("Dia chi IP cua ESP32: ");
-//   Serial.println(WiFi.localIP());
-
-//   // Test POST request sau khi kết nối
-//   testInternetConnection();
-// }
-
-// void loop() {
-//   // Kiểm tra lại kết nối mỗi 10 giây
-//   if (WiFi.status() != WL_CONNECTED) {
-//     Serial.println("Mat ket noi WiFi! Dang thu ket noi lai...");
-//     WiFi.reconnect();
-//   } else {
-//     // Gửi lại request test mỗi 30 giây
-//     testInternetConnection();
-//   }
-
-//   delay(30000);
-// }
-
-// void testInternetConnection() {
-//   if (WiFi.status() == WL_CONNECTED) {
-//     HTTPClient http;
-
-//     // Dùng API test công khai
-//     String url = "http://httpbin.org/post";
-
-
-//     http.begin(url);
-//     http.addHeader("Content-Type", "application/json");
-
-//     // Dữ liệu JSON để gửi
-//     String postData = "{\"device\":\"ESP32\",\"status\":\"connected\"}";
-
-//     int httpResponseCode = http.POST(postData);
-
-//     if (httpResponseCode > 0) {
-//       Serial.print("POST thanh cong, ma HTTP: ");
-//       Serial.println(httpResponseCode);
-//       String payload = http.getString();
-//       Serial.println("Phan hoi tu server:");
-//       Serial.println(payload);
-//     } else {
-//       Serial.print("Loi POST: ");
-//       Serial.println(httpResponseCode);
-//     }
-
-//     http.end();
-//   } else {
-//     Serial.println("Chua ket noi WiFi, khong the POST!");
-//   }
-// }
-
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
+#include <string>
 
 // Thông tin mạng WiFi
-const char* ssid = "POCO M6 Pro";       // Tên WiFi
-const char* password = "212804@#*";     // Mật khẩu WiFi
+const char* ssid = "MINH KHANG";       // Tên WiFi
+const char* password = "20012016";     // Mật khẩu WiFi
 
-// Khởi tạo LCD với địa chỉ 0x27, kích thước 16x2
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+// Thông tin về căn hộ
+String roomCode = "";
 
-void setup() {
+void setup(){
   Serial.begin(115200);
   delay(1000);
   Serial.println();
   Serial.println("Dang ket noi WiFi...");
-  lcd.init();           // Khởi tạo LCD
-  lcd.backlight();      // Bật đèn nền
-  lcd.setCursor(0, 0);  // Đặt con trỏ tại dòng đầu
-  lcd.print("Xin chao ESP32"); // In thông điệp
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("");
+  Serial.println("Da ket noi WiFi!");
   
-    WiFi.begin(ssid, password);
 
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print(".");
-    }
+}
+void loop(){
+    // Kiểm tra lại kết nối mỗi 10 giây
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Mat ket noi WiFi! Dang thu ket noi lai...");
+    WiFi.reconnect();
+  }
 
-    if (WiFi.status() == WL_CONNECTED) {
+  //neu roomCode rong thi ket noi iot voi app
+  if(roomCode == ""){
+    //===================================goi /api/iot/connect-room============================
     HTTPClient http;
-
-        // Dùng API test công khai
-    String url = "https://quan-ly-tim-kiem-phong-tro-admin.vercel.app/api/iot/verify-password";
-
+    String url = "http://192.168.2.144:3000/api/iot/connect-room";
     http.begin(url);
     http.addHeader("Content-Type", "application/json");
 
-        // Dữ liệu JSON để gửi
-    String postData = "{\"password\":\"123456\",\"roomCode\":\"00001\"}";
+    // Chờ người dùng nhập
+    Serial.println("Nhap gia tri cho 'roomCode' va nhan Enter:");
+    while (!Serial.available());  // Dừng cho đến khi có dữ liệu    
+    String roomCodeData = Serial.readStringUntil('\n'); // Đọc chuỗi nhập
+    roomCodeData.trim();  // Xóa ký tự xuống dòng, khoảng trắng thừa
 
+    // Dữ liệu JSON để gửi
+    String postData = "{\"roomCode\":\"" + roomCodeData + "\"}";
     int httpResponseCode = http.POST(postData);
-
     if (httpResponseCode > 0) {
-      Serial.print("POST thanh cong, ma HTTP: ");
       Serial.println(httpResponseCode);
       String payload = http.getString();
-      Serial.println("Phan hoi tu server:");
-      Serial.println(payload);
 
       // --- Phân tích JSON ---
       StaticJsonDocument<200> doc;
       DeserializationError error = deserializeJson(doc, payload);
 
+      // Lấy giá trị "status" và "message"
+      String status = doc["status"];
+      String message = doc["message"];
+
+      Serial.println("Status cua connect-room: " + status); //done 
+      Serial.println("Message cua connect-room: " + message); //done
+      if(status == "success"){
+        //===================================================goi /api/iot/verify-otp
+        url = "http://192.168.2.144:3000/api/iot/verify-otp";
+        http.begin(url);
+        http.addHeader("Content-Type", "application/json");
+        // Chờ người dùng nhập
+        Serial.println("Nhap gia tri cho 'passwordData' va nhan Enter:");
+        while (!Serial.available());  // Dừng cho đến khi có dữ liệu      
+        String passwordData = Serial.readStringUntil('\n'); // Đọc chuỗi nhập
+        passwordData.trim();  // Xóa ký tự xuống dòng, khoảng trắng thừa
+
+        // Dữ liệu JSON để gửi
+        postData = "{\"otpCode\":\"" +passwordData+ "\",\"roomCode\":\""+roomCodeData+"\"}";
+        httpResponseCode = http.POST(postData);
+        if (httpResponseCode > 0) {
+          payload = http.getString();
+          //  --- Phân tích JSON ---
+          StaticJsonDocument<200> docVerifyOTP;
+          DeserializationError error = deserializeJson(docVerifyOTP, payload);
+          
+          // Lấy giá trị "status" và "message"
+          String status = docVerifyOTP["status"];
+          String message = docVerifyOTP["message"];
+
+          Serial.println("Status cua verify-otp" + status);
+          Serial.println("Message cua verify-otp" + message);
+          if(status == "success"){
+            roomCode = roomCodeData;
+          }
+
+          if (error) {
+            Serial.print("Loi parse JSON1: ");
+            Serial.println(error.c_str());
+            return;
+          }
+        }
+      }
+      
+
       if (error) {
-        Serial.print("Loi parse JSON: ");
+        Serial.print("Loi parse JSON:");
         Serial.println(error.c_str());
         return;
-      }
-
-      // Lấy giá trị "status" và "message"
-      const char* status = doc["status"];
-      const char* message = doc["message"];
-
-      // --- In ra LCD ---
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("status: ");
-      lcd.print(status);
-
-      lcd.setCursor(0, 1);
-      lcd.print("data: ");
-      lcd.print(message);
-
-      // --- In ra Serial để kiểm tra ---
-      Serial.print("Status: ");
-      Serial.println(status);
-      Serial.print("Data: ");
-      Serial.println(message);
-      } else {
+      }    
+    }
+    else {
         Serial.print("Loi POST: ");
         Serial.println(httpResponseCode);
-      }
-
-      http.end();
-    } else {
-      Serial.println("Chua ket noi WiFi, khong the POST!");
     }
+    http.end();
+  }
+  else{
+    Serial.println("Da ket noi IOT voi App voi roomCode la:" + roomCode);
+  }
 
+ 
 }
-
-void loop() {
-  // Có thể cập nhật nội dung LCD tại đây nếu cần
-}
-
