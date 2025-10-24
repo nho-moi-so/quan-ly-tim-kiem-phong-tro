@@ -29,6 +29,16 @@ export 'menu_detail_widget.dart';
 export 'room_status_ratio_widget.dart';
 export 'tag_with_icon_widget.dart';
 export 'monthly_income_chart_widget.dart';
+
+//contract
+export 'contact/summary_widget.dart';
+export 'contact/location_review_widget.dart';
+export 'contact/extend_info_widget.dart';
+export 'contact/password_display_widget.dart';
+
+//message
+export 'message/chat_item_widget.dart';
+
 Future<void> showDateTimePicker({
   required BuildContext context,
   required DateTime initialDateTime,

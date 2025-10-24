@@ -1,8 +1,37 @@
 //done
 import 'package:flutter/material.dart';
 
-class CardCustomerWidget extends StatelessWidget {
+class CardCustomerWidget extends StatefulWidget {
   const CardCustomerWidget({super.key});
+
+  @override
+  State<CardCustomerWidget> createState() => _CardCustomerWidgetState();
+}
+
+class _CardCustomerWidgetState extends State<CardCustomerWidget> {
+  late TextEditingController nameController;
+  late TextEditingController phoneController;
+  late TextEditingController idCardController;
+  late TextEditingController addressController;
+  String? selectedGender;
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController();
+    phoneController = TextEditingController();
+    idCardController = TextEditingController();
+    addressController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    idCardController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,57 +63,100 @@ class CardCustomerWidget extends StatelessWidget {
                   // ),
                 ),
                 const SizedBox(height: 24),
-                _buildLabel('Tên Khách Trọ'),
-                _buildInputBox(),
+                _buildLabeledInput('Tên Khách Trọ', nameController),
                 const SizedBox(height: 24),
-                _buildLabel('Số Điện Thoại'),
-                _buildInputBox(),
+                _buildLabeledInput('Số Điện Thoại', phoneController),
                 const SizedBox(height: 24),
-                _buildLabel('CCCD & Hộ Chiếu'),
-                _buildInputBox(height: 80),
+                _buildLabeledInput('CCCD & Hộ Chiếu', idCardController, inputHeight: 80),
                 const SizedBox(height: 24),
-                _buildLabel('Giới Tính'),
-                _buildInputBox(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                  _buildLabel('Giới Tính'),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: const BorderSide(color: Color(0xFF4285F4), width: 2),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    ),
+                    items: const [
+                    DropdownMenuItem(value: 'Nam', child: Text('Nam')),
+                    DropdownMenuItem(value: 'Nữ', child: Text('Nữ')),
+                    DropdownMenuItem(value: 'Khác', child: Text('Khác')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedGender = value;
+                      });
+                    },
+                    value: selectedGender,
+                  ),
+                  ],
+                ),
                 const SizedBox(height: 24),
-                _buildLabel('Địa Chỉ Thường Chú'),
-                _buildInputBox(height: 63),
+                _buildLabeledInput('Địa Chỉ Thường Chú', addressController, inputHeight: 63),
                 const SizedBox(height: 32),
                 // Buttons Row
                 Row(
                   children: [
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: const Color(0xFF4285F4), width: 1),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'Hủy',
-                          style: TextStyle(
-                            color: Colors.black,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          // TODO: Xử lý khi bấm nút Hủy
+                          Navigator.of(context).pop();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: const BorderSide(color: Color(0xFF4285F4), width: 1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          foregroundColor: Colors.black, // màu chữ
+                          textStyle: const TextStyle(
                             fontSize: 16,
                             fontFamily: 'Inter',
                             fontWeight: FontWeight.w500,
                           ),
                         ),
+                        child: const Text('Hủy'),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4285F4),
-                          borderRadius: BorderRadius.circular(15),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // TODO: xử lý thêm dữ liệu
+                          print('=== THÔNG TIN KHÁCH THUÊ MỚI ===');
+                          print('Tên Khách Trọ: ${nameController.text}');
+                          print('Số Điện Thoại: ${phoneController.text}');
+                          print('CCCD & Hộ Chiếu: ${idCardController.text}');
+                          print('Giới Tính: $selectedGender');
+                          print('Địa Chỉ Thường Chú: ${addressController.text}');
+                          print('=====================================');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4285F4),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
                         ),
-                        alignment: Alignment.center,
                         child: const Text(
                           'Thêm',
                           style: TextStyle(
-                            color: Colors.white,
                             fontSize: 16,
                             fontFamily: 'Inter',
                             fontWeight: FontWeight.w500,
@@ -92,6 +164,9 @@ class CardCustomerWidget extends StatelessWidget {
                         ),
                       ),
                     ),
+
+
+
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -115,15 +190,41 @@ class CardCustomerWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildInputBox({double height = 45}) {
-    return Container(
-      margin: const EdgeInsets.only(top: 6),
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Color(0xFF4285F4), width: 1),
-        borderRadius: BorderRadius.circular(15),
+Widget _buildInputBox({double height = 45, TextEditingController? controller}) {
+  return Container(
+    margin: const EdgeInsets.only(top: 6),
+    height: height,
+    child: TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Color(0xFF4285F4)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Color(0xFF4285F4)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Color(0xFF4285F4), width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.white,
       ),
+    ),
+  );
+}
+
+
+  Widget _buildLabeledInput(String label, TextEditingController controller, {double inputHeight = 45}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        _buildInputBox(height: inputHeight, controller: controller),
+      ],
     );
   }
 }

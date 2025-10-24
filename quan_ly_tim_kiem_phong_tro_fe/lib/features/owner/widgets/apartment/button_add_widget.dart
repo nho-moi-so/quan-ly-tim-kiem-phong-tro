@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class ButtonAddWidget extends StatelessWidget {
-  const ButtonAddWidget({super.key});
+  final String title;
+  final Widget screen;
+
+  const ButtonAddWidget({super.key, required this.title, required this.screen});
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +13,9 @@ class ButtonAddWidget extends StatelessWidget {
       height: 47,
       child: ElevatedButton(
         onPressed: () {
-          // TODO: Thêm logic khi nhấn nút
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => screen),
+          );
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF4285F4),
@@ -31,7 +36,7 @@ class ButtonAddWidget extends StatelessWidget {
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                'Thêm Phòng Trọ Mới',
+                title,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 style: const TextStyle(

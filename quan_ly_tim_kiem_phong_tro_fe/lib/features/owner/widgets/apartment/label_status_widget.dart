@@ -19,8 +19,8 @@ class LabelStatusWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: const [
-          _StatusItem(color: Color(0xFF34A853), label: 'Đang ở'),
-          _StatusItem(color: Color(0xFFE64646), label: 'Đang Trống'),
+          _StatusItem(color: Color(0xFFE64646), label: 'Đang Ở'),
+          _StatusItem(color: Color(0xFF34A853), label: 'Đang Trống'),
           _StatusItem(color: Color(0xFFFBBC05), label: 'Đã Cọc Tiền'),
         ],
       ),

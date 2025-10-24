@@ -1,0 +1,190 @@
+"use client";
+import type { TableColumnsType } from "antd";
+import { Button, Input, Space, Table, Tag, message } from "antd";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+const { Search } = Input;
+
+interface GuestData {
+  userCode: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  status: string;
+  registeredAt: string;
+}
+
+interface TableData {
+  maTaiKhoan: string;
+  tenNguoiDung: string;
+  email: string;
+  soDienThoai: string;
+  trangThai: string;
+  ngayTao: string;
+}
+
+export default function DanhSachTaiKhoanGuest() {
+  const router = useRouter();
+  const [data, setData] = useState<TableData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [originalData, setOriginalData] = useState<TableData[]>([]);
+
+  // Fetch guests from API
+  const fetchGuests = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/users/guests");
+      const result = await response.json();
+
+      if (result.status === "success" && result.data) {
+        const transformedData: TableData[] = result.data.map((guest: GuestData) => ({
+          maTaiKhoan: guest.userCode,
+          tenNguoiDung: guest.fullName,
+          email: guest.email,
+          soDienThoai: guest.phone,
+          trangThai: guest.status,
+          ngayTao: guest.registeredAt,
+        }));
+
+        setData(transformedData);
+        setOriginalData(transformedData);
+      } else {
+        message.error("Không thể tải danh sách guest");
+      }
+    } catch (error) {
+      console.error("Error fetching guests:", error);
+      message.error("Lỗi khi tải dữ liệu");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGuests();
+  }, []);
+
+  const onSearch = (value: string) => {
+    if (!value.trim()) {
+      setData(originalData);
+      return;
+    }
+
+    const filtered = originalData.filter((item) =>
+      item.tenNguoiDung.toLowerCase().includes(value.toLowerCase()) ||
+      item.email.toLowerCase().includes(value.toLowerCase()) ||
+      item.maTaiKhoan.toLowerCase().includes(value.toLowerCase())
+    );
+    
+    setData(filtered);
+  };
+
+  const columns: TableColumnsType<TableData> = [
+    {
+      title: "Mã tài khoản",
+      dataIndex: "maTaiKhoan",
+      key: "maTaiKhoan",
+      align: "center",
+    },
+    {
+      title: "Tên người dùng",
+      dataIndex: "tenNguoiDung",
+      key: "tenNguoiDung",
+      align: "center",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      align: "center",
+    },
+    {
+      title: "Số điện thoại",
+      dataIndex: "soDienThoai",
+      key: "soDienThoai",
+      align: "center",
+    },
+    {
+      title: "Trạng thái / Ngày tạo",
+      key: "trangThaiNgayTao",
+      align: "center",
+      render: (_, record) => {
+        const color =
+          record.trangThai === "Hoạt động"
+            ? "green"
+            : record.trangThai === "Bị khóa" ||
+              record.trangThai === "Bị Khóa"
+            ? "red"
+            : "orange";
+        return (
+          <Space>
+            <Tag color={color}>{record.trangThai}</Tag>
+            <span style={{ color: "#555" }}>{record.ngayTao}</span>
+          </Space>
+        );
+      },
+    },
+    {
+      title: "Hành động",
+      key: "action",
+      align: "center",
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="link"
+            onClick={() =>
+              router.push(`/admin/quan-ly-tai-khoan/${record.maTaiKhoan}?type=guest`)
+            }
+          >
+            Xem
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => console.log("Khóa tài khoản", record.maTaiKhoan)}
+          >
+            Khóa
+          </Button>
+          <Button
+            danger
+            onClick={() => console.log("Xóa tài khoản", record.maTaiKhoan)}
+          >
+            Xóa
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div style={{ padding: 24 }}>
+      <h2>Danh sách quản lý tài khoản Guest</h2>
+
+      <div
+        style={{
+          maxWidth: "100%",
+          marginBottom: 16,
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
+      >
+        <Search
+          placeholder="Nhập tên hoặc email để tìm kiếm"
+          allowClear
+          onSearch={onSearch}
+          style={{ width: 250 }}
+        />
+      </div>
+
+      <Table
+        columns={columns}
+        dataSource={data}
+        rowKey="maTaiKhoan"
+        loading={loading}
+        pagination={{ 
+          pageSize: 5,
+          showTotal: (total) => `Tổng số ${total} tài khoản`
+        }}
+      />
+    </div>
+  );
+}

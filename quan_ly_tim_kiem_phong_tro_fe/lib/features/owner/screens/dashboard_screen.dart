@@ -23,7 +23,7 @@ class DashboardScreen extends StatelessWidget {
               Center(child: LogoWidget()),
                 Row(
                 children: [
-                  const TagWithIconWidget(),
+                  // const TagWithIconWidget(),
                   const Spacer(),
                   // Button "Chủ trọ"
                   Container(

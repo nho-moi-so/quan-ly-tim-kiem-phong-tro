@@ -1,11 +1,49 @@
 //done
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/booking_request_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/booking_request_detail.dart';
 
-class CardBookingRequestDetailWidget extends StatelessWidget {
-  const CardBookingRequestDetailWidget({super.key});
+class CardBookingRequestDetailWidget extends StatefulWidget {
+  final String bookingRequestId;
+
+  const CardBookingRequestDetailWidget({
+    super.key,
+    required this.bookingRequestId,
+  });
+
+  @override
+  State<CardBookingRequestDetailWidget> createState() => _CardBookingRequestDetailWidgetState();
+}
+
+class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetailWidget> {
+  bool isEditing = false;
+  final BookingRequestController _bookingRequestController = BookingRequestController();
+  
+  //================================
+  BookingRequestDetail? bookingRequestDetail;
+  //============================================
+  
+  TextEditingController? passwordController;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBookingRequestDetail();
+  }
+
+  Future<void> _loadBookingRequestDetail() async {
+    bookingRequestDetail = await _bookingRequestController.getBookingRequestById(widget.bookingRequestId);
+    print("==1==${bookingRequestDetail?.roomNumber}");
+    passwordController = TextEditingController(text: bookingRequestDetail!.password);
+    print("==2==${bookingRequestDetail!.password}");
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (bookingRequestDetail == null || passwordController == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.all(16),
@@ -45,25 +83,73 @@ class CardBookingRequestDetailWidget extends StatelessWidget {
             const SizedBox(height: 16),
             ListTile(
               leading: CircleAvatar(backgroundColor: Color(0xFFEFF1F5)),
-              title: Text('Mỹ Ngọc'),
-              subtitle: Text('Phòng số 501 | Người thuê'),
+              title: Text(bookingRequestDetail!.fullName ?? ''),
+              subtitle: Text('Phòng số ${bookingRequestDetail!.roomNumber ?? ''} | Người thuê'),
             ),
             const SizedBox(height: 8),
-            buildInfoRow('Email', 'ltmn@example.com'),
-            buildInfoRow('Số điện thoại', '(123) 456-7890'),
-            buildInfoRow('Số người ở', '4 Người'),
+            buildInfoRow('Email', bookingRequestDetail!.email!),
+            buildInfoRow('Số điện thoại', bookingRequestDetail!.phoneNumber!),
+            buildInfoRow('Số người ở tối đa', '${bookingRequestDetail!.numberOfPeople} Người'),
             buildInfoRow('Checkin - Checkout', '14/05 - 15/05'),
-            buildInfoRow('Trạng thái', 'Đã Thanh Toán'),
-            buildInfoRow('Tiền phòng', '2.400.000'),
-            buildInfoRow('Mã đơn phòng', '#023135'),
-            buildInfoRow('Mật khẩu cung cấp', '012457'),
+            buildInfoRow('Trạng thái', bookingRequestDetail!.status ?? ''),
+            buildInfoRow('Tiền phòng', bookingRequestDetail!.price ?? ''),
+            buildInfoRow('Mã đơn phòng', bookingRequestDetail!.bookingCode ?? ''),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    'Mật khẩu cung cấp:',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: TextField(
+                    controller: passwordController,
+                    enabled: isEditing,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(isEditing ? Icons.check : Icons.edit),
+                  onPressed: () async {
+                    if (isEditing) {
+                      // Cập nhật mật khẩu
+                      bool result = await BookingRequestController().updateBookingRequestPassword(bookingRequestDetail?.bookingCode!, passwordController?.text);
+                      // Lưu mật khẩu
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Đã lưu mật khẩu: ${passwordController?.text}')),
+                      );
+                      if(result){
+                        print("Cập nhật mật khẩu thành công");
+                      } else {
+                        print("Cập nhật mật khẩu thất bại");
+                      }
+                    }
+                    setState(() {
+                      isEditing = !isEditing;
+                    });
+                  },
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF369C42)),
+                    onPressed: () {
+                      // Xử lý khi nhấn "Gửi Mật Khẩu"
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Mật khẩu đã được gửi')),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Color.fromARGB(255, 0, 255, 30)),
                     child: const Text('Gửi Mật Khẩu'),
                   ),
                 ),
@@ -71,7 +157,7 @@ class CardBookingRequestDetailWidget extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {},
-                    child: const Text('Xóa'),
+                    child: const Text('Đóng'),
                   ),
                 ),
               ],

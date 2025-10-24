@@ -1,8 +1,36 @@
-//done
 import 'package:flutter/material.dart';
 
-class SearchByDateWidget extends StatelessWidget {
-  const SearchByDateWidget({super.key});
+class SearchByDateWidget extends StatefulWidget {
+  final void Function(DateTime? from, DateTime? to)? onDateRangeChanged;
+  const SearchByDateWidget({super.key, this.onDateRangeChanged});
+
+  @override
+  State<SearchByDateWidget> createState() => _SearchByDateWidgetState();
+}
+
+class _SearchByDateWidgetState extends State<SearchByDateWidget> {
+  String fromDate = '--/--/----';
+  String toDate = '--/--/----';
+
+  void _pickDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() {
+        fromDate =
+            "${picked.start.day}/${picked.start.month}/${picked.start.year}";
+        toDate =
+            "${picked.end.day}/${picked.end.month}/${picked.end.year}";
+      });
+      if (widget.onDateRangeChanged != null) {
+        widget.onDateRangeChanged!(picked.start, picked.end); //== trả về start và end date
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +60,37 @@ class SearchByDateWidget extends StatelessWidget {
                   color: const Color(0xFF4285F4),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text(
-                  'Lịch Đặt Phòng',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontFamily: 'Noto Sans',
-                    fontWeight: FontWeight.w400,
-                    height: 1.29,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    foregroundColor: Colors.white,
+                    textStyle: const TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'Noto Sans',
+                      fontWeight: FontWeight.w400,
+                      height: 1.29,
+                    ),
+                  ),
+                  onPressed: () async {
+                    _pickDateRange();
+                    print('Start date: $fromDate');
+                    print('End date: $toDate');
+                    // List<BookingRequestSummary> bookingRequestSummaries = await _bookingRequestController.searchBookingRequestByStartDateAndEndDate("ownerId", DateTime.now(), DateTime.now()); //==ownerId đang cố định
+
+                  },
+                  child: const Text(
+                    'Lịch Đặt Phòng',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontFamily: 'Noto Sans',
+                      fontWeight: FontWeight.w400,
+                      height: 1.29,
+                    ),
                   ),
                 ),
               )
@@ -64,7 +115,7 @@ class SearchByDateWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  _buildDateBox(),
+                  _buildDateBox(fromDate),
                 ],
               ),
               const SizedBox(width: 40),
@@ -82,7 +133,7 @@ class SearchByDateWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  _buildDateBox(),
+                  _buildDateBox(toDate),
                 ],
               ),
             ],
@@ -92,7 +143,7 @@ class SearchByDateWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildDateBox() {
+  Widget _buildDateBox(String dateText) {
     return Container(
       width: 96,
       height: 42,
@@ -102,9 +153,9 @@ class SearchByDateWidget extends StatelessWidget {
         border: Border.all(color: const Color(0xFF4285F4), width: 1),
         borderRadius: BorderRadius.circular(7),
       ),
-      child: const Text(
-        '--/--/----', // bạn có thể thay bằng date picker sau
-        style: TextStyle(fontSize: 14),
+      child: Text(
+        dateText,
+        style: const TextStyle(fontSize: 14),
       ),
     );
   }

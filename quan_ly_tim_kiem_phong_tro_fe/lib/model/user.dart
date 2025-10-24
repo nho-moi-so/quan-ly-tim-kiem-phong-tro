@@ -1,14 +1,14 @@
 class User {
-  final String userID;
-  final String fullName;
-  final String email;
-  final String phone;
-  final String password;
-  final String role;
-  final String username;
-  final String approvalStatus;
-  final bool viewFeedback;
-  final bool viewStatistics;
+  final String? userID;
+  final String? fullName;
+  final String? email;
+  final String? phone;
+  final String? password;
+  final String? role;
+  final String? username;
+  final String? approvalStatus;
+  final bool? viewFeedback;
+  final bool? viewStatistics;
   final String? adminCCCD;
   final String? ownerStatus;
   final String? ownerCCCD;
@@ -16,16 +16,16 @@ class User {
   final int? reviewCount;
 
   User({
-    required this.userID,
-    required this.fullName,
-    required this.email,
-    required this.phone,
-    required this.password,
-    required this.role,
-    required this.username,
-    required this.approvalStatus,
-    required this.viewFeedback,
-    required this.viewStatistics,
+    this.userID,
+    this.fullName,
+    this.email,
+    this.phone,
+    this.password,
+    this.role,
+    this.username,
+    this.approvalStatus,
+    this.viewFeedback,
+    this.viewStatistics,
     this.adminCCCD,
     this.ownerStatus,
     this.ownerCCCD,

@@ -1,9 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/apartment_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
 
 import '../../widgets/widgets.dart';
 
-class DetailApartmentScreen extends StatelessWidget {
-  const DetailApartmentScreen({super.key});
+class DetailApartmentScreen extends StatefulWidget {
+  final RoomDetail? roomDetail;
+
+  const DetailApartmentScreen({super.key, this.roomDetail});
+
+  @override
+  State<DetailApartmentScreen> createState() => _DetailApartmentScreenState();
+}
+
+class _DetailApartmentScreenState extends State<DetailApartmentScreen> {
+  final ApartmentController _apartmentController = ApartmentController();
+  List<Map<String, String>> roomStates = [];
+  List<String> roomTypes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    final fetchedRoomStates = await _apartmentController.getRoomStatusWithKey();
+    final fetchedRoomTypes = await _apartmentController.getAllRoomTypes();
+    setState(() {
+      roomStates = fetchedRoomStates;
+      roomTypes = fetchedRoomTypes;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +49,15 @@ class DetailApartmentScreen extends StatelessWidget {
             children: [
               SizedBox(height: screenHeight * 0.05),
               const Center(child: LogoWidget()),
-              TagWithIconWidget(),
-              const LabelTitleAndQuayLaiWidget(title: 'Thêm Phòng Mới'),
-              CardRoomDetailWidget()
+                LabelTitleAndQuayLaiWidget(
+                title: widget.roomDetail != null ? 'Chi tiết căn hộ' : 'Tạo căn hộ',
+                ),
+              // SizedBox(height: screenHeight * 0.02),
+              CardRoomDetailWidget(
+                initialData: widget.roomDetail ?? RoomDetail(), // Provide a default RoomDetail if null
+                roomStates: roomStates,
+                roomTypes: roomTypes,
+              ),
             ],
           ),
         ),

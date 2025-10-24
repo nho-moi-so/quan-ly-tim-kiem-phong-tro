@@ -1,24 +1,32 @@
 class Apartment {
-  final String apartmentID;
-  final String codeApartment;
-  final double dailyRate;
-  final double deposit;
-  final int maxOccupancy;
-  final String description;
-  final List<String> pathImage;
-  final String status;
-  final String password;
+  String? apartmentID;
+  String? codeApartment;
+  double? dailyRate;
+  double? deposit;
+  int? maxOccupancy;
+  String? description;
+  List<String>? pathImage;
+  String? status;
+  String? password;
+  String? address;
+  List<String>? requirement;
+  String? type;
+  String? userID;
 
   Apartment({
-    required this.apartmentID,
-    required this.codeApartment,
-    required this.dailyRate,
-    required this.deposit,
-    required this.maxOccupancy,
-    required this.description,
-    required this.pathImage,
-    required this.status,
-    required this.password,
+    this.apartmentID,
+    this.codeApartment,
+    this.dailyRate,
+    this.deposit,
+    this.maxOccupancy,
+    this.description,
+    this.pathImage,
+    this.status,
+    this.password,
+    this.address,
+    this.requirement,
+    this.type,
+    this.userID,
   });
 
   factory Apartment.fromMap(String id, Map<String, dynamic> map) => Apartment(
@@ -31,6 +39,10 @@ class Apartment {
         pathImage: List<String>.from(map['PathImage'] ?? []),
         status: map['Status'] ?? '',
         password: map['Password'] ?? '',
+        address: map['Address'] ?? '',
+        requirement: List<String>.from(map['Requirements'] ?? []),
+        type: map['Type'] ?? '',
+        userID: map['UserID'] ?? '',
       );
 
   Map<String, dynamic> toMap() => {
@@ -42,5 +54,9 @@ class Apartment {
         'PathImage': pathImage,
         'Status': status,
         'Password': password,
+        'Address': address,
+        'Requirements': requirement,
+        'Type': type,
+        'UserID': userID,
       };
 }

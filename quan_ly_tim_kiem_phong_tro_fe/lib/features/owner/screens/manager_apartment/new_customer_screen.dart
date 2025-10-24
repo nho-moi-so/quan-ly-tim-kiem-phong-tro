@@ -8,6 +8,9 @@ class NewCustomerScreen  extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
+  //====get customer data
+    // final customerData = ApartmentService().getCustomerInfo();
+
     return Scaffold(
       body: SingleChildScrollView(
               child: Container(
@@ -18,11 +21,16 @@ class NewCustomerScreen  extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //wiget trong đây
-              SizedBox(height: screenHeight * 0.05),              
+              SizedBox(height: screenHeight * 0.05),
               Center(child: LogoWidget()),
-              TagWithIconWidget(),
+              // TagWithIconWidget(),
               const LabelTitleAndQuayLaiWidget(title: "Thêm khách hàng mới",),
-              CardCustomerWidget(),
+              SizedBox(height: screenHeight * 0.02),
+              //===============test=================
+              const CardCustomerWidget(),
+              //===============test=================
+              
+              
             ],
           )
         ),
