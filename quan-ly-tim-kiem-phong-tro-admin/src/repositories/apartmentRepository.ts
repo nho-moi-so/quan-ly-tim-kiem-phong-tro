@@ -81,4 +81,21 @@ export class ApartmentRepository {
             throw error;
         }
     }
+    // tim apartment theo roomCode
+    static async getByRoomCode(roomCode: string): Promise<Apartment | null> {
+        try {
+            const querySnapshot = await db.collection(COLLECTION_NAME)
+                .where("CodeApartment", "==", roomCode)
+                .limit(1)
+                .get();
+            if (querySnapshot.empty) {
+                return null;
+            }
+            const doc = querySnapshot.docs[0];
+            return { Id: doc.id, ...doc.data() } as Apartment;
+        } catch (error) {
+            console.error("Error getting apartment by room code:", error);
+            throw error;
+        }
+    }
 }

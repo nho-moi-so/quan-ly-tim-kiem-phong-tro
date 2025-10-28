@@ -385,64 +385,89 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
               children: [
               const Text('Trạng thái Khóa IOT'),
               const SizedBox(height: 8),
-              GestureDetector(
-                child: FutureBuilder<bool>(
-                  future: ApartmentController().checkIOTConnection(roomCodeController.text),
+              StatefulBuilder(
+                builder: (context, setStateSB) {
+                // tạo future mới mỗi lần build để FutureBuilder kiểm tra lại
+                final future = ApartmentController().checkIOTConnection(roomCodeController.text);
+                return FutureBuilder<bool>(
+                  future: future,
                   builder: (context, snapshot) {
-                    final bool isConnected = snapshot.data == true;
-                    Color bg;
-                    Color border;
-                    IconData icon;
-                    String title;
-                    String subtitle;
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      bg = Colors.grey.shade200;
-                      border = Colors.grey.shade700;
-                      icon = Icons.lock;
-                      title = 'Đang kiểm tra';
-                      subtitle = 'Vui lòng chờ...';
-                    } else {
-                      bg = isConnected ? Colors.green.shade50 : Colors.red.shade50;
-                      border = isConnected ? Colors.green.shade700 : Colors.red.shade700;
-                      icon = isConnected ? Icons.lock_open : Icons.lock;
-                      title = isConnected ? 'Đã kết nối' : 'Chưa kết nối';
-                      subtitle = isConnected ? 'Khóa sẵn sàng' : 'Không thể kết nối';
-                    }
+                  final bool isConnected = snapshot.data == true;
+                  Color bg;
+                  Color border;
+                  IconData icon;
+                  String title;
+                  String subtitle;
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    bg = Colors.grey.shade200;
+                    border = Colors.grey.shade700;
+                    icon = Icons.lock;
+                    title = 'Đang kiểm tra';
+                    subtitle = 'Vui lòng chờ...';
+                  } else {
+                    bg = isConnected ? Colors.green.shade50 : Colors.red.shade50;
+                    border = isConnected ? Colors.green.shade700 : Colors.red.shade700;
+                    icon = isConnected ? Icons.lock_open : Icons.lock;
+                    title = isConnected ? 'Đã kết nối' : 'Chưa kết nối';
+                    subtitle = isConnected ? 'Khóa sẵn sàng' : 'Không thể kết nối';
+                  }
 
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    decoration: BoxDecoration(
+                    color: bg,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: border, width: 1),
+                    ),
+                    child: Row(
+                    children: [
+                      Container(
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
-                        color: bg,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: border, width: 1),
+                        color: border,
+                        shape: BoxShape.circle,
                       ),
-                      child: Row(
+                      child: Icon(icon, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: border,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(icon, color: Colors.white, size: 20),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: border)),
-                                const SizedBox(height: 4),
-                                Text(subtitle, style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
-                              ],
-                            ),
-                          ),
+                        Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: border)),
+                        const SizedBox(height: 4),
+                        Text(subtitle, style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
                         ],
                       ),
-                    );
+                      ),
+                      // Nút refresh đơn giản để cập nhật lại trạng thái
+                      snapshot.connectionState == ConnectionState.waiting
+                        ? SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: Center(
+                          child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          ),
+                        )
+                        : IconButton(
+                          icon: const Icon(Icons.refresh),
+                          tooltip: 'Cập nhật trạng thái',
+                          onPressed: () {
+                          // rebuild StatefulBuilder -> tạo lại future và kiểm tra lại
+                          setStateSB(() {});
+                          },
+                        ),
+                    ],
+                    ),
+                  );
                   },
-                ),
+                );
+                },
               ),
               ],
             ),
