@@ -30,7 +30,7 @@ class SocketService with ChangeNotifier {
       // - Android Emulator: http://10.0.2.2:3000
       // - iOS Simulator: http://localhost:3000
       // - Device thật (cùng WiFi): http://YOUR_IP:3000
-      final serverUrl = 'http://192.168.2.144:3000';
+      final serverUrl = 'http://10.54.183.42:3000';
       print('🌐 Connecting to: $serverUrl');
       
       socket = IO.io(

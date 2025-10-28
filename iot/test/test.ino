@@ -6,26 +6,27 @@
 // #include <HTTPClient.h>
 
 // // ============================Biến Global=========================
-// // // LCD
-// // LiquidCrystal_I2C lcd(0x27, 16, 2);
+// // LCD
+// LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// // // Keypad
-// // const byte ROWS = 4;
-// // const byte COLS = 4;
-// // char keys[ROWS][COLS] = {
-// //   {'1','2','3','A'},
-// //   {'4','5','6','B'},
-// //   {'7','8','9','C'},
-// //   {'*','0','#','D'}
-// // };
-// // byte rowPins[ROWS] = {9, 8, 7, 6};
-// // byte colPins[COLS] = {5, 4, 3, 2};
-// // Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+// // Keypad
+// const byte ROWS = 4;
+// const byte COLS = 4;
 
-// // // Servo
-// // int currentAngle = 0; //lưu góc quay hiện tại của servo
-// // Servo myServo;
-// // const int servoPin = 18; // Chân kết nối servo
+// char keys[ROWS][COLS] = {
+//   {'1','2','3','A'},
+//   {'4','5','6','B'},
+//   {'7','8','9','C'},
+//   {'*','0','#','D'}
+// };
+// byte rowPins[ROWS] = {9, 8, 7, 6};
+// byte colPins[COLS] = {5, 4, 3, 2};
+// Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+// // Servo
+// int currentAngle = 0; //lưu góc quay hiện tại của servo
+// Servo myServo;
+// const int servoPin = 18; // Chân kết nối servo
 
 // // WiFi
 // String ssid = "";
@@ -309,7 +310,7 @@
 // }
 
 
-//=============================================================
+// =============================================================
 // #include <WiFi.h>
 // #include <HTTPClient.h>
 
@@ -384,99 +385,99 @@
 //     Serial.println("Chua ket noi WiFi, khong the POST!");
 //   }
 // }
-//=============================================================================================
-// #include <Wire.h>
-// #include <LiquidCrystal_I2C.h>
-// #include <WiFi.h>
-// #include <ArduinoJson.h>
-// #include <HTTPClient.h>
+// //=============================================================================================
+// // #include <Wire.h>
+// // #include <LiquidCrystal_I2C.h>
+// // #include <WiFi.h>
+// // #include <ArduinoJson.h>
+// // #include <HTTPClient.h>
 
-// // Thông tin mạng WiFi
-// const char* ssid = "POCO M6 Pro";       // Tên WiFi
-// const char* password = "212804@#*";     // Mật khẩu WiFi
+// // // Thông tin mạng WiFi
+// // const char* ssid = "POCO M6 Pro";       // Tên WiFi
+// // const char* password = "212804@#*";     // Mật khẩu WiFi
 
-// // Khởi tạo LCD với địa chỉ 0x27, kích thước 16x2
-// LiquidCrystal_I2C lcd(0x27, 16, 2);
+// // // Khởi tạo LCD với địa chỉ 0x27, kích thước 16x2
+// // LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// void setup() {
-//   Serial.begin(115200);
-//   delay(1000);
-//   Serial.println();
-//   Serial.println("Dang ket noi WiFi...");
-//   lcd.init();           // Khởi tạo LCD
-//   lcd.backlight();      // Bật đèn nền
-//   lcd.setCursor(0, 0);  // Đặt con trỏ tại dòng đầu
-//   lcd.print("Xin chao ESP32"); // In thông điệp
+// // void setup() {
+// //   Serial.begin(115200);
+// //   delay(1000);
+// //   Serial.println();
+// //   Serial.println("Dang ket noi WiFi...");
+// //   lcd.init();           // Khởi tạo LCD
+// //   lcd.backlight();      // Bật đèn nền
+// //   lcd.setCursor(0, 0);  // Đặt con trỏ tại dòng đầu
+// //   lcd.print("Xin chao ESP32"); // In thông điệp
   
-//     WiFi.begin(ssid, password);
+// //     WiFi.begin(ssid, password);
 
-//     while (WiFi.status() != WL_CONNECTED) {
-//       delay(500);
-//       Serial.print(".");
-//     }
+// //     while (WiFi.status() != WL_CONNECTED) {
+// //       delay(500);
+// //       Serial.print(".");
+// //     }
 
-//     if (WiFi.status() == WL_CONNECTED) {
-//     HTTPClient http;
+// //     if (WiFi.status() == WL_CONNECTED) {
+// //     HTTPClient http;
 
-//         // Dùng API test công khai
-//     String url = "https://quan-ly-tim-kiem-phong-tro-admin.vercel.app/api/iot/verify-password";
+// //         // Dùng API test công khai
+// //     String url = "https://quan-ly-tim-kiem-phong-tro-admin.vercel.app/api/iot/verify-password";
 
-//     http.begin(url);
-//     http.addHeader("Content-Type", "application/json");
+// //     http.begin(url);
+// //     http.addHeader("Content-Type", "application/json");
 
-//         // Dữ liệu JSON để gửi
-//     String postData = "{\"password\":\"123456\",\"roomCode\":\"00001\"}";
+// //         // Dữ liệu JSON để gửi
+// //     String postData = "{\"password\":\"123456\",\"roomCode\":\"00001\"}";
 
-//     int httpResponseCode = http.POST(postData);
+// //     int httpResponseCode = http.POST(postData);
 
-//     if (httpResponseCode > 0) {
-//       Serial.print("POST thanh cong, ma HTTP: ");
-//       Serial.println(httpResponseCode);
-//       String payload = http.getString();
-//       Serial.println("Phan hoi tu server:");
-//       Serial.println(payload);
+// //     if (httpResponseCode > 0) {
+// //       Serial.print("POST thanh cong, ma HTTP: ");
+// //       Serial.println(httpResponseCode);
+// //       String payload = http.getString();
+// //       Serial.println("Phan hoi tu server:");
+// //       Serial.println(payload);
 
-//       // --- Phân tích JSON ---
-//       StaticJsonDocument<200> doc;
-//       DeserializationError error = deserializeJson(doc, payload);
+// //       // --- Phân tích JSON ---
+// //       StaticJsonDocument<200> doc;
+// //       DeserializationError error = deserializeJson(doc, payload);
 
-//       if (error) {
-//         Serial.print("Loi parse JSON: ");
-//         Serial.println(error.c_str());
-//         return;
-//       }
+// //       if (error) {
+// //         Serial.print("Loi parse JSON: ");
+// //         Serial.println(error.c_str());
+// //         return;
+// //       }
 
-//       // Lấy giá trị "status" và "message"
-//       const char* status = doc["status"];
-//       const char* message = doc["message"];
+// //       // Lấy giá trị "status" và "message"
+// //       const char* status = doc["status"];
+// //       const char* message = doc["message"];
 
-//       // --- In ra LCD ---
-//       lcd.clear();
-//       lcd.setCursor(0, 0);
-//       lcd.print("status: ");
-//       lcd.print(status);
+// //       // --- In ra LCD ---
+// //       lcd.clear();
+// //       lcd.setCursor(0, 0);
+// //       lcd.print("status: ");
+// //       lcd.print(status);
 
-//       lcd.setCursor(0, 1);
-//       lcd.print("data: ");
-//       lcd.print(message);
+// //       lcd.setCursor(0, 1);
+// //       lcd.print("data: ");
+// //       lcd.print(message);
 
-//       // --- In ra Serial để kiểm tra ---
-//       Serial.print("Status: ");
-//       Serial.println(status);
-//       Serial.print("Data: ");
-//       Serial.println(message);
-//       } else {
-//         Serial.print("Loi POST: ");
-//         Serial.println(httpResponseCode);
-//       }
+// //       // --- In ra Serial để kiểm tra ---
+// //       Serial.print("Status: ");
+// //       Serial.println(status);
+// //       Serial.print("Data: ");
+// //       Serial.println(message);
+// //       } else {
+// //         Serial.print("Loi POST: ");
+// //         Serial.println(httpResponseCode);
+// //       }
 
-//       http.end();
-//     } else {
-//       Serial.println("Chua ket noi WiFi, khong the POST!");
-//     }
+// //       http.end();
+// //     } else {
+// //       Serial.println("Chua ket noi WiFi, khong the POST!");
+// //     }
 
-// }
+// // }
 
-// void loop() {
-//   // Có thể cập nhật nội dung LCD tại đây nếu cần
-// }
+// // void loop() {
+// //   // Có thể cập nhật nội dung LCD tại đây nếu cần
+// // }
