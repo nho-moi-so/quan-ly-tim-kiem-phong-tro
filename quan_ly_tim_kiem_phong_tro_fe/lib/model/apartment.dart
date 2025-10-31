@@ -16,6 +16,7 @@ class Apartment {
   final List<String> Requirements;
   final String Bedroom;
   final String Bathroom;
+  final List<String>? amenities;
 
   Apartment({
     required this.ApartmentID,
@@ -33,6 +34,8 @@ class Apartment {
     required this.Requirements,
     required this.Bathroom,
     required this.Bedroom,
+    required this.amenities,
+
   });
 
   static String _getString(Map<String, dynamic> d, List<String> keys) {
@@ -86,6 +89,9 @@ class Apartment {
       Requirements: (data['Requirements'] is List) ? List<String>.from(data['Requirements']) : <String>[],
       Bathroom: _getString(data, ['Bathroom', 'bathroom']), 
       Bedroom: _getString(data, ['Bedroom', 'bedroom']), 
+      amenities: (data['amenities'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList(),
     );
   }
 }

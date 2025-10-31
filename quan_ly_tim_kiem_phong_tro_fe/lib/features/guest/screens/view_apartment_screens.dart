@@ -7,14 +7,25 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/apartment/a
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/apartment/apartment_detail_contact.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/apartment/apartment_map.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/apartment/images.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/search_criteria.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/booking_request/total.dart';
 
 class ViewApartmentScreens extends StatelessWidget {
   final Apartment apartment;
-
-  const ViewApartmentScreens({super.key, required this.apartment});
+  final SearchCriteria? criteria;
+  const ViewApartmentScreens({
+    super.key,
+    required this.apartment,
+    this.criteria,
+  });
 
   @override
   Widget build(BuildContext context) {
+    int soNgayO = 1;
+    if (criteria?.checkIn != null && criteria?.checkOut != null) {
+      soNgayO = criteria!.checkOut!.difference(criteria!.checkIn!).inDays;
+      if (soNgayO <= 0) soNgayO = 1;
+    }
     return Scaffold(
       appBar: AppBar(title: Text(apartment.Type ?? "Chi tiết căn hộ")),
       body: SingleChildScrollView(
@@ -24,9 +35,12 @@ class ViewApartmentScreens extends StatelessWidget {
             Images(apartment: apartment),
             ApartmentDetail(apartment: apartment),
             ApartmentDetailCard(apartment: apartment),
-            ApartmentAmenities(),
-            ApartmentMap(),
-            ApartmentDetailContact(),
+            ApartmentAmenities(apartment: apartment),
+            ApartmentMap(apartment: apartment),
+            ApartmentDetailContact(
+              apartment: apartment,
+              criteria: criteria, // ✅ TRUYỀN THÊM DỮ LIỆU TÌM KIẾM
+            ),
           ],
         ),
       ),

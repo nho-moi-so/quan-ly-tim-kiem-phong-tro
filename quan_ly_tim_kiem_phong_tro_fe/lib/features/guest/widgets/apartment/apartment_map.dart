@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
 
 class ApartmentMap extends StatelessWidget {
-  const ApartmentMap({super.key});
+  final Apartment apartment;
+  const ApartmentMap({super.key, required this.apartment});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class ApartmentMap extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Vị Trí',
+            'Vị trí',
             style: TextStyle(
               fontSize: screenWidth * 0.045,
               fontWeight: FontWeight.bold,
@@ -71,7 +73,7 @@ class ApartmentMap extends StatelessWidget {
                         SizedBox(width: screenWidth * 0.01),
                         Expanded(
                           child: Text(
-                            '45 Nguyễn Văn Cừ, Cần Thơ',
+                            apartment.address ?? '45 Nguyễn Văn Cừ, Cần Thơ',
                             style: TextStyle(
                               fontSize: screenWidth * 0.036,
                               color: Colors.black87,

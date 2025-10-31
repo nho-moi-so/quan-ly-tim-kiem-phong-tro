@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/search_criteria.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/view_contract_screens.dart';
 
 class ApartmentDetailContact extends StatelessWidget {
-  const ApartmentDetailContact({super.key});
+  final Apartment apartment;
+  final SearchCriteria? criteria;
 
+  const ApartmentDetailContact({
+    super.key,
+    required this.apartment,
+    this.criteria,
+  });
   @override
   Widget build(BuildContext context) {
-
     return Column(
       children: [
         // Phần 1: Một số thông tin hữu ích khác
@@ -26,9 +34,15 @@ class ApartmentDetailContact extends StatelessWidget {
               const SizedBox(height: 12),
               _infoRow(Icons.check, "Nhận phòng - 14h\nTrả phòng - 12h"),
               const SizedBox(height: 8),
-              _infoRow(Icons.add, "Căn hộ gần trung tâm,\nhỗ trợ cho thuê xe di chuyển"),
+              _infoRow(
+                Icons.add,
+                "Căn hộ gần trung tâm,\nhỗ trợ cho thuê xe di chuyển",
+              ),
               const SizedBox(height: 8),
-              _infoRow(Icons.apartment, "Về căn hộ\nMột tòa nhà có 8 tầng\nMỗi tầng có 12 căn phòng\nGần trung tâm, có hồ bơi vô cực\nKèm nhiều tiện ích khác"),
+              _infoRow(
+                Icons.apartment,
+                "Về căn hộ\nMột tòa nhà có 8 tầng\nMỗi tầng có 12 căn phòng\nGần trung tâm, có hồ bơi vô cực\nKèm nhiều tiện ích khác",
+              ),
             ],
           ),
         ),
@@ -53,9 +67,15 @@ class ApartmentDetailContact extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
-                      Text("Em Bông", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        "Em Bông",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       Text("090 2343 2345"),
-                      Text("Property Agent", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                      Text(
+                        "Property Agent",
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
                     ],
                   ),
                 ],
@@ -66,7 +86,10 @@ class ApartmentDetailContact extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.phone, color: Colors.black),
-                  label: const Text("Gọi Điện", style: TextStyle(color: Colors.black)),
+                  label: const Text(
+                    "Gọi Điện",
+                    style: TextStyle(color: Colors.black),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE0E0E0),
                   ),
@@ -88,7 +111,18 @@ class ApartmentDetailContact extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ViewContractScreens(
+                          apartmentId: apartment.ApartmentID!, 
+                          criteria: criteria,
+                        ),
+                      ),
+                    );
+                  },
+
                   icon: const Icon(Icons.shopping_cart_checkout),
                   label: const Text("Đặt Phòng"),
                   style: ElevatedButton.styleFrom(

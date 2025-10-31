@@ -3,7 +3,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/booking_req
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/booking_request.dart';
 
 class BookingCard extends StatelessWidget {
-  final BookingRequest booking;
+  final BookingRequest booking; // ✅ Thay vì Apartment
 
   const BookingCard({super.key, required this.booking});
 
@@ -53,10 +53,10 @@ class BookingCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildValue(booking.id ?? "", fontSize),
-                    _buildValue(booking.userId, fontSize),
+                    _buildValue(booking.userId ?? "Không rõ", fontSize),
                     _buildValue("${booking.checkinDate} - ${booking.checkoutDate}", fontSize),
                     _buildValue(
-                      booking.status,
+                      booking.status ?? "Chờ duyệt",
                       fontSize,
                       statusColor: Colors.blue,
                     ),
