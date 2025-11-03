@@ -304,13 +304,23 @@ void loop(){
     http.end();
   }
   else{
+    // Hiển thị mã phòng + hướng dẫn, chờ nhấn '#' để vào nhập mật khẩu
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("Da ket noi!");
+    String line1 = "Ma phong:" + roomCode;
+    if (line1.length() > 16) line1 = line1.substring(0, 16);
+    lcd.print(line1);
     lcd.setCursor(0, 1);
-    lcd.print("Room:" + roomCode);
-    delay(3000);
-    //===================================nhap mat khau de mo cua============================
+    lcd.print("Nhan # de nhap MK");
+
+    // Chờ '#'
+    while (true) {
+      char k = keypad.getKey();
+      if (k == '#') break;
+      delay(50);
+    }
+
+    // Màn hình nhập mật khẩu
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Nhap mat khau:");
@@ -328,57 +338,58 @@ void loop(){
       char key = keypad.getKey();
       if (key) {
         if (key == '#') {
-          if (inputPassword.length() > 0) {
-            inputComplete = true; // Kết thúc nhập
-          }
+          if (inputPassword.length() > 0) inputComplete = true;
         } else if (key == '*') {
           if (inputPassword.length() > 0) {
-            inputPassword.remove(inputPassword.length() - 1); // Xóa ký tự cuối
+            inputPassword.remove(inputPassword.length() - 1);
             lcd.setCursor(0, 1);
-            lcd.print("                "); // Xóa dòng
+            lcd.print("                ");
             lcd.setCursor(0, 1);
             lcd.print(inputPassword);
           }
         } else {
-          if (inputPassword.length() < 16) { // Giới hạn độ dài
+          if (inputPassword.length() < 16) {
             inputPassword += key;
             lcd.print(key);
           }
         }
       }
     }
-    // Gửi mật khẩu đến server để kiểm tra
+
+    // Gửi mật khẩu kiểm tra
     HTTPClient http;
     String url = hostServer + "/api/iot/verify-password";
     http.begin(url);
     http.addHeader("Content-Type", "application/json");
-    String postData = "{\"password\":\"" +inputPassword+ "\",\"roomCode\":\""+roomCode+"\"}";
+    String postData = "{\"password\":\"" + inputPassword + "\",\"roomCode\":\"" + roomCode + "\"}";
     int httpResponseCode = http.POST(postData);
+
     if (httpResponseCode > 0) {
       String payload = http.getString();
-      // --- Phân tích JSON ---
       StaticJsonDocument<200> doc;
       DeserializationError error = deserializeJson(doc, payload);
-      // Lấy giá trị "status" và "message"
       String status = doc["status"];
       String message = doc["message"];
-      // Hiển thị kết quả trên LCD
+      
       lcd.clear();
       lcd.setCursor(0, 0);
       if (status == "success") {
-        lcd.print("Mo cua...");
-        // Mở cửa - xoay servo 180 độ
-        myServo.write(180);
-        delay(2000);
-        myServo.write(0); // Đóng cửa lại
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Cua da mo!");
+        if (currentAngle != 180) {
+          lcd.print("Mo cua...");
+          myServo.write(180);      // xoay đến 180° và giữ
+          currentAngle = 180;
+          delay(500);
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Cua da mo!");
+        } else {
+          lcd.print("Da mo roi!");
+        }
       } else {
         lcd.print("Sai mat khau!");
       }
       lcd.setCursor(0, 1);
-      lcd.print(message.substring(0, 16)); // Giới hạn 16 ký tự
+      lcd.print(message.substring(0, 16));
       delay(2000);
 
       if (error) {
@@ -386,17 +397,18 @@ void loop(){
         lcd.setCursor(0, 0);
         lcd.print("Loi JSON!");
         delay(1500);
+        http.end();
         return;
       }
+    } else {
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Loi ket noi!");
+      lcd.setCursor(0, 1);
+      lcd.print(http.errorToString(httpResponseCode));
+      delay(2000);
     }
-    else {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Loi ket noi!");
-        lcd.setCursor(0, 1);
-        lcd.print(http.errorToString(httpResponseCode));
-        delay(2000);
-    }
+    http.end();
   }
 
  
