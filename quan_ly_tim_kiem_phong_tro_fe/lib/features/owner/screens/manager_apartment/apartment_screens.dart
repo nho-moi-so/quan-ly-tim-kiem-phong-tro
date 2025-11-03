@@ -17,6 +17,27 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
   
   //get all list card infor
   Future<List<RoomCardInfo>> roomCards = ApartmentController().getSummaryRoom( "dYSjvUDL2vwRrSgqiDHy"); //==UserId cứng tạm thời
+  RoomFilter currentFilter = RoomFilter.all;
+
+  List<RoomCardInfo> _filterRooms(List<RoomCardInfo> rooms) {
+    switch (currentFilter) {
+      case RoomFilter.all:
+        return rooms;
+      case RoomFilter.rented:
+        // Lọc phòng đang ở (có khách thuê)
+        return rooms.where((room) => 
+          room.tenantName != "Chưa có khách thuê" && 
+          (room.status == 'Đang Ở' || room.status == 'rented')
+        ).toList();
+      case RoomFilter.available:
+        // Lọc phòng còn trống (chưa có khách thuê hoặc status là đang trống)
+        return rooms.where((room) => 
+          room.tenantName == "Chưa có khách thuê" || 
+          room.status == 'Đang Trống' || 
+          room.status == 'available'
+        ).toList();
+    }
+  }
 
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -50,7 +71,14 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
               SizedBox(
               height: screenHeight * 0.01,
               ),
-              LabelStatusWidget(),
+              LabelStatusWidget(
+                initialFilter: currentFilter,
+                onFilterChanged: (filter) {
+                  setState(() {
+                    currentFilter = filter;
+                  });
+                },
+              ),
               SizedBox(
               height: screenHeight * 0.01,
               ),
@@ -61,8 +89,9 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
                 future: roomCards,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
+                    final filteredRooms = _filterRooms(snapshot.data!);
                     return Column(
-                      children: snapshot.data!.map((card) => CardRoomWidget(data: card,)).toList(),
+                      children: filteredRooms.map((card) => CardRoomWidget(data: card,)).toList(),
                     );
                   } else if (snapshot.hasError) {
                     return Text("${snapshot.error}");

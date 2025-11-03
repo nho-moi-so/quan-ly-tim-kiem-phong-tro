@@ -245,4 +245,32 @@ class ApartmentController {
       return false;
     }
   }
+
+  // Kiểm tra mã phòng có unique không
+  Future<bool> isRoomCodeUnique(String roomCode) async {
+    try {
+      List<Apartment> apartments = await _apartmentService.getAllApartment();
+      return !apartments.any((apt) => apt.codeApartment == roomCode);
+    } catch (e) {
+      print('Error checking room code uniqueness: $e');
+      return false;
+    }
+  }
+
+  // Tạo mã phòng ngẫu nhiên unique
+  Future<String> generateUniqueRoomCode() async {
+    String code;
+    bool isUnique = false;
+    int attempts = 0;
+    
+    do {
+      // Format: P + 3 chữ số ngẫu nhiên (P101, P234, etc.)
+      final random = DateTime.now().millisecondsSinceEpoch % 1000;
+      code = 'P${random.toString().padLeft(3, '0')}';
+      isUnique = await isRoomCodeUnique(code);
+      attempts++;
+    } while (!isUnique && attempts < 10);
+    
+    return code;
+  }
 }
