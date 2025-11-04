@@ -78,7 +78,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'Tin nhắn',
+            label: 'Liên hệ',
           ),
 
         ],
