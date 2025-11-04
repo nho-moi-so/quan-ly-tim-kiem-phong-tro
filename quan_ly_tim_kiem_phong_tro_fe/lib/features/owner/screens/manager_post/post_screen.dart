@@ -52,15 +52,12 @@ class _PostScreenState extends State<PostScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TagWithIconWidget(title: "Quảng lý bài đăng"),
-                // ButtonAddWidget(title: "Thêm bài đăng mới", screen: DetailPostScreen(postId: "new"),),
+                // ButtonAddWidget(title: "Thêm bài đăng mới", screen: DetailPostScreen(postId: ''),),
               ],
               ),
-              // SizedBox(height: screenHeight * 0.02),
-              // FliterStatusWidget(),
-              SizedBox(height: screenHeight * 0.02),
-              LabelTitleWidget(title: "Danh sách bài đăng"),
+              SizedBox(height: screenHeight * 0.01),
               SearchBarWidget(),
-              SizedBox(height: screenHeight * 0.02),
+              SizedBox(height: screenHeight * 0.015),
               if (_isLoading)
                 const Center(child: CircularProgressIndicator())
               else if (_posts.isEmpty)

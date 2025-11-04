@@ -5,18 +5,21 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/screens.dar
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/socket_service.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialIndex;
+
+  const MainScreen({super.key, this.initialIndex = 0});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialIndex;
     
     // Join tất cả rooms của user khi app khởi động
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -36,8 +39,8 @@ class _MainScreenState extends State<MainScreen> {
     const DashboardScreen(), // Hoặc ContractScreen nếu bạn có
     const ApartmentScreen(),
     BookingRequestScreens(),
-    const MessageScreen(),
     const PostScreen(),
+    const MessageScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -67,15 +70,15 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.pending_actions),
-            label: 'Yêu cầu',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            label: 'Tin nhắn',
+            label: 'Đặt phòng',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),
             label: 'Bài đăng',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            label: 'Tin nhắn',
           ),
 
         ],

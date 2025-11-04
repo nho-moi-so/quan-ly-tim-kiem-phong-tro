@@ -39,18 +39,13 @@ class DetailPostScreen extends StatelessWidget {
               width: screenWidth,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               color: Colors.white,
+              
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: screenHeight * 0.03),
                   Center(child: LogoWidget()),
-                  Row(
-                    children: [
-                      const Spacer(),
-                    ],
-                  ),
-                  SizedBox(height: screenHeight * 0.01),
-                  LabelTitleWidget(title: "Thông tin bài đăng"),
+                  // LabelTitleWidget(title: "Thông tin bài đăng"),
                   Center(child: RoomDetailCardWidget(
                     postDetail,
                     onSubmit: (isCreate, data) async {
