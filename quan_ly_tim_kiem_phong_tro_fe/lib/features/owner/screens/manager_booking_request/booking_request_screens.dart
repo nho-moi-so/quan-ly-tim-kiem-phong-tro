@@ -10,7 +10,7 @@ class BookingRequestScreens extends StatefulWidget {
 }
 
 class _BookingRequestScreensState extends State<BookingRequestScreens> {
-  String selectedStatus = 'All';
+  String selectedStatus = 'Pending';
   final BookingRequestController _bookingRequestController = BookingRequestController();
 
   List<BookingRequestSummary> allRequests = [];
@@ -65,11 +65,12 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
               Center(
                 child: LogoWidget(),
               ),
-              // TagWithIconWidget(),
               SizedBox(height: screenHeight * 0.02),
-              //label title
-              LabelTitleWidget(
-                title: "Danh Sách Yêu Cầu Đặt Phòng",
+              Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TagWithIconWidget(title: "Danh sách đặt phòng"),
+              ],
               ),
               //filter status
               FliterStatusWidget(
@@ -79,7 +80,6 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                   });
                 },
                 tabs: [
-                  'All',
                   ..._bookingRequestController.getStatusList(),
                 ],
               ),
@@ -97,15 +97,14 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
               ),
               SizedBox(height: screenHeight * 0.02),
               //card booking request
-              Center(
-                child: Column(
-                  children: filteredRequests
-                      .map((req) => CardBookingRequestWidget(
-                            bookingCode: req.bookingCode ?? '',
-                            customerName: req.customerName ?? '',
-                            checkinCheckout: req.checkinCheckout ?? '',
-                            status: req.status ?? '',
-                            onConfirm: (action) async {
+              Column(
+                children: filteredRequests
+                    .map((req) => CardBookingRequestWidget(
+                          bookingCode: req.bookingCode ?? '',
+                          customerName: req.customerName ?? '',
+                          checkinCheckout: req.checkinCheckout ?? '',
+                          status: req.status ?? '',
+                          onConfirm: (action) async {
                               if (action == BookingAction.approved) {
                                 //== Xác nhận
                                 final result = await _bookingRequestController
@@ -134,10 +133,9 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                               }
                             },
                           ))
-                      .toList(),
-                ),
+                    .toList(),
               ),
-              
+              SizedBox(height: screenHeight * 0.02),
             ],
           ),
         ),
