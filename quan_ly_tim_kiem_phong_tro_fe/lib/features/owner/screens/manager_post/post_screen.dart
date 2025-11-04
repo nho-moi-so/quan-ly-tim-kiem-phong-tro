@@ -59,9 +59,15 @@ class _PostScreenState extends State<PostScreen> {
               SearchBarWidget(),
               SizedBox(height: screenHeight * 0.015),
               if (_isLoading)
-                const Center(child: CircularProgressIndicator())
+                const LoadingWidget(
+                  message: 'Đang tải bài đăng...',
+                )
               else if (_posts.isEmpty)
-                const Center(child: Text("Không có bài đăng nào"))
+                const EmptyStateWidget(
+                  title: 'Chưa có bài đăng',
+                  message: 'Bạn chưa có bài đăng nào',
+                  icon: Icons.post_add,
+                )
               else
                 ..._posts.map((post) => RoomPostItemWidget(
                       postId: post.postId!,

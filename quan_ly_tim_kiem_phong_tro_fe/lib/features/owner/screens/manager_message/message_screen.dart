@@ -81,23 +81,29 @@ class _MessageScreenState extends State<MessageScreen> {
               // FliterStatusWidget(),
               SizedBox(height: screenHeight * 0.02),
               Center(child: LabelTitleWidget(title: "Lịch sử trò chuyện")),
-              SizedBox(height: screenHeight * 0.02),
+              SizedBox(height: screenHeight * 0.01),
               SearchBarWidget(),
               SizedBox(height: screenHeight * 0.02),
                 _isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : Column(
+                  ? const LoadingWidget(
+                      message: 'Đang tải tin nhắn...',
+                    )
+                  : _messages.isEmpty
+                    ? const EmptyStateWidget(
+                        title: 'Chưa có cuộc trò chuyện',
+                        message: 'Bạn chưa có tin nhắn nào',
+                        icon: Icons.chat_bubble_outline,
+                      )
+                    : Column(
                     children: _messages
-                      .map((msg) => GestureDetector(
-                        onTap: () {
-                          _showChatBottomSheet(context, msg);
-                        },
-                        child: ChatItem(
+                      .map((msg) => ChatItem(
                           avatarUrl: msg.avatarUrl,
                           name: msg.name,
                           message: msg.message,
                           status: msg.status,
-                        ),
+                          onTap: () {
+                            _showChatBottomSheet(context, msg);
+                          },
                         ))
                       .toList(),
                   ),

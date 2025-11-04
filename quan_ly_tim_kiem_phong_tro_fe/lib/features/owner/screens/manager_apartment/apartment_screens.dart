@@ -88,15 +88,36 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
               FutureBuilder<List<RoomCardInfo>>(
                 future: roomCards,
                 builder: (context, snapshot) {
-                  if (snapshot.hasData) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const LoadingWidget(
+                      message: 'Đang tải danh sách phòng...',
+                    );
+                  } else if (snapshot.hasError) {
+                    return EmptyStateWidget(
+                      title: 'Có lỗi xảy ra',
+                      message: 'Không thể tải danh sách phòng\n${snapshot.error}',
+                      icon: Icons.error_outline,
+                    );
+                  } else if (snapshot.hasData) {
                     final filteredRooms = _filterRooms(snapshot.data!);
+                    if (filteredRooms.isEmpty) {
+                      String message = 'Chưa có phòng nào';
+                      if (currentFilter == RoomFilter.rented) {
+                        message = 'Chưa có phòng nào đang được thuê';
+                      } else if (currentFilter == RoomFilter.available) {
+                        message = 'Chưa có phòng trống';
+                      }
+                      return EmptyStateWidget(
+                        title: 'Không có phòng',
+                        message: message,
+                        icon: Icons.home_outlined,
+                      );
+                    }
                     return Column(
                       children: filteredRooms.map((card) => CardRoomWidget(data: card,)).toList(),
                     );
-                  } else if (snapshot.hasError) {
-                    return Text("${snapshot.error}");
                   }
-                  return const CircularProgressIndicator();
+                  return const SizedBox.shrink();
                 })
             ],
             
