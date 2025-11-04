@@ -184,38 +184,70 @@ class _OtpDisplayScreenState extends State<OtpDisplayScreen> {
                         ],
                         const SizedBox(height: 20),
                         const Divider(),
+                        // const SizedBox(height: 20),
+                        // const Text(
+                        //   'Mã OTP',
+                        //   style: TextStyle(
+                        //     fontSize: 14,
+                        //     fontWeight: FontWeight.w600,
+                        //     color: Color(0xFF6B7280),
+                        //   ),
+                        // ),
+                        // const SizedBox(height: 8),
+                        // Container(
+                        //   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        //   decoration: BoxDecoration(
+                        //     gradient: const LinearGradient(
+                        //       colors: [Color(0xFF4C6FFF), Color(0xFF0066CC)],
+                        //     ),
+                        //     borderRadius: BorderRadius.circular(12),
+                        //     boxShadow: [
+                        //       BoxShadow(
+                        //         color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                        //         blurRadius: 8,
+                        //         offset: const Offset(0, 4),
+                        //       ),
+                        //     ],
+                        //   ),
+                        //   child: Text(
+                        //     socketService.otp ?? '',
+                        //     style: const TextStyle(
+                        //       fontSize: 32,
+                        //       fontWeight: FontWeight.bold,
+                        //       color: Colors.white,
+                        //       letterSpacing: 6,
+                        //     ),
+                        //   ),
+                        // ),
                         const SizedBox(height: 20),
-                        const Text(
-                          'Mã OTP',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF6B7280),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF4C6FFF), Color(0xFF0066CC)],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF4C6FFF).withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
+                        // Button to show dialog again
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              _showOtpDialog(context, socketService);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF4C6FFF),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            ],
-                          ),
-                          child: Text(
-                            socketService.otp ?? '',
-                            style: const TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
+                              elevation: 0,
+                            ),
+                            icon: const Icon(
+                              Icons.visibility_rounded,
                               color: Colors.white,
-                              letterSpacing: 6,
+                              size: 20,
+                            ),
+                            label: const Text(
+                              'Hiển Thị OTP',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ),
@@ -561,7 +593,7 @@ class _OtpDisplayScreenState extends State<OtpDisplayScreen> {
                             const SizedBox(width: 12),
                             const Expanded(
                               child: Text(
-                                'Nhập mã này vào thiết bị ESP32 để hoàn tất xác thực',
+                                'Nhập mã này vào hệ thống IoT để hoàn tất xác thực',
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
@@ -586,7 +618,7 @@ class _OtpDisplayScreenState extends State<OtpDisplayScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.of(dialogContext).pop();
-                        socketService.resetOtp();
+                        // Don't reset OTP here, so user can view it again later
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6B7280),
