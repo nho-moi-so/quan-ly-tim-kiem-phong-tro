@@ -146,36 +146,36 @@ class _SearchByDateWidgetState extends State<SearchByDateWidget> {
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF4285F4), Color(0xFF0D47A1)],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF4285F4).withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.calendar_today, size: 16, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text(
-                          'Chọn ngày',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
+                    // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    // decoration: BoxDecoration(
+                    //   gradient: const LinearGradient(
+                    //     colors: [Color(0xFF4285F4), Color(0xFF0D47A1)],
+                    //   ),
+                    // //   borderRadius: BorderRadius.circular(12),
+                    // //   boxShadow: [
+                    // //     BoxShadow(
+                    // //       color: const Color(0xFF4285F4).withOpacity(0.3),
+                    // //       blurRadius: 8,
+                    // //       offset: const Offset(0, 2),
+                    // //     ),
+                    // //   ],
+                    // // ),
+                    // child: Row(
+                    //   mainAxisSize: MainAxisSize.min,
+                    //   children: const [
+                    //     Icon(Icons.calendar_today, size: 16, color: Colors.white),
+                    //     SizedBox(width: 8),
+                    //     // Text(
+                    //     //   'Chọn ngày',
+                    //     //   style: TextStyle(
+                    //     //     color: Colors.white,
+                    //     //     fontSize: 14,
+                    //     //     fontFamily: 'Inter',
+                    //     //     fontWeight: FontWeight.w600,
+                    //     //   ),
+                    //     // ),
+                    //   ],
+                    // ),
                   ),
                 ),
               ),
