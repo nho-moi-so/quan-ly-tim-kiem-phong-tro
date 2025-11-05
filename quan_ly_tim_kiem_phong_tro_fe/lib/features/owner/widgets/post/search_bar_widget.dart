@@ -6,34 +6,32 @@ class SearchBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 390,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: Colors.white,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+      ),
       child: TextField(
         decoration: InputDecoration(
-          hintText: 'Tìm kiếm bài đăng…',
+          hintText: 'Tìm kiếm tin nhắn...',
           hintStyle: const TextStyle(
-            color: Color(0xFFA09CAB),
-            fontSize: 16,
+            color: Color(0xFF9CA3AF),
+            fontSize: 15,
             fontFamily: 'Inter',
-            // fontWeight: FontWeight.w400,
-            // height: 1.25,
+            fontWeight: FontWeight.w400,
           ),
           prefixIcon: const Icon(
-            Icons.search,
-            color: Color(0xFFA09CAB),
-            size: 24,
+            Icons.search_rounded,
+            color: Color(0xFF6B7280),
+            size: 22,
           ),
-          filled: true,
-          fillColor: const Color(0xFFEFF1F5),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(1),
-            borderSide: BorderSide.none,
-          ),
+          filled: false,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(1),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 2),
           ),
         ),
       ),

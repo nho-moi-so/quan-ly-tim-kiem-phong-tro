@@ -1,98 +1,85 @@
-
-import '../../features/owner/viewmodel/room_detail.dart';
-import '../../features/owner/viewmodel/room_card_info.dart';
- 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
+
 class ApartmentService {
   //connect to firebase
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  //get Utility
-  Future<List<String>> getAmenities() async {
-    List<String> amenities = [];
-      try {
-    QuerySnapshot snapshot = await firestore.collection('amenity').get();
-        for (var doc in snapshot.docs) {
-        // Giả sử mỗi tài liệu có một trường 'Description' kiểu String
-        String? name = doc['Description'];
-        if (name != null) {
-            amenities.add(name);
-        }
-        }
-    } catch (e) {
-        print('Error getting amenities: $e');
+  //getAllApartment => List<Apartment>
+  Future<List<Apartment>> getAllApartment() async {
+    List<Apartment> apartments = [];
+    QuerySnapshot snapshot = await firestore.collection("apartment").get();
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      apartments.add(Apartment.fromMap(doc.id, data));
     }
-    
-    // return [
-    //   'Cho Nuôi Chó Mèo',
-    //   'Có Khóa Vân Tay, Mật Khảu',
-    //   'Bãi Đậu Xe',
-    //   'Wifi miễn phí',
-    // ];
-    return amenities;
+    return apartments;
+    }
+
+  //getApartmentById => Apartment
+  Future<Apartment> getApartmentById(String id) async {
+    DocumentSnapshot snapshot = await firestore.collection("apartment").doc(id).get();
+    final data = snapshot.data() as Map<String, dynamic>;
+    return Apartment.fromMap(snapshot.id, data);
   }
 
-  // get Room Detail
-  RoomDetail getRoomDetail() {
-    return RoomDetail(
-      roomCode: 'P102',
-      area: '25',
-      checkin: '14:00',
-      checkout: '12:00',
-      maxCapacity: '3',
-      room_status: 'Trống',
-      price: '2500000',
-      description: 'Phòng mới xây, có ban công thoáng mát.',
-      utilities: [
-        'Cho Nuôi Chó Mèo',
-        'Wifi miễn phí',
-      ],
-      roomType: 'Studio',
-    );
+  //getApartmentByUser => List<Apartment>
+  Future<List<Apartment>> getApartmentByUser(String userId) async {
+    List<Apartment> apartments = [];
+    QuerySnapshot snapshot = await firestore
+        .collection("apartment")
+        .where('UserID', isEqualTo: userId)
+        .get();
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      apartments.add(Apartment.fromMap(doc.id, data));
+    }
+    return apartments;
   }
 
-  //List Room Summary
-  List<RoomCardInfo> getAllRoomCards() {
-    return [
-      RoomCardInfo(
-        roomName: 'Phòng 101',
-        tenantName: 'Nguyễn Văn A',
-        price: '2.500.000 VNĐ',
-        status: 'Trống',
-        onViewDetail: () {
-          // Handle view detail action
-        },
-        onDelete: () {
-          // Handle delete action
-        },
-        onEdit: () {
-          // Handle edit action
-        },
-        onContract: () {
-          // Handle contract action
-        },
-      ),
-      RoomCardInfo(
-        roomName: 'Phòng 102',
-        tenantName: 'Trần Thị B',
-        price: '3.000.000 VNĐ',
-        status: 'Đã thuê',
-        onViewDetail: () {
-          // Handle view detail action
-        },
-        onDelete: () {
-          // Handle delete action
-        },
-        onEdit: () {
-          // Handle edit action
-        },
-        onContract: () {
-          // Handle contract action
-        },
-      ),
-    ];
+  //createApartment => Apartment
+  Future<Apartment> createApartment(Apartment apartment) async {
+  DocumentReference docRef = await firestore
+      .collection("apartment")
+      .add(apartment.toMap());
+
+  // Lấy lại dữ liệu vừa add từ Firestore
+  DocumentSnapshot snapshot = await docRef.get();
+  final data = snapshot.data() as Map<String, dynamic>;
+
+  // Trả về Apartment mới, dùng fromMap (không cần sửa model)
+  return Apartment.fromMap(docRef.id, data);
+  }
+
+
+  //updateApartment => Apartment
+  Future<Apartment> updateApartment(Apartment apartment) async {
+    await firestore.collection("apartment").doc(apartment.apartmentID).update(apartment.toMap());
+    return apartment;
+  }
+
+  //deleteApartment => bool
+  Future<bool> deleteApartment(String apartmentID) async {
+    try {
+      await firestore.collection("apartment").doc(apartmentID).delete();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future getApartmentsByOwnerId(String ownerId) async {
+    List<Apartment> apartments = [];
+    QuerySnapshot snapshot = await firestore
+        .collection("apartment")
+        .where('UserID', isEqualTo: ownerId)
+        .get();
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      apartments.add(Apartment.fromMap(doc.id, data));
+    }
+    return apartments;
   }
 
 
 }
-

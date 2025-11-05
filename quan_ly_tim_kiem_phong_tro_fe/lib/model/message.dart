@@ -4,14 +4,18 @@ class Message {
   final String content;
   final String status;
   final DateTime sentDate;
-  final DateTime receivedDate;
+  final DateTime? receivedDate;
+  final String? senderID;
+  final String? receiverID;
 
   Message({
     required this.messageID,
     required this.content,
     required this.status,
     required this.sentDate,
-    required this.receivedDate,
+    this.receivedDate,
+    this.senderID,
+    this.receiverID,
   });
 
   factory Message.fromMap(String id, Map<String, dynamic> map) => Message(
@@ -19,13 +23,19 @@ class Message {
         content: map['Content'] ?? '',
         status: map['Status'] ?? '',
         sentDate: (map['SentDate'] as Timestamp).toDate(),
-        receivedDate: (map['ReceivedDate'] as Timestamp).toDate(),
+        receivedDate: map['ReceivedDate'] != null
+            ? (map['ReceivedDate'] as Timestamp).toDate()
+            : null,
+        senderID: map['SenderID'],
+        receiverID: map['ReceiverID'],
       );
 
   Map<String, dynamic> toMap() => {
         'Content': content,
         'Status': status,
         'SentDate': Timestamp.fromDate(sentDate),
-        'ReceivedDate': Timestamp.fromDate(receivedDate),
+        if (receivedDate != null) 'ReceivedDate': Timestamp.fromDate(receivedDate!),
+        'SenderID': senderID,
+        'ReceiverID': receiverID,
       };
 }

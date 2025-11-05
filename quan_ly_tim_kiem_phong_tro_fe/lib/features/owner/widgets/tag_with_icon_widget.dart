@@ -39,16 +39,7 @@ class TagWithIconWidget extends StatelessWidget {
             ),
             child: Row(
               children: [
-              // Sử dụng file "Home filled.svg" thay cho Placeholder
-              SizedBox(
-                width: 18,
-                height: 18,
-                child: SvgPicture.asset(
-                'assets/Home filled.svg',
-                fit: BoxFit.contain,
-                ),
-              ),
-              const SizedBox(width: 8),
+
               Text(
                   title,
                   style: TextStyle(fontSize: 14),

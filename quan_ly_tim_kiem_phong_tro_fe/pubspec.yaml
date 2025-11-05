@@ -41,6 +41,14 @@ dependencies:
   cloud_firestore: ^5.6.11
   firebase_storage: ^12.4.9
   flutter_svg: ^2.2.0
+  image_picker: ^1.1.2
+  path_provider: ^2.1.5
+  intl: ^0.20.2
+
+  socket_io_client: ^3.0.0
+  http: ^1.0.0 # Gói này không bắt buộc cho socket, nhưng hữu ích nếu bạn cần gọi API
+  provider: ^6.1.5+1
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
