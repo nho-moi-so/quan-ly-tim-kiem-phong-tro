@@ -26,11 +26,9 @@ class BookingApartmentScreens extends StatelessWidget {
             return const Center(child: Text('Không tìm thấy căn hộ'));
           }
 
-          // Tạo model Apartment từ DocumentSnapshot
           final doc = snapshot.data!;
           final apartment = Apartment.fromFirestore(doc);
 
-          // Bây giờ truyền apartment vào widget hiển thị
           return SingleChildScrollView(
             child: ApartmentBookingForm(apartment: apartment),
           );

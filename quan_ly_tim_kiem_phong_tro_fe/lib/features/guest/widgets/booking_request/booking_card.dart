@@ -1,11 +1,54 @@
+import 'package:cloud_firestore/cloud_firestore.dart'; // <-- Nhớ import Firestore
 import 'package:flutter/material.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/booking_request/booking_detail_dialog.dart';
+import 'package:intl/intl.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/booking_request.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/booking_request/booking_detail_dialog.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/contract.dart';
 
 class BookingCard extends StatelessWidget {
-  final BookingRequest booking; // ✅ Thay vì Apartment
+  final dynamic data;
+  final VoidCallback? onDelete;
+  final VoidCallback? onView;
 
-  const BookingCard({super.key, required this.booking});
+  const BookingCard({
+    super.key,
+    required this.data,
+    this.onDelete,
+    this.onView,
+  });
+
+  bool get _isContract => data is Contract;
+  bool get _isBooking => data is BookingRequest;
+
+  String _formatDate(DateTime date) {
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  String _formatCurrency(int amount) {
+    final formatter = NumberFormat('#,###', 'vi_VN');
+    return '${formatter.format(amount)} VNĐ';
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+      case 'chờ duyệt':
+        return Colors.orange;
+      case 'active':
+      case 'approved':
+      case 'đang hoạt động':
+        return Colors.green;
+      case 'expired':
+      case 'hết hạn':
+        return Colors.red;
+      case 'cancelled':
+      case 'rejected':
+      case 'đã hủy':
+        return Colors.grey;
+      default:
+        return Colors.blue;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,33 +77,19 @@ class BookingCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildRow(Icons.home, "Mã Đơn:", fontSize),
-                    _buildRow(Icons.person, "Tên Khách:", fontSize),
-                    _buildRow(Icons.calendar_today, "Checkin-Checkout:", fontSize),
-                    _buildRow(Icons.circle, "Trạng Thái:", fontSize),
-                  ],
+                  children: _buildLeftLabels(fontSize),
                 ),
               ),
               Container(
                 width: 1,
-                height: 100,
+                height: _isContract ? 140 : 100,
                 color: Colors.grey.shade300,
                 margin: const EdgeInsets.symmetric(horizontal: 8),
               ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildValue(booking.id ?? "", fontSize),
-                    _buildValue(booking.userId ?? "Không rõ", fontSize),
-                    _buildValue("${booking.checkinDate} - ${booking.checkoutDate}", fontSize),
-                    _buildValue(
-                      booking.status ?? "Chờ duyệt",
-                      fontSize,
-                      statusColor: Colors.blue,
-                    ),
-                  ],
+                  children: _buildRightValues(fontSize),
                 ),
               ),
             ],
@@ -70,12 +99,10 @@ class BookingCard extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
-                    // xử lý xóa nếu cần
-                  },
+                  onPressed: onDelete ?? _defaultDelete,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade100,
-                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.red.shade50,
+                    foregroundColor: Colors.red,
                   ),
                   child: const Text("Xóa"),
                 ),
@@ -83,17 +110,12 @@ class BookingCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => BookingDetailDialog(booking: booking),
-                    );
-                  },
+                  onPressed: onView ?? () => _defaultView(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text("Xem"),
+                  child: Text(_isContract ? "Chi Tiết" : "Xem"),
                 ),
               ),
             ],
@@ -103,6 +125,67 @@ class BookingCard extends StatelessWidget {
     );
   }
 
+  List<Widget> _buildLeftLabels(double fontSize) {
+    if (_isContract) {
+      return [
+        _buildRow(Icons.description, "Mã Hợp Đồng:", fontSize),
+        _buildRow(Icons.person, "Người Thuê:", fontSize),
+        _buildRow(Icons.calendar_today, "Thời Hạn:", fontSize),
+        _buildRow(Icons.attach_money, "Tổng Tiền:", fontSize),
+        _buildRow(Icons.circle, "Trạng Thái:", fontSize),
+      ];
+    } else if (_isBooking) {
+      return [
+        _buildRow(Icons.home, "Mã Đơn:", fontSize),
+        _buildRow(Icons.person, "Tên Khách:", fontSize),
+        _buildRow(Icons.calendar_today, "Checkin-Checkout:", fontSize),
+        _buildRow(Icons.circle, "Trạng Thái:", fontSize),
+      ];
+    }
+    return [];
+  }
+
+  List<Widget> _buildRightValues(double fontSize) {
+    if (_isContract) {
+      Contract contract = data as Contract;
+
+      final String endDateDisplay = contract.endDate != null
+          ? _formatDate(contract.endDate!)
+          : "Không giới hạn";
+
+      return [
+        _buildValue(contract.contractID, fontSize),
+        _buildValue(contract.userId, fontSize),
+        _buildValue(
+          "${_formatDate(contract.startDate)} - $endDateDisplay",
+          fontSize,
+        ),
+        _buildValue(_formatCurrency(contract.total), fontSize),
+        _buildValue(
+          contract.status,
+          fontSize,
+          statusColor: _getStatusColor(contract.status),
+        ),
+      ];
+    } else if (_isBooking) {
+      BookingRequest booking = data as BookingRequest;
+      return [
+        _buildValue(booking.id ?? "", fontSize),
+        _buildValue(booking.userId ?? "Không rõ", fontSize),
+        _buildValue(
+          "${booking.checkinDate} - ${booking.checkoutDate}",
+          fontSize,
+        ),
+        _buildValue(
+          booking.status ?? "Chờ duyệt",
+          fontSize,
+          statusColor: _getStatusColor(booking.status ?? "pending"),
+        ),
+      ];
+    }
+    return [];
+  }
+
   Widget _buildRow(IconData icon, String label, double fontSize) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -110,7 +193,9 @@ class BookingCard extends StatelessWidget {
         children: [
           Icon(icon, size: fontSize, color: Colors.black54),
           const SizedBox(width: 6),
-          Expanded(child: Text(label, style: TextStyle(fontSize: fontSize))),
+          Expanded(
+            child: Text(label, style: TextStyle(fontSize: fontSize)),
+          ),
         ],
       ),
     );
@@ -120,21 +205,114 @@ class BookingCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (statusColor != null)
             Container(
               width: 8,
               height: 8,
-              margin: const EdgeInsets.only(right: 4),
-              decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+              margin: const EdgeInsets.only(right: 4, top: 6),
+              decoration: BoxDecoration(
+                color: statusColor,
+                shape: BoxShape.circle,
+              ),
             ),
           Expanded(
             child: Text(
               value,
               style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w500),
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  void _defaultDelete() {}
+
+  void _defaultView(BuildContext context) {
+    if (_isBooking) {
+      BookingRequest booking = data as BookingRequest;
+      showDialog(
+        context: context,
+        builder: (context) => BookingDetailDialog(booking: booking),
+      );
+    } else if (_isContract) {
+      _showContractDetailDialog(context);
+    }
+  }
+
+  Future<void> _showContractDetailDialog(BuildContext context) async {
+    Contract contract = data as Contract;
+
+    final String endDateDetail = contract.endDate != null
+        ? _formatDate(contract.endDate!)
+        : 'Không giới hạn';
+    final String? roomPassword = await _fetchRoomPassword(
+      contract.ApartmentId ?? "",
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Chi Tiết Hợp Đồng'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildDetailRow('Mã hợp đồng:', contract.contractID),
+              _buildDetailRow('Người thuê:', contract.userId),
+              _buildDetailRow('Ngày bắt đầu:', _formatDate(contract.startDate)),
+              _buildDetailRow('Ngày kết thúc:', endDateDetail),
+              _buildDetailRow('Tổng tiền:', _formatCurrency(contract.total)),
+              _buildDetailRow('Trạng thái:', contract.status),
+              _buildDetailRow('Mật khẩu phòng:', roomPassword ?? 'Không có'),
+              _buildDetailRow('Ngày tạo:', _formatDate(contract.createdDate)),
+              _buildDetailRow('Cập nhật:', _formatDate(contract.updateDate)),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String?> _fetchRoomPassword(String apartmentId) async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('apartment')
+          .doc(apartmentId)
+          .get();
+
+      return doc.data()?['Password'] as String?;
+    } catch (e) {
+      print('Lỗi khi lấy mật khẩu phòng: $e');
+      return null;
+    }
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );

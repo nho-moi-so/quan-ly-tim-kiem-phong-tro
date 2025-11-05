@@ -39,7 +39,7 @@ class ViewApartmentScreens extends StatelessWidget {
             ApartmentMap(apartment: apartment),
             ApartmentDetailContact(
               apartment: apartment,
-              criteria: criteria, // ✅ TRUYỀN THÊM DỮ LIỆU TÌM KIẾM
+              criteria: criteria, 
             ),
           ],
         ),

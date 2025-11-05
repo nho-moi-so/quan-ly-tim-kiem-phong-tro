@@ -56,7 +56,7 @@ class ApartmentDetailCard extends StatelessWidget {
             context,
             Icons.bed,
             'Giường',
-            "2 Giường", // set cứng
+            "2 Giường", 
             labelStyle,
             valueStyle,
           ),
@@ -92,7 +92,7 @@ class ApartmentDetailCard extends StatelessWidget {
             context,
             Icons.bathtub,
             'Phòng Tắm',
-            "1 Phòng tắm", // set cứng
+            "1 Phòng tắm", 
             labelStyle,
             valueStyle,
           ),

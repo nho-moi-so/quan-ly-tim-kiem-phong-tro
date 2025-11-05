@@ -16,14 +16,12 @@ class ApartmentBookingForm extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Tính số ngày ở
-    int soNgayO = 1; // mặc định 1 ngày
+    int soNgayO = 1; 
     if (criteria?.checkIn != null && criteria?.checkOut != null) {
       soNgayO = criteria!.checkOut!.difference(criteria!.checkIn!).inDays;
       if (soNgayO <= 0) soNgayO = 1;
     }
 
-    // Tính tổng tiền
     double tongTien = (apartment.DailyRate ?? 0) * soNgayO;
 
     return SingleChildScrollView(
@@ -38,7 +36,6 @@ class ApartmentBookingForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// --- Hình + tiêu đề ---
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -129,7 +126,6 @@ class ApartmentBookingForm extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            /// --- Phần bổ sung: Một số thông tin hữu ích khác ---
             Container(
               margin: const EdgeInsets.all(12),
               padding: const EdgeInsets.all(12),
@@ -198,7 +194,6 @@ class ApartmentBookingForm extends StatelessWidget {
     );
   }
 
-  // Hàm helper hiển thị info row
   Widget _infoRow(IconData icon, String text) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,7 +206,6 @@ class ApartmentBookingForm extends StatelessWidget {
   }
 }
 
-// Widget riêng để hiển thị mỗi requirement
 class InfoRow extends StatelessWidget {
   final String text;
   const InfoRow({super.key, required this.text});

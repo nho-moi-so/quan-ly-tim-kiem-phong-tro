@@ -10,11 +10,9 @@ class ApartmentDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // lấy giá phòng và đặt cọc
     final daily = apartment.DailyRate;
     final deposit = apartment.Deposit;
 
-    // convert requirements list -> string
     final reqText =
         (apartment.Requirements != null && apartment.Requirements!.isNotEmpty)
         ? apartment.Requirements!.join(', ')
@@ -26,7 +24,6 @@ class ApartmentDetail extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // tên phòng
             Text(
               apartment.Type ?? 'Tên phòng',
               style: TextStyle(
@@ -37,7 +34,6 @@ class ApartmentDetail extends StatelessWidget {
             ),
             SizedBox(height: screenWidth * 0.02),
 
-            // hiển thị giá phòng
             Text(
               daily != null ? formatVND(daily.toInt()) : '-',
               style: TextStyle(
@@ -49,7 +45,7 @@ class ApartmentDetail extends StatelessWidget {
 
             SizedBox(height: screenWidth * 0.03),
 
-            // địa chỉ
+   
             Row(
               children: [
                 Icon(
@@ -73,28 +69,26 @@ class ApartmentDetail extends StatelessWidget {
 
             SizedBox(height: screenWidth * 0.04),
 
-            // info items
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 InfoItem(
                   icon: Icons.bed,
-                  text: "2 Giường", // set cứng
+                  text: "2 Giường",
                 ),
                 InfoItem(
                   icon: Icons.bathtub,
-                  text: "1 Phòng Tắm", // set cứng
+                  text: "1 Phòng Tắm",
                 ),
                 InfoItem(
                   icon: Icons.people,
-                  text: "${apartment.maxOccupancy ?? 0} người", // vẫn động
+                  text: "${apartment.maxOccupancy ?? 0} người", 
                 ),
               ],
             ),
 
             SizedBox(height: screenWidth * 0.03),
 
-            // đặt cọc
             Text(
               "Đặt cọc: ${deposit != null ? formatVND(deposit.toInt()) : '-'}",
               style: TextStyle(
@@ -105,7 +99,6 @@ class ApartmentDetail extends StatelessWidget {
 
             SizedBox(height: screenWidth * 0.02),
 
-            // yêu cầu
             buildRow(
               context,
               Icons.pets,
@@ -169,7 +162,6 @@ class InfoItem extends StatelessWidget {
   }
 }
 
-// Hàm format tiền VND (nếu bạn chưa có)
 String formatVND(int value) {
   return "${value.toString()} ₫";
 }

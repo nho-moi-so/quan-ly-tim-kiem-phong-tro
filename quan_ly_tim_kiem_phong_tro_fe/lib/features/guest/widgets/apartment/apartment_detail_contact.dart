@@ -16,7 +16,6 @@ class ApartmentDetailContact extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Phần 1: Một số thông tin hữu ích khác
         Container(
           margin: const EdgeInsets.all(12),
           padding: const EdgeInsets.all(12),

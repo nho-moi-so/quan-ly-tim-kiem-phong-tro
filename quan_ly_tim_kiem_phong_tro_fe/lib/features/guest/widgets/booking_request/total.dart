@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/search_criteria.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/booking_success_screen.dart';
@@ -62,12 +63,9 @@ class _TotalState extends State<Total> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-
-    // 🔹 Lấy ngày Check-in / Check-out thật
     final checkIn = widget.criteria?.checkIn;
     final checkOut = widget.criteria?.checkOut;
 
-    // 🔹 Tính số ngày ở
     int soNgayO =
         widget.soNgayO ??
         ((checkIn != null && checkOut != null)
@@ -75,7 +73,6 @@ class _TotalState extends State<Total> {
             : 1);
     if (soNgayO <= 0) soNgayO = 1;
 
-    // 🔹 Tính tổng tiền
     double tongTien =
         widget.tongTien ?? ((widget.apartment.DailyRate ?? 0) * soNgayO);
 
@@ -97,7 +94,6 @@ class _TotalState extends State<Total> {
           ),
           const SizedBox(height: 12),
 
-          // 🔹 Hiển thị Check-in / Check-out
           _buildRow(
             "Ngày nhận phòng:",
             checkIn != null ? _formatDate(checkIn) : "Chưa chọn",
@@ -119,7 +115,6 @@ class _TotalState extends State<Total> {
           ),
           const SizedBox(height: 16),
 
-          // 🔹 Chính sách
           Row(
             children: [
               Checkbox(
@@ -151,19 +146,43 @@ class _TotalState extends State<Total> {
           ),
           const SizedBox(height: 12),
 
-          // 🔹 Nút đặt phòng
+        
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _isPolicyAccepted
-                  ? () {
-                      // Chuyển sang trang thành công
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const BookingSuccessScreen(),
-                        ),
-                      );
+                  ? () async {
+                      try {
+                        await FirebaseFirestore.instance
+                            .collection('contract')
+                            .add({
+                              'UserID': 'guest', 
+                              'ApartmentId':
+                                  widget.apartment.ApartmentID ??
+                                  'unknown',
+                              'StartDate': widget.criteria?.checkIn
+                                  ?.toIso8601String(),
+                              'EndDate': widget.criteria?.checkOut
+                                  ?.toIso8601String(),
+                              'Total': widget.totalAmount,
+                              'Status': 'pending',
+                              'CreatedDate': FieldValue.serverTimestamp(),
+                              'UpdateDate': DateTime.now(),
+                            });
+                             print('✅ Đặt phòng thành công, dữ liệu đã lưu vào Firestore');
+
+                        // Chuyển sang trang thành công
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BookingSuccessScreen(),
+                          ),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Lỗi khi đặt phòng: $e')),
+                        );
+                      }
                     }
                   : null,
               style: ElevatedButton.styleFrom(
@@ -204,7 +223,6 @@ class _TotalState extends State<Total> {
     );
   }
 
-  /// 🔹 Hàm định dạng ngày cho đẹp hơn
   String _formatDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
   }

@@ -38,7 +38,6 @@ class ViewContractScreens extends StatelessWidget {
 
           final apartment = Apartment.fromFirestore(snapshot.data!);
 
-          // ✅ Tính toán logic ở đây (ngoài children)
           int soNgayO = 1;
           if (criteria?.checkIn != null && criteria?.checkOut != null) {
             soNgayO = criteria!.checkOut!.difference(criteria!.checkIn!).inDays;

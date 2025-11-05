@@ -61,7 +61,7 @@ class SearchApartmentScreens extends StatelessWidget {
                                 builder: (_) => ViewApartmentScreens(
                                   apartment: apartment,
                                   criteria:
-                                      criteria, // <-- truyền criteria đã có sẵn
+                                      criteria, 
                                 ),
                               ),
                             );
