@@ -4,16 +4,16 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/socket_room
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/socket_service.dart';
 
-class MainScreen extends StatefulWidget {
+class OwnerMainScreen extends StatefulWidget {
   final int initialIndex;
 
-  const MainScreen({super.key, this.initialIndex = 0});
+  const OwnerMainScreen({super.key, this.initialIndex = 0});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<OwnerMainScreen> createState() => _OwnerMainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _OwnerMainScreenState extends State<OwnerMainScreen> {
   late int _selectedIndex;
 
   @override

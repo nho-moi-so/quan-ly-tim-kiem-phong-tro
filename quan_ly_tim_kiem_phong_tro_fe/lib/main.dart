@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/common/screens/register_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/socket_service.dart';
 
+import 'features/common/screens/login_screens.dart';
 import 'features/owner/screens/otp_display_screen.dart';
 import 'features/owner/screens/screens.dart';
 import 'service/navigation_service.dart';
@@ -35,14 +37,16 @@ import 'service/navigation_service.dart';
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
         navigatorKey: navigationService.navigatorKey, // ← BẮT BUỘC
-        initialRoute: '/main', // Đổi từ '/' sang '/main'
+        initialRoute: '/login', // Đổi từ '/' sang '/main'
         routes: {
-          '/main': (context) => const MainScreen(), // Thêm route mới
+          '/main': (context) => const OwnerMainScreen(), // Thêm route mới
           '/messages': (context) => const MessageScreen(),
           '/apartments': (context) => const ApartmentScreen(),
           '/posts': (context) => const PostScreen(),
           '/bookings': (context) => BookingRequestScreens(),
           '/dashboard': (context) => const DashboardScreen(),
+          '/login': (context) => const LoginScreens(),
+          '/register': (context) => const RegisterScreens(),
           '/iot-test': (context) => const OtpDisplayScreen(), // ← Test IOT screen
   },
   // Handle parameterized routes (post detail, chat with args)

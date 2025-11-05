@@ -177,9 +177,9 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                           onPressed: () {
                             // Close any dialog (if this widget was shown in a dialog)
                             Navigator.of(context, rootNavigator: true).pop();
-                            // Then navigate to MainScreen with the Posts tab selected (index 3)
+                            // Then navigate to OwnerMainScreen with the Posts tab selected (index 3)
                             Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const MainScreen(initialIndex: 3),
+                              builder: (context) => const OwnerMainScreen(initialIndex: 3),
                             ));
                           },
                           style: ElevatedButton.styleFrom(
