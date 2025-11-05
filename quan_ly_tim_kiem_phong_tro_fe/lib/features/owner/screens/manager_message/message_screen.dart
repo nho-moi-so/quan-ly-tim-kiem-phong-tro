@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/message_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/chat_item_viewmodel.dart';
@@ -23,8 +24,7 @@ class _MessageScreenState extends State<MessageScreen> {
   }
 
   Future<void> _loadMessages() async {
-    //== Thay "ownerId" bằng id thực tế nếu có
-    final messages = await _messageController.getSummaryMessage("dYSjvUDL2vwRrSgqiDHy");
+    final messages = await _messageController.getSummaryMessage(FirebaseAuth.instance.currentUser!.uid);
     setState(() {
       _messages = messages
           .map((msg) => ChatItemViewModel(

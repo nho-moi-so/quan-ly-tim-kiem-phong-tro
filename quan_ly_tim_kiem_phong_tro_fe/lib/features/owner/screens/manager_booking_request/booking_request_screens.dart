@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/booking_request_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/booking_request_summary.dart';
@@ -29,7 +30,7 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
     setState(() {
       _isLoading = true;
     });
-    final summaries = await _bookingRequestController.getAllBookingRequestsSummaries("dYSjvUDL2vwRrSgqiDHy"); //==UserId cứng tạm thời
+    final summaries = await _bookingRequestController.getAllBookingRequestsSummaries(FirebaseAuth.instance.currentUser!.uid);
     setState(() {
       allRequests = summaries;
       _isLoading = false;
@@ -97,7 +98,7 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                     _isLoading = true;
                   });
                   final results = await _bookingRequestController
-                      .searchBookingRequestByStartDateAndEndDate("dYSjvUDL2vwRrSgqiDHy", from, to);
+                      .searchBookingRequestByStartDateAndEndDate(FirebaseAuth.instance.currentUser!.uid, from, to);
                   setState(() {
                     allRequests = results;
                     _isLoading = false;

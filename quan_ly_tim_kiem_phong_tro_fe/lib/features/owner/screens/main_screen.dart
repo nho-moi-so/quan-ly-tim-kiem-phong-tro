@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/socket_room_helper.dart';
@@ -25,12 +26,17 @@ class _OwnerMainScreenState extends State<OwnerMainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final socketService = Provider.of<SocketService>(context, listen: false);
       
-      //== Hardcode userId tạm thời để test
-      const userId = "dYSjvUDL2vwRrSgqiDHy";
+      // Lấy userId từ Firebase Auth currentUser
+      final currentUser = FirebaseAuth.instance.currentUser;
       
-      print('🔄 MainScreen: Đang join rooms cho user $userId...');
-      await SocketRoomHelper.joinUserRooms(socketService, userId);
-      print('✅ MainScreen: Đã join rooms thành công');
+      if (currentUser != null) {
+        final userId = currentUser.uid;
+        print('🔄 MainScreen: Đang join rooms cho user $userId...');
+        await SocketRoomHelper.joinUserRooms(socketService, userId);
+        print('✅ MainScreen: Đã join rooms thành công');
+      } else {
+        print('⚠️ MainScreen: Không tìm thấy user đang đăng nhập');
+      }
     });
   }
 

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/apartment_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/detail_apartment_screen.dart';
@@ -16,7 +17,7 @@ class ApartmentScreen extends StatefulWidget {
 class _MainApartmentScreenState extends State<ApartmentScreen> {
   
   //get all list card infor
-  Future<List<RoomCardInfo>> roomCards = ApartmentController().getSummaryRoom( "dYSjvUDL2vwRrSgqiDHy"); //==UserId cứng tạm thời
+  Future<List<RoomCardInfo>> roomCards = ApartmentController().getSummaryRoom( FirebaseAuth.instance.currentUser!.uid);
   RoomFilter currentFilter = RoomFilter.all;
 
   List<RoomCardInfo> _filterRooms(List<RoomCardInfo> rooms) {

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/post_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_post/detail_post_screens.dart';
@@ -24,8 +25,7 @@ class _PostScreenState extends State<PostScreen> {
   }
 
   Future<void> _loadPosts() async {
-    //== Thay "ownerId" bằng id thực tế nếu có
-    final posts = await _postController.viewSummary("dYSjvUDL2vwRrSgqiDHy");
+    final posts = await _postController.viewSummary(FirebaseAuth.instance.currentUser!.uid);
     setState(() {
       _posts = posts;
       _isLoading = false;
