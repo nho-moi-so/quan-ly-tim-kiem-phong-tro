@@ -1,0 +1,93 @@
+@startuml
+left to right direction
+skinparam rectangle {
+  BorderThickness 4
+}
+skinparam nodesep 50
+skinparam ranksep 50
+skinparam padding 50
+
+actor "Admin" as Admin
+actor "Chủ Trọ" as ChuTro
+actor "Người Thuê" as NguoiThue
+
+rectangle "Hệ Thống Quản Lý Nhà Trọ" {
+  ' Các chức năng của Admin
+  usecase "Thống kê" as UC1
+  usecase "Quản lý người dùng" as UC2
+  usecase "Duyệt bài đăng" as UC3
+  usecase "Tìm kiếm bài đăng" as UC4
+  usecase "Xem chi tiết bài đăng" as UC5
+  usecase "Quản lý bài đăng" as UC6
+
+  ' Các chức năng của Chủ Trọ
+  usecase "Xem hợp đồng" as UC8
+  usecase "Tìm kiếm hợp đồng" as UC10
+  usecase "Quản lý căn hộ" as UC11
+  usecase "Quản lý hợp đồng" as UC12
+  usecase "Quản lý yêu cầu đặt phòng" as UC13
+
+  ' Các chức năng của Người Thuê
+  usecase "Xem thông tin căn hộ" as UC14
+  usecase "Tìm kiếm căn hộ" as UC15
+  usecase "Đặt phòng" as UC16
+  usecase "Báo cáo vi phạm" as UC17
+  usecase "Quản lý mật khẩu phòng" as UC18
+  usecase "Xem mật khẩu phòng" as UC19
+  usecase "Xem lịch sử đặt phòng" as UC20
+  usecase "Nhắn tin" as UC21
+  usecase "Quản lý tài khoản" as UC22
+  usecase "Đăng ký" as UC23
+
+  ' Chức năng trung tâm
+  usecase "Đăng nhập" as UCLogin
+}
+
+' Kết nối Admin
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+
+' Kết nối Chủ Trọ
+ChuTro --> UC6
+ChuTro --> UC11
+ChuTro --> UC12
+ChuTro --> UC13
+ChuTro --> UC23
+ChuTro --> UC21
+ChuTro --> UC22
+
+' Kết nối Người Thuê
+NguoiThue --> UC15
+NguoiThue --> UC16
+NguoiThue --> UC17
+NguoiThue --> UC18
+NguoiThue --> UC20
+NguoiThue --> UC21
+NguoiThue --> UC22
+NguoiThue --> UC23
+NguoiThue --> UC10
+
+' Kết nối đăng nhập
+UC1 ..> UCLogin
+UC2 ..> UCLogin
+UC3 ..> UCLogin
+UC6 ..> UCLogin
+UC11 ..> UCLogin
+UC12 ..> UCLogin
+UC13 ..> UCLogin
+UC16 ..> UCLogin
+UC17 ..> UCLogin
+UC18 ..> UCLogin
+UC19 ..> UCLogin
+UC22 ..> UCLogin
+UC19 --> UC18
+UC4 --> UC6
+UC5 --> UC4
+UC14 --> UC15
+UC15 --> UC11
+UC4 --> UC3
+UC8 --> UC10
+UC10 --> UC12
+
+@enduml

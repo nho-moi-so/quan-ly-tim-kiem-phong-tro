@@ -1,0 +1,155 @@
+@startuml
+' Giữ bố cục cũ, chỉ làm rộng bảng hơn
+skinparam classAttributePadding 15
+skinparam classFontSize 14
+skinparam classAttributeFontSize 13
+skinparam nodesep 100
+skinparam ranksep 120
+skinparam dpi 150
+
+class User {
+  Id: int
+  FullName	
+  Email
+  Phone
+  Password
+  CCCD
+  Login()
+  Logout()
+  UpdateInfo()
+}
+
+class Admin {
+  Id: int
+  ApprovePost()
+  ManageAccount()
+  ViewStatistics()
+}
+
+class Owner {
+  Id: int
+  Status: string
+  SignUp()
+  DeleteAccount()
+  ManageApartment()
+  ManagePost()
+  ManageAgreement()
+  ManageBookingRequest()
+}
+
+class Guest {
+  Id: int
+  Status: string
+  SearchApartment()
+  ViewApartment()
+  BookApartment()
+  ViewPassword()
+  ReportPost()
+}
+
+class Message {
+  Id: int
+  Content: string
+  Status: string
+  SentDate: datetime
+  ReceivedDate: datetime
+}
+
+class Apartment {
+  Id: int
+  CodeApartment: string
+  DailyRate: decimal
+  Deposit: decimal
+  MaxOccupancy: int
+  Description: string
+  PathImage: List<string>
+  Status: string
+  Address: string
+  Require: string
+}
+
+class Post {
+  Id: int
+  Header: string
+  Description: string
+  Status: string
+  CreatedDate: datetime
+}
+
+class Amenity {
+  Id: int
+  Name: string
+  Description: string
+  IsQuantifiable: bool
+}
+
+class AmenityApartment {
+  Id: int
+  Quantity: int
+  IsAvailable: bool
+}
+
+class Contract {
+  Id: int
+  StartDate: datetime
+  EndDate: datetime
+  Clause: string
+  Status: string
+  CreatedDate: datetime
+  UpdatedDate: datetime
+  PathFileContract: string
+  Password: string
+}
+
+class BookingRequest {
+  Id: int
+  RequestedDate: datetime
+  Status: string
+  CheckInTime: datetime
+  CheckOutTime: datetime
+}
+
+class Invoice {
+  Id: int
+  Code: string
+  Status: string
+  CreatedDate: datetime
+  IssueDate: datetime
+  CancellationDate: datetime
+  VAT: float
+  Note: string
+  TotalAmount: decimal
+}
+
+class InvoiceDetail {
+  Id: int
+  Description: string
+  Quantity: int
+  UnitPrice: decimal
+  SubTotal: decimal
+}
+
+class ContentViolation {
+  Id: int
+  Description: string
+  Type: string
+  ReportedDate: datetime
+  Status: string
+}
+
+User "1" -- "0..*" Message
+Admin --|> User
+Owner --|> User
+Guest --|> User
+Owner "1" -- "0..*" Apartment
+Post "1..*" -- "1" Apartment
+Apartment "1" -- "0..*" Amenity
+Apartment "1" -- "0..*" AmenityApartment
+Contract "1" -- "1" Apartment
+Contract "1" -- "0..*" BookingRequest
+BookingRequest "0..*" -- "1" Apartment
+Invoice "1" -- "0..*" InvoiceDetail
+Invoice "1..*" -- "1" BookingRequest
+ContentViolation "0..*" -- "1" Apartment
+ContentViolation -- Admin
+@enduml
