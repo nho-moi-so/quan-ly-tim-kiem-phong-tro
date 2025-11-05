@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../service/auth_service.dart';
+
 
 class SignupForm extends StatefulWidget {
   const SignupForm({super.key});
@@ -23,19 +25,30 @@ class _SignupFormState extends State<SignupForm> {
       );
       return;
     }
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match.')),
+      );
+      return;
+    }
+    SignUpViewModel signUpViewModel = SignUpViewModel(username: _usernameController.text, phone: _phoneController.text, email: _emailController.text, password: _passwordController.text);
 
-    final message = '''
-Username: ${_usernameController.text}
-Phone: ${_phoneController.text}
-Email: ${_emailController.text}
-Password: ${_passwordController.text}
-Confirm: ${_confirmPasswordController.text}
-Terms accepted: $_acceptTerms
-''';
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    AuthService authService = AuthService();
+    Future<bool> result = authService.registerUser(signUpViewModel);
+    result.then((value) {
+      if (value) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration successful!')),
+        );
+        // Optionally, navigate to another page
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration failed. Please try again.')),
+        );
+      }
+    }).catchError((error) {
+      // Handle registration error
+    });
   }
 
   @override
