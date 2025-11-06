@@ -20,6 +20,13 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
   Future<List<RoomCardInfo>> roomCards = ApartmentController().getSummaryRoom( FirebaseAuth.instance.currentUser!.uid);
   RoomFilter currentFilter = RoomFilter.all;
 
+  // Method để refresh danh sách phòng
+  void _refreshRoomList() {
+    setState(() {
+      roomCards = ApartmentController().getSummaryRoom(FirebaseAuth.instance.currentUser!.uid);
+    });
+  }
+
   List<RoomCardInfo> _filterRooms(List<RoomCardInfo> rooms) {
     switch (currentFilter) {
       case RoomFilter.all:
@@ -63,7 +70,11 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TagWithIconWidget(title: "Quảng lý căn hộ"),
-                ButtonAddWidget(title: "Thêm căn hộ mới", screen: DetailApartmentScreen(),),
+                ButtonAddWidget(
+                  title: "Thêm căn hộ mới", 
+                  screen: DetailApartmentScreen(),
+                  onNavigateBack: _refreshRoomList, // Refresh khi quay lại
+                ),
               ],
               ),
               SizedBox(

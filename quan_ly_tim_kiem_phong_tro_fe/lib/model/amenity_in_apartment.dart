@@ -22,6 +22,8 @@ class AmenityInApartment {
       );
 
   Map<String, dynamic> toMap() => {
+        'ApartmentID': apartmentId,
+        'AmenityID': amenityId,
         'Quantity': quantity,
         'IsAvailable': isAvailable,
       };

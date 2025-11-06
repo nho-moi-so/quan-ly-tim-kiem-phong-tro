@@ -5,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/apartment_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/apartment_screens.dart';
 
 import '../../viewmodel/room_detail.dart';
 
@@ -45,6 +44,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
 
   List<String> allUtilities = [];
   late List<File> _images;
+  bool _isSubmitting = false;
 
   final ImagePicker _picker = ImagePicker();
   
@@ -88,7 +88,9 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     print("================${initialImages}===========");
 
     roomCodeController = TextEditingController(text: widget.initialData.roomCode);
-    depositPriceController = TextEditingController(text: widget.initialData.depositPrice);
+    depositPriceController = TextEditingController(
+      text: widget.initialData.depositPrice.isEmpty ? '0' : widget.initialData.depositPrice
+    );
     areaController = TextEditingController(text: widget.initialData.area);
     checkinController = TextEditingController(text: widget.initialData.checkin);
     checkoutController = TextEditingController(text: widget.initialData.checkout);
@@ -755,13 +757,13 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                 GestureDetector(
-                  onTap: () {
-                  Navigator.of(context).maybePop();
+                  onTap: _isSubmitting ? null : () {
+                    Navigator.of(context).maybePop();
                   },
                   child: _buildActionButton('Hủy', color: Colors.white, textColor: Colors.black),
                 ),
                 GestureDetector(
-                  onTap: () async {
+                  onTap: _isSubmitting ? null : () async {
                   // Kiểm tra mã phòng khi tạo mới
                   if (widget.initialData.roomCode.isEmpty) {
                     if (roomCodeController.text.trim().isEmpty) {
@@ -792,7 +794,12 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     ),
                   );
                   // Gọi service để cập nhật thông tin phòng
-                  RoomDetail createOrUpdateRoom = RoomDetail(
+                  try {
+                    setState(() {
+                      _isSubmitting = true;
+                    });
+
+                    RoomDetail createOrUpdateRoom = RoomDetail(
                     roomId: widget.initialData.roomId,
                     roomCode: roomCodeController.text,
                     area: areaController.text,
@@ -821,25 +828,71 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     }).toList()),
                   );
                     if (widget.initialData.roomCode.isNotEmpty) {
+                      // Cập nhật phòng
                       final success = await ApartmentController().updateApartment(createOrUpdateRoom);
-                    } else {
+                      if (mounted && success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Row(
+                              children: [
+                                Icon(Icons.check_circle, color: Colors.white),
+                                SizedBox(width: 12),
+                                Text('Cập nhật phòng thành công!'),
+                              ],
+                            ),
+                            backgroundColor: Color(0xFF10B981),
+                          ),
+                        );
+                        // Pop về màn hình trước (giữ nguyên bottom nav)
+                        Navigator.of(context).pop(true); // true = có thay đổi, cần refresh
+                      }
+                      } else {
+                      // Tạo phòng mới
                       final success = await ApartmentController().createApartment(createOrUpdateRoom);
-                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Tạo phòng thành công!')),
-                      );
-                      Navigator.of(context).pop();
-                      if (success) {
-                          Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (context) => const ApartmentScreen()));
+                      if (mounted && success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Row(
+                              children: [
+                                Icon(Icons.check_circle, color: Colors.white),
+                                SizedBox(width: 12),
+                                Text('Tạo phòng thành công!'),
+                              ],
+                            ),
+                            backgroundColor: Color(0xFF10B981),
+                          ),
+                        );
+                        // Pop về màn hình trước (giữ nguyên bottom nav)
+                        Navigator.of(context).pop(true); // true = có thay đổi, cần refresh
+                      } else if (mounted && !success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Row(
+                              children: [
+                                Icon(Icons.error, color: Colors.white),
+                                SizedBox(width: 12),
+                                Text('Tạo phòng thất bại!'),
+                              ],
+                            ),
+                            backgroundColor: Color(0xFFEF4444),
+                          ),
+                        );
                       }
                     }
+                  } finally {
+                    if (mounted) {
+                      setState(() {
+                        _isSubmitting = false;
+                      });
+                    }
+                  }
                   },
                   child: _buildActionButton(
-                  widget.initialData.roomCode.isNotEmpty ? 'Cập Nhật' : 'Tạo',
-                  color: const Color(0xFF4285F4),
-                  textColor: Colors.white,
-                  width: 153,
+                    widget.initialData.roomCode.isNotEmpty ? 'Cập Nhật' : 'Tạo',
+                    color: const Color(0xFF4285F4),
+                    textColor: Colors.white,
+                    width: 153,
+                    isLoading: _isSubmitting,
                   ),
                 ),
               ],
@@ -1048,7 +1101,7 @@ String _formatDateTime(DateTime dateTime) {
     );
   }
 
-  Widget _buildActionButton(String text, {required Color color, required Color textColor, double width = 74}) {
+  Widget _buildActionButton(String text, {required Color color, required Color textColor, double width = 74, bool isLoading = false}) {
     return Container(
       width: width,
       height: 50.87,
@@ -1058,10 +1111,19 @@ String _formatDateTime(DateTime dateTime) {
         borderRadius: BorderRadius.circular(7),
         border: color == Colors.white ? Border.all(color: const Color(0xFF4285F4)) : null,
       ),
-      child: Text(
-        text,
-        style: TextStyle(color: textColor, fontSize: 19, fontWeight: FontWeight.w600),
-      ),
+      child: isLoading
+          ? SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(textColor),
+              ),
+            )
+          : Text(
+              text,
+              style: TextStyle(color: textColor, fontSize: 19, fontWeight: FontWeight.w600),
+            ),
     );
   }
 

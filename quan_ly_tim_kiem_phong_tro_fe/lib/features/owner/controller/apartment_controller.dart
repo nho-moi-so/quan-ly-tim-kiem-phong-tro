@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/contract_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
@@ -29,35 +30,73 @@ class ApartmentController {
   //createApartment(RoomCardDetail) => RoomCardDetail - done without image and user
   Future<bool> createApartment(RoomDetail roomCardDetail) async {
     try {
+      // Debug: In giá trị gốc
+      print('📊 DEBUG - Original price: "${roomCardDetail.price}"');
+      print('📊 DEBUG - Original deposit: "${roomCardDetail.depositPrice}"');
+      
+      // Xóa dấu phẩy và ký tự không phải số trước khi parse
+      String cleanPrice = roomCardDetail.price.replaceAll(RegExp(r'[^0-9.]'), '');
+      String cleanDeposit = roomCardDetail.depositPrice.replaceAll(RegExp(r'[^0-9.]'), '');
+      
+      // Debug: In giá trị sau khi clean
+      print('✅ DEBUG - Cleaned price: "$cleanPrice"');
+      print('✅ DEBUG - Cleaned deposit: "$cleanDeposit"');
+      
+      // Validate trước khi parse
+      if (cleanPrice.isEmpty) {
+        throw Exception('Giá phòng không hợp lệ');
+      }
+      
       Apartment apartment = Apartment(
         codeApartment: roomCardDetail.roomCode,
-        dailyRate: double.parse(roomCardDetail.price),
-        deposit: double.parse(roomCardDetail.depositPrice),
+        dailyRate: double.parse(cleanPrice),
+        deposit: cleanDeposit.isEmpty ? 0.0 : double.parse(cleanDeposit),
         maxOccupancy: int.parse(roomCardDetail.maxCapacity),
         description: roomCardDetail.description,
         status: roomCardDetail.room_status == '' ? 'Available' : roomCardDetail.room_status,
         address: roomCardDetail.address,
         type: roomCardDetail.roomType,
         requirement: roomCardDetail.requirement.split(',').map((e) => e.trim()).toList(),
-        userID: "exampleUserId", //===chưa có user nên tạm thời để vậy
+        userID: fb_auth.FirebaseAuth.instance.currentUser!.uid,
       );
 
       Apartment createdApartment = await _apartmentService.createApartment(apartment);
       print('Apartment created with ID: ${createdApartment.apartmentID}');
 
       // dò amenity để thêm vào amenityInApartment
+      print('🔍 DEBUG - Utilities to add: ${roomCardDetail.utilities}');
+      print('🔍 DEBUG - Number of utilities: ${roomCardDetail.utilities.length}');
+      
       for (String amenityName in roomCardDetail.utilities) {
-        Amenity? amenity = await _amenityService.getAmenityByName(amenityName);
-        if (amenity != null) {
-          await _amenityInApartmentService.createAmenityInApartment(
-            AmenityInApartment(
+        print('➡️ Processing amenity: "$amenityName"');
+        
+        try {
+          Amenity? amenity = await _amenityService.getAmenityByName(amenityName);
+          
+          if (amenity != null) {
+            print('✅ Found amenity: ${amenity.description} (ID: ${amenity.amenityID})');
+            
+            final amenityInApartment = AmenityInApartment(
               apartmentId: createdApartment.apartmentID!,
               amenityId: amenity.amenityID,
               isAvailable: true,
-            ),
-          );
+            );
+            
+            print('📝 Creating AmenityInApartment: apartmentId=${createdApartment.apartmentID}, amenityId=${amenity.amenityID}');
+            
+            await _amenityInApartmentService.createAmenityInApartment(amenityInApartment);
+            
+            print('✅ Successfully created AmenityInApartment for "${amenityName}"');
+          } else {
+            print('⚠️ Amenity not found: "$amenityName"');
+          }
+        } catch (e, stackTrace) {
+          print('❌ ERROR adding amenity "$amenityName": $e');
+          print('❌ StackTrace: $stackTrace');
         }
       }
+      
+      print('✅ Finished processing all amenities');
       return true; // thành công
     } catch (e) {
       print('Error creating apartment: $e');
@@ -68,23 +107,29 @@ class ApartmentController {
   
   //updateApartment
   Future<bool> updateApartment(RoomDetail roomCardDetail) async{
-      // print(roomCardDetail.roomId);
-      // print(roomCardDetail.roomCode);
+      try {
+        // Xóa dấu phẩy và ký tự không phải số trước khi parse
+        String cleanPrice = roomCardDetail.price.replaceAll(RegExp(r'[^0-9.]'), '');
+        String cleanDeposit = roomCardDetail.depositPrice.replaceAll(RegExp(r'[^0-9.]'), '');
 
-      //tìm thông tin của apartment
-      Apartment foundApartment = await _apartmentService.getApartmentById(roomCardDetail.roomId);
-      foundApartment.codeApartment = roomCardDetail.roomCode;
-      foundApartment.dailyRate = double.parse(roomCardDetail.price);
-      foundApartment.deposit = double.parse(roomCardDetail.depositPrice);
-      foundApartment.maxOccupancy = int.parse(roomCardDetail.maxCapacity);
-      foundApartment.description = roomCardDetail.description;
-      foundApartment.status = roomCardDetail.room_status;
+        //tìm thông tin của apartment
+        Apartment foundApartment = await _apartmentService.getApartmentById(roomCardDetail.roomId);
+        foundApartment.codeApartment = roomCardDetail.roomCode;
+        foundApartment.dailyRate = double.parse(cleanPrice);
+        foundApartment.deposit = cleanDeposit.isEmpty ? 0.0 : double.parse(cleanDeposit);
+        foundApartment.maxOccupancy = int.parse(roomCardDetail.maxCapacity);
+        foundApartment.description = roomCardDetail.description;
+        foundApartment.status = roomCardDetail.room_status;
 
-      Apartment updatedApartment = await _apartmentService.updateApartment(foundApartment);
-      print('Apartment updated with ID: ${updatedApartment.apartmentID}');
-      // tìm thông tin của amenity của apartment
+        Apartment updatedApartment = await _apartmentService.updateApartment(foundApartment);
+        print('Apartment updated with ID: ${updatedApartment.apartmentID}');
+        // tìm thông tin của amenity của apartment
 
-    return false;
+        return true;
+      } catch (e) {
+        print('Error updating apartment: $e');
+        return false;
+      }
   }
   //deleteApartment
   Future<bool> deleteApartment(String apartmentId) async{

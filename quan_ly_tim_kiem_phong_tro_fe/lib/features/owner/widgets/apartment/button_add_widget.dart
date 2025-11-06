@@ -3,8 +3,14 @@ import 'package:flutter/material.dart';
 class ButtonAddWidget extends StatelessWidget {
   final String title;
   final Widget screen;
+  final VoidCallback? onNavigateBack;
 
-  const ButtonAddWidget({super.key, required this.title, required this.screen});
+  const ButtonAddWidget({
+    super.key, 
+    required this.title, 
+    required this.screen,
+    this.onNavigateBack,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +34,14 @@ class ButtonAddWidget extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            Navigator.of(context).push(
+          onTap: () async {
+            final result = await Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => screen),
             );
+            // Nếu có callback và result = true (có thay đổi), gọi callback
+            if (result == true && onNavigateBack != null) {
+              onNavigateBack!();
+            }
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
