@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/booking_request_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_contract/contract_detail_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/booking_request_summary.dart';
 
 import '../../widgets/widgets.dart';
@@ -11,7 +12,7 @@ class BookingRequestScreens extends StatefulWidget {
 }
 
 class _BookingRequestScreensState extends State<BookingRequestScreens> {
-  String selectedStatus = 'Pending';
+  String selectedStatus = 'Approved';
   final BookingRequestController _bookingRequestController = BookingRequestController();
 
   List<BookingRequestSummary> allRequests = [];
@@ -86,7 +87,8 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                   });
                 },
                 tabs: [
-                  ..._bookingRequestController.getStatusList(),
+                  'Approved',
+                  'Canceled',
                 ],
               ),
               // //search by date
@@ -119,72 +121,33 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                   : Column(
                 children: filteredRequests
                     .map((req) => CardBookingRequestWidget(
+                          bookingId: req.bookingId ?? '',
                           bookingCode: req.bookingCode ?? '',
                           customerName: req.customerName ?? '',
                           checkinCheckout: req.checkinCheckout ?? '',
                           status: req.status ?? '',
+                          checkinDate: req.checkinDate != null
+                              ? "${req.checkinDate!.day.toString().padLeft(2, '0')}/${req.checkinDate!.month.toString().padLeft(2, '0')}/${req.checkinDate!.year}"
+                              : 'Không có thông tin',
+                          checkoutDate: req.checkoutDate != null
+                              ? "${req.checkoutDate!.day.toString().padLeft(2, '0')}/${req.checkoutDate!.month.toString().padLeft(2, '0')}/${req.checkoutDate!.year}"
+                              : 'Không có thông tin',
+                          totalPrice: req.totalPrice,
+                          cancelReason: 'Khách hàng đổi ý', //== Lấy từ database
+                          isRefunded: false, //== Lấy từ database
                           onConfirm: (action) async {
-                              // Show loading dialog
-                              showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (ctx) => Center(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(24),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const CircularProgressIndicator(
-                                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4285F4)),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        const Text(
-                                          'Đang xử lý...',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-
-                              bool result = false;
-                              if (action == BookingAction.approved) {
-                                //== Xác nhận
-                                result = await _bookingRequestController
-                                    .updateBookingRequestStatus(req.bookingCode ?? '', 'Approved');
-                              } else if (action == BookingAction.canceled) {
-                                //== Hủy
-                                result = await _bookingRequestController
-                                    .updateBookingRequestStatus(req.bookingCode ?? '', 'Canceled');
-                              } else if (action == BookingAction.pending) {
-                                //== Hoàn tác
-                                result = await _bookingRequestController
-                                    .updateBookingRequestStatus(req.bookingCode ?? '', 'Pending');
-                              }
-
-                              // Close loading dialog
-                              Navigator.pop(context);
-
-                              if (result) {
-                                // Show success message
+                              if (action == BookingAction.viewContract) {
+                                //== Hiển thị màn hình hợp đồng
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Row(
                                       children: [
-                                        const Icon(Icons.check_circle, color: Colors.white),
+                                        const Icon(Icons.description, color: Colors.white),
                                         const SizedBox(width: 12),
-                                        const Text('Cập nhật trạng thái thành công'),
+                                        Text('Xem hợp đồng: ${req.bookingCode}'),
                                       ],
                                     ),
-                                    backgroundColor: Colors.green,
+                                    backgroundColor: const Color(0xFF10B981),
                                     duration: const Duration(seconds: 2),
                                     behavior: SnackBarBehavior.floating,
                                     shape: RoundedRectangleBorder(
@@ -192,25 +155,11 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                                     ),
                                   ),
                                 );
-                                // Reload data
-                                _loadBookingRequests();
-                              } else {
-                                // Show error message
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Row(
-                                      children: [
-                                        const Icon(Icons.error_outline, color: Colors.white),
-                                        const SizedBox(width: 12),
-                                        const Text('Cập nhật thất bại. Vui lòng thử lại'),
-                                      ],
-                                    ),
-                                    backgroundColor: Colors.red,
-                                    duration: const Duration(seconds: 2),
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
+                                //== Hiển thị màn hình hợp đồng
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ContractDetailScreen(contractId: req.bookingId ?? ''),
                                   ),
                                 );
                               }

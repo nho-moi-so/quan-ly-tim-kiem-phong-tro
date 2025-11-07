@@ -2,25 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/widgets/booking_request/card_booking_request_detail_widget.dart';
 
 // Thêm enum để phân biệt hành động
-enum BookingAction { approved, canceled, pending }
+enum BookingAction { viewContract, viewDetails, refund }
 
 class CardBookingRequestWidget extends StatefulWidget {
+  final String bookingId;
   final String bookingCode;
   final String customerName;
   final String checkinCheckout;
+  final String checkinDate;
+  final String checkoutDate;
   final String status;
+  final String? totalPrice;
   final Color statusColor;
   final IconData statusIcon;
+  final String? cancelReason;
+  final bool? isRefunded;
   final void Function(BookingAction action)? onConfirm;
 
   const CardBookingRequestWidget({
     super.key,
+    required this.bookingId,
     required this.bookingCode,
     required this.customerName,
     required this.checkinCheckout,
+    required this.checkinDate,
+    required this.checkoutDate,
     required this.status,
+    this.totalPrice,
     this.statusColor = const Color(0xFF34A853),
     this.statusIcon = Icons.verified,
+    this.cancelReason,
+    this.isRefunded,
     this.onConfirm,
   });
   
@@ -32,17 +44,22 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'pending':
-        return const Color(0xFFF59E0B);
       case 'approved':
         return const Color(0xFF10B981);
       case 'canceled':
         return const Color(0xFFEF4444);
-      case 'completed':
-        return const Color(0xFF8B5CF6);
       default:
         return const Color(0xFF6B7280);
     }
+  }
+
+  String _displayStatus(String status) {
+    final s = status.toLowerCase();
+    if (s.contains('approved') || s.contains('duyệt') || s.contains('xác nhận')) return 'Đã duyệt';
+    if (s.contains('canceled') || s.contains('hủy') || s.contains('từ chối')) return 'Đã hủy';
+    if (s.contains('pending') || s.contains('chờ')) return 'Chờ xử lý';
+    if (s.contains('completed') || s.contains('hoàn thành')) return 'Hoàn thành';
+    return status;
   }
 
   @override
@@ -121,7 +138,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                           ),
                         ),
                         Text(
-                          '#${widget.bookingCode}',
+                          '#${widget.bookingId}',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -148,7 +165,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                     ],
                   ),
                   child: Text(
-                    widget.status,
+                    _displayStatus(widget.status),
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -179,7 +196,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                   icon: Icons.meeting_room_rounded,
                   iconColor: const Color(0xFF8B5CF6),
                   label: 'Mã Phòng',
-                  value: 'A101', // Mock data
+                  value: widget.bookingCode
                 ),
                 const SizedBox(height: 12),
 
@@ -188,7 +205,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                   icon: Icons.login_rounded,
                   iconColor: const Color(0xFF10B981),
                   label: 'Check-in',
-                  value: '14/05/2024 - 14:00',
+                  value: widget.checkinDate
                 ),
                 const SizedBox(height: 12),
 
@@ -197,7 +214,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                   icon: Icons.logout_rounded,
                   iconColor: const Color(0xFFEF4444),
                   label: 'Check-out',
-                  value: '15/05/2024 - 12:00',
+                  value: widget.checkoutDate
                 ),
                 const SizedBox(height: 12),
 
@@ -206,13 +223,40 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                   icon: Icons.attach_money_rounded,
                   iconColor: const Color(0xFFF59E0B),
                   label: 'Tổng Tiền',
-                  value: '2,500,000 VND',
+                  value: widget.totalPrice ?? 'Không có thông tin',
                   valueStyle: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFFF59E0B),
                   ),
                 ),
+
+                // Thông tin bổ sung cho trạng thái Canceled
+                if (widget.status == 'Canceled') ...[
+                  const SizedBox(height: 12),
+                  _buildInfoRow(
+                    icon: Icons.info_rounded,
+                    iconColor: const Color(0xFFEF4444),
+                    label: 'Lý Do Hủy',
+                    value: widget.cancelReason ?? 'Không có thông tin',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInfoRow(
+                    icon: Icons.credit_card_rounded,
+                    iconColor: widget.isRefunded == true 
+                      ? const Color(0xFF10B981) 
+                      : const Color(0xFFF59E0B),
+                    label: 'Hoàn Tiền',
+                    value: widget.isRefunded == true ? 'Đã hoàn tiền' : 'Chưa hoàn tiền',
+                    valueStyle: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: widget.isRefunded == true 
+                        ? const Color(0xFF10B981) 
+                        : const Color(0xFFF59E0B),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -300,61 +344,38 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
 
   List<Widget> _buildActionButtons() {
     List<Widget> actionButtons = [];
-
-    if (widget.status == 'Pending') {
+  if (widget.status.toLowerCase() == 'approved') {
+      // Trạng thái Approved: Xem và Hợp đồng
       actionButtons.add(
         Expanded(
           child: _actionButton(
-            label: 'Xác Nhận',
-            icon: Icons.check_circle_rounded,
+            label: 'Hợp Đồng',
+            icon: Icons.description_rounded,
             bgColor: const Color(0xFF10B981),
             textColor: Colors.white,
             onTap: () {
-              widget.onConfirm?.call(BookingAction.approved);
+              widget.onConfirm?.call(BookingAction.viewContract);
             },
           ),
         ),
       );
-    } else if (widget.status == 'Approved') {
-      actionButtons.addAll([
-        Expanded(
-          child: _actionButton(
-            label: 'Hủy',
-            icon: Icons.cancel_rounded,
-            bgColor: const Color(0xFFEF4444),
-            textColor: Colors.white,
-            onTap: () {
-              widget.onConfirm?.call(BookingAction.canceled);
-            },
+    } else if (widget.status.toLowerCase() == 'canceled') {
+      // Trạng thái Canceled: nếu chưa hoàn tiền thì hiển thị nút Hoàn tiền
+      if (widget.isRefunded != true) {
+        actionButtons.add(
+          Expanded(
+            child: _actionButton(
+              label: 'Hoàn tiền',
+              icon: Icons.payments_rounded,
+              bgColor: const Color(0xFFF59E0B),
+              textColor: Colors.white,
+              onTap: () {
+                widget.onConfirm?.call(BookingAction.refund);
+              },
+            ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _actionButton(
-            label: 'Hoàn tác',
-            icon: Icons.undo_rounded,
-            bgColor: const Color(0xFF6B7280),
-            textColor: Colors.white,
-            onTap: () {
-              widget.onConfirm?.call(BookingAction.pending);
-            },
-          ),
-        ),
-      ]);
-    } else if (widget.status == 'Canceled') {
-      actionButtons.add(
-        Expanded(
-          child: _actionButton(
-            label: 'Hoàn tác',
-            icon: Icons.undo_rounded,
-            bgColor: const Color(0xFF6B7280),
-            textColor: Colors.white,
-            onTap: () {
-              widget.onConfirm?.call(BookingAction.pending);
-            },
-          ),
-        ),
-      );
+        );
+      }
     }
 
     return actionButtons;

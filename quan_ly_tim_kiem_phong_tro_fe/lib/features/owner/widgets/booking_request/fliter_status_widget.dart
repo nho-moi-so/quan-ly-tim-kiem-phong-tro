@@ -49,6 +49,16 @@ class _FliterStatusWidgetState extends State<FliterStatusWidget> {
     }
   }
 
+  String _displayLabel(String status) {
+    final s = status.toLowerCase();
+    if (s.contains('approved') || s.contains('duyệt') || s.contains('xác nhận')) return 'Đã duyệt';
+    if (s.contains('canceled') || s.contains('hủy') || s.contains('từ chối')) return 'Đã hủy';
+    if (s.contains('pending') || s.contains('chờ')) return 'Chờ xử lý';
+    if (s.contains('completed') || s.contains('hoàn thành')) return 'Hoàn thành';
+    if (s.contains('all') || s.contains('tất cả')) return 'Tất cả';
+    return status;
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -56,38 +66,16 @@ class _FliterStatusWidgetState extends State<FliterStatusWidget> {
     return Container(
       width: screenWidth - 32,
       margin: const EdgeInsets.symmetric(vertical: 12),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFF8F9FF),
-            Color(0xFFFFFFFF),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFBFCDE6), width: 2),
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 16,
-            spreadRadius: 0,
-            offset: const Offset(0, 4),
-            color: Colors.black.withOpacity(0.06),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        child: Row(
-          children: List.generate(widget.tabs.length, (index) {
-            return Padding(
+      child: Row(
+        children: List.generate(widget.tabs.length, (index) {
+          return Expanded(
+            child: Padding(
               padding: EdgeInsets.only(
-                right: index < widget.tabs.length - 1 ? 8 : 0,
+                left: index == 0 ? 0 : 4,
+                right: index == widget.tabs.length - 1 ? 0 : 4,
               ),
               child: _StatusChip(
-                label: widget.tabs[index],
+                label: _displayLabel(widget.tabs[index]),
                 icon: _getIconForStatus(widget.tabs[index]),
                 color: _getColorForStatus(widget.tabs[index]),
                 isActive: activeIndex == index,
@@ -98,9 +86,9 @@ class _FliterStatusWidgetState extends State<FliterStatusWidget> {
                   });
                 },
               ),
-            );
-          }),
-        ),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -128,7 +116,7 @@ class _StatusChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        height: 48,
         decoration: BoxDecoration(
           gradient: isActive
               ? LinearGradient(
@@ -136,49 +124,56 @@ class _StatusChip extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
-              : null,
-          color: isActive ? null : Colors.white,
+              : LinearGradient(
+                  colors: [Colors.white, Colors.grey.shade50],
+                ),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isActive ? color : color.withOpacity(0.2),
+            color: isActive ? color : const Color(0xFFE5E7EB),
             width: isActive ? 2 : 1.5,
           ),
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: color.withOpacity(0.3),
+                    color: color.withOpacity(0.25),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
                 ]
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withOpacity(0.04),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
                 ],
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isActive ? Colors.white : color,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 20,
                 color: isActive ? Colors.white : color,
-                fontSize: 14,
-                fontFamily: 'Inter',
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-                letterSpacing: 0.3,
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isActive ? Colors.white : color,
+                    fontSize: 14,
+                    fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

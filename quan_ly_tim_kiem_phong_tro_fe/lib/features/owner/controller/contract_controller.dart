@@ -1,34 +1,48 @@
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/contract_detail.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/amenity_in_apartment_service.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/amenity_service.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/apartment_service.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/contract_service.dart';
+
 
 class ContractController {
+  final ContractService _contractService = ContractService();
+  final ApartmentService _apartmentService = ApartmentService();
+  final AmenityInApartmentService _amenityInApartmentService = AmenityInApartmentService();
+  final AmenityService _amenityService = AmenityService();
   //create(String bookingRequestId) => bool
   
   //viewDetail(String contractId) => ContractDetail - done //==dữ liệu giả
   Future<ContractDetail?> viewDetail(String contractId) async {
+    //thong tin contract
+    var contract = await _contractService.getContractById(contractId);
+    //thong tin apartment
+    var apartment = await _apartmentService.getApartmentById(contract.apartmentId);
+    //thong tin amenity
+    var amenities = await _amenityInApartmentService.getAmenityInApartmentByApartmentId(contract.apartmentId);
+    amenities.sort((a, b) => a.amenityId.compareTo(b.amenityId));
+    List<String> amenityNames = [];
+    for (var amenity in amenities) {
+      var amenityDetail = await _amenityService.getAmenityById(amenity.amenityId);
+      amenityNames.add(amenityDetail.description);
+    }
+
     var contractDetail = ContractDetail(
-      contractId: contractId,
-      imageUrl: "https://placehold.co/148x111",
-      price: "4.500.000đ",
-      deposit: "500.000đ",
-      title: "MiniHouse Cần Thơ",
-      address: "45 Nguyễn Văn Cừ, Cần Thơ",
-      features: [
-        "Miễn phí wifi",
-        "Có hồ bơi vô cực",
-        "Có bãi đỗ xe",
-        "Hỗ trợ trên 24/24",
-        "Hỗ trợ mang hành lý tận phòng",
-        "2 giường đơn",
-        "Đặt và thanh toán tiền ngay",
-        "Khuyến mãi chớp nhoáng",
-      ],
+      contractId: contract.contractID,
+      imageUrl: (apartment.pathImage?.isNotEmpty ?? false) ? apartment.pathImage![0] : "https://placehold.co/148x111",
+      price: formatCurrency(contract.total),
+      deposit: formatCurrency(apartment.dailyRate!),
+      title: apartment.type,
+      address: apartment.address,
+      features: amenityNames,
       imageUrlMap: "https://your-map-image-url",
       ratingText: "9.2 Trên cả tuyệt vời",
-      rating: 4,
-      checkInTime: DateTime(2023, 10, 1, 14, 0),
-      checkOutTime: DateTime(2023, 10, 2, 12, 0),
+      rating: 4.0,
+      checkInTime: contract.startDate,
+      checkOutTime: contract.endDate,
       extraInfo: "Không có thêm thông tin",
-      description: "Căn hộ rộng rãi, thoáng mát",
+      description: apartment.description,
       password: "12345678",
     );
 

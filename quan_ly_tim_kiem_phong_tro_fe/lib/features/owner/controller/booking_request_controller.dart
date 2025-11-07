@@ -1,13 +1,16 @@
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/booking_request_detail.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/booking_request_summary.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/model/booking_request.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/contract.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/apartment_service.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/booking_request_service.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/contract_service.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/user_service.dart';
 class BookingRequestController {
   final BookingRequestService _bookingRequestService = BookingRequestService();
+  final ContractService _contractService = ContractService();
   final ApartmentService _apartmentService = ApartmentService();
   final UserService _userService = UserService();
 
@@ -18,26 +21,42 @@ class BookingRequestController {
     List<Apartment> apartments = await _apartmentService.getApartmentByUser(ownerId);
     print("==1==${apartments}");
     //lấy các bookingRequest có apartmentId là của các apartment trên
-    List<BookingRequest> bookingRequests = [];
+    List<Contract> contracts = [];
     for(var apartment in apartments) {
-      var bookingRequestInApartment = await _bookingRequestService.getBookingRequestByApartmentId(apartment.apartmentID!);
-      bookingRequests.addAll(bookingRequestInApartment);
+      var bookingRequestInApartment = await _contractService.getContractByApartmentId(apartment.apartmentID!);
+      contracts.addAll(bookingRequestInApartment);
     }
-    print("==2==${bookingRequests}");
+    print("==2==${contracts}");
     //-> từ cái đó sắp xếp theo thời gian tạo 
     // bookingRequests.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     
-    //-> trong cái bookingRequests có userId là của người thuê -> lấy userId đó để lấy thông tin user
+    //-> trong cái contracts có userId là của người thuê -> lấy userId đó để lấy thông tin user
     List<BookingRequestSummary> bookingRequestSummaries = [];
-    for (var bookingRequest in bookingRequests) {
-      var user = await _userService.getUserById(bookingRequest.userId);
-      BookingRequestSummary bookingRequestSummary = BookingRequestSummary(
-        bookingCode: bookingRequest.bookingRequestID,
-        customerName: user.fullName,
-        checkinCheckout: formatDateInCardSummary(bookingRequest.checkinDate, bookingRequest.checkoutDate),
-        status: bookingRequest.status,
-      );
-      bookingRequestSummaries.add(bookingRequestSummary);
+    for (var contract in contracts) {
+      // Skip contracts with invalid userId
+      if (contract.userId.isEmpty) {
+        print('Skipping contract ${contract.contractID} - empty userId');
+        continue;
+      }
+      // lay thong tin cua apartment
+      var apartment = await _apartmentService.getApartmentById(contract.apartmentId);
+      try {
+        var user = await _userService.getUserById(contract.userId);
+        BookingRequestSummary bookingRequestSummary = BookingRequestSummary(
+          bookingId: contract.contractID,
+          bookingCode: apartment.codeApartment,
+          customerName: user.fullName,
+          checkinCheckout: formatDateInCardSummary(contract.startDate, contract.endDate),
+          checkinDate: contract.startDate,
+          checkoutDate: contract.endDate,
+          totalPrice: '${formatCurrency(contract.total)} VND',
+          status: contract.status,
+        );
+        bookingRequestSummaries.add(bookingRequestSummary);
+      } catch (e) {
+        print('Error loading user for contract ${contract.contractID}: $e');
+        // Continue to next contract instead of crashing
+      }
     }
     //-> trả về List<BookingRequestSummary>
     print("==3==$bookingRequestSummaries");
@@ -47,13 +66,13 @@ class BookingRequestController {
   //getBookingRequestById(String bookingRequestId) => BookingRequestDetail - done
   Future<BookingRequestDetail> getBookingRequestById(String bookingRequestId) async{
     //lấy bookingRequestId -> lấy bookingRequest 
-    var bookingRequest = await _bookingRequestService.getBookingRequestById(bookingRequestId);
-    print("==1==${bookingRequest.apartmentID}");
+    var contract = await _contractService.getContractById(bookingRequestId);
+    print("==1==${contract.apartmentId}");
     //trong bookingRequest có apartmentId -> lấy thông tin của phòng đó
-    var apartment = await _apartmentService.getApartmentById(bookingRequest.apartmentID);
+    var apartment = await _apartmentService.getApartmentById(contract.apartmentId);
     print("==2==${apartment.maxOccupancy}");
     //-> trong cái bookingRequest có userId là của người thuê -> lấy userId đó để lấy thông tin user 
-    var user = await _userService.getUserById(bookingRequest.userId);
+    var user = await _userService.getUserById(contract.userId);
     print("==3==${user.fullName}");
     //-> trả về BookingRequestDetail
     BookingRequestDetail bookingRequestDetail = BookingRequestDetail(
@@ -62,10 +81,10 @@ class BookingRequestController {
       email: user.email,
       phoneNumber: user.phone,
       numberOfPeople: apartment.maxOccupancy, //==này đang lấy số người ở apartment
-      checkinCheckout: formatDateInCardSummary(bookingRequest.checkinDate, bookingRequest.checkoutDate),
-      status: bookingRequest.status,
+      checkinCheckout: formatDateInCardSummary(contract.startDate, contract.endDate),
+      status: contract.status,
       price: apartment.dailyRate.toString(), //== này đang lấy daylyRate hình như không đúng logic
-      bookingCode: bookingRequest.bookingRequestID,
+      bookingCode: contract.contractID,
       password: apartment.password //== này đang lấy password bên apartment
     );
     print("==4==${bookingRequestDetail.checkinCheckout}");
@@ -76,14 +95,14 @@ class BookingRequestController {
   //updateBookingRequestStatus(String bookingRequestId, String status) => bool
   Future<bool> updateBookingRequestStatus(String bookingRequestId, String status)async{
     //lấy bookingRequestId -> lấy bookingRequest 
-    var bookingRequest = await _bookingRequestService.getBookingRequestById(bookingRequestId);
+    var contract = await _contractService.getContractById(bookingRequestId);
     try {
        //-> cập nhật status 
       if (!BookingRequestStatus.values.contains(status)) {
         throw Exception("Invalid status");
       }
-      bookingRequest.status = status;
-      await _bookingRequestService.updateBookingRequest(bookingRequest);
+      contract.status = status;
+      await _contractService.updateContract(contract);
       //-> trả về bool
       return true;
     } catch (e) {
@@ -99,9 +118,9 @@ class BookingRequestController {
   //updateBookingRequestPassword(String bookingRequestId, String newPassword) => bool - done
   Future<bool> updateBookingRequestPassword(String? bookingRequestId, String? newPassword) async{
     //lấy bookingRequestId -> lấy bookingRequest 
-    var bookingRequest = await _bookingRequestService.getBookingRequestById(bookingRequestId!);
-    print("==1==${bookingRequest.apartmentID}");
-    var apartment = await _apartmentService.getApartmentById(bookingRequest.apartmentID); //==hiện tại password đang ở apartment
+    var contract = await _contractService.getContractById(bookingRequestId!);
+    print("==1==${contract.apartmentId}");
+    var apartment = await _apartmentService.getApartmentById(contract.apartmentId); //==hiện tại password đang ở apartment
     print("==2==${apartment.password}");
     //-> cập nhật password
     apartment.password = newPassword;
@@ -125,29 +144,40 @@ class BookingRequestController {
     List<Apartment> apartments = await _apartmentService.getApartmentByUser(ownerId);
     print("==1==${apartments}");
     //-> lấy các bookingRequest có apartmentId là của các apartment trên 
-    List<BookingRequest> bookingRequests = [];
+    List<Contract> contracts = [];
     for(var apartment in apartments) {
-      var bookingRequestInApartment = await _bookingRequestService.getBookingRequestByApartmentId(apartment.apartmentID!);
-      bookingRequests.addAll(bookingRequestInApartment);
+      var contractInApartment = await _contractService.getContractByApartmentId(apartment.apartmentID!);
+      contracts.addAll(contractInApartment);
     }
-    print("==2==${bookingRequests}");
+    print("==2==${contracts}");
     //-> lọc bookingRequest theo khoảng thời gian 
-    bookingRequests = bookingRequests.where((bookingRequest) {
-      return bookingRequest.checkinDate.isAfter(startDate!) &&
-          bookingRequest.checkoutDate.isBefore(endDate!);
+    contracts = contracts.where((contract) {
+      return contract.startDate.isAfter(startDate!) &&
+          contract.endDate.isBefore(endDate!);
     }).toList();
     //-> trong cái bookingRequest có userId là của người thuê -> lấy userId đó để lấy thông tin user 
     List<BookingRequestSummary> bookingRequestSummaries = [];
-    for (var bookingRequest in bookingRequests) {
-      var user = await _userService.getUserById(bookingRequest.userId);
-      BookingRequestSummary bookingRequestSummary = BookingRequestSummary(
-        bookingCode: bookingRequest.bookingRequestID,
-        customerName: user.fullName,
-        checkinCheckout: formatDateInCardSummary(bookingRequest.checkinDate, bookingRequest.checkoutDate),
-        checkinDate: bookingRequest.checkinDate, //==không biết nữa, không biết nữa
-        status: bookingRequest.status,
-      );
-      bookingRequestSummaries.add(bookingRequestSummary);
+    for (var contract in contracts) {
+      // Skip contracts with invalid userId
+      if (contract.userId.isEmpty) {
+        print('Skipping contract ${contract.contractID} - empty userId');
+        continue;
+      }
+      
+      try {
+        var user = await _userService.getUserById(contract.userId);
+        BookingRequestSummary bookingRequestSummary = BookingRequestSummary(
+          bookingCode: contract.contractID,
+          customerName: user.fullName,
+          checkinCheckout: formatDateInCardSummary(contract.startDate, contract.endDate),
+          checkinDate: contract.startDate,
+          status: contract.status,
+        );
+        bookingRequestSummaries.add(bookingRequestSummary);
+      } catch (e) {
+        print('Error loading user for contract ${contract.contractID}: $e');
+        // Continue to next contract instead of crashing
+      }
     }
     //-> trả về List<BookingRequestSummary>
     print("==3==$bookingRequestSummaries");
