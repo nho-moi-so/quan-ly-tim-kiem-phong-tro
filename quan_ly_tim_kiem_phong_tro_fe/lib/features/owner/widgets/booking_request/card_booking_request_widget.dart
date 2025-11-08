@@ -279,7 +279,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                       showDialog(
                         context: context,
                         builder: (context) => CardBookingRequestDetailWidget(
-                          bookingRequestId: widget.bookingCode,
+                          bookingRequestId: widget.bookingId,
                         ),
                       );
                     },
