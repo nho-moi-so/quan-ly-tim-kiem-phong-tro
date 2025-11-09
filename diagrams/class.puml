@@ -1,0 +1,218 @@
+@startuml class-diagram
+left to right direction
+'        left
+'down           up
+'       right
+
+class User{
+    - id: string
+    - fullName: string
+    - email: string
+    - phone: string
+    - password: string
+    - cccd: string
+
+    + Login(): void
+    + LoginOut(): void
+    + UpdateInfo(): void
+}
+
+' enum OwnerStatus {
+'     APPROVED
+'     PENDING
+'     REJECTED
+'     REVOKED
+' }
+class Owner{
+    - id: string
+    ' OwnerStatus
+    - status: string
+
+    + SignUp(): void
+    + ManageAccount(): void
+    + ManageApartment(): void
+    + ManagementPost(): void
+    + ManageContract(): void
+    ' + ManageBookingRequest(): void
+    + ConnectToIoTDevice(): void
+}
+' Owner --> OwnerStatus
+
+' enum GuestStatus {
+'     ACTIVE
+'     BLOCKED
+'     WARNING
+' }
+class Guest{
+    - id: string
+    - status: string
+
+    + SignUp(): void
+    + ManageAccount(): void
+    + SearchApartment(): void
+    + BookApartment(): void
+    + ViewPassword(): void
+    + ReportPost(): void
+}
+' Guest --> GuestStatus
+
+
+class Admin{
+    - id: string
+
+    + ManagePost(): void
+    + ManageUser(): void
+    + ViewStatistics(): void
+    
+}
+
+' enum ApartmentStatus {
+'     AVAILABLE
+'     BOOKED
+'     MAINTENANCE
+'     UNAVAILABLE
+' }
+' enum ApartmentType {
+'     STUDIO
+'     ONE_BEDROOM
+'     TWO_BEDROOM
+'     PENTHOUSE
+'     DUPLEX
+' }
+class Apartment{
+    - id: string
+    - codeApartment: string
+    - dailyRate: decimal
+    - maxOccupancy: int
+    - description: string
+    - images: List<string>
+    - status: string
+    - address: string
+    - type: string
+    - require: List<string>
+
+
+}
+' Apartment --> ApartmentStatus
+
+class Amenity{
+    - id: string
+    - name: string
+    - description: string
+    ' vật dụng có thể định lượng được (ví dụ: khăn giấy, xà phòng, nước uống ...) hoặc không định lượng được (ví dụ: wifi, truyền hình cáp, bãi đỗ xe ...) 
+    - isQuantifiable: bool
+}
+class AmenityInApartment{
+    - id: string
+    - quantity: int
+    - isAvailable: bool
+}
+
+' enum PostStatus {
+'     PENDING
+'     APPROVED
+'     REJECTED
+'     HIDDEN
+' }
+
+class IoTDevice{
+    - id: string
+    - name: string
+    - description: string
+}
+
+' enum IoTDeviceStatus {
+'     CONNECTED
+'     DISCONNECTED
+'     MALFUNCTIONING
+' }
+class IoTDeviceInApartment{
+    - id: string
+    - otp: string
+    - status: string
+}
+
+class Post{
+    - id: string
+    - header: string
+    - description: string
+    - status: string
+    - publishedDate: datetime
+}
+' Post --> PostStatus
+
+' enum ContentVilolationStatus {
+'     REPORTED
+'     UNDER_REVIEW
+'     RESOLVED
+'     DISMISSED
+' }
+' enum ContentVilolationType {
+'     FAKE
+'     INCORRECT_INFORMATION
+' }
+class ContentVilolation{
+    - id: string
+    - description: string
+    - type: string
+    - reportedDate: datetime
+    - status: string
+}
+' ContentVilolation --> ContentVilolationStatus
+
+' enum ContractStatus {
+'     ACTIVE
+'     APPROVED
+'     CANCELLED
+'     PENDING
+' }
+class Contract{
+    - id: string
+    'ngày tạo ~ ngày đặt phòng 
+    - createdDate: datetime
+    'ngày checkin ~ ngày nhận phòng 
+    - startDate: datetime
+    'ngày checkout ~ ngày trả phòng
+    - endDate: datetime
+    'danh sách các điều khoản trong hợp đồng
+    - clause: List<string>
+    - status: string
+    - pathFile: string
+    - password: string
+
+
+}
+' Contract --> ContractStatus
+
+' enum InvoiceStatus {
+'     PAID
+'     UNPAID
+'     PENDING
+'     CANCELLED
+' }
+class Invoice{
+    - id: string
+    - code: string
+    - status: string
+    ' ngày phát hành hóa đơn
+    - issuedDate: datetime
+    ' ngày hủy hóa đơn
+    - cancellationDate: datetime
+    - vat: decimal
+    ' giá phải trả = tổng chi tiết hóa đơn + VAT
+    - totalAmount: decimal
+    - note: string
+}
+' Invoice --> InvoiceStatus
+class InvoiceDetail{
+    - id: string
+    ' phí thuê phòng, phí dọn dẹp, chăm sóc thú cưng, phí dịch vụ khác
+    - description: string
+    - quantity: int
+    ' giá mỗi đơn vị
+    - unitPrice: decimal
+    ' subTotal = quantity * unitPrice
+    - subTotal: decimal
+}
+
+@enduml
