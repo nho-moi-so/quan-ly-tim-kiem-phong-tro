@@ -65,6 +65,10 @@ class Admin{
     + ViewStatistics(): void
     
 }
+User <|-- Owner: is
+User <|-- Guest: is
+User <|-- Admin: is
+
 
 ' enum ApartmentStatus {
 '     AVAILABLE
@@ -94,6 +98,8 @@ class Apartment{
 
 }
 ' Apartment --> ApartmentStatus
+Owner "1" -- "0..*" Apartment: owns
+
 
 class Amenity{
     - id: string
@@ -102,11 +108,13 @@ class Amenity{
     ' vật dụng có thể định lượng được (ví dụ: khăn giấy, xà phòng, nước uống ...) hoặc không định lượng được (ví dụ: wifi, truyền hình cáp, bãi đỗ xe ...) 
     - isQuantifiable: bool
 }
+Apartment "1" -- "0..*" Amenity: includes
 class AmenityInApartment{
     - id: string
     - quantity: int
     - isAvailable: bool
 }
+(Apartment, Amenity) .. AmenityInApartment: contains
 
 ' enum PostStatus {
 '     PENDING
@@ -126,11 +134,13 @@ class IoTDevice{
 '     DISCONNECTED
 '     MALFUNCTIONING
 ' }
+Apartment "1" -- "0..*" IoTDevice: has
 class IoTDeviceInApartment{
     - id: string
     - otp: string
     - status: string
 }
+(Apartment, IoTDevice) .. IoTDeviceInApartment: contains
 
 class Post{
     - id: string
@@ -140,7 +150,8 @@ class Post{
     - publishedDate: datetime
 }
 ' Post --> PostStatus
-
+Apartment "1" -- "0..*" Post: advertises
+Admin "1..*" -- "0..*" Post: manages
 ' enum ContentVilolationStatus {
 '     REPORTED
 '     UNDER_REVIEW
@@ -158,6 +169,7 @@ class ContentVilolation{
     - reportedDate: datetime
     - status: string
 }
+(Admin, Post) .. ContentVilolation: resolves
 ' ContentVilolation --> ContentVilolationStatus
 
 ' enum ContractStatus {
@@ -166,6 +178,8 @@ class ContentVilolation{
 '     CANCELLED
 '     PENDING
 ' }
+
+Guest "0..*" -- "0..*" Apartment: book
 class Contract{
     - id: string
     'ngày tạo ~ ngày đặt phòng 
@@ -183,7 +197,7 @@ class Contract{
 
 }
 ' Contract --> ContractStatus
-
+(Guest, Apartment) .. Contract: have
 ' enum InvoiceStatus {
 '     PAID
 '     UNPAID
@@ -203,6 +217,7 @@ class Invoice{
     - totalAmount: decimal
     - note: string
 }
+Contract "1" -- "0..*" Invoice: has
 ' Invoice --> InvoiceStatus
 class InvoiceDetail{
     - id: string
@@ -214,5 +229,17 @@ class InvoiceDetail{
     ' subTotal = quantity * unitPrice
     - subTotal: decimal
 }
-
+Invoice "1" -- "1..*" InvoiceDetail: includes
+' enum MessageStatus{
+'     SENT
+'     DELIVERED
+'     READ
+' }
+class Message{
+    - id: string
+    - content: string
+    - status: string
+}
+(Guest, Owner) .. Message: exchange
+' Message --> MessageStatus
 @enduml
