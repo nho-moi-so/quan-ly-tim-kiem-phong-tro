@@ -28,15 +28,25 @@ class ContractController {
       amenityNames.add(amenityDetail.description);
     }
 
+    // Calculate number of days
+    final numberOfDays = contract.endDate.difference(contract.startDate).inDays;
+    
+    // Mock invoice data (you can calculate these from real data)
+    final dailyRate = apartment.dailyRate ?? 0.0;
+    final otherFees = 100000.0; // Phí dịch vụ, điện nước, etc.
+    final taxRate = 10.0; // 10% VAT
+    final discount = 200000.0; // Giảm giá khuyến mãi
+    final totalPrice = dailyRate * (numberOfDays > 0 ? numberOfDays : 1) + otherFees + (dailyRate * (numberOfDays > 0 ? numberOfDays : 1) + otherFees) * (taxRate / 100) - discount;
+
     var contractDetail = ContractDetail(
       contractId: contract.contractID,
       imageUrl: (apartment.pathImage?.isNotEmpty ?? false) ? apartment.pathImage![0] : "https://placehold.co/148x111",
-      price: formatCurrency(contract.total),
+      price: formatCurrency(totalPrice),
       deposit: formatCurrency(apartment.dailyRate!),
       title: apartment.type,
       address: apartment.address,
       features: amenityNames,
-      imageUrlMap: "https://your-map-image-url",
+      imageUrlMap: "https://maps.app.goo.gl/D9n1mdjx7YEBCBPD9",
       ratingText: "9.2 Trên cả tuyệt vời",
       rating: 4.0,
       checkInTime: contract.startDate,
@@ -44,6 +54,12 @@ class ContractController {
       extraInfo: "Không có thêm thông tin",
       description: apartment.description,
       password: "12345678",
+      // Invoice data
+      dailyRate: dailyRate,
+      numberOfDays: numberOfDays > 0 ? numberOfDays : 1,
+      otherFees: otherFees,
+      taxRate: taxRate,
+      discount: discount,
     );
 
     return contractDetail;

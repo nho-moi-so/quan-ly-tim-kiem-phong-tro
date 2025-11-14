@@ -30,6 +30,13 @@ class ContractDetail {
 
   String? pathContract;
 
+  // Invoice details
+  double? dailyRate; // Giá mỗi ngày
+  int? numberOfDays; // Số ngày
+  double? otherFees; // Phí khác
+  double? taxRate; // Thuế (%)
+  double? discount; // Giảm giá
+
   ContractDetail({
     required this.contractId,
     this.imageUrl,
@@ -47,5 +54,11 @@ class ContractDetail {
     this.description,
     this.password,
     this.pathContract,
+    this.dailyRate,
+    this.numberOfDays,
+    this.otherFees,
+    this.taxRate,
+    this.discount,
+
   });
 }

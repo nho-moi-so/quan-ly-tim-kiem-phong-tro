@@ -40,6 +40,17 @@ class BookingRequestController {
       }
       // lay thong tin cua apartment
       var apartment = await _apartmentService.getApartmentById(contract.apartmentId);
+
+          // Calculate number of days
+        final numberOfDays = contract.endDate.difference(contract.startDate).inDays;
+        
+        // Mock invoice data (you can calculate these from real data)
+        final dailyRate = apartment.dailyRate ?? 0.0;
+        final otherFees = 100000.0; // Phí dịch vụ, điện nước, etc.
+        final taxRate = 10.0; // 10% VAT
+        final discount = 200000.0; // Giảm giá khuyến mãi
+        final totalPrice = dailyRate * (numberOfDays > 0 ? numberOfDays : 1) + otherFees + (dailyRate * (numberOfDays > 0 ? numberOfDays : 1) + otherFees) * (taxRate / 100) - discount;
+        
       try {
         var user = await _userService.getUserById(contract.userId);
         BookingRequestSummary bookingRequestSummary = BookingRequestSummary(
@@ -49,7 +60,7 @@ class BookingRequestController {
           checkinCheckout: formatDateInCardSummary(contract.startDate, contract.endDate),
           checkinDate: contract.startDate,
           checkoutDate: contract.endDate,
-          totalPrice: '${formatCurrency(contract.total)} VND',
+          totalPrice: '${formatCurrency(totalPrice)} VND',
           status: contract.status,
         );
         bookingRequestSummaries.add(bookingRequestSummary);
@@ -75,6 +86,17 @@ class BookingRequestController {
     var user = await _userService.getUserById(contract.userId);
     print("==3==${user.fullName}");
     //-> trả về BookingRequestDetail
+
+        // Calculate number of days
+    final numberOfDays = contract.endDate.difference(contract.startDate).inDays;
+    
+    // Mock invoice data (you can calculate these from real data)
+    final dailyRate = apartment.dailyRate ?? 0.0;
+    final otherFees = 100000.0; // Phí dịch vụ, điện nước, etc.
+    final taxRate = 10.0; // 10% VAT
+    final discount = 200000.0; // Giảm giá khuyến mãi
+    final totalPrice = dailyRate * (numberOfDays > 0 ? numberOfDays : 1) + otherFees + (dailyRate * (numberOfDays > 0 ? numberOfDays : 1) + otherFees) * (taxRate / 100) - discount;
+
     BookingRequestDetail bookingRequestDetail = BookingRequestDetail(
       fullName: user.fullName,
       roomNumber: apartment.codeApartment,
@@ -82,10 +104,15 @@ class BookingRequestController {
       phoneNumber: user.phone,
       numberOfPeople: apartment.maxOccupancy, //==này đang lấy số người ở apartment
       checkinCheckout: formatDateInCardSummary(contract.startDate, contract.endDate),
+      checkInDate: contract.startDate,
+      checkOutDate: contract.endDate,
+
       status: contract.status,
       price: apartment.dailyRate.toString(), //== này đang lấy daylyRate hình như không đúng logic
       bookingCode: contract.contractID,
-      password: apartment.password //== này đang lấy password bên apartment
+      password: apartment.password, //== này đang lấy password bên apartment
+      totalPrice: formatCurrency(totalPrice),
+      
     );
     print("==4==${bookingRequestDetail.checkinCheckout}");
     return bookingRequestDetail;

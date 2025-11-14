@@ -12,6 +12,7 @@ class BookingRequestDetail {
   String? price;
   String? codeRoom;
   String? password;
+  String? totalPrice;
 
   BookingRequestDetail({
     this.bookingCode,
@@ -27,5 +28,6 @@ class BookingRequestDetail {
     this.price,
     this.codeRoom,
     this.password = '',
+    this.totalPrice,
   });
 }
