@@ -360,8 +360,23 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
         ),
       );
     } else if (widget.status.toLowerCase() == 'canceled') {
-      // Trạng thái Canceled: nếu chưa hoàn tiền thì hiển thị nút Hoàn tiền
+      // Trạng thái Canceled: luôn có nút Hợp đồng, và nếu chưa hoàn tiền thì có thêm nút Hoàn tiền
+      actionButtons.add(
+        Expanded(
+          child: _actionButton(
+            label: 'Hợp Đồng',
+            icon: Icons.description_rounded,
+            bgColor: const Color(0xFF10B981),
+            textColor: Colors.white,
+            onTap: () {
+              widget.onConfirm?.call(BookingAction.viewContract);
+            },
+          ),
+        ),
+      );
+      
       if (widget.isRefunded != true) {
+        actionButtons.add(const SizedBox(width: 8));
         actionButtons.add(
           Expanded(
             child: _actionButton(

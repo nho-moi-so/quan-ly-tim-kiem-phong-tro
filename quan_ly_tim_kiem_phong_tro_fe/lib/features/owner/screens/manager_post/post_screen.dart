@@ -52,7 +52,11 @@ class _PostScreenState extends State<PostScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TagWithIconWidget(title: "Quảng lý bài đăng"),
-                // ButtonAddWidget(title: "Thêm bài đăng mới", screen: DetailPostScreen(postId: ''),),
+                ButtonAddWidget(
+                  title: "Thêm bài đăng mới", 
+                  screen: DetailPostScreen(postId: ''),
+                  onNavigateBack: _loadPosts, // Refresh khi quay lại
+                ),
               ],
               ),
               SizedBox(height: screenHeight * 0.01),

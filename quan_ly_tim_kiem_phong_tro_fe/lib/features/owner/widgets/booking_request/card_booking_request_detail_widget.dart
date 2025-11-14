@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/booking_request_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/booking_request_detail.dart';
 
 class CardBookingRequestDetailWidget extends StatefulWidget {
@@ -239,13 +240,13 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
                         const Divider(height: 24),
                         buildInfoRow('Số người ở tối đa', '${bookingRequestDetail!.numberOfPeople} Người', Icons.groups_rounded),
                         const Divider(height: 24),
-                        buildInfoRow('Check-in', '${bookingRequestDetail!.checkInDate} - ${bookingRequestDetail!.checkInDate}', Icons.login_rounded),
+                        buildInfoRow('Check-in', '${bookingRequestDetail!.checkInDate}', Icons.login_rounded),
                         const Divider(height: 24),
-                        buildInfoRow('Check-out', '${bookingRequestDetail!.checkOutDate} - ${bookingRequestDetail!.checkOutDate}', Icons.logout_rounded),
+                        buildInfoRow('Check-out', '${bookingRequestDetail!.checkOutDate}', Icons.logout_rounded),
                         const Divider(height: 24),
                         buildInfoRowWithStatus('Trạng thái', bookingRequestDetail!.status ?? '', statusColor),
                         const Divider(height: 24),
-                        buildInfoRow('Tiền phòng', '${bookingRequestDetail!.totalPrice ?? ''} VND', Icons.attach_money_rounded),
+                        buildInfoRow('Tiền phòng', '${formatCurrency(bookingRequestDetail!.price ?? 0.0)} VND', Icons.attach_money_rounded),
                       ],
                     ),
                   ),

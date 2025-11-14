@@ -1,0 +1,88 @@
+@startuml activity-diagram
+' ' --- Tiêu đề và Cài đặt Giao diện ---
+' title Quy trình hệ thống quản lý và tìm kiếm căn hộ
+
+' --- Định nghĩa các Swimlane (Tác nhân) ---
+|Chủ căn hộ|
+|Quản trị viên|
+|Người thuê|
+|Hệ thống|
+
+' --- Luồng 1: Chủ căn hộ (Owner) ---
+|Chủ căn hộ|
+start
+:Đăng ký tài khoản;
+' ---Luồng quản trị viên duyệt tài khoản Chủ căn hộ---
+:Yêu cầu duyệt tài khoản;
+|Quản trị viên|
+if (Duyệt tài khoản?) then ([từ chối])
+    ' :Thông báo từ chối \ncho Chủ căn hộ;
+    ' |Chủ căn hộ|
+    ' :Nhận thông \nbáo lỗi;
+    stop
+else ([duyệt])
+    :Tài khoản kích hoạt;
+|Chủ căn hộ|
+:Tạo căn hộ;
+
+' --- Luồng kết nối IoT ---
+:Kết nối IoT với căn hộ;
+|Hệ thống|
+if(Kết nối thành công?) then ([thất bại])
+    ' :Thông báo lỗi \ncho Chủ căn hộ;
+    ' |Chủ căn hộ|
+    ' :Nhận thông \nbáo lỗi;
+    stop
+else ([thành công])
+    ' :Xác nhận kết nối \nthành công;
+
+' Luồng đăng bài
+|Chủ căn hộ|
+:Đăng bài;
+
+' --- Luồng 2: Quản trị viên (Admin) ---
+|Quản trị viên|
+:Nhận được bài đăng;
+if (Duyệt bài?) then ([từ chối])
+    ' :Thông báo từ chối \ncho Chủ căn hộ;
+    stop
+else ([duyệt])
+    :Bài đăng công khai;
+
+' --- Luồng 3: Người thuê (Tenant) ---
+|Người thuê|
+    ' :Đăng ký;
+    ' :Đăng nhập;
+    :Tìm kiếm và Yêu cầu đặt phòng;
+
+' --- Luồng 4: Hệ thống (Xử lý thanh toán) ---
+|Hệ thống|
+    if (Đặt phòng, thanh toán?) then ([thất bại])
+        ' :Thông báo \nthanh toán thất bại;
+        ' |Người thuê|
+        ' :Nhận thông \nbáo lỗi;
+        stop
+    else ([thành công])
+        :Gửi mật khẩu phòng;
+
+' --- Luồng 5: Người thuê (Check-in) ---
+|Người thuê|
+        :Nhập mật khẩu vào IoT;
+
+' --- Luồng 6: Hệ thống (Xác thực IoT) ---
+|Hệ thống|
+        if(Xác thực?) then ([thất bại])
+            ' :Thông báo lỗi \ncho Người thuê;
+            ' |Người thuê|
+            ' :Nhận thông \nbáo lỗi;
+            stop
+        else ([thành công])
+        
+' --- Luồng 7: Người thuê (Vào nhà) ---
+|Người thuê|
+        :Vào nhà;
+        stop
+    endif
+endif
+
+@enduml
