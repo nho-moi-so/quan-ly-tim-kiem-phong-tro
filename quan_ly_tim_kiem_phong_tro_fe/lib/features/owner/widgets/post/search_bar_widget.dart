@@ -13,7 +13,7 @@ class SearchBarWidget extends StatelessWidget {
       ),
       child: TextField(
         decoration: InputDecoration(
-          hintText: 'Tìm kiếm tin nhắn...',
+          hintText: 'Tìm kiếm...',
           hintStyle: const TextStyle(
             color: Color(0xFF9CA3AF),
             fontSize: 15,

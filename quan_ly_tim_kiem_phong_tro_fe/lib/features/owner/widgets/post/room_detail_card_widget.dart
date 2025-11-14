@@ -81,7 +81,7 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                   _infoField(label: 'Tiêu đề', controller: postTitleController, fullWidth: true, icon: Icons.title, hint: 'Nhập tiêu đề bài đăng...'),
                   
                   const SizedBox(height: 12),
-                  _infoField(label: 'Mô tả', controller: postDescriptionController, fullWidth: true, multiline: true, icon: Icons.description, hint: 'Nhập mô tả bài đăng...'),
+                  _infoField(label: 'Nội dung', controller: postDescriptionController, fullWidth: true, multiline: true, icon: Icons.description, hint: 'Nhập nội dung bài đăng...'),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     value: postStatusController.text.isNotEmpty ? postStatusController.text : 'Draft',
