@@ -98,7 +98,7 @@ class Apartment{
 
 }
 ' Apartment --> ApartmentStatus
-Owner "1" -- "0..*" Apartment: owns
+Owner "1" -down- "0..*" Apartment: owns
 
 
 class Amenity{
@@ -229,7 +229,7 @@ class InvoiceDetail{
     ' subTotal = quantity * unitPrice
     - subTotal: decimal
 }
-Invoice "1" -- "1..*" InvoiceDetail: includes
+Invoice "1" -left- "1..*" InvoiceDetail: includes
 ' enum MessageStatus{
 '     SENT
 '     DELIVERED
