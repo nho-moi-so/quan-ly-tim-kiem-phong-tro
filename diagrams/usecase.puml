@@ -51,7 +51,7 @@ note top of manage_booking: Cập nhật đặt phòng
 usecase "Xem hợp đồng" as view_booking_contract
 manage_booking .. view_booking_contract: extend
 usecase "Quản lý hóa đơn" as manage_invoice
-' note bottom of manage_invoice: Tìm kiếm, Xem chi tiết hóa đơn
+note bottom of manage_invoice: Hoàn tiền
 usecase "Quản lý bài đăng" as manage_post
 note bottom of manage_post: Tạo, Sửa, Ẩn, Xóa bài đăng
 usecase "Nhắn tin" as messaging
