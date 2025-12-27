@@ -30,14 +30,14 @@ Servo myServo;
 const int servoPin = 18; // Chân kết nối servo
 
 // Thông tin mạng WiFi
-const char* ssid = "abcxyz";       // Tên WiFi
-const char* password = "12345678";     // Mật khẩu WiFi
+const char* ssid = "MINH KHANG";       // Tên WiFi
+const char* password = "20012016";     // Mật khẩu WiFi
 
 // Thông tin về căn hộ
 String roomCode = "";
 
 //thông tin host server
-String hostServer = "http://10.54.183.42:3000";
+String hostServer = "http://192.168.2.144:3000";
 
 void setup(){
   Serial.begin(115200);
@@ -374,10 +374,10 @@ void loop(){
       lcd.clear();
       lcd.setCursor(0, 0);
       if (status == "success") {
-        if (currentAngle != 180) {
+        if (currentAngle != 90) {
           lcd.print("Mo cua...");
-          myServo.write(180);      // xoay đến 180° và giữ
-          currentAngle = 180;
+          myServo.write(90);      // xoay đến 90° và giữ
+          currentAngle = 90;
           delay(500);
           lcd.clear();
           lcd.setCursor(0, 0);
