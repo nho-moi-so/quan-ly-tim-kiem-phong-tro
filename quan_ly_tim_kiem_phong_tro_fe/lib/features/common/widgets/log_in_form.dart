@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/main_screen.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/service/auth_service.dart';
+
+import '../controller/auth_controller.dart';
 
 class LogInForm extends StatefulWidget {
   const LogInForm({super.key});
@@ -14,6 +15,7 @@ class _LogInFormState extends State<LogInForm> {
   bool _isLoading = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final AuthController _authController = AuthController();
 
   @override
   void dispose() {
@@ -23,38 +25,25 @@ class _LogInFormState extends State<LogInForm> {
   }
 
   Future<void> _handleLogin() async {
-    // Validate inputs
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-
-    if (email.isEmpty || password.isEmpty) {
-      _showErrorSnackBar('Vui lòng nhập đầy đủ email và mật khẩu');
-      return;
-    }
-
-    // Basic email validation
-    if (!email.contains('@')) {
-      _showErrorSnackBar('Email không hợp lệ');
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final authService = AuthService();
-      final userData = await authService.loginUser(email, password);
+      final result = await _authController.loginUser(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
 
       if (!mounted) return;
 
-      if (userData != null) {
-        final role = userData['Role'] as String?;
+      if (result['success']) {
+        final role = result['role'] as String?;
         debugPrint('Đăng nhập thành công! Role: $role');
-        debugPrint('User data: $userData');
+        debugPrint('User data: ${result['userData']}');
 
         // Show success message
-        _showSuccessSnackBar('Đăng nhập thành công!');
+        _showSuccessSnackBar(result['message']);
 
         // Navigate based on role
         if (role?.toLowerCase() == 'owner') {
@@ -63,31 +52,22 @@ class _LogInFormState extends State<LogInForm> {
             MaterialPageRoute(builder: (_) => const OwnerMainScreen()),
           );
         } 
-        // else if (role == 'guest') {
+        // else if (role?.toLowerCase() == 'guest') {
         //   Navigator.pushReplacement(
         //     context,
         //     MaterialPageRoute(builder: (_) => const GuestMainScreen()),
         //   );
         // }
+        else {
+          _showErrorSnackBar('Vai trò người dùng không hợp lệ');
+        }
       } else {
-        _showErrorSnackBar('Đăng nhập thất bại. Vui lòng thử lại.');
+        _showErrorSnackBar(result['message']);
       }
     } catch (e) {
       if (!mounted) return;
-      
-      String errorMessage = 'Đăng nhập thất bại';
-      if (e.toString().contains('user-not-found')) {
-        errorMessage = 'Email không tồn tại';
-      } else if (e.toString().contains('wrong-password')) {
-        errorMessage = 'Mật khẩu không đúng';
-      } else if (e.toString().contains('invalid-email')) {
-        errorMessage = 'Email không hợp lệ';
-      } else if (e.toString().contains('user-disabled')) {
-        errorMessage = 'Tài khoản đã bị vô hiệu hóa';
-      }
-      
       debugPrint('Login error: $e');
-      _showErrorSnackBar(errorMessage);
+      _showErrorSnackBar('Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       if (mounted) {
         setState(() {

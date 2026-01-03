@@ -53,23 +53,18 @@ class AuthSwitchText extends StatelessWidget {
               ),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.info_outline, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Text('Chuyển đến trang $text2'),
-                  ],
-                ),
-                backgroundColor: const Color(0xFF4C6FFF),
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            );
-            if (onTap != null) onTap!();
+                  if (onTap != null) {
+                    onTap!();
+                  } else {
+                    // Default navigation behavior
+                    if (isLogin) {
+                      // Từ Login -> Register
+                      Navigator.pushNamed(context, '/register');
+                    } else {
+                      // Từ Register -> Login
+                      Navigator.pushNamed(context, '/login');
+                    }
+                  }
                 },
             ),
           ],
