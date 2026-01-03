@@ -96,4 +96,48 @@ class MessageService {
 
     return controller.stream;
   }
+
+  //==========================getSummaryMessagesForUser
+  Future<Map<String, Message>> getSummaryMessagesForUser(String userId) async {
+    Map<String, Message> summaryMessages = {};
+
+    // Lấy tin nhắn mà user là người gửi (không dùng orderBy để tránh cần index)
+    QuerySnapshot sentSnapshot = await firestore
+        .collection('message')
+        .where('SenderID', isEqualTo: userId)
+        .get();
+
+    // Lấy tin nhắn mà user là người nhận
+    QuerySnapshot receivedSnapshot = await firestore
+        .collection('message')
+        .where('ReceiverID', isEqualTo: userId)
+        .get();
+
+    // Xử lý tin nhắn đã gửi
+    for (var doc in sentSnapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final message = Message.fromMap(doc.id, data);
+      final otherUserId = message.receiverID!;
+      
+      if (!summaryMessages.containsKey(otherUserId) ||
+          message.sentDate.isAfter(summaryMessages[otherUserId]!.sentDate)) {
+        summaryMessages[otherUserId] = message;
+      }
+    }
+
+    // Xử lý tin nhắn đã nhận
+    for (var doc in receivedSnapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final message = Message.fromMap(doc.id, data);
+      final otherUserId = message.senderID!;
+      
+      if (!summaryMessages.containsKey(otherUserId) ||
+          message.sentDate.isAfter(summaryMessages[otherUserId]!.sentDate)) {
+        summaryMessages[otherUserId] = message;
+      }
+    }
+
+    return summaryMessages;
+  }
+  
 }

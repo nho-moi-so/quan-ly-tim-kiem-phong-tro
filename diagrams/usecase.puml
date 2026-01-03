@@ -38,11 +38,11 @@ rectangle "Ứng dụng quản lý & tìm kiếm căn hộ thông minh tích h�
 usecase "Đăng nhập" as login
 usecase "Đăng ký" as register
 usecase "Quản lý tài khoản" as manage_account
-note bottom of manage_account: Thay đổi, Đổi mật khẩu, \nĐăng xuất, Xóa tài khoản,
+note bottom of manage_account: Thay đổi, Đổi mật khẩu, Đăng xuất, Xóa tài khoản,
 usecase "Yêu cầu xác minh tài khoản" as request_owner_verification
 
 usecase "Quản lý căn hộ" as manage_apartment
-note bottom of manage_apartment: Thêm, Sửa, Xóa căn hộ, \nTìm kiếm, Xem, Kết nối khóa cửa IoT
+note bottom of manage_apartment: Thêm, Sửa, Xóa căn hộ, Tìm kiếm, Xem, Kết nối khóa cửa IoT
 ' usecase "Kết nối khóa cửa IoT" as connect_iot_lock
 ' manage_apartment .. connect_iot_lock: extend
 
@@ -90,7 +90,7 @@ usecase "Báo cáo vi phạm" as report_violation
 
 ' Các chức năng của Quản trị viên
 usecase "Quản lý tài khoản người dùng" as manage_user_accounts
-note top of manage_user_accounts: Xem, Khóa/Mở khóa, Xóa tài khoản, \nDuyệt xác minh chủ căn hộ
+note top of manage_user_accounts: Xem, Khóa/Mở khóa, Xóa tài khoản, Duyệt xác minh chủ căn hộ
 ' usecase "Đăng xuất" as logout
 ' usecase "Đăng nhập" as login
 ' usecase "Đổi mật khẩu" as change_password

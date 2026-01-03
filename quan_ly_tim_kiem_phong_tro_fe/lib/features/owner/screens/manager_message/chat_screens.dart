@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/message_controller.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/model/message.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/chat_item_viewmodel.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/message.dart';
 
 class ChatScreen extends StatefulWidget {
   final ChatItemViewModel chatItem;
@@ -42,27 +42,27 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildMessage(String text, bool fromMe) {
     return Align(
-      alignment: fromMe ? Alignment.centerLeft : Alignment.centerRight,
+      alignment: fromMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         constraints: const BoxConstraints(maxWidth: 250),
         decoration: BoxDecoration(
-          color: fromMe ? Colors.grey.withOpacity(0.3) : const Color(0xFFF3ECEC),
+          color: fromMe ? const Color(0xFF4285F4) : Colors.grey.withOpacity(0.3),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(8),
             topRight: const Radius.circular(8),
-            bottomLeft: fromMe ? Radius.zero : const Radius.circular(8),
-            bottomRight: fromMe ? const Radius.circular(8) : Radius.zero,
+            bottomLeft: fromMe ? const Radius.circular(8) : Radius.zero,
+            bottomRight: fromMe ? Radius.zero : const Radius.circular(8),
           ),
         ),
         child: Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontFamily: 'Inter',
             fontWeight: FontWeight.w300,
-            color: Colors.black,
+            color: fromMe ? Colors.white : Colors.black,
           ),
         ),
       ),
@@ -93,12 +93,14 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   CircleAvatar(
                     radius: 30,
-                    backgroundImage: NetworkImage("https://placehold.co/60x75"),
+                    backgroundImage: NetworkImage(widget.chatItem.avatarUrl.isNotEmpty 
+                      ? widget.chatItem.avatarUrl 
+                      : "https://placehold.co/60x75"),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    "Pamiuoi",
-                    style: TextStyle(
+                  Text(
+                    widget.chatItem.name,
+                    style: const TextStyle(
                       fontSize: 20,
                       fontFamily: 'Inter',
                       fontWeight: FontWeight.w600,
