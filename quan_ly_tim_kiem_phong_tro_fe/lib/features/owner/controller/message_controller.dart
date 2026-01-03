@@ -11,42 +11,49 @@ class MessageController {
 
   get firestore => _messageService.firestore;
 
-  //getSummaryMessage - //== fake data - done 
-  List<ChatItemViewModel> getSummaryMessage(String ownerId) {
-    return [
-      ChatItemViewModel(
-        avatarUrl: "https://placehold.co/36x45",
-        name: "Pamiuoi",
-        message: "Dạ Phòng 203 còn trống ko ạ",
-        status: "Online",
-        ownerId: "U001",
-        tenantId: "U002",
-      ),
-      ChatItemViewModel(
-        avatarUrl: "https://placehold.co/36x45",
-        name: "Nguyen Van A",
-        message: "Dạ Phòng 203 còn trống ko ạ",
-        status: "Offline",
-        ownerId: "U002",
-        tenantId: "U003",
-      ),
-      ChatItemViewModel(
-        avatarUrl: "https://placehold.co/36x45",
-        name: "Nguyen Van B",
-        message: "Dạ Phòng 203 còn trống ko ạ",
-        status: "Online",
-        ownerId: "U002",
-        tenantId: "U004",
-      ),
-      ChatItemViewModel(
-        avatarUrl: "https://placehold.co/36x45",
-        name: "Nguyen Van C",
-        message: "Dạ Phòng 203 còn trống ko ạ",
-        status: "Offline",
-        ownerId: "U002",
-        tenantId: "U005",
-      ),
-    ];
+  //getSummaryMessage - Lấy danh sách tóm tắt tin nhắn
+  Future<List<ChatItemViewModel>> getSummaryMessage(String ownerId) async {
+    // print("Getting summary messages for owner: $ownerId");
+    try {
+      // Lấy tất cả tin nhắn tóm tắt cho owner
+      Map<String, Message> summaryMessages = await _messageService.getSummaryMessagesForUser(ownerId);
+      
+      List<ChatItemViewModel> chatItems = [];
+      
+      // Duyệt qua từng cuộc hội thoại
+      for (var entry in summaryMessages.entries) {
+        String otherUserId = entry.key;
+        Message lastMessage = entry.value;
+        
+        // Xác định ai là sender và receiver
+        bool isOwnerSender = lastMessage.senderID == ownerId;
+        String displayMessage = isOwnerSender ? "Bạn: ${lastMessage.content}" : lastMessage.content;
+        
+        // Tạo ChatItemViewModel
+        ChatItemViewModel chatItem = ChatItemViewModel(
+          avatarUrl: "", // Có thể lấy từ User service nếu cần
+          name: "User $otherUserId", // Có thể lấy tên thật từ User service
+          message: displayMessage,
+          status: lastMessage.status,
+          ownerId: ownerId,
+          tenantId: otherUserId,
+        );
+        
+        chatItems.add(chatItem);
+      }
+      
+      // Sắp xếp theo thời gian tin nhắn mới nhất
+      chatItems.sort((a, b) {
+        DateTime dateA = summaryMessages[a.tenantId]!.sentDate;
+        DateTime dateB = summaryMessages[b.tenantId]!.sentDate;
+        return dateB.compareTo(dateA);
+      });
+      
+      return chatItems;
+    } catch (e) {
+      print("Error getting summary messages: $e");
+      return [];
+    }
   }
 
   //getConversation(String senderId, String receiverId) => List<Message> - done

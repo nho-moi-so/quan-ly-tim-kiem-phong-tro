@@ -178,13 +178,13 @@ class _MessengerChatWidgetState extends State<_MessengerChatWidget> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: Column(
-        crossAxisAlignment: fromMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+        crossAxisAlignment: fromMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: fromMe ? MainAxisAlignment.start : MainAxisAlignment.end,
+            mainAxisAlignment: fromMe ? MainAxisAlignment.end : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              if (fromMe) ...[
+              if (!fromMe) ...[
                 CircleAvatar(
                   radius: 14,
                   backgroundColor: Colors.grey[300],
@@ -202,18 +202,18 @@ class _MessengerChatWidgetState extends State<_MessengerChatWidget> {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     gradient: fromMe 
-                      ? null
-                      : const LinearGradient(
+                      ? const LinearGradient(
                           colors: [Color(0xFF0084FF), Color(0xFF0066CC)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                        ),
-                    color: fromMe ? const Color(0xFFE4E6EB) : null,
+                        )
+                      : null,
+                    color: fromMe ? null : const Color(0xFFE4E6EB),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(18),
                       topRight: const Radius.circular(18),
-                      bottomLeft: fromMe ? Radius.zero : const Radius.circular(18),
-                      bottomRight: fromMe ? const Radius.circular(18) : const Radius.circular(4),
+                      bottomLeft: fromMe ? const Radius.circular(18) : Radius.zero,
+                      bottomRight: fromMe ? const Radius.circular(4) : const Radius.circular(18),
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -228,7 +228,7 @@ class _MessengerChatWidgetState extends State<_MessengerChatWidget> {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
-                      color: fromMe ? Colors.black87 : Colors.white,
+                      color: fromMe ? Colors.white : Colors.black87,
                       height: 1.4,
                     ),
                   ),
@@ -240,8 +240,8 @@ class _MessengerChatWidgetState extends State<_MessengerChatWidget> {
             Padding(
               padding: EdgeInsets.only(
                 top: 4,
-                left: fromMe ? 38 : 0,
-                right: fromMe ? 0 : 8,
+                left: fromMe ? 0 : 38,
+                right: fromMe ? 8 : 0,
               ),
               child: Text(
                 _formatTime(timestamp),

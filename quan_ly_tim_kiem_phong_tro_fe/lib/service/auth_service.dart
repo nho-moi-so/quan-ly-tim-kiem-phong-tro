@@ -6,12 +6,14 @@ class SignUpViewModel {
   String phone = '';
   String email = '';
   String password = '';
+  String role = 'guest'; // 'guest' hoặc 'owner'
 
   SignUpViewModel({
     this.username = '',
     this.phone = '',
     this.email = '',
-    this.password = ''
+    this.password = '',
+    this.role = 'guest',
   });
   
 }
@@ -32,10 +34,10 @@ class AuthService {
 
       // Lưu thông tin bổ sung vào Firestore
       await firestore.collection('users').doc(userCredential.user!.uid).set({
-        'Username': signUpViewModel.username,
+        'FullName': signUpViewModel.username,
         'Phone': signUpViewModel.phone,
         'Email': signUpViewModel.email,
-        'Role': 'guest'
+        'Role': signUpViewModel.role // Lưu role được chọn
         // Không lưu password dạng plain text!
       });
 

@@ -1,31 +1,59 @@
 ' alt + d
 @startuml usecase-diagram
-
+skinparam shadowing false
+skinparam backgroundColor #f9f9f9
+skinparam usecase {
+    BackgroundColor #e6f7ff
+    BorderColor #1890ff
+    FontColor #000000
+    FontSize 14
+    Shadowing true
+}
+skinparam actor {
+    BackgroundColor #fff2e8
+    BorderColor #fa8c16
+    FontColor #000000
+    FontSize 14
+}
+skinparam rectangle {
+    BackgroundColor #fffbe6
+    BorderColor #d48806
+    FontColor #000000
+    FontSize 18
+    Shadowing true
+}
+skinparam note{
+    BackgroundColor #faf2b9
+    BorderColor #c51c1c
+}
 left to right direction
 
 actor "Quản trị viên" as Admin
 actor "Người thuê" as Guest
 actor "Chủ căn hộ" as Owner
 
-rectangle "Hệ thống quản lý và tìm kiếm căn hộ"{
+rectangle "Ứng dụng quản lý & tìm kiếm căn hộ thông minh tích hợp IoT"{
 ' Các chức năng của Chủ căn hộ
 ' usecase "Đăng xuất" as logout
 usecase "Đăng nhập" as login
 usecase "Đăng ký" as register
 usecase "Quản lý tài khoản" as manage_account
-note bottom of manage_account: Chỉnh sửa thông tin cá nhân,\nĐăng xuất, Xóa tài khoản, \nYêu cầu xác minh tài khoản là chủ căn hộ
+note bottom of manage_account: Thay đổi, Đổi mật khẩu, Đăng xuất, Xóa tài khoản,
+usecase "Yêu cầu xác minh tài khoản" as request_owner_verification
 
 usecase "Quản lý căn hộ" as manage_apartment
-note bottom of manage_apartment: Thêm, Sửa, Xóa căn hộ, Xem, \nKết nối khóa cửa IoT
+note bottom of manage_apartment: Thêm, Sửa, Xóa căn hộ, Tìm kiếm, Xem, Kết nối khóa cửa IoT
 ' usecase "Kết nối khóa cửa IoT" as connect_iot_lock
 ' manage_apartment .. connect_iot_lock: extend
 
 usecase "Quản lý đặt phòng" as manage_booking
-note bottom of manage_booking: Cập nhật đặt phòng, \nXem hợp đồng đặt phòng
+note top of manage_booking: Cập nhật đặt phòng
+usecase "Xem hợp đồng" as view_booking_contract
+manage_booking .. view_booking_contract: extend
 usecase "Quản lý hóa đơn" as manage_invoice
-note bottom of manage_invoice: Tìm kiếm, Xem chi tiết hóa đơn
+note bottom of manage_invoice: Hoàn tiền
 usecase "Quản lý bài đăng" as manage_post
-note bottom of manage_post: Tạo, Sửa, Ẩn, Xóa bài đăng, \nCông bố bài đăng
+note bottom of manage_post: Tạo, Sửa, Ẩn, Xóa bài đăng
 usecase "Nhắn tin" as messaging
 usecase "Thống kê" as statistics
 
@@ -34,34 +62,40 @@ usecase "Thống kê" as statistics
 ' usecase "Đăng xuất" as logout
 ' usecase "Đăng nhập" as login
 ' usecase "Đăng ký" as register
-usecase "Tìm kiếm căn hộ" as search_apartment
-usecase "Xem chi tiết căn hộ" as view_apartment_details
-manage_apartment .. search_apartment: extend
-search_apartment . view_apartment_details: extend
+' usecase "Tìm kiếm căn hộ" as search_apartment
+' usecase "Xem chi tiết căn hộ" as view_apartment_details
+' manage_apartment .. search_apartment: extend
+' search_apartment . view_apartment_details: extend
 
 usecase "Đặt phòng" as book_apartment
+usecase "Hủy đặt phòng" as cancel_booking
 
-usecase "Tìm kiếm đặt phòng" as search_booking
+usecase "Tìm kiếm yêu cầu đặt phòng" as search_booking
 manage_booking .. search_booking: extend
-usecase "Xem chi tiết đặt phòng" as view_booking_details
-search_booking . view_booking_details: extend
-usecase "Xem lịch sử đặt phòng" as view_booking_history
-search_booking . view_booking_history: extend
-' usecase "Nhắn tin" as messaging
+usecase "Xem yêu cầu đặt phòng" as view_booking_requests
+search_booking . view_booking_requests: extend
 
+
+usecase "Tìm kiếm hóa đơn" as search_invoices
+manage_invoice .. search_invoices: extend
+usecase "Xem chi tiết hóa đơn" as view_invoice_details
+search_invoices . view_invoice_details: extend
 usecase "Tìm kiếm bài đăng" as search_posts
 manage_post .. search_posts: extend
 usecase "Xem chi tiết bài đăng" as view_post_details
 search_posts . view_post_details: extend
+' usecase "Nhắn tin" as messaging
 
 usecase "Báo cáo vi phạm" as report_violation
 
 ' Các chức năng của Quản trị viên
 usecase "Quản lý tài khoản người dùng" as manage_user_accounts
+note top of manage_user_accounts: Xem, Khóa/Mở khóa, Xóa tài khoản, Duyệt xác minh chủ căn hộ
 ' usecase "Đăng xuất" as logout
 ' usecase "Đăng nhập" as login
-usecase "Đổi mật khẩu" as change_password
-manage_account .. change_password: extend
+' usecase "Đổi mật khẩu" as change_password
+' manage_account .. change_password: extend
+'usecase "Quản lý bài đăng" as manage_post
 usecase "Duyệt bài đăng" as approve_posts
 ' usecase "Thống kê" as statistics
 
@@ -70,6 +104,7 @@ usecase "Duyệt bài đăng" as approve_posts
 (Owner) -- (login)
 (Owner) -- (register)
 (Owner) -- (manage_account)
+(request_owner_verification) - (Owner)
 (Owner) -- (manage_apartment)
 (Owner) -- (manage_booking)
 (Owner) -- (manage_invoice)
@@ -77,24 +112,29 @@ usecase "Duyệt bài đăng" as approve_posts
 (Owner) -- (messaging)
 (Owner) -- (statistics)
 
-'Người thuê
-(login) -- (Guest)
-(register) -- (Guest)
-(manage_account) -- (Guest)
-(search_apartment) -- (Guest)
-(search_booking) -- (Guest)
-(book_apartment) -- (Guest)
-(messaging) -- (Guest)
-(report_violation) -- (Guest)
 
+'Người thuê
+(register) - (Guest)
+(login) - (Guest)
+(manage_account) -- (Guest)
+(search_posts) -- (Guest)
+(book_apartment) - (Guest)
+(cancel_booking) - (Guest)
+(search_booking) -- (Guest)
+(search_invoices) -- (Guest)
+(view_booking_contract) -- (Guest)
+(messaging) - (Guest)
+(report_violation) - (Guest)
 
 'Quản trị viên
-(login) -- (Admin)
-(manage_user_accounts) -- (Admin)
-(search_posts) -- (Admin)
-(approve_posts) -- (Admin)
-(change_password) -- (Admin)
-(statistics) -- (Admin)
+(login) --- (Admin)
+(manage_user_accounts) - (Admin)
+(manage_account) -- (Admin)
+(manage_post) -- (Admin)
+(approve_posts) - (Admin)
+' (change_password) -- (Admin)
+(statistics) - (Admin)
+
 
 }
 @enduml

@@ -98,7 +98,7 @@ class Apartment{
 
 }
 ' Apartment --> ApartmentStatus
-Owner "1" -- "0..*" Apartment: owns
+Owner "1" -right- "0..*" Apartment: owns
 
 
 class Amenity{
@@ -150,7 +150,7 @@ class Post{
     - publishedDate: datetime
 }
 ' Post --> PostStatus
-Apartment "1" -- "0..*" Post: advertises
+Post "1" -left- "0..*" Apartment: advertises
 Admin "1..*" -- "0..*" Post: manages
 ' enum ContentVilolationStatus {
 '     REPORTED
@@ -217,7 +217,7 @@ class Invoice{
     - totalAmount: decimal
     - note: string
 }
-Contract "1" -- "0..*" Invoice: has
+Invoice "0..*" -- "1"Contract : has
 ' Invoice --> InvoiceStatus
 class InvoiceDetail{
     - id: string
@@ -229,7 +229,7 @@ class InvoiceDetail{
     ' subTotal = quantity * unitPrice
     - subTotal: decimal
 }
-Invoice "1" -- "1..*" InvoiceDetail: includes
+Invoice "1" -left- "1..*" InvoiceDetail: includes
 ' enum MessageStatus{
 '     SENT
 '     DELIVERED
