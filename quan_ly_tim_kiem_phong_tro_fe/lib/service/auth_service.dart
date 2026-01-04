@@ -34,7 +34,7 @@ class AuthService {
 
       // Lưu thông tin bổ sung vào Firestore
       await firestore.collection('users').doc(userCredential.user!.uid).set({
-        'FullName': signUpViewModel.username,
+        'Fullname': signUpViewModel.username,
         'Phone': signUpViewModel.phone,
         'Email': signUpViewModel.email,
         'Role': signUpViewModel.role // Lưu role được chọn
