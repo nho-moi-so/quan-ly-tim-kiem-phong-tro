@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/common/screens/login_screens.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/profile_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/auth_service.dart';
 
 import '../widgets/widgets.dart';
@@ -25,29 +26,49 @@ class DashboardScreen extends StatelessWidget {
               Center(child: LogoWidget()),
                 Row(
                 children: [
-                  const TagWithIconWidget(title: "Trang chủ"),
-                  const Spacer(),
-                  // Button "Chủ trọ"
-                  Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(16),
+                  const Expanded(
+                    flex: 3,
+                    child: TagWithIconWidget(title: "Trang chủ"),
                   ),
-                  child: const Text(
-                    'Chủ trọ',
-                    style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(width: 6),
+                  // Button "Chủ trọ"
+                  Expanded(
+                    flex: 2,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ProfileScreen(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Text(
+                          'Chủ căn hộ',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
                     ),
                   ),
-                  ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 6),
                   // Button Đăng xuất
                   InkWell(
                     onTap: () => _handleLogout(context),
                     child: Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEF4444).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -59,7 +80,7 @@ class DashboardScreen extends StatelessWidget {
                       child: const Icon(
                         Icons.logout_rounded,
                         color: Color(0xFFEF4444),
-                        size: 22,
+                        size: 20,
                       ),
                     ),
                   ),
