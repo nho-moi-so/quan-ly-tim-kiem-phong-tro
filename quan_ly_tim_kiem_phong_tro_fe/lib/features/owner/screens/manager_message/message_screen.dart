@@ -39,17 +39,38 @@ class _MessageScreenState extends State<MessageScreen> {
 
   Future<void> _loadMessages() async {
     final messages = await _messageController.getSummaryMessage(FirebaseAuth.instance.currentUser!.uid);
+    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+    
+    // Load actual user names from Firestore
+    List<ChatItemViewModel> chatItems = [];
+    for (var msg in messages) {
+      // Determine which user is the partner (not current user)
+      final partnerId = msg.ownerId == currentUserId ? msg.tenantId : msg.ownerId;
+      
+      // Fetch partner's name from Firestore
+      String partnerName = 'Người dùng';
+      try {
+        final userDoc = await _firestore.collection('users').doc(partnerId).get();
+        if (userDoc.exists) {
+          final userData = userDoc.data();
+          partnerName = userData?['Fullname'] ?? 'Người dùng';
+        }
+      } catch (e) {
+        print('Error fetching user name: $e');
+      }
+      
+      chatItems.add(ChatItemViewModel(
+        avatarUrl: msg.avatarUrl,
+        name: partnerName,
+        message: msg.message,
+        status: msg.status,
+        ownerId: msg.ownerId,
+        tenantId: msg.tenantId,
+      ));
+    }
+    
     setState(() {
-      _messages = messages
-          .map((msg) => ChatItemViewModel(
-                avatarUrl: msg.avatarUrl,
-                name: msg.name,
-                message: msg.message,
-                status: msg.status,
-                ownerId: msg.ownerId,
-                tenantId: msg.tenantId,
-              ))
-          .toList();
+      _messages = chatItems;
       _filteredMessages = _messages;
       _isLoading = false;
     });
@@ -643,14 +664,14 @@ class _MessengerChatWidgetState extends State<_MessengerChatWidget> {
                           color: Color(0xFF050505),
                         ),
                       ),
-                      Text(
-                        widget.chatItem.status,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
+                      // Text(
+                      //   widget.chatItem.status,
+                      //   style: TextStyle(
+                      //     fontSize: 12,
+                      //     color: Colors.grey[600],
+                      //     fontWeight: FontWeight.w400,
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
