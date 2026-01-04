@@ -60,7 +60,7 @@ class _PostScreenState extends State<PostScreen> {
               ],
               ),
               SizedBox(height: screenHeight * 0.01),
-              SearchBarWidget(),
+              // SearchBarWidget(),
               SizedBox(height: screenHeight * 0.015),
               if (_isLoading)
                 const LoadingWidget(

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/message_controller.dart';
@@ -14,13 +15,26 @@ class MessageScreen extends StatefulWidget {
 
 class _MessageScreenState extends State<MessageScreen> {
   final MessageController _messageController = MessageController();
+  final TextEditingController _searchController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  
   List<ChatItemViewModel> _messages = [];
+  List<ChatItemViewModel> _filteredMessages = [];
+  List<Map<String, dynamic>> _searchedUsers = [];
   bool _isLoading = true;
+  bool _isSearching = false;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _loadMessages();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadMessages() async {
@@ -36,8 +50,101 @@ class _MessageScreenState extends State<MessageScreen> {
                 tenantId: msg.tenantId,
               ))
           .toList();
+      _filteredMessages = _messages;
       _isLoading = false;
     });
+  }
+
+  bool _isPhoneNumber(String text) {
+    // Check if text contains only digits and has 10-11 digits
+    return RegExp(r'^[0-9]{10,11}$').hasMatch(text.trim());
+  }
+
+  Future<void> _handleSearch(String query) async {
+    setState(() {
+      _searchQuery = query;
+      _isSearching = true;
+      _searchedUsers = [];
+    });
+
+    if (query.isEmpty) {
+      setState(() {
+        _filteredMessages = _messages;
+        _isSearching = false;
+        _searchedUsers = [];
+      });
+      return;
+    }
+
+    // Check if it's a phone number
+    if (_isPhoneNumber(query)) {
+      // Search for users by phone
+      try {
+        final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+        final QuerySnapshot snapshot = await _firestore
+            .collection('users')
+            .where('Phone', isEqualTo: query.trim())
+            .get();
+
+        final users = snapshot.docs
+            .where((doc) => doc.id != currentUserId)
+            .map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              return {
+                'userId': doc.id,
+                'fullname': data['Fullname'] ?? 'Không có tên',
+                'phone': data['Phone'] ?? '',
+                'role': data['Role'] ?? '',
+              };
+            })
+            .toList();
+
+        setState(() {
+          _searchedUsers = users;
+          _filteredMessages = [];
+          _isSearching = false;
+        });
+      } catch (e) {
+        setState(() {
+          _isSearching = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi tìm kiếm: ${e.toString()}'),
+              backgroundColor: const Color(0xFFEF4444),
+            ),
+          );
+        }
+      }
+    } else {
+      // Search in messages by name or content
+      final filtered = _messages.where((msg) {
+        final nameLower = msg.name.toLowerCase();
+        final messageLower = msg.message.toLowerCase();
+        final queryLower = query.toLowerCase();
+        return nameLower.contains(queryLower) || messageLower.contains(queryLower);
+      }).toList();
+
+      setState(() {
+        _filteredMessages = filtered;
+        _searchedUsers = [];
+        _isSearching = false;
+      });
+    }
+  }
+
+  void _startChatWithUser(Map<String, dynamic> user) {
+    final chatItem = ChatItemViewModel(
+      avatarUrl: '',
+      name: user['fullname'],
+      message: 'Bắt đầu trò chuyện',
+      status: 'Trực tuyến',
+      ownerId: FirebaseAuth.instance.currentUser!.uid,
+      tenantId: user['userId'],
+    );
+    
+    _showChatBottomSheet(context, chatItem);
   }
 
   void _showChatBottomSheet(BuildContext context, ChatItemViewModel chatItem) {
@@ -53,6 +160,143 @@ class _MessageScreenState extends State<MessageScreen> {
       ),
     );
   }
+
+  Widget _buildUserCard(Map<String, dynamic> user) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFFE5E7EB),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Avatar
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF4C6FFF), Color(0xFF8B5CF6)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Center(
+              child: Text(
+                user['fullname'].toString().substring(0, 1).toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          
+          // User info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user['fullname'],
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1F2937),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.phone_outlined,
+                      size: 12,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      user['phone'],
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4C6FFF).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        _getRoleDisplay(user['role']),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF4C6FFF),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          // Chat button
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF10B981), Color(0xFF059669)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => _startChatWithUser(user),
+              icon: const Icon(
+                Icons.chat_bubble_outline,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getRoleDisplay(String? role) {
+    switch (role?.toLowerCase()) {
+      case 'owner':
+        return 'Chủ căn hộ';
+      case 'guest':
+        return 'Khách thuê';
+      case 'admin':
+        return 'Quản trị viên';
+      default:
+        return 'Người dùng';
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -82,31 +326,91 @@ class _MessageScreenState extends State<MessageScreen> {
               SizedBox(height: screenHeight * 0.02),
               Center(child: LabelTitleWidget(title: "Lịch sử trò chuyện")),
               SizedBox(height: screenHeight * 0.01),
-              SearchBarWidget(),
+              SearchBarWidget(
+                controller: _searchController,
+                onChanged: _handleSearch,
+                onClear: () {
+                  setState(() {
+                    _searchQuery = '';
+                    _filteredMessages = _messages;
+                    _searchedUsers = [];
+                  });
+                },
+              ),
               SizedBox(height: screenHeight * 0.02),
-                _isLoading
+              
+              // Show search results for users if found
+              if (_searchedUsers.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4C6FFF).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.person_search, 
+                        color: Color(0xFF4C6FFF), size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Tìm thấy ${_searchedUsers.length} người dùng',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF4C6FFF),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ..._searchedUsers.map((user) => _buildUserCard(user)),
+                const SizedBox(height: 12),
+                const Divider(),
+                const SizedBox(height: 12),
+              ],
+              
+              // Show message results
+              _isLoading
                   ? const LoadingWidget(
                       message: 'Đang tải tin nhắn...',
                     )
-                  : _messages.isEmpty
-                    ? const EmptyStateWidget(
-                        title: 'Chưa có cuộc trò chuyện',
-                        message: 'Bạn chưa có tin nhắn nào',
-                        icon: Icons.chat_bubble_outline,
+                  : _isSearching
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF4C6FFF),
+                          ),
+                        ),
                       )
-                    : Column(
-                    children: _messages
-                      .map((msg) => ChatItem(
-                          avatarUrl: msg.avatarUrl,
-                          name: msg.name,
-                          message: msg.message,
-                          status: msg.status,
-                          onTap: () {
-                            _showChatBottomSheet(context, msg);
-                          },
-                        ))
-                      .toList(),
-                  ),
+                    : _searchQuery.isNotEmpty && _filteredMessages.isEmpty && _searchedUsers.isEmpty
+                      ? EmptyStateWidget(
+                          title: 'Không tìm thấy kết quả',
+                          message: _isPhoneNumber(_searchQuery) 
+                            ? 'Không tìm thấy người dùng với số điện thoại này'
+                            : 'Không tìm thấy tin nhắn phù hợp',
+                          icon: Icons.search_off,
+                        )
+                      : _filteredMessages.isEmpty && _searchQuery.isEmpty
+                        ? const EmptyStateWidget(
+                            title: 'Chưa có cuộc trò chuyện',
+                            message: 'Bạn chưa có tin nhắn nào',
+                            icon: Icons.chat_bubble_outline,
+                          )
+                        : Column(
+                          children: _filteredMessages
+                            .map((msg) => ChatItem(
+                                avatarUrl: msg.avatarUrl,
+                                name: msg.name,
+                                message: msg.message,
+                                status: msg.status,
+                                onTap: () {
+                                  _showChatBottomSheet(context, msg);
+                                },
+                              ))
+                            .toList(),
+                        ),
                 
             ],
           ),
@@ -114,6 +418,8 @@ class _MessageScreenState extends State<MessageScreen> {
       ),
     );
   }
+
+
 }
 
 // Messenger-style Chat Widget
