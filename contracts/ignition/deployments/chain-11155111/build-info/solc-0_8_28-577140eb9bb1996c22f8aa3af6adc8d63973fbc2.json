@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-577140eb9bb1996c22f8aa3af6adc8d63973fbc2",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/BookingChain.sol": "project/contracts/BookingChain.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/BookingChain.sol": {
+        "content": "//thong tin hop dong cho 4 chỗ:\n\t// 1. sau khi thanh toán, sau khi hủy (owner và guest)\n\t// 2. lưu trên database off-chain (admin) \n\t// 3. lưu trên on-chain (blockchain)\n\t// => if owner AND admin ADJUST => owner == admin != guest == blockchain => blockchain alway tell the truth\n\t// => if owner AND admin AND guest WRONG => database offchain is attacked, refund back for guest\n\n//tham số contract_hash sẽ dùng api/blockchain/hash để hash để cho trùng khớp với toàn bộ\n\n\n// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract BookingChain {\n    // ======================Modifiers======================\n    modifier onlyOwner() {\n        require(msg.sender == owner, \"Only owner can call this function\");\n        _;\n    }\n    \n    modifier onlyAdmin() {\n        require(isAdmin[msg.sender], \"Only admin can call this function\");\n        _;\n    }\n    \n    \n    // Enums\n    enum ContractStatus { PAID, CANCELLED }\n    // ======================Struct for Contract======================\n    struct Contract {\n        uint256 checkin;\n        uint256 checkout;\n        uint256 timestamp;\n        ContractStatus status;\n        bool isValid;\n    }\n    \n    // ======================State variables======================\n    address public owner;\n    mapping(address => bool) public isAdmin;\n    mapping(string => Contract) public contracts;\n    \n    // Events\n    event AdminGranted(address indexed admin);\n    event AdminRevoked(address indexed admin);\n    event ContractConfirmed(string indexed contractHash, uint256 checkin, uint256 checkout);\n    event ContractCancelled(string indexed contractHash);\n    event ContractVoided(string indexed contractHash);\n    event ContractVerified(string indexed contractHash, bool isValid);\n    \n    \n    // ======================Constructor======================\n    constructor() {\n        owner = msg.sender;\n        isAdmin[owner] = true;\n        emit AdminGranted(owner);\n    }\n    \n    // ======================Owner functions======================\n    function grantRoleAdmin(address admin) external onlyOwner {\n        require(admin != address(0), \"Invalid address\");\n        isAdmin[admin] = true;\n        emit AdminGranted(admin);\n    }\n    \n    function revokeRoleAdmin(address admin) external onlyOwner {\n        require(admin != address(0), \"Invalid address\");\n        isAdmin[admin] = false;\n        emit AdminRevoked(admin);\n    }\n    \n    // ======================Admin functions======================\n    function confirmContract(\n        string calldata contractHash,\n        uint256 checkin,\n        uint256 checkout\n    ) external onlyAdmin {\n        require(checkin < checkout, \"Invalid dates\");\n        require(!contracts[contractHash].isValid, \"Contract already exists\");\n        \n        contracts[contractHash] = Contract({\n            checkin: checkin,\n            checkout: checkout,\n            timestamp: block.timestamp,\n            status: ContractStatus.PAID,\n            isValid: true\n        });\n        \n        emit ContractConfirmed(contractHash, checkin, checkout);\n    }\n    \n    function cancelContract(string calldata contractHash) external onlyAdmin {\n        require(contracts[contractHash].isValid, \"Contract not found\");\n        contracts[contractHash].status = ContractStatus.CANCELLED;\n        emit ContractCancelled(contractHash);\n    }\n    \n    function voidContract(string calldata contractHash) external onlyAdmin {\n        require(contracts[contractHash].isValid, \"Contract not found\");\n        contracts[contractHash].isValid = false;\n        emit ContractVoided(contractHash);\n    }\n    \n    // ======================Public functions======================\n    function verify(string calldata contractHash) external {\n        bool isValidContract = contracts[contractHash].isValid;\n        emit ContractVerified(contractHash, isValidContract);\n    }\n    \n    function getContract(string calldata contractHash) \n        external \n        view \n        returns (Contract memory) \n    {\n        require(contracts[contractHash].isValid, \"Contract not found\");\n        return contracts[contractHash];\n    }\n}"
+      }
+    }
+  }
+}
