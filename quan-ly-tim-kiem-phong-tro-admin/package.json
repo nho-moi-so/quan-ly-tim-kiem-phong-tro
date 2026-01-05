@@ -7,10 +7,12 @@
     "build": "next build",
     "start": "NODE_ENV=production node server.js",
     "lint": "next lint",
-    "gen": "node src/scripts/generate-component.js"
+    "gen": "node src/scripts/generate-component.js",
+    "test": "jest"
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.1.0",
+    "@jest/globals": "^30.2.0",
     "antd": "^5.27.4",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
@@ -20,12 +22,16 @@
     "react-dom": "^18",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
+    "viem": "^2.43.5",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
