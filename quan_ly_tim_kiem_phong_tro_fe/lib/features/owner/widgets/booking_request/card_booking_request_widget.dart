@@ -42,6 +42,20 @@ class CardBookingRequestWidget extends StatefulWidget {
 
 class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
 
+  String _formatDateTime(String dateTimeStr) {
+    try {
+      DateTime dateTime = DateTime.parse(dateTimeStr);
+      String day = dateTime.day.toString().padLeft(2, '0');
+      String month = dateTime.month.toString().padLeft(2, '0');
+      String year = dateTime.year.toString();
+      String hour = dateTime.hour.toString().padLeft(2, '0');
+      String minute = dateTime.minute.toString().padLeft(2, '0');
+      return '$hour:$minute $day/$month/$year';
+    } catch (e) {
+      return dateTimeStr;
+    }
+  }
+
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'approved':
@@ -205,7 +219,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                   icon: Icons.login_rounded,
                   iconColor: const Color(0xFF10B981),
                   label: 'Check-in',
-                  value: widget.checkinDate
+                  value: _formatDateTime(widget.checkinDate)
                 ),
                 const SizedBox(height: 12),
 
@@ -214,7 +228,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                   icon: Icons.logout_rounded,
                   iconColor: const Color(0xFFEF4444),
                   label: 'Check-out',
-                  value: widget.checkoutDate
+                  value: _formatDateTime(widget.checkoutDate)
                 ),
                 const SizedBox(height: 12),
 

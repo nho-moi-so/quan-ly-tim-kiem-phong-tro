@@ -31,6 +31,19 @@ class RoomPostItemWidget extends StatelessWidget {
     }
   }
 
+  String _getStatusInVietnamese(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'Đang chờ';
+      case 'approved':
+        return 'Đã duyệt';
+      case 'rejected':
+        return 'Đã từ chối';
+      default:
+        return status;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor(status);
@@ -178,7 +191,7 @@ class RoomPostItemWidget extends StatelessWidget {
                           ],
                         ),
                         child: Text(
-                          status,
+                          _getStatusInVietnamese(status),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,

@@ -35,14 +35,13 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
         // Lọc phòng đang ở (có khách thuê)
         return rooms.where((room) => 
           room.tenantName != "Chưa có khách thuê" && 
-          (room.status == 'Đang Ở' || room.status == 'rented')
+          (room.status == 'Rented' || room.status.contains('Rented'))
         ).toList();
       case RoomFilter.available:
         // Lọc phòng còn trống (chưa có khách thuê hoặc status là đang trống)
         return rooms.where((room) => 
           room.tenantName == "Chưa có khách thuê" || 
-          room.status == 'Đang Trống' || 
-          room.status == 'available'
+          (room.status == 'Available' || room.status.contains('Available'))
         ).toList();
     }
   }

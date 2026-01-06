@@ -42,6 +42,42 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
     setState(() {});
   }
 
+  String _formatDateTime(dynamic dateTime) {
+    try {
+      late DateTime parsedDateTime;
+      if (dateTime is String) {
+        parsedDateTime = DateTime.parse(dateTime);
+      } else if (dateTime is DateTime) {
+        parsedDateTime = dateTime;
+      } else {
+        return dateTime.toString();
+      }
+      String day = parsedDateTime.day.toString().padLeft(2, '0');
+      String month = parsedDateTime.month.toString().padLeft(2, '0');
+      String year = parsedDateTime.year.toString();
+      String hour = parsedDateTime.hour.toString().padLeft(2, '0');
+      String minute = parsedDateTime.minute.toString().padLeft(2, '0');
+      return '$hour:$minute $day/$month/$year';
+    } catch (e) {
+      return dateTime.toString();
+    }
+  }
+
+  String _getStatusInVietnamese(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'Đang chờ';
+      case 'approved':
+        return 'Đã duyệt';
+      case 'canceled':
+        return 'Đã hủy';
+      case 'completed':
+        return 'Hoàn thành';
+      default:
+        return status;
+    }
+  }
+
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -240,11 +276,11 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
                         const Divider(height: 24),
                         buildInfoRow('Số người ở tối đa', '${bookingRequestDetail!.numberOfPeople} Người', Icons.groups_rounded),
                         const Divider(height: 24),
-                        buildInfoRow('Check-in', '${bookingRequestDetail!.checkInDate}', Icons.login_rounded),
+                        buildInfoRow('Check-in', _formatDateTime(bookingRequestDetail!.checkInDate!), Icons.login_rounded),
                         const Divider(height: 24),
-                        buildInfoRow('Check-out', '${bookingRequestDetail!.checkOutDate}', Icons.logout_rounded),
+                        buildInfoRow('Check-out', _formatDateTime(bookingRequestDetail!.checkOutDate!), Icons.logout_rounded),
                         const Divider(height: 24),
-                        buildInfoRowWithStatus('Trạng thái', bookingRequestDetail!.status ?? '', statusColor),
+                        buildInfoRowWithStatus('Trạng thái', _getStatusInVietnamese(bookingRequestDetail!.status ?? ''), statusColor),
                         const Divider(height: 24),
                         buildInfoRow('Tiền phòng', '${formatCurrency(bookingRequestDetail!.price ?? 0.0)} VND', Icons.attach_money_rounded),
                       ],

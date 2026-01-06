@@ -6,7 +6,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_deta
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/amenities.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/amenity_in_apartment.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/model/booking_request.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/contract.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/user.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/user_service.dart';
 
@@ -14,6 +14,7 @@ import '../../../service/owner/amenity_in_apartment_service.dart';
 import '../../../service/owner/amenity_service.dart';
 import '../../../service/owner/apartment_service.dart';
 import '../../../service/owner/booking_request_service.dart';
+import '../../../service/owner/contract_service.dart';
 import '../../../service/owner/iot_otp_service.dart';
 import '../viewmodel/room_card_info.dart';
 
@@ -24,6 +25,7 @@ class ApartmentController {
   final AmenityInApartmentService _amenityInApartmentService = AmenityInApartmentService();
   final AmenityService _amenityService = AmenityService();
   final IotOtpService _iotOtpService = IotOtpService();
+  final ContractService _contractService = ContractService();
 
   final ContractController _contractController = ContractController();
 
@@ -202,34 +204,35 @@ class ApartmentController {
         // Lấy danh sách yêu cầu đặt phòng cho căn hộ này
         // Gán tên khách thuê nếu có một bookingRequest có CheckoutDate ở tương lai
         // Ngược lại gán "Chưa có khách thuê"
-        List<BookingRequest> bookingRequests = await _bookingService.getBookingRequestByApartmentId(apartment.apartmentID!);
-      if (bookingRequests.isNotEmpty) {
-        for(var booking in bookingRequests){
-          print(booking.status);
-          print(booking.userId);
-          if (booking.checkoutDate.isAfter(DateTime.now())) {
+        List<Contract> contracts = await _contractService.getContractByApartmentId(apartment.apartmentID!);
+      var contractId;
+      if (contracts.isNotEmpty) {
+        for(var contract in contracts){
             //nếu có booking và checkoutDate ở tương lai
+          // print(contract.endDate);
+          if (contract.endDate.isAfter(DateTime.now())) {
             // print(userId);
-            User user = await _userService.getUserById(booking.userId);
+            User user = await _userService.getUserById(contract.userId);
             // print(user.email);
             tenantName = user.fullName ?? 'Chưa có khách thuê';
-            break; // Chỉ cần lấy tên khách thuê đầu tiên có trạng thái hợp lệ
+            contractId = contract.contractID;
+            break; //== Chỉ cần lấy tên khách thuê đầu tiên có trạng thái hợp lệ
           } else {
             tenantName = "Chưa có khách thuê";
           }
         }
       }
       String price = '${formatCurrency(apartment.dailyRate!).toString()}/ngày';
+      String status = tenantName != "Chưa có khách thuê" ? "Rented" : apartment.status ?? "Available";
       RoomCardInfo infoApartment = RoomCardInfo(
         roomName: roomName,
         tenantName: tenantName,
         price: price,
-        status: apartment.status!,
+        status: status,
         onViewDetail: () => viewDetailApartment(apartment.apartmentID!),
         onDelete: () => deleteApartment(apartment.apartmentID!),
         onContract: () async {
-          //==lấy id của contract của phòng này
-          return "exampleContractId";
+          return contractId;
         },
       );
 

@@ -55,7 +55,6 @@ class _PostScreenState extends State<PostScreen> {
                 ButtonAddWidget(
                   title: "Thêm bài đăng mới", 
                   screen: DetailPostScreen(postId: ''),
-                  onNavigateBack: _loadPosts, // Refresh khi quay lại
                 ),
               ],
               ),

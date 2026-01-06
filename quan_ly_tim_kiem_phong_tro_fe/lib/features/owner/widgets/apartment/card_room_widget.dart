@@ -11,6 +11,15 @@ class CardRoomWidget extends StatelessWidget {
 
   const CardRoomWidget({super.key, required this.data});
 
+  String _getStatusInVietnamese(String status) {
+    if (status.contains('Available')) {
+      return 'Còn trống';
+    } else if (status.contains('Rented')) {
+      return 'Đã thuê';
+    }
+    return status;
+  }
+
   Color _getStatusColor(String status) {
     if (status.contains('Còn trống') || status.contains('Available')) {
       return const Color(0xFF10B981);
@@ -121,7 +130,7 @@ class CardRoomWidget extends StatelessWidget {
                     ],
                   ),
                   child: Text(
-                    data.status,
+                    _getStatusInVietnamese(data.status),
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
