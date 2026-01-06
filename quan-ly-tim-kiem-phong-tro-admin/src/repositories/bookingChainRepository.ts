@@ -159,7 +159,7 @@ export class BookingChainRepository {
                     checkin: BigInt(0),
                     checkout: BigInt(0),
                     timestamp: BigInt(0),
-                    status: ContractStatus.Pending,
+                    status: ContractStatus.PAID,
                     isValid: false,
                 };
             }

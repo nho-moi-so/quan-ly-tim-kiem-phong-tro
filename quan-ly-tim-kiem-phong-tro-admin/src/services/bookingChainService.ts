@@ -116,17 +116,12 @@ export const bookingChainService = {
         // Đọc contract từ blockchain (view function - không tốn gas)
         const contract = await bookingChainRepo.getContract(contractHash);
         
-        // Kiểm tra contract có tồn tại và hợp lệ không
+        // Kiểm tra contract có tồn tại không (chỉ cần isValid = true)
         if (!contract.isValid) {
-            throw new Error(`Contract with hash ${contractHash} does not exist or is invalid on blockchain`);
+            throw new Error(`Contract with hash ${contractHash} does not exist or has been voided`);
         }
 
-        // Kiểm tra status của contract (chỉ verify contract PAID)
-        if (contract.status !== 0) { // 0 = PAID
-            throw new Error(`Contract must be in PAID status to be verified. Current status: ${contract.status === 1 ? 'CANCELLED' : 'Unknown'}`);
-        }
-
-        // Trả về thông tin contract đã verified (không cần tạo transaction)
+        // Trả về thông tin contract (không quan tâm status PAID hay CANCELLED)
         const checkinTimestamp = Number(contract.checkin);
         const checkoutTimestamp = Number(contract.checkout);
         const createdTimestamp = Number(contract.timestamp);
@@ -134,15 +129,51 @@ export const bookingChainService = {
         return {
             verified: true,
             contractInfo: {
-                // checkin: contract.checkin.toString(),
                 checkinDate: new Date(checkinTimestamp * 1000).toISOString(),
-                // checkout: contract.checkout.toString(),
                 checkoutDate: new Date(checkoutTimestamp * 1000).toISOString(),
-                // timestamp: contract.timestamp.toString(),
                 createdAt: new Date(createdTimestamp * 1000).toISOString(),
-                // status: contract.status,
                 statusText: contract.status === 0 ? 'PAID' : 'CANCELLED',
                 isValid: contract.isValid
+            }
+        };
+    },
+
+    async cancelBookingOnChain(contractHash: string) {
+        // Kiểm tra hash không được rỗng
+        if (!contractHash || contractHash.trim() === '') {
+            throw new Error('Contract hash cannot be empty');
+        }
+
+        // Kiểm tra contract có tồn tại không
+        const contract = await bookingChainRepo.getContract(contractHash);
+        
+        if (!contract.isValid) {
+            throw new Error(`Contract with hash ${contractHash} does not exist or is invalid on blockchain`);
+        }
+
+        // Kiểm tra contract đang ở trạng thái PAID (chỉ cancel được contract PAID)
+        if (contract.status !== 0) { // 0 = PAID
+            throw new Error(`Contract is already in ${contract.status === 1 ? 'CANCELLED' : 'Unknown'} status`);
+        }
+
+        // Thực hiện cancel trên blockchain
+        const result = await bookingChainRepo.cancelContractAndWait({ contractHash });
+
+        // Lấy thông tin contract sau khi cancel
+        const cancelledContract = await bookingChainRepo.getContract(contractHash);
+        
+        const checkinTimestamp = Number(cancelledContract.checkin);
+        const checkoutTimestamp = Number(cancelledContract.checkout);
+        const createdTimestamp = Number(cancelledContract.timestamp);
+        
+        return {
+            ...result,
+            contractInfo: {
+                checkinDate: new Date(checkinTimestamp * 1000).toISOString(),
+                checkoutDate: new Date(checkoutTimestamp * 1000).toISOString(),
+                createdAt: new Date(createdTimestamp * 1000).toISOString(),
+                statusText: cancelledContract.status === 0 ? 'PAID' : 'CANCELLED',
+                isValid: cancelledContract.isValid
             }
         };
     }
