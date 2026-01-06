@@ -36,12 +36,14 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({
 			status: "success",
-			message: "Booking contract confirmed",
+			message: "Booking contract confirmed successfully",
 			data: {
 				contract_hash,
-                checkin,
-                checkout,
-				result: normalizedResult
+				checkin,
+				checkout,
+				transaction_hash: normalizedResult.hash,
+				block_number: normalizedResult.receipt.blockNumber,
+				contract_info: normalizedResult.contractInfo
 			}
 		});
 	} catch (err: unknown) {
@@ -53,9 +55,20 @@ export async function POST(request: Request) {
 			}, { status: 400 });
 		}
 
+		const errorMessage = err instanceof Error ? err.message : "Unknown error";
+		
+		// Trả về status code khác nhau dựa trên loại lỗi
+		const statusCode = errorMessage.includes("already exists") 
+		                   ? 409 // Conflict
+		                   : errorMessage.includes("Invalid date") || 
+		                     errorMessage.includes("cannot be") ||
+		                     errorMessage.includes("must be")
+		                   ? 400 // Bad Request
+		                   : 400;
+
 		return NextResponse.json({
 			status: "fail",
-			message: err instanceof Error ? err.message : "Unknown error"
-		}, { status: 400 });
+			message: errorMessage
+		}, { status: statusCode });
 	}
 }

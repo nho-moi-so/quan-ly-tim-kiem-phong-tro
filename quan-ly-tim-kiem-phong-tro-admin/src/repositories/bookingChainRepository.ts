@@ -21,8 +21,8 @@ dotenv.config();
 // ==================== Types ====================
 
 export enum ContractStatus {
-    Pending = 0,
-    Confirmed = 1,
+    PAID = 0,        // Đã thanh toán - hợp lệ
+    CANCELLED = 1,   // Đã hủy
 }
 
 export type Contract = {
@@ -177,7 +177,7 @@ export class BookingChainRepository {
             checkin: this.timestampToDate(contract.checkin),
             checkout: this.timestampToDate(contract.checkout),
             timestamp: this.timestampToDate(contract.timestamp),
-            status: contract.status === ContractStatus.Pending ? "Pending" : "Confirmed",
+            status: contract.status === ContractStatus.PAID ? "PAID" : "CANCELLED",
             isValid: contract.isValid,
             checkinTimestamp: Number(contract.checkin),
             checkoutTimestamp: Number(contract.checkout),
