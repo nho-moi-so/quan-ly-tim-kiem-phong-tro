@@ -104,5 +104,21 @@ export const UserService = {
         }
         const updated = await UserRepository.update(ownerId, { OwnerStatus: 'active' });
         return { userCode: updated.Id, status: updated.OwnerStatus ?? 'active' };
+    },
+
+    getUserByEmail: async (email: string) => {
+        const users = await UserRepository.getAll();
+        const user = users.find(u => u.Email === email);
+        
+        if (!user) {
+            return null;
+        }
+
+        return {
+            userId: user.Id,
+            email: user.Email,
+            fullName: user.Fullname,
+            role: user.Role
+        };
     }
 };

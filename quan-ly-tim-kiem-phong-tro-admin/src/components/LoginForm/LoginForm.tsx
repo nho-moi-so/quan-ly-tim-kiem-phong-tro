@@ -1,13 +1,17 @@
-import { Button, Card, Checkbox, Form, Input, Typography } from "antd";
+"use client";
+import { auth } from "@/lib/firebase/config";
 import type { FormProps } from "antd";
-import React from "react";
+import { Button, Card, Checkbox, Form, Input, Typography, message } from "antd";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 
 interface LoginFormProps {
   // Add your props here
 }
 
 type FieldType = {
-  username?: string;
+  email?: string;
   password?: string;
   remember?: boolean;
 };
@@ -15,8 +19,69 @@ type FieldType = {
 const { Title, Text } = Typography;
 
 export const LoginForm: React.FC<LoginFormProps> = (props) => {
-  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-    console.log("Đăng nhập thành công:", values);
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    setLoading(true);
+    try {
+      // Sign in with Firebase Authentication
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        values.email!,
+        values.password!
+      );
+
+      const user = userCredential.user;
+
+      // Get ID token to verify on server
+      const idToken = await user.getIdToken();
+
+      // Call API to verify user role and get additional info
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.status === "success") {
+        message.success("Đăng nhập thành công!");
+        
+        // Store user info in localStorage
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(result.data));
+          localStorage.setItem("idToken", idToken);
+        }
+
+        // Redirect to admin dashboard
+        router.push("/admin");
+      } else {
+        message.error(result.message || "Đăng nhập thất bại");
+        // Sign out if role check fails
+        await auth.signOut();
+      }
+    } catch (error: any) {
+      console.error("Lỗi đăng nhập:", error);
+      
+      // Handle Firebase Auth errors
+      if (error.code === "auth/invalid-credential") {
+        message.error("Email hoặc mật khẩu không chính xác");
+      } else if (error.code === "auth/user-not-found") {
+        message.error("Tài khoản không tồn tại");
+      } else if (error.code === "auth/wrong-password") {
+        message.error("Mật khẩu không chính xác");
+      } else if (error.code === "auth/too-many-requests") {
+        message.error("Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau");
+      } else {
+        message.error("Có lỗi xảy ra khi đăng nhập");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
@@ -55,11 +120,14 @@ export const LoginForm: React.FC<LoginFormProps> = (props) => {
         autoComplete="off"
       >
         <Form.Item<FieldType>
-          label="Tài khoản"
-          name="username"
-          rules={[{ required: true, message: "Vui lòng nhập tài khoản!" }]}
+          label="Email"
+          name="email"
+          rules={[
+            { required: true, message: "Vui lòng nhập email!" },
+            { type: "email", message: "Email không hợp lệ!" }
+          ]}
         >
-          <Input placeholder="Nhập tên đăng nhập" />
+          <Input placeholder="Nhập email" />
         </Form.Item>
 
         <Form.Item<FieldType>
@@ -75,7 +143,7 @@ export const LoginForm: React.FC<LoginFormProps> = (props) => {
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" block>
+          <Button type="primary" htmlType="submit" block loading={loading}>
             Đăng nhập
           </Button>
         </Form.Item>
