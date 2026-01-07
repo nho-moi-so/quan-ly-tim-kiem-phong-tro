@@ -1,4 +1,5 @@
 "use client";
+import { formatId } from "@/lib/formatId";
 import type { DescriptionsProps } from "antd";
 import { Badge, Card, Descriptions, Image, message, Spin } from "antd";
 import { useParams } from "next/navigation";
@@ -141,7 +142,7 @@ export default function Page() {
   return (
     <div style={{ padding: 24 }}>
       <h2 style={{ textAlign: "center", marginBottom: 24 }}>
-        Chi Tiết Bài Đăng #{data.codePost}
+        Chi Tiết Bài Đăng #{formatId.formatPostId(data.codePost)}
       </h2>
 
       {/* Thông tin bài đăng */}

@@ -13,8 +13,8 @@ export const UserService = {
                 fullName: guest.Fullname,
                 email: guest.Email,
                 phone: guest.Phone,
-                status: "Hoạt động", //== Hardcoded for now
-                registeredAt: "2023-01-01" //== Hardcoded for now
+                // Return raw status; FE will translate for display
+                status: guest.GuestStatus ?? "active",
             });
         }
         return guestSummaries;
@@ -31,7 +31,7 @@ export const UserService = {
             fullName: user.Fullname,
             email: user.Email,
             phone: user.Phone,
-            status: "Hoạt động", //== Hardcoded for now
+            status: user.GuestStatus ?? "active",
             registeredAt: "2023-01-01" //== Hardcoded for now
         };
     },
@@ -48,8 +48,7 @@ export const UserService = {
                 fullName: owner.Fullname,
                 email: owner.Email,
                 phone: owner.Phone,
-                status: "Hoạt động", //== Hardcoded for now
-                registeredAt: "2023-01-01" //== Hardcoded for now
+                status: owner.OwnerStatus ?? "active",
             });
         }
         return ownerSummaries;
@@ -66,8 +65,44 @@ export const UserService = {
             fullName: user.Fullname,
             email: user.Email,
             phone: user.Phone,
-            status: "Hoạt động", //== Hardcoded for now
+            status: user.OwnerStatus ?? "active",
             registeredAt: "2023-01-01" //== Hardcoded for now
         };
+    },
+
+    lockGuest: async (guestId: string) => {
+        const user = await UserRepository.getById(guestId);
+        if (!user || user.Role !== 'guest') {
+            throw new Error('Guest not found');
+        }
+        const updated = await UserRepository.update(guestId, { GuestStatus: 'locked' });
+        return { userCode: updated.Id, status: updated.GuestStatus ?? 'locked' };
+    },
+
+    lockOwner: async (ownerId: string) => {
+        const user = await UserRepository.getById(ownerId);
+        if (!user || user.Role !== 'owner') {
+            throw new Error('Owner not found');
+        }
+        const updated = await UserRepository.update(ownerId, { OwnerStatus: 'locked' });
+        return { userCode: updated.Id, status: updated.OwnerStatus ?? 'locked' };
+    },
+
+    unlockGuest: async (guestId: string) => {
+        const user = await UserRepository.getById(guestId);
+        if (!user || user.Role !== 'guest') {
+            throw new Error('Guest not found');
+        }
+        const updated = await UserRepository.update(guestId, { GuestStatus: 'active' });
+        return { userCode: updated.Id, status: updated.GuestStatus ?? 'active' };
+    },
+
+    unlockOwner: async (ownerId: string) => {
+        const user = await UserRepository.getById(ownerId);
+        if (!user || user.Role !== 'owner') {
+            throw new Error('Owner not found');
+        }
+        const updated = await UserRepository.update(ownerId, { OwnerStatus: 'active' });
+        return { userCode: updated.Id, status: updated.OwnerStatus ?? 'active' };
     }
 };

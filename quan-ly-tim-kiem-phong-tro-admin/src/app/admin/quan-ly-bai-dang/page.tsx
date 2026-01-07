@@ -1,4 +1,6 @@
 "use client";
+import { formatId } from "@/lib/formatId";
+import { tranlateStatus } from "@/lib/tranlateStatus";
 import type { TableColumnsType } from "antd";
 import { Button, Flex, Input, message, Space, Table, Typography } from "antd";
 import { useRouter } from "next/navigation";
@@ -18,6 +20,7 @@ interface Post {
 }
 
 interface TableData {
+  postId: string;
   maBaiDang: string;
   tieuDe: string;
   nguoiDang: string;
@@ -46,11 +49,12 @@ export default function Page() {
           const dateStr = date.toLocaleDateString("vi-VN");
 
           return {
-            maBaiDang: post.codePost,
+            postId: post.codePost,
+            maBaiDang: formatId.formatPostId(post.codePost),
             tieuDe: post.title,
             nguoiDang: post.author,
             ngayDang: dateStr,
-            trangThai: post.status,
+            trangThai: tranlateStatus.tranlateToVietnameseStatusPost(post.status),
           };
         });
 
@@ -106,30 +110,131 @@ export default function Page() {
           <Button
             type="link"
             onClick={() => {
-              console.log("Xem", record.maBaiDang);
-              router.push(`/admin/quan-ly-bai-dang/${record.maBaiDang}`);
+              console.log("Xem", record.postId);
+              router.push(`/admin/quan-ly-bai-dang/${record.postId}`);
             }}
           >
             Xem
           </Button>
-          <Button
-            type="primary"
-            onClick={() => {
-              // TODO: call api
-              console.log("Duyệt", record.maBaiDang);
-            }}
-          >
-            Duyệt
-          </Button>
-          <Button
-            danger
-            onClick={() => {
-              // TODO: call api
-              console.log("Từ chối", record.maBaiDang);
-            }}
-          >
-            Từ chối
-          </Button>
+          {record.trangThai === "Đang chờ duyệt" && (
+            <>
+              <Button
+                type="primary"
+                onClick={async () => {
+                  try {
+                    const response = await fetch(`/api/posts/${record.postId}/approve`, {
+                      method: "POST",
+                    });
+                    const result = await response.json();
+                    if (result.status === "success") {
+                      message.success("Duyệt bài đăng thành công");
+                      fetchPosts();
+                    } else {
+                      message.error(result.message || "Có lỗi xảy ra");
+                    }
+                  } catch (error) {
+                    console.error("Error approving post:", error);
+                    message.error("Lỗi khi duyệt bài đăng");
+                  }
+                }}
+              >
+                Duyệt
+              </Button>
+              <Button
+                danger
+                onClick={async () => {
+                  try {
+                    const response = await fetch(`/api/posts/${record.postId}/reject`, {
+                      method: "POST",
+                    });
+                    const result = await response.json();
+                    if (result.status === "success") {
+                      message.success("Từ chối bài đăng thành công");
+                      fetchPosts();
+                    } else {
+                      message.error(result.message || "Có lỗi xảy ra");
+                    }
+                  } catch (error) {
+                    console.error("Error rejecting post:", error);
+                    message.error("Lỗi khi từ chối bài đăng");
+                  }
+                }}
+              >
+                Từ chối
+              </Button>
+            </>
+          )}
+          {record.trangThai === "Đã duyệt" && (
+            <Button
+              onClick={async () => {
+                try {
+                  const response = await fetch(`/api/posts/${record.postId}/hide`, {
+                    method: "POST",
+                  });
+                  const result = await response.json();
+                  if (result.status === "success") {
+                    message.success("Ẩn bài đăng thành công");
+                    fetchPosts();
+                  } else {
+                    message.error(result.message || "Có lỗi xảy ra");
+                  }
+                } catch (error) {
+                  console.error("Error hiding post:", error);
+                  message.error("Lỗi khi ẩn bài đăng");
+                }
+              }}
+            >
+              Ẩn
+            </Button>
+          )}
+          {record.trangThai === "Đã từ chối" && (
+            <Button
+              type="primary"
+              onClick={async () => {
+                try {
+                  const response = await fetch(`/api/posts/${record.postId}/approve`, {
+                    method: "POST",
+                  });
+                  const result = await response.json();
+                  if (result.status === "success") {
+                    message.success("Duyệt bài đăng thành công");
+                    fetchPosts();
+                  } else {
+                    message.error(result.message || "Có lỗi xảy ra");
+                  }
+                } catch (error) {
+                  console.error("Error approving post:", error);
+                  message.error("Lỗi khi duyệt bài đăng");
+                }
+              }}
+            >
+              Duyệt
+            </Button>
+          )}
+          {record.trangThai === "Đã ẩn" && (
+            <Button
+              type="primary"
+              onClick={async () => {
+                try {
+                  const response = await fetch(`/api/posts/${record.postId}/approve`, {
+                    method: "POST",
+                  });
+                  const result = await response.json();
+                  if (result.status === "success") {
+                    message.success("Hiển thị lại bài đăng thành công");
+                    fetchPosts();
+                  } else {
+                    message.error(result.message || "Có lỗi xảy ra");
+                  }
+                } catch (error) {
+                  console.error("Error showing post:", error);
+                  message.error("Lỗi khi hiển thị lại bài đăng");
+                }
+              }}
+            >
+              Hiển thị lại
+            </Button>
+          )}
         </Space>
       ),
     },

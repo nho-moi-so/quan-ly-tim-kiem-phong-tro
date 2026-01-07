@@ -111,7 +111,7 @@ export default function Page() {
   return (
     <div style={{ padding: 24 }}>
       <h2 style={{ textAlign: "center", marginBottom: 24 }}>
-        Thông Tin Tài Khoản {type === 'owner' ? 'Owner' : 'Guest'}
+        Thông Tin Tài Khoản {type === 'owner' ? 'Chủ căn hộ' : 'Khách thuê'}
       </h2>
 
       <Card bordered style={{ maxWidth: 800, margin: "0 auto" }}>

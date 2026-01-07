@@ -1,17 +1,16 @@
 "use client";
 
-import React, { ReactNode, useState } from "react";
 import {
-  AudioOutlined,
   AppstoreOutlined,
+  DashboardOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  UserOutlined,
-  DashboardOutlined,
+  UserOutlined
 } from "@ant-design/icons";
 import type { GetProps, MenuProps } from "antd";
-import { Avatar, Input, Button, Layout, Menu, theme } from "antd";
+import { Avatar, Button, Input, Layout, Menu, theme } from "antd";
 import { useRouter } from "next/navigation";
+import React, { ReactNode, useState } from "react";
 
 type MenuItem = Required<MenuProps>["items"][number];
 type SearchProps = GetProps<typeof Input.Search>;
@@ -67,12 +66,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       children: [
         {
           key: "owner",
-          label: "Owner",
+          label: "Chủ Căn Hộ",
           onClick: () => router.push("/admin/quan-ly-tai-khoan/owner"),
         },
         {
           key: "guest",
-          label: "Guest",
+          label: "Khách Thuê",
           onClick: () => router.push("/admin/quan-ly-tai-khoan/guest"),
         },
       ],
@@ -156,7 +155,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 height: 48,
               }}
             />
-            <h3 style={{ margin: 0, fontWeight: 600 }}>Admin Dashboard</h3>
+            <h3 style={{ margin: 0, fontWeight: 600 }}>Trang quản trị</h3>
           </div>
 
           {/* Thanh tìm kiếm */}
@@ -173,7 +172,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <Search
               placeholder="Tìm kiếm người dùng, bài đăng..."
               allowClear
-              enterButton="Search"
+              enterButton="Tìm kiếm"
               size="large"
               onSearch={onSearch}
             />

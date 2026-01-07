@@ -3,13 +3,14 @@ import { PostRepository } from "@/repositories/postRepository";
 import { UserRepository } from "@/repositories/userRepository";
 
 export const PostService = {
+
     getAllPosts: async () => {
         const posts = await PostRepository.getAll();
         let result = [];
         for (const post of posts) {
             //tim thông tin của author là chủ căn hộ
             const apartment = await ApartmentRepository.getById(post.ApartmentID);
-            console.log("apartmentID", post.ApartmentID);
+            // console.log("apartmentID", post.ApartmentID);
             if(!apartment) {
                 console.warn("Apartment not found for post " + post.Id);
                 continue;
@@ -29,6 +30,54 @@ export const PostService = {
             });
         }
         return result;
+    },
+
+    approvePost: async (postId: string) => {
+        const post = await PostRepository.getById(postId);
+        if (!post) {
+            throw new Error("Post not found");
+        }
+        
+        const updatedPost = await PostRepository.update(postId, {
+            Status: "approved"
+        });
+        
+        return {
+            codePost: updatedPost.Id,
+            status: updatedPost.Status
+        };
+    },
+
+    rejectPost: async (postId: string) => {
+        const post = await PostRepository.getById(postId);
+        if (!post) {
+            throw new Error("Post not found");
+        }
+        
+        const updatedPost = await PostRepository.update(postId, {
+            Status: "rejected"
+        });
+        
+        return {
+            codePost: updatedPost.Id,
+            status: updatedPost.Status
+        };
+    },
+
+    hidePost: async (postId: string) => {
+        const post = await PostRepository.getById(postId);
+        if (!post) {
+            throw new Error("Post not found");
+        }
+        
+        const updatedPost = await PostRepository.update(postId, {
+            Status: "hidden"
+        });
+        
+        return {
+            codePost: updatedPost.Id,
+            status: updatedPost.Status
+        };
     },
     
     getDetailPost: async (postId: string) => {

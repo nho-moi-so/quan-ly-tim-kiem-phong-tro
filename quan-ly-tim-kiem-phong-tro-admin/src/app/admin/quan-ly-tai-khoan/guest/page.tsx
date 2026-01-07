@@ -1,4 +1,5 @@
 "use client";
+import { formatId } from "@/lib/formatId";
 import type { TableColumnsType } from "antd";
 import { Button, Input, Space, Table, Tag, message } from "antd";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ interface GuestData {
 }
 
 interface TableData {
+  userId: string;
   maTaiKhoan: string;
   tenNguoiDung: string;
   email: string;
@@ -38,12 +40,19 @@ export default function DanhSachTaiKhoanGuest() {
       const result = await response.json();
 
       if (result.status === "success" && result.data) {
+        const toVN = (s: string) => {
+          const v = (s || '').toLowerCase();
+          if (v === 'locked') return 'Bị khóa';
+          if (v === 'active') return 'Hoạt động';
+          return s;
+        };
         const transformedData: TableData[] = result.data.map((guest: GuestData) => ({
-          maTaiKhoan: guest.userCode,
+          userId: guest.userCode,
+          maTaiKhoan: formatId.formatUserId(guest.userCode),
           tenNguoiDung: guest.fullName,
           email: guest.email,
           soDienThoai: guest.phone,
-          trangThai: guest.status,
+          trangThai: toVN(guest.status),
           ngayTao: guest.registeredAt,
         }));
 
@@ -105,7 +114,7 @@ export default function DanhSachTaiKhoanGuest() {
       align: "center",
     },
     {
-      title: "Trạng thái / Ngày tạo",
+      title: "Trạng thái",
       key: "trangThaiNgayTao",
       align: "center",
       render: (_, record) => {
@@ -133,23 +142,60 @@ export default function DanhSachTaiKhoanGuest() {
           <Button
             type="link"
             onClick={() =>
-              router.push(`/admin/quan-ly-tai-khoan/${record.maTaiKhoan}?type=guest`)
+              router.push(`/admin/quan-ly-tai-khoan/${record.userId}?type=guest`)
             }
           >
             Xem
           </Button>
-          <Button
-            type="primary"
-            onClick={() => console.log("Khóa tài khoản", record.maTaiKhoan)}
-          >
-            Khóa
-          </Button>
-          <Button
+          {record.trangThai === 'Bị khóa' ? (
+            <Button
+              type="primary"
+              onClick={async () => {
+                try {
+                  const res = await fetch(`/api/users/guests/${record.userId}/unlock`, { method: 'POST' });
+                  const json = await res.json();
+                  if (json.status === 'success') {
+                    message.success('Mở khóa tài khoản thành công');
+                    fetchGuests();
+                  } else {
+                    message.error(json.message || 'Có lỗi xảy ra');
+                  }
+                } catch (e) {
+                  console.error('Unlock guest error:', e);
+                  message.error('Lỗi khi mở khóa tài khoản');
+                }
+              }}
+            >
+              Mở khóa
+            </Button>
+          ) : (
+            <Button
+              type="primary"
+              onClick={async () => {
+                try {
+                  const res = await fetch(`/api/users/guests/${record.userId}/lock`, { method: 'POST' });
+                  const json = await res.json();
+                  if (json.status === 'success') {
+                    message.success('Khóa tài khoản thành công');
+                    fetchGuests();
+                  } else {
+                    message.error(json.message || 'Có lỗi xảy ra');
+                  }
+                } catch (e) {
+                  console.error('Lock guest error:', e);
+                  message.error('Lỗi khi khóa tài khoản');
+                }
+              }}
+            >
+              Khóa
+            </Button>
+          )}
+          {/* <Button
             danger
             onClick={() => console.log("Xóa tài khoản", record.maTaiKhoan)}
           >
             Xóa
-          </Button>
+          </Button> */}
         </Space>
       ),
     },
