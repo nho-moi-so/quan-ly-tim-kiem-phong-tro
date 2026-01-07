@@ -39,6 +39,10 @@ String roomCode = "";
 //thông tin host server
 String hostServer = "http://192.168.2.144:3000";
 
+//Thông tin của thiết bị iot này
+String type_iot = "smart_lock";
+String device_id = "LOCK001";
+
 void setup(){
   Serial.begin(115200);
   delay(1000);
@@ -155,7 +159,7 @@ void loop(){
     http.addHeader("Content-Type", "application/json");
 
     // Dữ liệu JSON để gửi
-    String postData = "{\"roomCode\":\"" + roomCodeData + "\"}";
+    String postData = "{\"roomCode\":\"" + roomCodeData + "\",\"type_iot\":\"" + type_iot + "\",\"deviceId\":\"" + device_id + "\"}";
     int httpResponseCode = http.POST(postData);
     
     if (httpResponseCode > 0) {

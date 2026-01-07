@@ -286,7 +286,7 @@ class ApartmentController {
   //==check ổ khóa có kết nối không để tạm ở đây
   Future<bool> checkIOTConnection(String codeRoom) async {
     IOTOtp otp = await _iotOtpService.getOTPbyId(codeRoom);
-    if(otp.status == "verified"){
+    if(otp.Status == "verified"){
       return true;
     }
     else{

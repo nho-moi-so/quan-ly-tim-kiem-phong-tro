@@ -131,7 +131,6 @@ class IoTDevice{
 
 ' enum IoTDeviceStatus {
 '     CONNECTED
-'     DISCONNECTED
 '     MALFUNCTIONING
 ' }
 Apartment "1" -- "0..*" IoTDevice: has
@@ -139,6 +138,8 @@ class IoTDeviceInApartment{
     - id: string
     - otp: string
     - status: string
+    - pingCode: string
+    - pingReply: string    
 }
 (Apartment, IoTDevice) .. IoTDeviceInApartment: contains
 

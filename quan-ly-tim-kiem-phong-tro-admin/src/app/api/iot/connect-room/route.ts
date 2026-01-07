@@ -1,40 +1,27 @@
-import { db } from "@/lib/firebase/admin";
-import { getIO } from "@/lib/socket";
-import admin from "firebase-admin";
+import { IOTService } from "@/services/IOTService";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 const ConnectRoomInputSchema = z.object({
-    roomCode: z.string()
+    roomCode: z.string(),
+    type_iot: z.string(), // ex: smart_lock
+    deviceId: z.string()
 });
 
 export async function POST(request: Request) {
     try{
         const json = await request.json();
-        const { roomCode } = ConnectRoomInputSchema.parse(json);
-        if (!roomCode) return NextResponse.json({ status: "error", message: "Missing roomCode" }, { status: 400 });
-
-            // 1) tạo OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-            // 2) lưu OTP vào Firestore (collection iot_otps, document ID = roomCode)
-        await db.collection("iot_otps").doc(roomCode).set({
-            otp,
-            status:"pending",
-            createdAt: admin.firestore.Timestamp.now(), // nếu dùng admin
-        });
-            // 3) emit OTP qua socket theo roomCode (nếu socket đã init)
-        try {
-            const io = getIO();
-            io.to(roomCode).emit("otp_received", { otp, roomCode });
-        } catch (e) {
-            // socket có thể chưa init, log nhưng vẫn trả success
-            console.warn("Socket not initialized or emit failed", e);
+        const { roomCode, type_iot, deviceId } = ConnectRoomInputSchema.parse(json);
+        if(!type_iot || roomCode.trim() === "" || !deviceId){
+            return NextResponse.json({
+                status: "fail",
+                message: "Missing type_iot, roomCode, or deviceId"
+            }, { status: 400 });
         }
+        const result = await IOTService.connectRoom(roomCode, type_iot, deviceId);
 
-        return NextResponse.json({
-            status: "success",
-            message: `OTP was sent to mobile app with code: ${roomCode}`
-        });
+        const httpStatus = result.status === "success" ? 200 : 400;
+        return NextResponse.json(result, { status: httpStatus });
     }
     catch(err : unknown){
         return NextResponse.json({
