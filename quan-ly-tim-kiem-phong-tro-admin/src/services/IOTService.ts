@@ -1,6 +1,9 @@
 import { db } from "@/lib/firebase/admin";
 import { getIO } from "@/lib/socket";
 import { ApartmentRepository } from "@/repositories/apartmentRepository";
+import { IoTDeviceInDepartmentRepository } from "@/repositories/iotDeviceInDepartmentRepository";
+import { IoTDeviceRepository } from "@/repositories/iotDeviceRepository";
+import { UserRepository } from "@/repositories/userRepository";
 import admin from "firebase-admin";
 
 type ServiceResult = {
@@ -8,9 +11,42 @@ type ServiceResult = {
     message: string;
     otp?: string;
     roomCode?: string;
+    online?: boolean;
 };
 
 export const IOTService = {
+    /**
+     * List IoT devices connected to apartments with enriched info
+     */
+    listDevices: async () => {
+        const devices = await IoTDeviceInDepartmentRepository.getAll();
+
+        // Enrich with apartment and owner info
+        const enriched = await Promise.all(
+            devices.map(async (d) => {
+                const apartment = await ApartmentRepository.getById(d.ApartmentID);
+                const deviceType = await IoTDeviceRepository.getById(d.IoTDeviceID);
+                let ownerName: string | undefined = undefined;
+                if (apartment?.UserID) {
+                    const owner = await UserRepository.getById(apartment.UserID);
+                    ownerName = owner?.Fullname || owner?.Email || owner?.Phone;
+                }
+                return {
+                    Id: d.Id,
+                    DeviceID: d.DeviceID,
+                    IoTDeviceID: d.IoTDeviceID,
+                    DeviceType: deviceType?.Name,
+                    ApartmentID: d.ApartmentID,
+                    ApartmentCode: apartment?.CodeApartment,
+                    OwnerName: ownerName,
+                    Status: d.Status,
+                    CreationDate: d.CreationDate,
+                };
+            })
+        );
+
+        return enriched;
+    },
     /**
      * Generate OTP for a room, persist to Firestore, and emit to socket room
      */
@@ -122,5 +158,61 @@ export const IOTService = {
             status: "success",
             message: "Password verified successfully",
         };
+    },
+
+    /**
+     * Trigger an online check (ping) for a device by room code.
+     * It writes a random PingCode and waits briefly for PingReply.
+     */
+    checkDevice: async (roomCode: string): Promise<ServiceResult> => {
+        if (!roomCode) {
+            return { status: "error", message: "Missing roomCode" };
+        }
+        const docRef = db.collection("iot_device_in_apartment").doc(roomCode);
+        const doc = await docRef.get();
+        if (!doc.exists) {
+            return { status: "fail", message: "Device not found" };
+        }
+
+        const pingCode = Math.random().toString(36).substring(2, 10);
+        await docRef.update({ PingCode: pingCode, PingReply: admin.firestore.FieldValue.delete() });
+
+        // Poll for up to ~5 seconds to see if device replies
+        const start = Date.now();
+        const timeoutMs = 5000;
+        let online = false;
+        while (Date.now() - start < timeoutMs) {
+            const latest = await docRef.get();
+            const data = latest.data();
+            if (data?.PingReply && data.PingReply === pingCode) {
+                online = true;
+                break;
+            }
+            // small delay
+            await new Promise((res) => setTimeout(res, 400));
+        }
+
+        return {
+            status: online ? "success" : "fail",
+            message: online ? "Device is online" : "No reply from device",
+            roomCode,
+            online,
+        };
+    },
+
+    /**
+     * Delete device mapping document
+     */
+    deleteDevice: async (roomCode: string): Promise<ServiceResult> => {
+        if (!roomCode) {
+            return { status: "error", message: "Missing roomCode" };
+        }
+        const docRef = db.collection("iot_device_in_apartment").doc(roomCode);
+        const doc = await docRef.get();
+        if (!doc.exists) {
+            return { status: "fail", message: "Device not found" };
+        }
+        await docRef.delete();
+        return { status: "success", message: "Device deleted", roomCode };
     },
 };

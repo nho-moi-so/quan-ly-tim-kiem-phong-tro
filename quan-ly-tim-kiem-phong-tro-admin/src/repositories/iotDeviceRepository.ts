@@ -71,6 +71,29 @@ export class IoTDeviceRepository {
 	}
 
 	/**
+	 * Create a new device with a specific ID
+	 */
+	static async createWithId(deviceId: string, deviceData: CreateIoTDeviceData): Promise<IoTDevice> {
+		try {
+			const docRef = db.collection(COLLECTION_NAME).doc(deviceId);
+			const existing = await docRef.get();
+			if (existing.exists) {
+				throw new Error("Device ID already exists");
+			}
+
+			await docRef.set(deviceData);
+			const doc = await docRef.get();
+			return {
+				Id: doc.id,
+				...doc.data(),
+			} as IoTDevice;
+		} catch (error) {
+			console.error("Error creating IoT device with specific ID:", error);
+			throw error;
+		}
+	}
+
+	/**
 	 * Update a device by ID
 	 */
 	static async update(deviceId: string, updateData: UpdateIoTDeviceData): Promise<IoTDevice> {

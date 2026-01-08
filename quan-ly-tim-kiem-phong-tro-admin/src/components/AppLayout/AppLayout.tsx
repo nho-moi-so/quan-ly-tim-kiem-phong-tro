@@ -94,6 +94,23 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         },
       ],
     },
+    {
+      key: "quan-ly-iot",
+      label: "Quản Lý Thiết Bị IoT",
+      icon: <AppstoreOutlined />,
+      children: [
+        {
+          key: "loai-thiet-bi",
+          label: "Loại thiết bị hỗ trợ",
+          onClick: () => router.push("/admin/quan-ly-thiet-bi-iot/loai-thiet-bi"),
+        },
+        {
+          key: "thiet-bi-da-ket-noi",
+          label: "Thiết bị đã kết nối",
+          onClick: () => router.push("/admin/quan-ly-thiet-bi-iot/thiet-bi-da-ket-noi"),
+        },
+      ],
+    },
   ];
 
   return (

@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/apartment_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/iot_device.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/iot_device_service.dart';
 
 import '../../viewmodel/room_detail.dart';
 
@@ -522,98 +524,9 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
             ),
 
             const SizedBox(height: 24),
-            // Trạng thái kết nối Khóa IOT (đơn giản)
+            // Thiết bị IOT - Thiết kế tổng quát
             if (widget.initialData.roomCode.isNotEmpty) ...[
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Trạng thái Khóa IOT'),
-                  const SizedBox(height: 8),
-                  StatefulBuilder(
-                    builder: (context, setStateSB) {
-                      // tạo future mới mỗi lần build để FutureBuilder kiểm tra lại
-                      final future = ApartmentController().checkIOTConnection(roomCodeController.text);
-                      return FutureBuilder<bool>(
-                        future: future,
-                        builder: (context, snapshot) {
-                          final bool isConnected = snapshot.data == true;
-                          Color bg;
-                          Color border;
-                          IconData icon;
-                          String title;
-                          String subtitle;
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            bg = Colors.grey.shade200;
-                            border = Colors.grey.shade700;
-                            icon = Icons.lock;
-                            title = 'Đang kiểm tra';
-                            subtitle = 'Vui lòng chờ...';
-                          } else {
-                            bg = isConnected ? Colors.green.shade50 : Colors.red.shade50;
-                            border = isConnected ? Colors.green.shade700 : Colors.red.shade700;
-                            icon = isConnected ? Icons.lock_open : Icons.lock;
-                            title = isConnected ? 'Đã kết nối' : 'Chưa kết nối';
-                            subtitle = isConnected ? 'Khóa sẵn sàng' : 'Không thể kết nối';
-                          }
-
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: bg,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: border, width: 1),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: border,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(icon, color: Colors.white, size: 20),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: border)),
-                                      const SizedBox(height: 4),
-                                      Text(subtitle, style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
-                                    ],
-                                  ),
-                                ),
-                                snapshot.connectionState == ConnectionState.waiting
-                                  ? SizedBox(
-                                      width: 36,
-                                      height: 36,
-                                      child: Center(
-                                        child: SizedBox(
-                                          width: 18,
-                                          height: 18,
-                                          child: CircularProgressIndicator(strokeWidth: 2),
-                                        ),
-                                      ),
-                                    )
-                                  : IconButton(
-                                      icon: const Icon(Icons.refresh),
-                                      tooltip: 'Cập nhật trạng thái',
-                                      onPressed: () {
-                                        // rebuild StatefulBuilder -> tạo lại future và kiểm tra lại
-                                        setStateSB(() {});
-                                      },
-                                    ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
+              _buildIotDevicesSection(),
               const SizedBox(height: 24),
             ],
             const Text('Chọn Trạng Thái Phòng'),
@@ -1099,6 +1012,352 @@ String _formatDateTime(DateTime dateTime) {
         },
       ),
     );
+  }
+
+  /// Widget hiển thị section Thiết bị IOT
+  Widget _buildIotDevicesSection() {
+    final iotService = IotDeviceService();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Thiết bị IOT',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF2C3E50),
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () {
+                setState(() {}); // Refresh lại section
+              },
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Làm mới'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF4C6FFF),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        
+        // Danh sách thiết bị hỗ trợ và trạng thái kết nối
+        StatefulBuilder(
+          builder: (context, setStateSB) {
+            return FutureBuilder<List<dynamic>>(
+              future: Future.wait([
+                iotService.getAllSupportedDevices(),
+                iotService.getConnectedDevicesForRoom(roomCodeController.text),
+              ]),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Center(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          SizedBox(height: 8),
+                          Text('Đang tải thiết bị IOT...'),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.red.shade700),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Không thể tải danh sách thiết bị',
+                            style: TextStyle(color: Colors.red.shade700),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final List<IotDevice> supportedDevices = snapshot.data![0] as List<IotDevice>;
+                final List<ConnectedIotDevice> connectedDevices = snapshot.data![1] as List<ConnectedIotDevice>;
+
+                if (supportedDevices.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.grey),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text('Hệ thống chưa có thiết bị IOT nào được hỗ trợ'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // Tạo map để tra cứu nhanh trạng thái kết nối
+                final Map<String, ConnectedIotDevice> connectionMap = {};
+                for (var connected in connectedDevices) {
+                  connectionMap[connected.iotDeviceId] = connected;
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Thống kê
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4C6FFF).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildIotStat(
+                            'Hỗ trợ',
+                            supportedDevices.length.toString(),
+                            Icons.devices,
+                            Colors.blue,
+                          ),
+                          Container(width: 1, height: 30, color: Colors.grey.shade300),
+                          _buildIotStat(
+                            'Đã kết nối',
+                            connectedDevices.where((d) => d.isConnected).length.toString(),
+                            Icons.link,
+                            Colors.green,
+                          ),
+                          Container(width: 1, height: 30, color: Colors.grey.shade300),
+                          _buildIotStat(
+                            'Chờ xác nhận',
+                            connectedDevices.where((d) => !d.isConnected).length.toString(),
+                            Icons.pending,
+                            Colors.orange,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Danh sách thiết bị
+                    ...supportedDevices.map((device) {
+                      final connected = connectionMap[device.deviceId];
+                      return _buildIotDeviceCard(device, connected, setStateSB);
+                    }).toList(),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  /// Widget thống kê IOT
+  Widget _buildIotStat(String label, String value, IconData icon, Color color) {
+    return Column(
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Widget hiển thị card từng thiết bị IOT
+  Widget _buildIotDeviceCard(IotDevice device, ConnectedIotDevice? connected, StateSetter setStateSB) {
+    final bool isConnected = connected?.isConnected ?? false;
+    final bool isPending = connected != null && !connected.isConnected;
+    
+    Color bg;
+    Color borderColor;
+    IconData statusIcon;
+    String statusText;
+    String statusSubtitle;
+
+    if (isConnected) {
+      bg = Colors.green.shade50;
+      borderColor = Colors.green.shade700;
+      statusIcon = Icons.check_circle;
+      statusText = 'Đã kết nối';
+      statusSubtitle = 'Thiết bị sẵn sàng hoạt động';
+    } else if (isPending) {
+      bg = Colors.orange.shade50;
+      borderColor = Colors.orange.shade700;
+      statusIcon = Icons.pending;
+      statusText = 'Chờ xác nhận';
+      statusSubtitle = 'Đang chờ thiết bị phản hồi';
+    } else {
+      bg = Colors.grey.shade100;
+      borderColor = Colors.grey.shade400;
+      statusIcon = Icons.link_off;
+      statusText = 'Chưa kết nối';
+      statusSubtitle = 'Thiết bị chưa được liên kết';
+    }
+
+    // Xác định icon cho loại thiết bị
+    IconData deviceIcon = _getDeviceIcon(device.deviceId);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      child: Row(
+        children: [
+          // Icon thiết bị
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: borderColor.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(deviceIcon, color: borderColor, size: 24),
+          ),
+          const SizedBox(width: 12),
+          
+          // Thông tin thiết bị
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  device.name,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2C3E50),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  device.description,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                // Status badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: borderColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(statusIcon, size: 14, color: borderColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        statusText,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: borderColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Nút refresh trạng thái
+          Tooltip(
+            message: statusSubtitle,
+            child: IconButton(
+              onPressed: () {
+                setStateSB(() {}); // Refresh lại trạng thái
+              },
+              icon: Icon(Icons.refresh, color: borderColor),
+              tooltip: 'Cập nhật trạng thái',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Lấy icon phù hợp cho từng loại thiết bị
+  IconData _getDeviceIcon(String deviceId) {
+    switch (deviceId.toLowerCase()) {
+      case 'smart_lock':
+        return Icons.lock;
+      case 'sensor_door':
+        return Icons.sensor_door;
+      case 'camera':
+        return Icons.videocam;
+      case 'thermostat':
+        return Icons.thermostat;
+      case 'light':
+        return Icons.lightbulb;
+      case 'fan':
+        return Icons.air;
+      case 'sensor_motion':
+        return Icons.sensors;
+      case 'alarm':
+        return Icons.alarm;
+      default:
+        return Icons.device_hub;
+    }
   }
 
   Widget _buildActionButton(String text, {required Color color, required Color textColor, double width = 74, bool isLoading = false}) {

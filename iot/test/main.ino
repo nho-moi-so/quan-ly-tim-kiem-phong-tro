@@ -43,6 +43,62 @@ String hostServer = "http://192.168.2.144:3000";
 String type_iot = "smart_lock";
 String device_id = "LOCK001";
 
+// Trạng thái ping từ server
+String lastPingCode = "";
+unsigned long lastPollTime = 0;
+
+// Poll server lấy PingCode, nếu đổi thì gửi PingReply
+void pollPingCode() {
+  if (roomCode == "") {
+    return; // Chỉ poll khi đã connect thành công
+  }
+
+  HTTPClient http;
+  String url = hostServer + "/api/iot/devices/" + roomCode + "/ping";
+
+  http.begin(url);
+  int httpResponseCode = http.GET();
+
+  if (httpResponseCode == 200) {
+    String payload = http.getString();
+
+    StaticJsonDocument<200> doc;
+    DeserializationError error = deserializeJson(doc, payload);
+
+    if (!error) {
+      String currentPingCode = doc["pingCode"] | "";
+
+      // Nếu PingCode mới thì phản hồi lại
+      if (currentPingCode.length() > 0 && currentPingCode != lastPingCode) {
+        lastPingCode = currentPingCode;
+        updatePingReply(currentPingCode);
+      }
+    }
+  }
+
+  http.end();
+}
+
+// Gửi PingReply về server để xác nhận online
+void updatePingReply(String pingCode) {
+  HTTPClient http;
+  String url = hostServer + "/api/iot/devices/" + roomCode + "/ping";
+
+  http.begin(url);
+  http.addHeader("Content-Type", "application/json");
+
+  String postData = "{\"pingReply\":\"" + pingCode + "\"}";
+  int httpResponseCode = http.POST(postData);
+
+  if (httpResponseCode == 200) {
+    Serial.println("[IoT] PingReply sent: " + pingCode);
+  } else {
+    Serial.println("[IoT] Error sending PingReply: " + String(httpResponseCode));
+  }
+
+  http.end();
+}
+
 void setup(){
   Serial.begin(115200);
   delay(1000);
@@ -51,7 +107,6 @@ void setup(){
   lcd.init();
   lcd.backlight();
   lcd.clear();
-  lcd.setCursor(0, 0);
   lcd.print("Khoi dong...");
   delay(1000);
   
@@ -100,6 +155,12 @@ void loop(){
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("Mat ket noi WiFi! Dang thu ket noi lai...");
     WiFi.reconnect();
+  }
+
+  // Poll PingCode mỗi 500ms để cập nhật PingReply
+  if (millis() - lastPollTime > 500) {
+    pollPingCode();
+    lastPollTime = millis();
   }
 
   //neu roomCode rong thi ket noi iot voi app

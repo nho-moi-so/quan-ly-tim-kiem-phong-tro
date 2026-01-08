@@ -13,4 +13,14 @@ export const tranlateStatus = {
                     return status;
             }
         },
+        tranlateToVietnameseStatusIoT: (status: string): string => {
+            switch (status.toLowerCase()) {
+                case 'verified':
+                    return 'Đã kết nối';
+                case 'pending':
+                    return 'Đang chờ kết nối';
+                default:
+                    return status;
+            }
+        }
 }
