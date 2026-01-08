@@ -73,6 +73,7 @@ void pollPingCode() {
         lastPingCode = currentPingCode;
         updatePingReply(currentPingCode);
       }
+
     }
   }
 
@@ -91,16 +92,28 @@ void updatePingReply(String pingCode) {
   int httpResponseCode = http.POST(postData);
 
   if (httpResponseCode == 200) {
-    Serial.println("[IoT] PingReply sent: " + pingCode);
+
   } else {
-    Serial.println("[IoT] Error sending PingReply: " + String(httpResponseCode));
+    lcd.setCursor(0, 0);
+    lcd.println("[IoT] Error sending PingReply: " + String(httpResponseCode));
+    delay(1000);
+    lcd.clear();
   }
 
   http.end();
 }
 
+void delayWithPoll() {
+      // Kiểm tra và poll PingCode trong khi chờ nhập
+  if (millis() - lastPollTime > 2000) {
+    pollPingCode();
+    lastPollTime = millis();
+  }
+}
+
 void setup(){
   Serial.begin(115200);
+
   delay(1000);
   
   // Khởi tạo LCD
@@ -158,10 +171,7 @@ void loop(){
   }
 
   // Poll PingCode mỗi 500ms để cập nhật PingReply
-  if (millis() - lastPollTime > 500) {
-    pollPingCode();
-    lastPollTime = millis();
-  }
+  delayWithPoll();
 
   //neu roomCode rong thi ket noi iot voi app
   if(roomCode == ""){
@@ -184,6 +194,9 @@ void loop(){
     bool inputComplete = false;
     
     while (!inputComplete) {
+      // Kiểm tra và poll PingCode trong khi chờ nhập
+      delayWithPoll();
+      
       char key = keypad.getKey();
       if (key) {
         if (key == '#') {
@@ -266,6 +279,9 @@ void loop(){
         inputComplete = false;
         
         while (!inputComplete) {
+          // Kiểm tra và poll PingCode trong khi chờ nhập
+          delayWithPoll();
+          
           char key = keypad.getKey();
           if (key) {
             if (key == '#') {
@@ -380,6 +396,9 @@ void loop(){
 
     // Chờ '#'
     while (true) {
+      // Kiểm tra và poll PingCode trong khi chờ nhập
+      delayWithPoll();
+      
       char k = keypad.getKey();
       if (k == '#') break;
       delay(50);
@@ -400,6 +419,9 @@ void loop(){
     inputPassword = "";
     bool inputComplete = false;
     while (!inputComplete) {
+      // Kiểm tra và poll PingCode trong khi chờ nhập
+      delayWithPoll();
+      
       char key = keypad.getKey();
       if (key) {
         if (key == '#') {

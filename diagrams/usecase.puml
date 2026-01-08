@@ -98,6 +98,9 @@ note top of manage_user_accounts: Xem, Khóa/Mở khóa, Xóa tài khoản, Duy�
 'usecase "Quản lý bài đăng" as manage_post
 usecase "Duyệt bài đăng" as approve_posts
 ' usecase "Thống kê" as statistics
+usecase "Xem thống kê" as view_statistics
+usecase "Quản lý thiết bị IoT" as manage_iot_devices
+note bottom of manage_iot_devices: Thêm, Sửa, Xóa và kiểm tra thiết bị IoT
 
 ' nối các usecase
 'Chủ căn hộ
@@ -134,6 +137,8 @@ usecase "Duyệt bài đăng" as approve_posts
 (approve_posts) - (Admin)
 ' (change_password) -- (Admin)
 (statistics) - (Admin)
+(view_statistics) -- (Admin)
+(manage_iot_devices) - (Admin)
 
 
 }
