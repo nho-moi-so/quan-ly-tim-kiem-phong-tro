@@ -111,6 +111,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         },
       ],
     },
+    {
+      key: "quan-ly-lich-dat-phong",
+      label: "Quản Lý Đặt Phòng",
+      icon: <AppstoreOutlined />,
+      onClick: () => router.push("/admin/quan-ly-lich-dat-phong"),
+    },
   ];
 
   return (

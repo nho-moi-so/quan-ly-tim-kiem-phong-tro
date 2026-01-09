@@ -139,6 +139,7 @@ note bottom of manage_iot_devices: Thêm, Sửa, Xóa và kiểm tra thiết b�
 (statistics) - (Admin)
 (view_statistics) -- (Admin)
 (manage_iot_devices) - (Admin)
+(manage_booking) -- (Admin)
 
 
 }
