@@ -1,6 +1,7 @@
 import 'dart:convert'; // Để decode JSON trả về
 
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http; // Để gọi API upload
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/contract_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
@@ -343,11 +344,14 @@ class ApartmentController {
     return code;
   }
 
-
+ 
   Future<String?> _uploadImageToServer(String filePath) async {
     // 1. Cấu hình Domain Server (Thay bằng IP/Domain thật của bạn)
-    // Ví dụ: 'http://192.168.1.5:3000' hoặc 'https://api.myserver.com'
-    const String serverDomain = 'http://192.168.1.11:3000'; 
+    final String? serverDomain = dotenv.env['HOST_SERVER'];
+    if(serverDomain == null) {
+      print('Upload failed: HOST_SERVER is not defined in .env file');
+      return null;
+    }
     
     try {
       // Generate random filename (chỉ chữ và số)

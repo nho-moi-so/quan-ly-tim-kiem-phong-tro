@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/common/screens/register_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/socket_service.dart';
@@ -13,10 +14,13 @@ import 'service/navigation_service.dart';
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
     
-    // Khởi tạo SocketService trước khi chạy app
+    // Load .env file BEFORE creating SocketService
+    await dotenv.load(fileName: ".env");
+    
+    // Khởi tạo SocketService sau khi dotenv được load
     final socketService = SocketService();
     print('🚀 Main: SocketService created');
-    
+
     runApp(
       ChangeNotifierProvider.value(
         value: socketService,

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import '../navigation_service.dart';
@@ -25,12 +26,10 @@ class SocketService with ChangeNotifier {
   void initSocket() {
     try {
       print('🔄 Initializing Socket...');
-      
-      // Thay đổi URL dựa trên môi trường:
-      // - Android Emulator: http://10.0.2.2:3000
-      // - iOS Simulator: http://localhost:3000
-      // - Device thật (cùng WiFi): http://YOUR_IP:3000
-      final serverUrl = 'http://192.168.2.144:3000';
+      final serverUrl = dotenv.env['HOST_SERVER'];
+      if(serverUrl == null) {
+        throw Exception('HOST_SERVER is not defined in .env file');
+      }
       print('🌐 Connecting to: $serverUrl');
       
       socket = IO.io(
