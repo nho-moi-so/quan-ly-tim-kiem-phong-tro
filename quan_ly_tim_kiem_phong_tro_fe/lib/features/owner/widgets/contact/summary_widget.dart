@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class SummaryWidget extends StatelessWidget {
-  late String? imageUrl;
-  late String? price;
-  late String? deposit;
-  late String? title;
-  late String? address;
-  late List<String>? features;
+  final String? imageUrl;
+  final String? price;
+  final String? deposit;
+  final String? title;
+  final String? address;
+  final List<String>? features;
 
-  SummaryWidget({
+  const SummaryWidget({
     super.key,
     required this.imageUrl,
     required this.price,
@@ -16,11 +16,10 @@ class SummaryWidget extends StatelessWidget {
     required this.title,
     required this.address,
     required this.features,
-    });
+  });
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -43,7 +42,11 @@ class SummaryWidget extends StatelessWidget {
                 width: 148,
                 height: 111,
                 color: Colors.grey[300],
-                child: const Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                child: const Icon(
+                  Icons.broken_image,
+                  size: 48,
+                  color: Colors.grey,
+                ),
               ),
             ),
           ),
@@ -67,34 +70,47 @@ class SummaryWidget extends StatelessWidget {
                 // Giá cũ + Giá mới + % giảm
                 Row(
                   children: [
-                    Text(
-                      deposit!,
-                      style: TextStyle(
-                        color: Colors.black.withOpacity(0.65),
-                        fontSize: 14,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w600,
-                        // decoration: TextDecoration.lineThrough,
+                    Flexible(
+                      flex: 1,
+                      child: Text(
+                        deposit!,
+                        style: TextStyle(
+                          color: Colors.black.withOpacity(0.65),
+                          fontSize: 12,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                          // decoration: TextDecoration.lineThrough,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      price!,
-                      style: const TextStyle(
-                        color: Color(0xFFF7210F),
-                        fontSize: 18,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w700,
+                    const SizedBox(width: 6),
+                    Flexible(
+                      flex: 2,
+                      child: Text(
+                        price!,
+                        style: const TextStyle(
+                          color: Color(0xFFF7210F),
+                          fontSize: 16,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w700,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
-                    const SizedBox(width: 8),
                   ],
                 ),
                 const SizedBox(height: 4),
                 // Địa chỉ
                 Row(
                   children: [
-                    const Icon(Icons.location_on, color: Color(0xFF4B5563), size: 18),
+                    const Icon(
+                      Icons.location_on,
+                      color: Color(0xFF4B5563),
+                      size: 18,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(

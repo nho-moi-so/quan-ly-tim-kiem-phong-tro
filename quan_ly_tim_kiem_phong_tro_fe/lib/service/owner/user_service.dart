@@ -35,6 +35,45 @@ class UserService {
     );
   }
 
+  //getUserByFullname
+  Future<User?> getUserByFullname(String fullName) async {
+    QuerySnapshot snapshot = await firestore
+        .collection("users")
+        .where('Fullname', isEqualTo: fullName)
+        .get();
+    if (snapshot.docs.isNotEmpty) {
+      final doc = snapshot.docs.first;
+      final data = doc.data() as Map<String, dynamic>;
+      return User(
+        userID: doc.id,
+        fullName: data['Fullname'],
+        email: data['Email'],
+        phone: data['Phone'],
+      );
+    }
+    return null; // Trả về null nếu không tìm thấy người dùng
+  }
+
+  //getUserByEmail
+  Future<User?> getUserByEmail(String email) async {
+    QuerySnapshot snapshot = await firestore
+        .collection("users")
+        .where('Email', isEqualTo: email)
+        .get();
+    if (snapshot.docs.isNotEmpty) {
+      final doc = snapshot.docs.first;
+      final data = doc.data() as Map<String, dynamic>;
+      return User(
+        userID: doc.id,
+        fullName: data['Fullname'],
+        email: data['Email'],
+        phone: data['Phone'],
+      );
+    }
+    return null; // Trả về null nếu không tìm thấy người dùng
+  }
+
+
   //createUser
 
   //updateUser

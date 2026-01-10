@@ -78,9 +78,9 @@ export const bookingChainService = {
             throw new Error('Check-in date must be before check-out date');
         }
 
-        if (checkinSec < nowSec - 86400) { // Allow backdating by 1 day for testing
-            throw new Error('Check-in date cannot be in the past (more than 1 day ago)');
-        }
+        // if (checkinSec < nowSec - 86400) { // Allow backdating by 1 day for testing
+        //     throw new Error('Check-in date cannot be in the past (more than 1 day ago)');
+        // }
 
         // Confirm contract trên blockchain
         const result = await bookingChainRepo.confirmContractAndWait({

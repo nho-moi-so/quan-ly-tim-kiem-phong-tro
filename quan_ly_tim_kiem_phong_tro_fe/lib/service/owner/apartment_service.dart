@@ -81,5 +81,19 @@ class ApartmentService {
     return apartments;
   }
 
+  //getApartmentByCode => Apartment
+  Future<Apartment> getApartmentByCode(String codeApartment) async {
+    QuerySnapshot snapshot = await firestore
+        .collection("apartment")
+        .where('CodeApartment', isEqualTo: codeApartment)
+        .get();
+    if (snapshot.docs.isNotEmpty) {
+      final data = snapshot.docs.first.data() as Map<String, dynamic>;
+      return Apartment.fromMap(snapshot.docs.first.id, data);
+    } else {
+      throw Exception("Apartment with code $codeApartment not found");
+    }
+  }
+
 
 }
