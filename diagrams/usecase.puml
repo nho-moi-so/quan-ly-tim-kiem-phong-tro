@@ -47,7 +47,7 @@ note bottom of manage_apartment: Thêm, Sửa, Xóa căn hộ, Tìm kiếm, Xem,
 ' manage_apartment .. connect_iot_lock: extend
 
 usecase "Quản lý đặt phòng" as manage_booking
-note top of manage_booking: Cập nhật đặt phòng
+note top of manage_booking: Cập nhật đặt phòng, kiểm tra toàn vẹn hợp đồng
 usecase "Xem hợp đồng" as view_booking_contract
 manage_booking .. view_booking_contract: extend
 usecase "Quản lý hóa đơn" as manage_invoice
