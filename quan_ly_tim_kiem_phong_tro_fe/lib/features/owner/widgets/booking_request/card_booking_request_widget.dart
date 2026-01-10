@@ -60,7 +60,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
     switch (status.toLowerCase()) {
       case 'approved':
         return const Color(0xFF10B981);
-      case 'canceled':
+      case 'cancelled':
         return const Color(0xFFEF4444);
       default:
         return const Color(0xFF6B7280);
@@ -70,7 +70,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
   String _displayStatus(String status) {
     final s = status.toLowerCase();
     if (s.contains('approved') || s.contains('duyệt') || s.contains('xác nhận')) return 'Đã duyệt';
-    if (s.contains('canceled') || s.contains('hủy') || s.contains('từ chối')) return 'Đã hủy';
+    if (s.contains('cancelled') || s.contains('hủy') || s.contains('từ chối')) return 'Đã hủy';
     if (s.contains('pending') || s.contains('chờ')) return 'Chờ xử lý';
     if (s.contains('completed') || s.contains('hoàn thành')) return 'Hoàn thành';
     return status;
@@ -245,8 +245,8 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                   ),
                 ),
 
-                // Thông tin bổ sung cho trạng thái Canceled
-                if (widget.status == 'Canceled') ...[
+                // Thông tin bổ sung cho trạng thái Cancelled
+                if (widget.status == 'Cancelled') ...[
                   const SizedBox(height: 12),
                   _buildInfoRow(
                     icon: Icons.info_rounded,
@@ -373,8 +373,8 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
           ),
         ),
       );
-    } else if (widget.status.toLowerCase() == 'canceled') {
-      // Trạng thái Canceled: luôn có nút Hợp đồng, và nếu chưa hoàn tiền thì có thêm nút Hoàn tiền
+    } else if (widget.status.toLowerCase() == 'cancelled') {
+      // Trạng thái Cancelled: luôn có nút Hợp đồng, và nếu chưa hoàn tiền thì có thêm nút Hoàn tiền
       actionButtons.add(
         Expanded(
           child: _actionButton(

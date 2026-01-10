@@ -124,24 +124,37 @@ class _LogInFormState extends State<LogInForm> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF374151),
+            fontFamily: 'Noto Sans',
+            color: Color(0xFF6B7280),
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
+          style: const TextStyle(
+            fontSize: 14,
+            fontFamily: 'Noto Sans',
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF1F2937),
+          ),
           decoration: InputDecoration(
             hintText: 'Nhập địa chỉ email của bạn',
             hintStyle: const TextStyle(
               fontSize: 14,
+              fontFamily: 'Noto Sans',
               color: Color(0xFF9CA3AF),
             ),
             prefixIcon: Container(
               margin: const EdgeInsets.all(12),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF4C6FFF).withOpacity(0.1),
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF4C6FFF).withOpacity(0.15),
+                    const Color(0xFF4C6FFF).withOpacity(0.05),
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
@@ -151,14 +164,14 @@ class _LogInFormState extends State<LogInForm> {
               ),
             ),
             filled: true,
-            fillColor: const Color(0xFFF9FAFB),
+            fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -176,24 +189,37 @@ class _LogInFormState extends State<LogInForm> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF374151),
+            fontFamily: 'Noto Sans',
+            color: Color(0xFF6B7280),
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _passwordController,
           obscureText: _obscurePassword,
+          style: const TextStyle(
+            fontSize: 14,
+            fontFamily: 'Noto Sans',
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF1F2937),
+          ),
           decoration: InputDecoration(
             hintText: 'Nhập mật khẩu của bạn',
             hintStyle: const TextStyle(
               fontSize: 14,
+              fontFamily: 'Noto Sans',
               color: Color(0xFF9CA3AF),
             ),
             prefixIcon: Container(
               margin: const EdgeInsets.all(12),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF4C6FFF).withOpacity(0.1),
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF4C6FFF).withOpacity(0.15),
+                    const Color(0xFF4C6FFF).withOpacity(0.05),
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
@@ -203,14 +229,14 @@ class _LogInFormState extends State<LogInForm> {
               ),
             ),
             filled: true,
-            fillColor: const Color(0xFFF9FAFB),
+            fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -248,6 +274,7 @@ class _LogInFormState extends State<LogInForm> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'Noto Sans',
                 color: Color(0xFF4C6FFF),
               ),
             ),
@@ -257,43 +284,63 @@ class _LogInFormState extends State<LogInForm> {
         const SizedBox(height: 20),
 
         // Login Button
-        SizedBox(
+        Container(
           width: double.infinity,
           height: 52,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4C6FFF),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
-              shadowColor: const Color(0xFF4C6FFF).withOpacity(0.3),
-            ),
-            onPressed: _isLoading ? null : _handleLogin,
-            child: _isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.login_rounded, size: 20),
-                      SizedBox(width: 8),
-                      Text(
-                        'Đăng Nhập',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
+          decoration: BoxDecoration(
+            gradient: _isLoading
+                ? null
+                : const LinearGradient(
+                    colors: [Color(0xFF4C6FFF), Color(0xFF6B8AFF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+            color: _isLoading ? const Color(0xFF9CA3AF) : null,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: _isLoading
+                ? null
+                : [
+                    BoxShadow(
+                      color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _isLoading ? null : _handleLogin,
+              borderRadius: BorderRadius.circular(12),
+              child: Center(
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.login_rounded, size: 20, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text(
+                            'Đăng Nhập',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Noto Sans',
+                              color: Colors.white,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
           ),
         ),
 

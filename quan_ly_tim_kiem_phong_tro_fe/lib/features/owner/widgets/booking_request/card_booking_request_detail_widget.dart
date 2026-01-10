@@ -69,7 +69,7 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
         return 'Đang chờ';
       case 'approved':
         return 'Đã duyệt';
-      case 'canceled':
+      case 'cancelled':
         return 'Đã hủy';
       case 'completed':
         return 'Hoàn thành';
@@ -84,7 +84,7 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
         return const Color(0xFFF59E0B);
       case 'approved':
         return const Color(0xFF10B981);
-      case 'canceled':
+      case 'cancelled':
         return const Color(0xFFEF4444);
       case 'completed':
         return const Color(0xFF8B5CF6);

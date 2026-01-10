@@ -43,9 +43,10 @@ class LoginScreens extends StatelessWidget {
                   'Chào Mừng Trở Lại!',
                   style: TextStyle(
                     fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1F2937),
-                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: 'Noto Sans',
+                    color: Color(0xFF1A1F36),
+                    letterSpacing: -0.5,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -54,6 +55,7 @@ class LoginScreens extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
+                    fontFamily: 'Noto Sans',
                     color: Color(0xFF6B7280),
                   ),
                 ),
@@ -65,12 +67,23 @@ class LoginScreens extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFFFAFBFF),
+                        Color(0xFFFFFFFF),
+                      ],
+                    ),
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFFE0E7FF),
+                      width: 2,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.08),
-                        blurRadius: 20,
+                        blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
                     ],
@@ -93,20 +106,30 @@ class LoginScreens extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4C6FFF).withOpacity(0.1),
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFF4C6FFF).withOpacity(0.1),
+                        const Color(0xFF4C6FFF).withOpacity(0.05),
+                      ],
+                    ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF4C6FFF).withOpacity(0.2),
-                      width: 1,
+                      color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                      width: 1.5,
                     ),
                   ),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF4C6FFF).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF4C6FFF).withOpacity(0.2),
+                              const Color(0xFF4C6FFF).withOpacity(0.1),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(
                           Icons.apartment_rounded,
@@ -120,7 +143,8 @@ class LoginScreens extends StatelessWidget {
                           'Hệ thống quản lý và tìm kiếm phòng trọ thông minh',
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Noto Sans',
                             color: Color(0xFF1F2937),
                             height: 1.4,
                           ),

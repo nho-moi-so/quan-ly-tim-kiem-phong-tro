@@ -60,47 +60,77 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
     final screenWidth = MediaQuery.of(context).size.width;
     return SafeArea(
       child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         child: Center(
           child: Container(
             width: screenWidth < 400 ? screenWidth * 0.98 : 378,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: const Color(0xD8756A6A),
-                width: 1,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFFAFBFF),
+                  Color(0xFFFFFFFF),
+                ],
               ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFFE0E7FF),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Center(child: Text('Thông tin bài đăng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                  const SizedBox(height: 12),
+                  Center(
+                    child: Text(
+                      'Thông tin bài đăng',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'Noto Sans',
+                        color: Color(0xFF1A1F36),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   _infoField(label: 'Tiêu đề', controller: postTitleController, fullWidth: true, icon: Icons.title, hint: 'Nhập tiêu đề bài đăng...'),
-                  
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   _infoField(label: 'Nội dung', controller: postDescriptionController, fullWidth: true, multiline: true, icon: Icons.description, hint: 'Nhập nội dung bài đăng...'),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: postStatusController.text.isNotEmpty ? postStatusController.text : 'Draft',
+                    value: _normalizePostStatus(postStatusController.text.isNotEmpty ? postStatusController.text : 'Draft'),
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.info, color: Color(0xFF4285F4)),
+                      prefixIcon: const Icon(Icons.info, color: Color(0xFF4C6FFF)),
                       labelText: 'Trạng Thái',
+                      labelStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Noto Sans',
+                        color: Color(0xFF6B7280),
+                      ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Color(0xFF4285F4), width: 2),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 2),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                       isDense: true,
                       filled: true,
                       fillColor: Colors.white,
@@ -124,30 +154,48 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                       style: const TextStyle(color: Colors.black),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  const Center(child: Text('Thông tin phòng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: Text(
+                      'Thông tin phòng',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'Noto Sans',
+                        color: Color(0xFF1A1F36),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(child: _infoField(label: 'Phòng', controller: roomController, icon: Icons.meeting_room, hint: 'Số phòng...', readOnly: true)),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Expanded(child: _infoField(label: 'Trạng Thái', controller: statusController, icon: Icons.info_outline, hint: 'Nhập trạng thái...', readOnly: true)),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                    _infoField(
+                  const SizedBox(height: 16),
+                  _infoField(
                     label: 'Tiền Phòng (1 ngày):',
                     controller: priceController,
                     icon: Icons.attach_money,
                     fullWidth: true,
                     readOnly: true,
                     hint: '1 ngày - VND',
-                    ),
-                  const SizedBox(height: 12),
+                  ),
+                  const SizedBox(height: 16),
                   _infoField(label: 'Địa Chỉ', controller: addressController, fullWidth: true, icon: Icons.location_on, hint: 'Nhập địa chỉ phòng...', readOnly: true),
-                  const SizedBox(height: 20),
-                  const Text('Hình ảnh phòng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Hình ảnh phòng',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Noto Sans',
+                      color: Color(0xFF1A1F36),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   SizedBox(
                     height: 120,
                     child: ListView.builder(
@@ -155,11 +203,18 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                       itemCount: imageUrls.length,
                       itemBuilder: (context, index) {
                         return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 8),
+                          margin: const EdgeInsets.only(right: 12),
                           width: 160,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(12),
+                            color: const Color(0xFFF3F4F6),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                             image: DecorationImage(
                               image: NetworkImage(imageUrls[index]),
                               fit: BoxFit.cover,
@@ -172,41 +227,116 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                   const SizedBox(height: 24),
                   Row(
                     children: [
-                        Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Close any dialog (if this widget was shown in a dialog)
-                            Navigator.of(context, rootNavigator: true).pop();
-                            // Then navigate to OwnerMainScreen with the Posts tab selected (index 3)
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const OwnerMainScreen(initialIndex: 3),
-                            ));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[300],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                      Expanded(
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.grey[400]!,
+                                Colors.grey[400]!.withOpacity(0.85),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey[400]!.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () {
+                                Navigator.of(context, rootNavigator: true).pop();
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => const OwnerMainScreen(initialIndex: 3),
+                                ));
+                              },
+                              child: const Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.arrow_back, size: 18, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Quay lại',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                        fontFamily: 'Noto Sans',
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
-                          child: const Text('Quay lại', style: TextStyle(color: Colors.black)),
                         ),
-                        ),
+                      ),
                       const SizedBox(width: 16),
-                        Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                          bool isCreate = widget.postDetail.postId == null || widget.postDetail.postId!.isEmpty || widget.postDetail.postId == "new";
-                          _showConfirmationDialog(context, isCreate);
-                          },
-                          style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4285F4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      Expanded(
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF4C6FFF),
+                                Color(0xFF6B8AFF),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                          ),
-                          child: Text(
-                          widget.postDetail.postId == null || widget.postDetail.postId!.isEmpty || widget.postDetail.postId == "new" ? 'Tạo' : 'Cập Nhật',
-                          style: const TextStyle(color: Colors.black),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () {
+                                bool isCreate = widget.postDetail.postId == null || widget.postDetail.postId!.isEmpty || widget.postDetail.postId == "new";
+                                _showConfirmationDialog(context, isCreate);
+                              },
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      widget.postDetail.postId == null || widget.postDetail.postId!.isEmpty || widget.postDetail.postId == "new"
+                                        ? Icons.add_circle_outline
+                                        : Icons.update,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      widget.postDetail.postId == null || widget.postDetail.postId!.isEmpty || widget.postDetail.postId == "new" ? 'Tạo' : 'Cập Nhật',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                        fontFamily: 'Noto Sans',
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -256,10 +386,10 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [
-                      const Color(0xFF4285F4),
-                      const Color(0xFF0D47A1),
+                      Color(0xFF4C6FFF),
+                      Color(0xFF7C3AED),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -290,7 +420,9 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Noto Sans',
+                          letterSpacing: -0.5,
                         ),
                       ),
                     ),
@@ -308,12 +440,26 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFFFAFBFF),
+                            Color(0xFFFFFFFF),
+                          ],
+                        ),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: const Color(0xFF4285F4).withOpacity(0.3),
-                          width: 1,
+                          color: const Color(0xFFE0E7FF),
+                          width: 2,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -551,6 +697,23 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
     );
   }
 
+  String _normalizePostStatus(String status) {
+    // Normalize status to match PostStatus.values (Draft, Pending, Approved, Rejected)
+    final statusLower = status.toLowerCase();
+    if (statusLower == 'draft' || statusLower == 'nháp') return 'Draft';
+    if (statusLower == 'pending' || statusLower == 'đang chờ duyệt') return 'Pending';
+    if (statusLower == 'approved' || statusLower == 'đã duyệt') return 'Approved';
+    if (statusLower == 'rejected' || statusLower == 'bị từ chối') return 'Rejected';
+    
+    // If already in correct format, return as-is
+    if (['Draft', 'Pending', 'Approved', 'Rejected'].contains(status)) {
+      return status;
+    }
+    
+    // Default to Draft if unknown
+    return 'Draft';
+  }
+
   String _getStatusLabel(String value) {
     final statuses = PostController().getAllPostStatus();
     final status = statuses.firstWhere(
@@ -574,48 +737,48 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: Colors.black.withOpacity(0.7),
+          style: const TextStyle(
+            color: Color(0xFF6B7280),
             fontSize: 14,
             fontFamily: 'Noto Sans',
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 4),
-        Container(
-          width: fullWidth ? null : 166,
-          height: multiline ? 94 : 41,
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            color: Colors.white,
-          ),
-          alignment: Alignment.centerLeft,
-          child: TextFormField(
-            controller: controller,
-            maxLines: multiline ? 4 : 1,
-            readOnly: readOnly,
-            decoration: InputDecoration(
-              prefixIcon: icon != null ? Icon(icon, color: Color(0xFF4285F4)) : null,
-              hintText: hint,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              isDense: true,
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(color: Color(0xFF4285F4)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(color: Color(0xFF4285F4)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(color: Color(0xFF4285F4), width: 2),
-              ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          maxLines: multiline ? 4 : 1,
+          readOnly: readOnly,
+          decoration: InputDecoration(
+            prefixIcon: icon != null ? Icon(icon, color: const Color(0xFF4C6FFF)) : null,
+            hintText: hint,
+            hintStyle: const TextStyle(
+              color: Color(0xFF9CA3AF),
+              fontSize: 14,
+              fontFamily: 'Noto Sans',
             ),
-            style: const TextStyle(fontSize: 14, fontFamily: 'Noto Sans'),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            isDense: true,
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 2),
+            ),
+          ),
+          style: const TextStyle(
+            fontSize: 14,
+            fontFamily: 'Noto Sans',
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1F2937),
           ),
         ),
       ],

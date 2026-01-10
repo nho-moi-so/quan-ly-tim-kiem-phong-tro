@@ -140,12 +140,23 @@ class _SignupFormState extends State<SignupForm> {
       constraints: const BoxConstraints(maxWidth: 500),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFFAFBFF),
+            Color(0xFFFFFFFF),
+          ],
+        ),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFE0E7FF),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -159,7 +170,9 @@ class _SignupFormState extends State<SignupForm> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1F2937),
+              fontFamily: 'Noto Sans',
+              color: Color(0xFF1A1F36),
+              letterSpacing: -0.5,
             ),
           ),
           const SizedBox(height: 8),
@@ -167,6 +180,8 @@ class _SignupFormState extends State<SignupForm> {
             'Vui lòng điền thông tin để đăng ký',
             style: TextStyle(
               fontSize: 14,
+              fontWeight: FontWeight.w400,
+              fontFamily: 'Noto Sans',
               color: Color(0xFF6B7280),
             ),
           ),
@@ -272,6 +287,7 @@ class _SignupFormState extends State<SignupForm> {
                     color: Color(0xFF6B7280),
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
+                    fontFamily: 'Noto Sans',
                   ),
                 ),
               ),
@@ -280,37 +296,56 @@ class _SignupFormState extends State<SignupForm> {
           const SizedBox(height: 24),
 
           // Sign Up Button
-          SizedBox(
+          Container(
             width: double.infinity,
             height: 54,
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : _signUp,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4C6FFF),
-                disabledBackgroundColor: const Color(0xFF9CA3AF),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-                shadowColor: Colors.transparent,
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Text(
-                      'Đăng ký',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+            decoration: BoxDecoration(
+              gradient: _isLoading
+                  ? null
+                  : const LinearGradient(
+                      colors: [Color(0xFF4C6FFF), Color(0xFF6B8AFF)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
+              color: _isLoading ? const Color(0xFF9CA3AF) : null,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: _isLoading
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _isLoading ? null : _signUp,
+                borderRadius: BorderRadius.circular(12),
+                child: Center(
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Đăng ký',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Noto Sans',
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                ),
+              ),
             ),
           ),
         ],
@@ -324,7 +359,8 @@ class _SignupFormState extends State<SignupForm> {
       style: const TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: Color(0xFF374151),
+        fontFamily: 'Noto Sans',
+        color: Color(0xFF6B7280),
       ),
     );
   }
@@ -342,17 +378,29 @@ class _SignupFormState extends State<SignupForm> {
       controller: controller,
       obscureText: isPassword && !showPassword,
       keyboardType: keyboardType,
+      style: const TextStyle(
+        fontSize: 14,
+        fontFamily: 'Noto Sans',
+        fontWeight: FontWeight.w500,
+        color: Color(0xFF1F2937),
+      ),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(
           fontSize: 14,
+          fontFamily: 'Noto Sans',
           color: Color(0xFF9CA3AF),
         ),
         prefixIcon: Container(
           margin: const EdgeInsets.all(12),
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFF4C6FFF).withOpacity(0.1),
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFF4C6FFF).withOpacity(0.15),
+                const Color(0xFF4C6FFF).withOpacity(0.05),
+              ],
+            ),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -364,22 +412,22 @@ class _SignupFormState extends State<SignupForm> {
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
-                  showPassword ? Icons.visibility_off : Icons.visibility,
-                  color: const Color(0xFF9CA3AF),
+                  showPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                  color: const Color(0xFF6B7280),
                   size: 20,
                 ),
                 onPressed: onTogglePassword,
               )
             : null,
         filled: true,
-        fillColor: const Color(0xFFF9FAFB),
+        fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -387,7 +435,7 @@ class _SignupFormState extends State<SignupForm> {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFEF4444)),
+          borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
@@ -397,9 +445,9 @@ class _SignupFormState extends State<SignupForm> {
   Widget _buildRoleSelector() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: const Color(0xFFBFCDE6), width: 2),
       ),
       child: Column(
         children: [
@@ -412,7 +460,7 @@ class _SignupFormState extends State<SignupForm> {
           Container(
             height: 1,
             margin: const EdgeInsets.symmetric(horizontal: 16),
-            color: const Color(0xFFE5E7EB),
+            color: const Color(0xFFE0E7FF),
           ),
           _buildRoleOption(
             'owner',
@@ -447,10 +495,20 @@ class _SignupFormState extends State<SignupForm> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? const Color(0xFF4C6FFF).withOpacity(0.1)
-                    : const Color(0xFF9CA3AF).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                gradient: isSelected
+                    ? LinearGradient(
+                        colors: [
+                          const Color(0xFF4C6FFF).withOpacity(0.15),
+                          const Color(0xFF4C6FFF).withOpacity(0.05),
+                        ],
+                      )
+                    : LinearGradient(
+                        colors: [
+                          const Color(0xFF6B7280).withOpacity(0.1),
+                          const Color(0xFF6B7280).withOpacity(0.05),
+                        ],
+                      ),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 icon,
@@ -469,17 +527,20 @@ class _SignupFormState extends State<SignupForm> {
                     title,
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Noto Sans',
                       color: isSelected
                           ? const Color(0xFF1F2937)
                           : const Color(0xFF6B7280),
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: TextStyle(
                       fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Noto Sans',
                       color: isSelected
                           ? const Color(0xFF6B7280)
                           : const Color(0xFF9CA3AF),
@@ -493,19 +554,33 @@ class _SignupFormState extends State<SignupForm> {
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                gradient: isSelected
+                    ? const LinearGradient(
+                        colors: [Color(0xFF4C6FFF), Color(0xFF6B8AFF)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : null,
                 border: Border.all(
                   color: isSelected
                       ? const Color(0xFF4C6FFF)
-                      : const Color(0xFFD1D5DB),
+                      : const Color(0xFFBFCDE6),
                   width: 2,
                 ),
-                color: isSelected
-                    ? const Color(0xFF4C6FFF)
-                    : Colors.transparent,
+                color: isSelected ? null : Colors.transparent,
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
               ),
               child: isSelected
                   ? const Icon(
-                      Icons.check,
+                      Icons.check_rounded,
                       color: Colors.white,
                       size: 16,
                     )

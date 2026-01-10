@@ -173,8 +173,11 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
           // Chart
           SizedBox(
             height: 220,
-            child: LineChart(
-              LineChartData(
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: (maxIncome * 1.2).ceilToDouble(),
+                minY: 0,
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
@@ -194,7 +197,11 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
                       showTitles: true,
                       reservedSize: 32,
                       getTitlesWidget: (value, meta) {
-                        if (value == meta.min || value == meta.max) {
+                        if (value == 0 || value > dailyIncome.length) {
+                          return const SizedBox();
+                        }
+                        // Chỉ hiển thị các ngày 5, 10, 15, 20, 25, 30
+                        if (value % 5 != 0) {
                           return const SizedBox();
                         }
                         return Padding(
@@ -243,90 +250,50 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
                     left: BorderSide(color: const Color(0xFFE3E8EF), width: 1),
                   ),
                 ),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: List.generate(
-                      dailyIncome.length,
-                      (index) => FlSpot(index + 1, dailyIncome[index]),
-                    ),
-                    isCurved: true,
-                    curveSmoothness: 0.35,
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF4C6FFF), Color(0xFF7C3AED)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    barWidth: 3,
-                    isStrokeCapRound: true,
-                    dotData: FlDotData(
-                      show: true,
-                      getDotPainter: (spot, percent, barData, index) {
-                        return FlDotCirclePainter(
-                          radius: 3,
-                          color: Colors.white,
-                          strokeWidth: 2.5,
-                          strokeColor: const Color(0xFF4C6FFF),
-                        );
-                      },
-                    ),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFF4C6FFF).withOpacity(0.15),
-                          const Color(0xFF7C3AED).withOpacity(0.05),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                barGroups: List.generate(
+                  dailyIncome.length,
+                  (index) => BarChartGroupData(
+                    x: index + 1,
+                    barRods: [
+                      BarChartRodData(
+                        toY: dailyIncome[index],
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF4C6FFF), Color(0xFF7C3AED)],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                        width: 8,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(4),
+                          topRight: Radius.circular(4),
+                        ),
+                        backDrawRodData: BackgroundBarChartRodData(
+                          show: true,
+                          toY: (maxIncome * 1.2).ceilToDouble(),
+                          color: const Color(0xFFE3E8EF).withOpacity(0.3),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-                minX: 1,
-                maxX: 30,
-                minY: 0,
-                maxY: (maxIncome * 1.2).ceilToDouble(),
-                lineTouchData: LineTouchData(
-                  touchTooltipData: LineTouchTooltipData(
+                ),
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
                     tooltipBgColor: const Color(0xFF1A1F36),
                     tooltipRoundedRadius: 8,
                     tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    getTooltipItems: (List<LineBarSpot> touchedSpots) {
-                      return touchedSpots.map((spot) {
-                        return LineTooltipItem(
-                          'Ngày ${spot.x.toInt()}\n${spot.y.toStringAsFixed(1)} triệu',
-                          const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                            fontFamily: 'Noto Sans',
-                          ),
-                        );
-                      }).toList();
-                    },
-                  ),
-                  handleBuiltInTouches: true,
-                  getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) {
-                    return spotIndexes.map((spotIndex) {
-                      return TouchedSpotIndicatorData(
-                        FlLine(
-                          color: const Color(0xFF4C6FFF).withOpacity(0.5),
-                          strokeWidth: 2,
-                          dashArray: [5, 5],
-                        ),
-                        FlDotData(
-                          getDotPainter: (spot, percent, barData, index) {
-                            return FlDotCirclePainter(
-                              radius: 5,
-                              color: Colors.white,
-                              strokeWidth: 3,
-                              strokeColor: const Color(0xFF4C6FFF),
-                            );
-                          },
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      return BarTooltipItem(
+                        'Ngày ${group.x}\n${rod.toY.toStringAsFixed(1)} triệu',
+                        const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          fontFamily: 'Noto Sans',
                         ),
                       );
-                    }).toList();
-                  },
+                    },
+                  ),
                 ),
               ),
             ),

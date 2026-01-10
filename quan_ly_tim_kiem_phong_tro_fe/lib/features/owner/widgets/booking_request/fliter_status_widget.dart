@@ -20,7 +20,7 @@ class _FliterStatusWidgetState extends State<FliterStatusWidget> {
       return const Color(0xFFF59E0B); // Orange
     } else if (lowerStatus.contains('approved') || lowerStatus.contains('duyệt') || lowerStatus.contains('xác nhận')) {
       return const Color(0xFF10B981); // Green
-    } else if (lowerStatus.contains('canceled') || lowerStatus.contains('hủy') || lowerStatus.contains('từ chối')) {
+    } else if (lowerStatus.contains('cancelled') || lowerStatus.contains('hủy') || lowerStatus.contains('từ chối')) {
       return const Color(0xFFEF4444); // Red
     } else if (lowerStatus.contains('completed') || lowerStatus.contains('hoàn thành')) {
       return const Color(0xFF8B5CF6); // Purple
@@ -38,7 +38,7 @@ class _FliterStatusWidgetState extends State<FliterStatusWidget> {
       return Icons.schedule_rounded;
     } else if (lowerStatus.contains('approved') || lowerStatus.contains('duyệt') || lowerStatus.contains('xác nhận')) {
       return Icons.check_circle_rounded;
-    } else if (lowerStatus.contains('canceled') || lowerStatus.contains('hủy') || lowerStatus.contains('từ chối')) {
+    } else if (lowerStatus.contains('cancelled') || lowerStatus.contains('hủy') || lowerStatus.contains('từ chối')) {
       return Icons.cancel_rounded;
     } else if (lowerStatus.contains('completed') || lowerStatus.contains('hoàn thành')) {
       return Icons.verified_rounded;
@@ -52,7 +52,7 @@ class _FliterStatusWidgetState extends State<FliterStatusWidget> {
   String _displayLabel(String status) {
     final s = status.toLowerCase();
     if (s.contains('approved') || s.contains('duyệt') || s.contains('xác nhận')) return 'Đã duyệt';
-    if (s.contains('canceled') || s.contains('hủy') || s.contains('từ chối')) return 'Đã hủy';
+    if (s.contains('cancelled') || s.contains('hủy') || s.contains('từ chối')) return 'Đã hủy';
     if (s.contains('pending') || s.contains('chờ')) return 'Chờ xử lý';
     if (s.contains('completed') || s.contains('hoàn thành')) return 'Hoàn thành';
     if (s.contains('all') || s.contains('tất cả')) return 'Tất cả';

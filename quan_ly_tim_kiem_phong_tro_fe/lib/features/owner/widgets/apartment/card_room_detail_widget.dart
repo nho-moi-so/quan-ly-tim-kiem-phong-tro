@@ -145,59 +145,83 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Mã Phòng'),
+                const Text(
+                  'Mã Phòng',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1F2937),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
-                        controller: roomCodeController,
-                        decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color: isRoomCodeUnique == null 
-                                ? const Color(0xFF4285F4)
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (isRoomCodeUnique == null 
+                                ? const Color(0xFF4C6FFF)
                                 : isRoomCodeUnique! 
-                                  ? Colors.green 
-                                  : Colors.red,
-                              width: 2,
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFEF4444)).withOpacity(0.12),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color: isRoomCodeUnique == null 
-                                ? const Color(0xFF4285F4)
-                                : isRoomCodeUnique! 
-                                  ? Colors.green 
-                                  : Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          suffixIcon: isRoomCodeUnique != null
-                            ? Icon(
-                                isRoomCodeUnique! ? Icons.check_circle : Icons.error,
-                                color: isRoomCodeUnique! ? Colors.green : Colors.red,
-                              )
-                            : null,
+                          ],
                         ),
-                        onChanged: (_) {
-                          // Reset validation khi user thay đổi
-                          if (isRoomCodeUnique != null) {
-                            setState(() {
-                              isRoomCodeUnique = null;
-                            });
-                          }
-                        },
+                        child: TextFormField(
+                          controller: roomCodeController,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: isRoomCodeUnique == null 
+                                  ? const Color(0xFFBFCDE6)
+                                  : isRoomCodeUnique! 
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFFEF4444),
+                                width: 2,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: isRoomCodeUnique == null 
+                                  ? const Color(0xFFBFCDE6)
+                                  : isRoomCodeUnique! 
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFFEF4444),
+                                width: 2,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            suffixIcon: isRoomCodeUnique != null
+                              ? Icon(
+                                  isRoomCodeUnique! ? Icons.check_circle : Icons.error,
+                                  color: isRoomCodeUnique! ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                                )
+                              : null,
+                          ),
+                          onChanged: (_) {
+                            // Reset validation khi user thay đổi
+                            if (isRoomCodeUnique != null) {
+                              setState(() {
+                                isRoomCodeUnique = null;
+                              });
+                            }
+                          },
+                        ),
                       ),
                     ),
                     // Chỉ hiện nút check và random khi đang tạo mới (roomCode rỗng ban đầu)
-                    if (widget.initialData.roomCode.isEmpty) ...[
+                    if (widget.initialData.roomCode.isEmpty)
                       const SizedBox(width: 8),
+                    if (widget.initialData.roomCode.isEmpty)
                       // Nút kiểm tra
                       Material(
                         color: const Color(0xFF4C6FFF),
@@ -235,7 +259,9 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                           ),
                         ),
                       ),
+                    if (widget.initialData.roomCode.isEmpty)
                       const SizedBox(width: 8),
+                    if (widget.initialData.roomCode.isEmpty)
                       // Nút random
                       Material(
                         color: const Color(0xFF10B981),
@@ -260,7 +286,6 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                           ),
                         ),
                       ),
-                    ],
                   ],
                 ),
                 if (isRoomCodeUnique != null) ...[
@@ -271,7 +296,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                       : '✗ Mã phòng đã tồn tại, vui lòng chọn mã khác',
                     style: TextStyle(
                       fontSize: 12,
-                      color: isRoomCodeUnique! ? Colors.green : Colors.red,
+                      color: isRoomCodeUnique! ? const Color(0xFF10B981) : const Color(0xFFEF4444),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -304,20 +329,47 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              const Text('Sức Chứa Tối Đa'),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: capacityController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: const BorderSide(color: Color(0xFF4285F4)),
+              const Text(
+                'Sức Chứa Tối Đa',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1F2937),
                 ),
-                filled: true,
-                fillColor: Colors.white,
-                suffix: const Text('Người', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4C6FFF).withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: TextFormField(
+                  controller: capacityController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 2),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  suffix: const Text('Người', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
                 ),
               ),
               ],
@@ -337,35 +389,62 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Giá Phòng'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                    controller: priceController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                    const Text(
+                      'Giá Phòng',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1F2937),
                       ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      suffix: const Text('VND', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
-                    onChanged: (value) {
-                      String digits = value.replaceAll(RegExp(r'[^0-9]'), '');
-                      if (digits.isEmpty) {
-                      priceController.text = '';
-                      priceController.selection = TextSelection.collapsed(offset: 0);
-                      return;
-                      }
-                      final formatted = _formatCurrency(digits);
-                      priceController.text = formatted;
-                      priceController.selection = TextSelection.collapsed(offset: formatted.length);
-                    },
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF4C6FFF).withOpacity(0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextFormField(
+                      controller: priceController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 2),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        suffix: const Text('VND', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      onChanged: (value) {
+                        String digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+                        if (digits.isEmpty) {
+                          priceController.text = '';
+                          priceController.selection = TextSelection.collapsed(offset: 0);
+                          return;
+                        }
+                        final formatted = _formatCurrency(digits);
+                        priceController.text = formatted;
+                        priceController.selection = TextSelection.collapsed(offset: formatted.length);
+                      },
                     ),
-                  ],
                   ),
+                ],
+              ),
                 ),
                 const SizedBox(width: 16),
                 // Giá Đặt Cọc
@@ -414,14 +493,28 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
             const SizedBox(height: 16),
             _buildLabeledInput('Yêu cầu', requirementController, maxLines: 2),
             const SizedBox(height: 16),
-            const Text('Loại phòng'),
+            const Text(
+              'Loại phòng',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1F2937),
+              ),
+            ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(color: Color(0xFF4285F4)),
-                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFBFCDE6), width: 2),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4C6FFF).withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
@@ -452,14 +545,37 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     return StatefulBuilder(
                       builder: (context, setState) {
                         return AlertDialog(
-                          title: const Text('Thêm Tiện Ích'),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          title: const Text(
+                            'Thêm Tiện Ích',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1A1F36),
+                            ),
+                          ),
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               TextField(
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   hintText: 'Tìm kiếm tiện ích...',
-                                  prefixIcon: Icon(Icons.search),
+                                  prefixIcon: const Icon(Icons.search, color: Color(0xFF4C6FFF)),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: Color(0xFFE0E7FF), width: 2),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: Color(0xFFE0E7FF), width: 2),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 2),
+                                  ),
                                 ),
                                 onChanged: (value) {
                                   setState(() {
@@ -480,6 +596,8 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                                     return CheckboxListTile(
                                       title: Text(u),
                                       value: isChecked,
+                                      activeColor: const Color(0xFF4C6FFF),
+                                      checkColor: Colors.white,
                                       onChanged: (checked) {
                                         setState(() {
                                           if (checked == true) {
@@ -500,6 +618,9 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                             actions: [
                               TextButton(
                               onPressed: () => Navigator.of(context).pop(),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFF4C6FFF),
+                              ),
                               child: const Text('Thêm'),
                               ),
                               
@@ -529,14 +650,28 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
               _buildIotDevicesSection(),
               const SizedBox(height: 24),
             ],
-            const Text('Chọn Trạng Thái Phòng'),
+            const Text(
+              'Chọn Trạng Thái Phòng',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1F2937),
+              ),
+            ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(color: Color(0xFF4285F4)),
-                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFBFCDE6), width: 2),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4C6FFF).withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: _buildDropdownRoomState(),
             ),
@@ -802,7 +937,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                   },
                   child: _buildActionButton(
                     widget.initialData.roomCode.isNotEmpty ? 'Cập Nhật' : 'Tạo',
-                    color: const Color(0xFF4285F4),
+                    color: const Color(0xFF4C6FFF),
                     textColor: Colors.white,
                     width: 153,
                     isLoading: _isSubmitting,
@@ -833,91 +968,50 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     return buffer.toString();
   }
   
-    Widget _buildDateTimePicker({
-      required String label,
-      required TextEditingController controller,
-    }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          readOnly: true,
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: Color(0xFF4285F4)),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            suffixIcon: const Icon(Icons.calendar_today, size: 20),
-          ),
-          onTap: () async {
-          // Bắt đầu chọn ngày
-          DateTime? pickedDate = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2101),
-          );
-
-          if (pickedDate != null) {
-            // Sau khi chọn ngày xong, tiếp tục mở chọn giờ
-            TimeOfDay? pickedTime = await showTimePicker(
-              context: context,
-              initialTime: TimeOfDay.now(),
-            );
-
-            if (pickedTime != null) {
-              // Kết hợp ngày và giờ lại thành 1 đối tượng DateTime
-              final DateTime fullDateTime = DateTime(
-                pickedDate.year,
-                pickedDate.month,
-                pickedDate.day,
-                pickedTime.hour,
-                pickedTime.minute,
-              );
-
-              // Gán chuỗi ngày/giờ đã format vào controller
-              controller.text = _formatDateTime(fullDateTime);
-            }
-          }
-        }
-        ),
-      ],
-    );
-  }
-
-// Hàm format ngày + giờ theo định dạng dd/MM HH:mm
-String _formatDateTime(DateTime dateTime) {
-  final day = dateTime.day.toString().padLeft(2, '0');
-  final month = dateTime.month.toString().padLeft(2, '0');
-  final hour = dateTime.hour.toString().padLeft(2, '0');
-  final minute = dateTime.minute.toString().padLeft(2, '0');
-  return "$day/$month $hour:$minute";
-}
-
-
   Widget _buildLabeledInput(String label, TextEditingController controller, {int maxLines = 1}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1F2937),
+          ),
+        ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          maxLines: maxLines,
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: Color(0xFF4285F4)),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF4C6FFF).withOpacity(0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            maxLines: maxLines,
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 2),
+              ),
+              filled: true,
+              fillColor: Colors.white,
             ),
-            filled: true,
-            fillColor: Colors.white,
           ),
         ),
       ],
@@ -926,12 +1020,30 @@ String _formatDateTime(DateTime dateTime) {
 
   Widget _buildOptionRow(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xC19E4F4F),
-        borderRadius: BorderRadius.circular(10),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4C6FFF), Color(0xFF6B8AFF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4C6FFF).withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Text(text, style: const TextStyle(color: Colors.white)),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
@@ -947,47 +1059,45 @@ String _formatDateTime(DateTime dateTime) {
           }
         });
       },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 17,
-            height: 17,
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF4285F4) : Colors.white,
-              border: Border.all(width: 1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: isSelected ? const Icon(Icons.check, size: 12, color: Colors.white) : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF4C6FFF).withOpacity(0.1) : Colors.white,
+          border: Border.all(
+            color: isSelected ? const Color(0xFF4C6FFF) : const Color(0xFFE0E7FF),
+            width: 2,
           ),
-          const SizedBox(width: 8),
-          Text(text),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRadioOption(String value) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedRoomType = value;
-        });
-      },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: selectedRoomType == value ? const Color(0xFF4285F4) : const Color(0xFFD9D9D9),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFF4C6FFF) : Colors.white,
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF4C6FFF) : const Color(0xFFE0E7FF),
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: isSelected
+                  ? const Icon(Icons.check, size: 12, color: Colors.white)
+                  : null,
             ),
-          ),
-          const SizedBox(width: 8),
-          Text(value),
-        ],
+            const SizedBox(width: 8),
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? const Color(0xFF4C6FFF) : const Color(0xFF6B7280),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1028,9 +1138,11 @@ String _formatDateTime(DateTime dateTime) {
             const Text(
               'Thiết bị IOT',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF2C3E50),
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Noto Sans',
+                color: Color(0xFF1A1F36),
+                letterSpacing: -0.3,
               ),
             ),
             TextButton.icon(
@@ -1083,18 +1195,18 @@ String _formatDateTime(DateTime dateTime) {
                   return Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50,
+                      color: const Color(0xFFEF4444).withOpacity(0.05),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.shade200),
+                      border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.2)),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline, color: Colors.red.shade700),
+                        Icon(Icons.error_outline, color: const Color(0xFFEF4444)),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             'Không thể tải danh sách thiết bị',
-                            style: TextStyle(color: Colors.red.shade700),
+                            style: TextStyle(color: const Color(0xFFEF4444)),
                           ),
                         ),
                       ],
@@ -1147,21 +1259,21 @@ String _formatDateTime(DateTime dateTime) {
                             'Hỗ trợ',
                             supportedDevices.length.toString(),
                             Icons.devices,
-                            Colors.blue,
+                            const Color(0xFF4C6FFF),
                           ),
                           Container(width: 1, height: 30, color: Colors.grey.shade300),
                           _buildIotStat(
                             'Đã kết nối',
                             connectedDevices.where((d) => d.isConnected).length.toString(),
                             Icons.link,
-                            Colors.green,
+                            const Color(0xFF10B981),
                           ),
                           Container(width: 1, height: 30, color: Colors.grey.shade300),
                           _buildIotStat(
                             'Chờ xác nhận',
                             connectedDevices.where((d) => !d.isConnected).length.toString(),
                             Icons.pending,
-                            Colors.orange,
+                            const Color(0xFFF59E0B),
                           ),
                         ],
                       ),
@@ -1225,20 +1337,20 @@ String _formatDateTime(DateTime dateTime) {
     String statusSubtitle;
 
     if (isConnected) {
-      bg = Colors.green.shade50;
-      borderColor = Colors.green.shade700;
+      bg = const Color(0xFF10B981).withOpacity(0.05);
+      borderColor = const Color(0xFF10B981);
       statusIcon = Icons.check_circle;
       statusText = 'Đã kết nối';
       statusSubtitle = 'Thiết bị sẵn sàng hoạt động';
     } else if (isPending) {
-      bg = Colors.orange.shade50;
-      borderColor = Colors.orange.shade700;
+      bg = const Color(0xFFF59E0B).withOpacity(0.05);
+      borderColor = const Color(0xFFF59E0B);
       statusIcon = Icons.pending;
       statusText = 'Chờ xác nhận';
       statusSubtitle = 'Đang chờ thiết bị phản hồi';
     } else {
-      bg = Colors.grey.shade100;
-      borderColor = Colors.grey.shade400;
+      bg = const Color(0xFF6B7280).withOpacity(0.05);
+      borderColor = const Color(0xFF6B7280);
       statusIcon = Icons.link_off;
       statusText = 'Chưa kết nối';
       statusSubtitle = 'Thiết bị chưa được liên kết';
@@ -1361,14 +1473,33 @@ String _formatDateTime(DateTime dateTime) {
   }
 
   Widget _buildActionButton(String text, {required Color color, required Color textColor, double width = 74, bool isLoading = false}) {
+    final isOutlined = color == Colors.white;
     return Container(
       width: width,
-      height: 50.87,
+      height: 48,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(7),
-        border: color == Colors.white ? Border.all(color: const Color(0xFF4285F4)) : null,
+        gradient: isOutlined
+            ? null
+            : LinearGradient(
+                colors: [color, color.withOpacity(0.85)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+        color: isOutlined ? Colors.white : null,
+        borderRadius: BorderRadius.circular(12),
+        border: isOutlined
+            ? Border.all(color: const Color(0xFFE0E7FF), width: 2)
+            : null,
+        boxShadow: isOutlined
+            ? null
+            : [
+                BoxShadow(
+                  color: color.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: isLoading
           ? SizedBox(
@@ -1381,7 +1512,12 @@ String _formatDateTime(DateTime dateTime) {
             )
           : Text(
               text,
-              style: TextStyle(color: textColor, fontSize: 19, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: isOutlined ? const Color(0xFF1F2937) : textColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              ),
             ),
     );
   }
@@ -1468,7 +1604,7 @@ String _formatDateTime(DateTime dateTime) {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.red,
+                  color: const Color(0xFFEF4444),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(

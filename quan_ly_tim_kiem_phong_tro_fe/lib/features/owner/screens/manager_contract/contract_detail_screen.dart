@@ -97,61 +97,38 @@ class _ContractDetailScreenState extends State<ContractDetailScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        // keep app bar minimal; header content moved into body to match ApartmentScreen layout
-        automaticallyImplyLeading: false,
-      ),
       body: SingleChildScrollView(
         child: Container(
           width: screenWidth,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100), // add bottom padding for buttons
-          color: Colors.grey[50],
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          color: Colors.white,
           child: contractDetail == null
-              ? SizedBox(
-                  height: screenHeight - kToolbarHeight,
-                  child: errorMessage != null
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.error_outline,
-                                size: 64,
-                                color: Colors.red,
-                              ),
-                            
-                              Text(
-                                errorMessage!,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.red,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 24),
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  setState(() {
-                                    errorMessage = null;
-                                  });
-                                  _loadContractDetail();
-                                },
-                                icon: const Icon(Icons.refresh),
-                                label: const Text('Thử lại'),
-                              ),
-                            ],
+              ? Column(
+                  children: [
+                    SizedBox(height: screenHeight * 0.05),
+                    Center(child: LogoWidget()),
+                    SizedBox(height: screenHeight * 0.1),
+                    errorMessage != null
+                        ? EmptyStateWidget(
+                            title: 'Không thể tải hợp đồng',
+                            message: errorMessage!,
+                            icon: Icons.error_outline,
+                          )
+                        : const LoadingWidget(
+                            message: 'Đang tải thông tin hợp đồng...',
                           ),
-                        )
-                      : const Center(child: CircularProgressIndicator()),
+                  ],
                 )
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Logo centered (matching ApartmentScreen layout)
+                    // 1. Top Spacing
+                    SizedBox(height: screenHeight * 0.05),
+                    
+                    // 2. Logo Widget
                     Center(child: LogoWidget()),
-                    // Title row similar to ApartmentScreen: Tag + badge/action
+                    
+                    // 3. Header Row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -159,264 +136,337 @@ class _ContractDetailScreenState extends State<ContractDetailScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF4C6FFF), Color(0xFF6B8AFF)],
+                            ),
+                            borderRadius: BorderRadius.circular(8),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
-                                blurRadius: 6,
+                                color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                                blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
                             ],
                           ),
                           child: Text(
                             '#${widget.contractId}',
-                            style: TextStyle(
-                              fontSize: 12,
+                            style: const TextStyle(
+                              fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: Colors.grey[800],
+                              color: Colors.white,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: screenHeight * 0.01),
-                    SizedBox(height: screenHeight * 0.01),
-                    // Section Header - HỢP ĐỒNG
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.green.shade600,
-                            Colors.green.shade400,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.green.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.description_rounded,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Text(
-                              'THÔNG TIN HỢP ĐỒNG',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              '#',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.green.shade700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Main card with summary and details
-                    Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SummaryWidget(
-                              imageUrl: contractDetail!.imageUrl,
-                              price: contractDetail!.price,
-                              deposit: contractDetail!.price,
-                              title: contractDetail!.title,
-                              address: contractDetail!.address,
-                              features: contractDetail!.features,
-                            ),
-                            const SizedBox(height: 12),
-                            LocationReviewWidget(
-                              imageUrl: contractDetail!.imageUrlMap!,
-                              ratingText: contractDetail!.ratingText!,
-                              address: contractDetail!.address!,
-                              rating: contractDetail!.rating!,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // Extended info card
-                    Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: ExtendInfoWidget(
-                          checkInTime: contractDetail!.checkInTime.toString(),
-                          checkOutTime: contractDetail!.checkOutTime.toString(),
-                          extraInfo: contractDetail!.extraInfo!,
-                          description: contractDetail!.description!,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.01),
-                    // Section Header - HÓA ĐƠN
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.blue.shade600,
-                            Colors.blue.shade400,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.receipt_long_rounded,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Text(
-                              'CHI TIẾT HÓA ĐƠN',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                          const Icon(
-                            Icons.arrow_downward_rounded,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Invoice card
-                    InvoiceWidget(
-                      dailyRate: contractDetail!.dailyRate ?? 0,
-                      numberOfDays: contractDetail!.numberOfDays ?? 1,
-                      otherFees: contractDetail!.otherFees ?? 0,
-                      taxRate: contractDetail!.taxRate ?? 0,
-                      discount: contractDetail!.discount ?? 0,
-                      onDownload: _downloadInvoice,
-                      isDownloading: _isDownloadingInvoice,
-                    ),
-                    // // Password card
-                    // Card(
-                    //   shape: RoundedRectangleBorder(
-                    //     borderRadius: BorderRadius.circular(12),
-                    //   ),
-                    //   elevation: 1,
-                    //   child: Padding(
-                    //     padding: const EdgeInsets.all(12.0),
-                    //     child:
-                    //         PasswordDisplayWidget(password: contractDetail!.password!),
-                    //   ),
-                    // ),
+                    
+                    SizedBox(height: screenHeight * 0.02),
+                    
+                    // THÔNG TIN HỢP ĐỒNG Card
+                    _buildContractInfoCard(),
+                    
+                    SizedBox(height: screenHeight * 0.02),
+                    
+                    // CHI TIẾT HÓA ĐƠN Card
+                    _buildInvoiceCard(),
+                    
+                    SizedBox(height: screenHeight * 0.02),
                   ],
                 ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            foregroundColor: Colors.black, // text & icon màu đen
+      bottomNavigationBar: contractDetail != null
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _actionButton(
+                        label: 'Quay lại',
+                        icon: Icons.arrow_back_rounded,
+                        bgColor: const Color(0xFF6B7280),
+                        textColor: Colors.white,
+                        onTap: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _actionButton(
+                        label: _isDownloading ? 'Đang tải...' : 'Tải hợp đồng',
+                        icon: Icons.download_rounded,
+                        bgColor: const Color(0xFF10B981),
+                        textColor: Colors.white,
+                        onTap: _isDownloading ? () {} : _downloadContract,
+                        isLoading: _isDownloading,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildContractInfoCard() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFAFBFF), Color(0xFFFFFFFF)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE0E7FF), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
-          icon: const Icon(Icons.arrow_back),
-          label: const Text('Quay lại'),
-          onPressed: () => Navigator.of(context).pop(),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFF10B981).withOpacity(0.1),
+                  const Color(0xFF10B981).withOpacity(0.05),
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(18),
+                topRight: Radius.circular(18),
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF10B981), Color(0xFF059669)],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF10B981).withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.description_rounded,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Thông Tin Hợp Đồng',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            backgroundColor: Colors.green.shade600,
-            foregroundColor: Colors.black, // text & icon màu đen
           ),
-          icon: _isDownloading
-              ? const SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.black,
+          
+          // Body
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                SummaryWidget(
+                  imageUrl: contractDetail!.imageUrl,
+                  price: contractDetail!.price,
+                  deposit: contractDetail!.price,
+                  title: contractDetail!.title,
+                  address: contractDetail!.address,
+                  features: contractDetail!.features,
+                ),
+                const SizedBox(height: 16),
+                LocationReviewWidget(
+                  imageUrl: contractDetail!.imageUrlMap!,
+                  ratingText: contractDetail!.ratingText!,
+                  address: contractDetail!.address!,
+                  rating: contractDetail!.rating!,
+                ),
+                const SizedBox(height: 16),
+                ExtendInfoWidget(
+                  checkInTime: contractDetail!.checkInTime.toString(),
+                  checkOutTime: contractDetail!.checkOutTime.toString(),
+                  extraInfo: contractDetail!.extraInfo!,
+                  description: contractDetail!.description!,
+                ),
+              ],
             ),
-                )
-              : const Icon(Icons.description_rounded),
-          label: Text(_isDownloading ? 'Đang tải...' : 'Tải hợp đồng'),
-          onPressed: contractDetail == null || _isDownloading
-              ? null
-              : _downloadContract,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInvoiceCard() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFAFBFF), Color(0xFFFFFFFF)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE0E7FF), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFF4C6FFF).withOpacity(0.1),
+                  const Color(0xFF4C6FFF).withOpacity(0.05),
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(18),
+                topRight: Radius.circular(18),
               ),
             ),
-          ],
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF4C6FFF), Color(0xFF7C3AED)],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.receipt_long_rounded,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Chi Tiết Hóa Đơn',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Body
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: InvoiceWidget(
+              dailyRate: contractDetail!.dailyRate ?? 0,
+              numberOfDays: contractDetail!.numberOfDays ?? 1,
+              otherFees: contractDetail!.otherFees ?? 0,
+              taxRate: contractDetail!.taxRate ?? 0,
+              discount: contractDetail!.discount ?? 0,
+              onDownload: _downloadInvoice,
+              isDownloading: _isDownloadingInvoice,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _actionButton({
+    required String label,
+    required IconData icon,
+    required Color bgColor,
+    required Color textColor,
+    required VoidCallback onTap,
+    bool isLoading = false,
+  }) {
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [bgColor, bgColor.withOpacity(0.85)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: bgColor.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (isLoading)
+                  const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                else
+                  Icon(icon, size: 20, color: textColor),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

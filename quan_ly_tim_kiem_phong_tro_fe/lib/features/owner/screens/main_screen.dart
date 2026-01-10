@@ -59,35 +59,65 @@ class _OwnerMainScreenState extends State<OwnerMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF4285F4),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.description),
-            label: 'Trang chủ',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          selectedItemColor: const Color(0xFF4C6FFF),
+          unselectedItemColor: const Color(0xFF6B7280),
+          selectedLabelStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            fontFamily: 'Noto Sans',
+            letterSpacing: 0.2,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.apartment),
-            label: 'Căn hộ',
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Noto Sans',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.pending_actions),
-            label: 'Đặt phòng',
+          selectedIconTheme: const IconThemeData(
+            size: 26,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.post_add),
-            label: 'Bài đăng',
+          unselectedIconTheme: const IconThemeData(
+            size: 24,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            label: 'Liên hệ',
-          ),
-
-        ],
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard_rounded),
+              label: 'Trang chủ',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.apartment_rounded),
+              label: 'Căn hộ',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.pending_actions_rounded),
+              label: 'Đặt phòng',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.post_add_rounded),
+              label: 'Bài đăng',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.message_rounded),
+              label: 'Liên hệ',
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -88,7 +88,7 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                 },
                 tabs: [
                   'Approved',
-                  'Canceled',
+                  'Cancelled',
                 ],
               ),
               // //search by date

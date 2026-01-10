@@ -6,7 +6,7 @@ class RoomPostItemWidget extends StatelessWidget {
   final String postDate;
   final String status;
   final String imageUrl;
-  final void Function(String postId, String action)? onAction; // thêm dòng này
+  final void Function(String postId, String action)? onAction;
 
   const RoomPostItemWidget({
     Key? key,
@@ -15,7 +15,7 @@ class RoomPostItemWidget extends StatelessWidget {
     required this.postDate,
     required this.status,
     required this.imageUrl,
-    this.onAction, // thêm dòng này
+    this.onAction,
   }) : super(key: key);
 
   Color _getStatusColor(String status) {
@@ -26,6 +26,8 @@ class RoomPostItemWidget extends StatelessWidget {
         return const Color(0xFF10B981);
       case 'rejected':
         return const Color(0xFFEF4444);
+      case 'hidden':
+        return const Color(0xFF6B7280);
       default:
         return const Color(0xFF6B7280);
     }
@@ -39,6 +41,8 @@ class RoomPostItemWidget extends StatelessWidget {
         return 'Đã duyệt';
       case 'rejected':
         return 'Đã từ chối';
+      case 'hidden':
+        return 'Đã ẩn';
       default:
         return status;
     }
@@ -49,7 +53,7 @@ class RoomPostItemWidget extends StatelessWidget {
     final statusColor = _getStatusColor(status);
     
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -59,12 +63,12 @@ class RoomPostItemWidget extends StatelessWidget {
             Color(0xFFFFFFFF),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFFE0E7FF), width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 12,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -75,9 +79,9 @@ class RoomPostItemWidget extends StatelessWidget {
           Container(
             width: 100,
             height: 100,
-            margin: const EdgeInsets.all(12),
+            margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.15),
@@ -87,7 +91,7 @@ class RoomPostItemWidget extends StatelessWidget {
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -119,7 +123,7 @@ class RoomPostItemWidget extends StatelessWidget {
           // Thông tin phòng
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 12, right: 8),
+              padding: const EdgeInsets.only(top: 16, bottom: 16, right: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -128,23 +132,32 @@ class RoomPostItemWidget extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFF4C6FFF), Color(0xFF6B8FFF)],
+                            colors: [Color(0xFF4C6FFF), Color(0xFF7C3AED)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        child: const Icon(Icons.meeting_room_rounded, size: 16, color: Colors.white),
+                        child: const Icon(Icons.meeting_room_rounded, size: 18, color: Colors.white),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           roomName,
                           style: const TextStyle(
                             color: Color(0xFF1F2937),
                             fontSize: 16,
-                            fontFamily: 'Inter',
+                            fontFamily: 'Noto Sans',
                             fontWeight: FontWeight.w700,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -152,40 +165,40 @@ class RoomPostItemWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   
                   // Ngày đăng
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today_rounded, size: 14, color: Color(0xFF6B7280)),
-                      const SizedBox(width: 6),
+                      const Icon(Icons.calendar_today_rounded, size: 16, color: Color(0xFF6B7280)),
+                      const SizedBox(width: 8),
                       Text(
                         postDate,
                         style: const TextStyle(
                           color: Color(0xFF6B7280),
-                          fontSize: 13,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          fontFamily: 'Noto Sans',
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   
                   // Trạng thái
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [statusColor, statusColor.withOpacity(0.85)],
                           ),
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(8),
                           boxShadow: [
                             BoxShadow(
                               color: statusColor.withOpacity(0.3),
-                              blurRadius: 6,
+                              blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
                           ],
@@ -194,9 +207,9 @@ class RoomPostItemWidget extends StatelessWidget {
                           _getStatusInVietnamese(status),
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 12,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            fontFamily: 'Noto Sans',
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -209,7 +222,7 @@ class RoomPostItemWidget extends StatelessWidget {
 
           // Icon menu
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(right: 12),
             child: GestureDetector(
               onTapDown: (details) {
                 showDialog(
@@ -236,12 +249,19 @@ class RoomPostItemWidget extends StatelessWidget {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.more_vert_rounded, color: Color(0xFF6B7280), size: 20),
+                child: const Icon(Icons.more_vert_rounded, color: Color(0xFF6B7280), size: 22),
               ),
             ),
           ),
@@ -250,6 +270,7 @@ class RoomPostItemWidget extends StatelessWidget {
     );
   }
 }
+
 class _ActionMenuCard extends StatelessWidget {
   final void Function(String action)? onAction;
   const _ActionMenuCard({this.onAction});
@@ -260,7 +281,7 @@ class _ActionMenuCard extends StatelessWidget {
       color: Colors.transparent,
       child: Container(
         width: 180,
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
@@ -316,32 +337,15 @@ class _ActionMenuCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         onTap: () {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Icon(icon, color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Text('Bạn chọn: $label'),
-                ],
-              ),
-              backgroundColor: color,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              duration: const Duration(seconds: 2),
-            ),
-          );
           if (onAction != null) onAction!(action);
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
             gradient: LinearGradient(
               colors: [color.withOpacity(0.08), color.withOpacity(0.03)],
             ),
@@ -349,14 +353,19 @@ class _ActionMenuCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
+                  gradient: LinearGradient(
+                    colors: [
+                      color.withOpacity(0.15),
+                      color.withOpacity(0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: color, size: 18),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   label,
@@ -364,7 +373,7 @@ class _ActionMenuCard extends StatelessWidget {
                     color: color,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    fontFamily: 'Inter',
+                    fontFamily: 'Noto Sans',
                   ),
                 ),
               ),
