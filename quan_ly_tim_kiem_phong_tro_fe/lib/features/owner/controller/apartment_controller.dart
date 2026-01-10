@@ -1,4 +1,7 @@
+import 'dart:convert'; // Để decode JSON trả về
+
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
+import 'package:http/http.dart' as http; // Để gọi API upload
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/contract_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
@@ -29,7 +32,7 @@ class ApartmentController {
 
   final ContractController _contractController = ContractController();
 
-  //createApartment(RoomCardDetail) => RoomCardDetail - done without image and user
+  //createApartment(RoomCardDetail) => RoomCardDetail - done without image
   Future<bool> createApartment(RoomDetail roomCardDetail) async {
     try {
       // Debug: In giá trị gốc
@@ -48,6 +51,23 @@ class ApartmentController {
       if (cleanPrice.isEmpty) {
         throw Exception('Giá phòng không hợp lệ');
       }
+      // UPLOAD HÌNH ẢNH TRƯỚC (Đẩy logic này lên đầu)
+      // ---------------------------------------------------------
+      List<String> finalImageUrls = []; // List chứa các link ảnh từ server
+
+      if (roomCardDetail.images.isNotEmpty) {
+        print('🖼️ Đang upload ${roomCardDetail.images.length} ảnh...');
+        
+        for (String localPath in roomCardDetail.images) {
+          // Gọi hàm upload (hàm này vẫn giữ nguyên như câu trả lời trước)
+          String? serverUrl = await _uploadImageToServer(localPath);
+          
+          if (serverUrl != null) {
+            finalImageUrls.add(serverUrl); // Thêm link vào list
+            print('✅ Đã thêm ảnh: $serverUrl');
+          }
+        }
+      }
       
       Apartment apartment = Apartment(
         codeApartment: roomCardDetail.roomCode,
@@ -60,6 +80,7 @@ class ApartmentController {
         type: roomCardDetail.roomType,
         requirement: roomCardDetail.requirement.split(',').map((e) => e.trim()).toList(),
         userID: fb_auth.FirebaseAuth.instance.currentUser!.uid,
+        pathImage: finalImageUrls,
       );
 
       Apartment createdApartment = await _apartmentService.createApartment(apartment);
@@ -320,5 +341,73 @@ class ApartmentController {
     } while (!isUnique && attempts < 10);
     
     return code;
+  }
+
+
+  Future<String?> _uploadImageToServer(String filePath) async {
+    // 1. Cấu hình Domain Server (Thay bằng IP/Domain thật của bạn)
+    // Ví dụ: 'http://192.168.1.5:3000' hoặc 'https://api.myserver.com'
+    const String serverDomain = 'http://192.168.1.11:3000'; 
+    
+    try {
+      // Generate random filename (chỉ chữ và số)
+      String randomFileName = _generateRandomFileName(filePath);
+      
+      // Gọi API Upload
+      var uri = Uri.parse('$serverDomain/api/util/upload'); 
+      
+      var request = http.MultipartRequest('POST', uri);
+      
+      // Đính kèm file với tên file random
+      request.files.add(
+        await http.MultipartFile.fromPath('file', filePath, filename: randomFileName)
+      );
+      
+      // Gửi request
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        var jsonResponse = jsonDecode(response.body);
+
+        // ✅ LOGIC SỬA ĐỔI Ở ĐÂY:
+        // Dựa vào mẫu: { "status": "success", "data": { "url": "/uploads/..." } }
+        
+        if (jsonResponse['status'] == 'success' && jsonResponse['data'] != null) {
+          String relativePath = jsonResponse['data']['url'];
+          
+          // Ghép domain vào đường dẫn tương đối để thành link full
+          // Kết quả sẽ là: http://192.168.1.25:3000/uploads/ten-anh.jpg
+          return '$serverDomain$relativePath'; 
+        }
+      } 
+      
+      print('Upload failed: ${response.body}');
+      return null;
+
+    } catch (e) {
+      print('Upload connection error: $e');
+      return null;
+    }
+  }
+
+  /// Generate random filename chỉ gồm chữ và số, giữ lại đuôi mở rộng
+  String _generateRandomFileName(String originalPath) {
+    // Lấy đuôi mở rộng từ file gốc
+    String extension = '';
+    if (originalPath.contains('.')) {
+      extension = originalPath.substring(originalPath.lastIndexOf('.'));
+    }
+    
+    // Generate random string chỉ gồm chữ và số
+    const String chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    final random = DateTime.now().millisecondsSinceEpoch;
+    String randomName = '';
+    
+    for (int i = 0; i < 12; i++) {
+      randomName += chars[(random + i) % chars.length];
+    }
+    
+    return randomName + extension;
   }
 }
