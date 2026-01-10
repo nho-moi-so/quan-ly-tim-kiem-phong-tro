@@ -40,6 +40,13 @@
 | POST | `/api/iot/verify-otp` | `otpCode, roomCode` | Xác thực OTP để mở khóa |
 | POST | `/api/iot/verify-password` | `password, roomCode` | Xác thực password để mở khóa |
 
+## 🛠️ Utility APIs
+
+| Method | Endpoint | Body | Mô tả |
+|--------|----------|------|-------|
+| POST | `/api/util/upload` | `file` (FormData) | Upload file lên server, trả về URL |
+
+
 ---
 
 ## 📡 Socket.io Events
