@@ -208,9 +208,10 @@ export default function DanhSachTaiKhoanOwner() {
           maxWidth: "100%",
           marginBottom: 16,
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
         }}
       >
+        <Button onClick={fetchOwners} loading={loading}>Làm mới</Button>
         <Search
           placeholder="Nhập tên hoặc email để tìm kiếm"
           allowClear

@@ -166,12 +166,12 @@ export const IOTService = {
      */
     checkDevice: async (roomCode: string): Promise<ServiceResult> => {
         if (!roomCode) {
-            return { status: "error", message: "Missing roomCode" };
+            return { status: "error", message: "Thiếu mã phòng" };
         }
         const docRef = db.collection("iot_device_in_apartment").doc(roomCode);
         const doc = await docRef.get();
         if (!doc.exists) {
-            return { status: "fail", message: "Device not found" };
+            return { status: "fail", message: "Không tìm thấy thiết bị" };
         }
 
         const pingCode = Math.random().toString(36).substring(2, 10);
@@ -194,7 +194,7 @@ export const IOTService = {
 
         return {
             status: online ? "success" : "fail",
-            message: online ? "Device is online" : "No reply from device",
+            message: online ? "Thiết bị đang trực tuyến" : "Thiết bị không phản hồi sau 5 giây",
             roomCode,
             online,
         };

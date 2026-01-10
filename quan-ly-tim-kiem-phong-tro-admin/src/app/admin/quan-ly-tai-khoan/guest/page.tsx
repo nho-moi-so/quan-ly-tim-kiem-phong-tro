@@ -203,16 +203,17 @@ export default function DanhSachTaiKhoanGuest() {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2>Danh sách quản lý tài khoản Guest</h2>
+      <h2>Danh sách quản lý tài khoản khách thuê</h2>
 
       <div
         style={{
           maxWidth: "100%",
           marginBottom: 16,
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
         }}
       >
+        <Button onClick={fetchGuests} loading={loading}>Làm mới</Button>
         <Search
           placeholder="Nhập tên hoặc email để tìm kiếm"
           allowClear

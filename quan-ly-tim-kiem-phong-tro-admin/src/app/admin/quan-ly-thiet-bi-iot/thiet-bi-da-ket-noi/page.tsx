@@ -1,6 +1,7 @@
 "use client";
 import { tranlateStatus } from "@/lib/tranlateStatus";
-import { Button, message, notification, Popconfirm, Space, Table, Typography } from "antd";
+import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { Button, message, Modal, Popconfirm, Space, Spin, Table, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 
@@ -18,6 +19,10 @@ type DeviceRow = {
 export default function ThietBiDaKetNoiPage() {
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<DeviceRow[]>([]);
+  const [checkingDeviceId, setCheckingDeviceId] = useState<string | null>(null);
+  const [isCheckingDevice, setIsCheckingDevice] = useState(false);
+  const [checkResultVisible, setCheckResultVisible] = useState(false);
+  const [checkResult, setCheckResult] = useState<{ device: DeviceRow; isOnline: boolean } | null>(null);
 
   const fetchDevices = async () => {
     setLoading(true);
@@ -55,32 +60,26 @@ export default function ThietBiDaKetNoiPage() {
     title: string,
     desc: string
   ) => {
-    notification[type]({
-      message: title,
-      description: desc,
-      placement: "topRight",
-      style: {
-        borderRadius: 12,
-        boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
-      },
+    message[type]({
+      content: desc,
     });
   };
 
   const handleCheck = async (roomCode: string) => {
+    setCheckingDeviceId(roomCode);
+    setIsCheckingDevice(true);
+    const device = rows.find(r => r.Id === roomCode);
     try {
       const res = await fetch(`/api/iot/devices/${roomCode}/check`, { method: "POST" });
       const json = await res.json();
-      if (json.status === "success") {
-        showNotice("success", "Thiết bị đang trực tuyến", "Đã phản hồi trong 5 giây kiểm tra.");
-      } else {
-        showNotice(
-          "warning",
-          "Không nhận được phản hồi",
-          json.message || "Thiết bị chưa trả lời yêu cầu kiểm tra trong 5 giây."
-        );
-      }
+      const isOnline = json.status === "success";
+      setCheckResult({ device: device!, isOnline });
+      setCheckResultVisible(true);
     } catch (e: any) {
-      showNotice("error", "Lỗi kiểm tra thiết bị", e?.message || "Không thể kiểm tra trạng thái thiết bị.");
+      message.error(e?.message || "Không thể kiểm tra trạng thái thiết bị.");
+    } finally {
+      setCheckingDeviceId(null);
+      setIsCheckingDevice(false);
     }
   };
 
@@ -131,7 +130,13 @@ export default function ThietBiDaKetNoiPage() {
       render: (_, record) => (
         <Space>
           {record.StatusRaw !== "pending" && (
-            <Button onClick={() => handleCheck(record.Id)}>Kiểm tra</Button>
+            <Button 
+              onClick={() => handleCheck(record.Id)}
+              loading={checkingDeviceId === record.Id}
+              disabled={checkingDeviceId === record.Id}
+            >
+              Kiểm tra
+            </Button>
           )}
           <Popconfirm title="Xác nhận xóa thiết bị?" onConfirm={() => handleDelete(record.Id)}>
             <Button danger type="primary">Xóa</Button>
@@ -147,13 +152,44 @@ export default function ThietBiDaKetNoiPage() {
       <Space style={{ marginBottom: 12 }}>
         <Button onClick={fetchDevices} loading={loading}>Làm mới</Button>
       </Space>
-      <Table
-        rowKey={(r) => r.Id}
-        columns={columns}
-        dataSource={rows}
-        loading={loading}
-        pagination={{ pageSize: 10 }}
-      />
+      <Spin spinning={isCheckingDevice} tip={`Đang kiểm tra thiết bị ${rows.find(r => r.Id === checkingDeviceId)?.DeviceID || ''}...`}>
+        <Table
+          rowKey={(r) => r.Id}
+          columns={columns}
+          dataSource={rows}
+          loading={loading}
+          pagination={{ pageSize: 10 }}
+        />
+      </Spin>
+
+      <Modal
+        title={checkResult?.isOnline ? "Thiết bị đang trực tuyến" : "Cảnh báo: Thiết bị không phản hồi"}
+        open={checkResultVisible}
+        onCancel={() => setCheckResultVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setCheckResultVisible(false)}>
+            Đóng
+          </Button>,
+        ]}
+      >
+        {checkResult && (
+          <div>
+            <p><strong>Mã thiết bị:</strong> {checkResult.device.DeviceID}</p>
+            <p><strong>Loại thiết bị:</strong> {checkResult.device.DeviceType}</p>
+            <p><strong>Căn hộ:</strong> {checkResult.device.ApartmentCode}</p>
+            <p><strong>Chủ sở hữu:</strong> {checkResult.device.OwnerName}</p>
+            {checkResult.isOnline ? (
+              <p style={{ color: "#52c41a", marginTop: "12px" }}>
+                <CheckCircleOutlined /> Thiết bị đã phản hồi thành công trong vòng 5 giây
+              </p>
+            ) : (
+              <p style={{ color: "#ff4d4f", marginTop: "12px" }}>
+                <CloseCircleOutlined /> Thiết bị không phản hồi sau 5 giây kiểm tra
+              </p>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

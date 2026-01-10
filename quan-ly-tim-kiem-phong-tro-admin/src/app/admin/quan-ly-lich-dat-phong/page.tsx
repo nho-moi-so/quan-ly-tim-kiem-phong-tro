@@ -251,6 +251,9 @@ const QuanLyLichDatPhongPage: React.FC = () => {
         </p>
       </div>
 
+      <div style={{ marginBottom: 12 }}>
+        <Button onClick={fetchBookings} loading={isLoading}>Làm mới</Button>
+      </div>
       <Spin spinning={isLoading || isVerifyingIntegrity} tip={isLoading ? "Đang tải dữ liệu..." : "Đang kiểm tra tính toàn vẹn trên blockchain..."}>
         <Table
           columns={columns}

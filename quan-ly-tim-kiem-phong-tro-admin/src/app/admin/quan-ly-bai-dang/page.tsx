@@ -261,7 +261,8 @@ export default function Page() {
   return (
     <div style={{ padding: 24 }}>
       <Typography.Title level={2}>Danh sách bài đăng</Typography.Title>
-      <Flex justify="flex-end" style={{ marginBottom: 16 }}>
+      <Flex justify="space-between" style={{ marginBottom: 16 }}>
+        <Button onClick={fetchPosts} loading={loading}>Làm mới</Button>
         <Search
           placeholder="Tìm kiếm bài đăng..."
           allowClear
