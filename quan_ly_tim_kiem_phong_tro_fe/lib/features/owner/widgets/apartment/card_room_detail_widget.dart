@@ -53,6 +53,22 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
   // Trạng thái kiểm tra mã phòng
   bool? isRoomCodeUnique;
   bool isCheckingRoomCode = false;
+  
+  // Trạng thái check IOT device
+  final Map<String, bool> _deviceCheckingMap = {}; // deviceId -> đang check hay không
+  final Map<String, String> _deviceStatusMap = {}; // deviceId -> "online"/"offline"/""
+  
+  // Biến Future cho IOT devices
+  Future<List<dynamic>>? _iotDevicesFuture;
+  
+  // Hàm khởi tạo Future
+  void _initIotDevicesFuture() {
+    final iotService = IotDeviceService();
+    _iotDevicesFuture = Future.wait([
+      iotService.getAllSupportedDevices(),
+      iotService.getConnectedDevicesForRoom(roomCodeController.text),
+    ]);
+  }
 
   Future<void> _pickImages() async {
     final List<XFile>? pickedFiles = await _picker.pickMultiImage();
@@ -116,6 +132,11 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
   selectedRoomType = widget.initialData.roomType.isNotEmpty ? widget.initialData.roomType : (widget.roomTypes.isNotEmpty ? widget.roomTypes.first : null);
     // selectedRoomState = widget.initialData.roomState;
     _images = [];
+    
+    // Khởi tạo Future cho IOT nếu đã có roomCode
+    if (widget.initialData.roomCode.isNotEmpty) {
+      _initIotDevicesFuture();
+    }
   }
 
   @override
@@ -1126,8 +1147,6 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
 
   /// Widget hiển thị section Thiết bị IOT
   Widget _buildIotDevicesSection() {
-    final iotService = IotDeviceService();
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1147,7 +1166,9 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
             ),
             TextButton.icon(
               onPressed: () {
-                setState(() {}); // Refresh lại section
+                setState(() {
+                  _initIotDevicesFuture(); // Tạo Future mới để reload lại từ đầu
+                });
               },
               icon: const Icon(Icons.refresh, size: 18),
               label: const Text('Làm mới'),
@@ -1159,15 +1180,55 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
         ),
         const SizedBox(height: 8),
         
+        // Thống kê IOT - Hiển thị động dựa trên state
+        FutureBuilder<List<dynamic>>(
+          future: _iotDevicesFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const SizedBox.shrink();
+            }
+            
+            if (snapshot.hasData) {
+              final supportedDevices = snapshot.data![0] as List<IotDevice>;
+              final connectedDevices = snapshot.data![1] as List<ConnectedIotDevice>;
+              
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4C6FFF).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildIotStat(
+                      'Hỗ trợ',
+                      supportedDevices.length.toString(),
+                      Icons.devices,
+                      const Color(0xFF4C6FFF),
+                    ),
+                    Container(width: 1, height: 30, color: Colors.grey.shade300),
+                    _buildIotStat(
+                      'Đã kết nối',
+                      connectedDevices.where((d) => d.isConnected).length.toString(),
+                      Icons.link,
+                      const Color(0xFF10B981),
+                    ),
+                    
+                  ],
+                ),
+              );
+            }
+            
+            return const SizedBox.shrink();
+          },
+        ),
+        const SizedBox(height: 12),
+        
         // Danh sách thiết bị hỗ trợ và trạng thái kết nối
-        StatefulBuilder(
-          builder: (context, setStateSB) {
-            return FutureBuilder<List<dynamic>>(
-              future: Future.wait([
-                iotService.getAllSupportedDevices(),
-                iotService.getConnectedDevicesForRoom(roomCodeController.text),
-              ]),
-              builder: (context, snapshot) {
+        FutureBuilder<List<dynamic>>(
+          future: _iotDevicesFuture, // Sử dụng biến đã lưu
+          builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Container(
                     padding: const EdgeInsets.all(20),
@@ -1242,57 +1303,67 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                   connectionMap[connected.iotDeviceId] = connected;
                 }
 
+                // Tự động check trạng thái các thiết bị đã kết nối khi mới load trang
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _autoCheckConnectedDevices(connectedDevices);
+                });
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Thống kê
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4C6FFF).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildIotStat(
-                            'Hỗ trợ',
-                            supportedDevices.length.toString(),
-                            Icons.devices,
-                            const Color(0xFF4C6FFF),
-                          ),
-                          Container(width: 1, height: 30, color: Colors.grey.shade300),
-                          _buildIotStat(
-                            'Đã kết nối',
-                            connectedDevices.where((d) => d.isConnected).length.toString(),
-                            Icons.link,
-                            const Color(0xFF10B981),
-                          ),
-                          Container(width: 1, height: 30, color: Colors.grey.shade300),
-                          _buildIotStat(
-                            'Chờ xác nhận',
-                            connectedDevices.where((d) => !d.isConnected).length.toString(),
-                            Icons.pending,
-                            const Color(0xFFF59E0B),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    
                     // Danh sách thiết bị
                     ...supportedDevices.map((device) {
                       final connected = connectionMap[device.deviceId];
-                      return _buildIotDeviceCard(device, connected, setStateSB);
+                      return IotDeviceCard(
+                        key: ValueKey(device.deviceId),
+                        device: device,
+                        connected: connected,
+                        roomCode: roomCodeController.text,
+                        deviceCheckingMap: _deviceCheckingMap,
+                        deviceStatusMap: _deviceStatusMap,
+                        onStatusUpdate: () => setState(() {}),
+                      );
                     }).toList(),
                   ],
                 );
               },
-            );
-          },
         ),
       ],
     );
+  }
+
+  /// Tự động check trạng thái các thiết bị đã kết nối
+  Future<void> _autoCheckConnectedDevices(List<ConnectedIotDevice> connectedDevices) async {
+    final iotService = IotDeviceService();
+    
+    for (var connected in connectedDevices) {
+      // Chỉ check những thiết bị đã verified và chưa được check
+      if (connected.isConnected && !_deviceStatusMap.containsKey(connected.iotDeviceId)) {
+        try {
+          _deviceCheckingMap[connected.iotDeviceId] = true;
+          
+          final status = await iotService.callAPICheckIOTDevice(connected.connectionId);
+          print("status auto-check: $status for device ${connected.iotDeviceId}");
+          
+          if (mounted) {
+            setState(() {
+              _deviceStatusMap[connected.iotDeviceId] = status;
+              _deviceCheckingMap[connected.iotDeviceId] = false;
+            });
+          }
+        } catch (e) {
+          print('❌ Error auto-checking device ${connected.iotDeviceId}: $e');
+          if (mounted) {
+            setState(() {
+              _deviceCheckingMap[connected.iotDeviceId] = false;
+            });
+          }
+        }
+        
+        // Delay nhỏ giữa các request để tránh quá tải
+        await Future.delayed(const Duration(milliseconds: 300));
+      }
+    }
   }
 
   /// Widget thống kê IOT
@@ -1323,153 +1394,6 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
         ),
       ],
     );
-  }
-
-  /// Widget hiển thị card từng thiết bị IOT
-  Widget _buildIotDeviceCard(IotDevice device, ConnectedIotDevice? connected, StateSetter setStateSB) {
-    final bool isConnected = connected?.isConnected ?? false;
-    final bool isPending = connected != null && !connected.isConnected;
-    
-    Color bg;
-    Color borderColor;
-    IconData statusIcon;
-    String statusText;
-    String statusSubtitle;
-
-    if (isConnected) {
-      bg = const Color(0xFF10B981).withOpacity(0.05);
-      borderColor = const Color(0xFF10B981);
-      statusIcon = Icons.check_circle;
-      statusText = 'Đã kết nối';
-      statusSubtitle = 'Thiết bị sẵn sàng hoạt động';
-    } else if (isPending) {
-      bg = const Color(0xFFF59E0B).withOpacity(0.05);
-      borderColor = const Color(0xFFF59E0B);
-      statusIcon = Icons.pending;
-      statusText = 'Chờ xác nhận';
-      statusSubtitle = 'Đang chờ thiết bị phản hồi';
-    } else {
-      bg = const Color(0xFF6B7280).withOpacity(0.05);
-      borderColor = const Color(0xFF6B7280);
-      statusIcon = Icons.link_off;
-      statusText = 'Chưa kết nối';
-      statusSubtitle = 'Thiết bị chưa được liên kết';
-    }
-
-    // Xác định icon cho loại thiết bị
-    IconData deviceIcon = _getDeviceIcon(device.deviceId);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor, width: 1.5),
-      ),
-      child: Row(
-        children: [
-          // Icon thiết bị
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: borderColor.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(deviceIcon, color: borderColor, size: 24),
-          ),
-          const SizedBox(width: 12),
-          
-          // Thông tin thiết bị
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  device.name,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF2C3E50),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  device.description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                // Status badge
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: borderColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(statusIcon, size: 14, color: borderColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        statusText,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: borderColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Nút refresh trạng thái
-          Tooltip(
-            message: statusSubtitle,
-            child: IconButton(
-              onPressed: () {
-                setStateSB(() {}); // Refresh lại trạng thái
-              },
-              icon: Icon(Icons.refresh, color: borderColor),
-              tooltip: 'Cập nhật trạng thái',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Lấy icon phù hợp cho từng loại thiết bị
-  IconData _getDeviceIcon(String deviceId) {
-    switch (deviceId.toLowerCase()) {
-      case 'smart_lock':
-        return Icons.lock;
-      case 'sensor_door':
-        return Icons.sensor_door;
-      case 'camera':
-        return Icons.videocam;
-      case 'thermostat':
-        return Icons.thermostat;
-      case 'light':
-        return Icons.lightbulb;
-      case 'fan':
-        return Icons.air;
-      case 'sensor_motion':
-        return Icons.sensors;
-      case 'alarm':
-        return Icons.alarm;
-      default:
-        return Icons.device_hub;
-    }
   }
 
   Widget _buildActionButton(String text, {required Color color, required Color textColor, double width = 74, bool isLoading = false}) {
@@ -1721,6 +1645,289 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+// Widget riêng cho IOT Device Card để tối ưu performance
+class IotDeviceCard extends StatefulWidget {
+  final IotDevice device;
+  final ConnectedIotDevice? connected;
+  final String roomCode;
+  final Map<String, bool> deviceCheckingMap;
+  final Map<String, String> deviceStatusMap;
+  final VoidCallback onStatusUpdate;
+
+  const IotDeviceCard({
+    super.key,
+    required this.device,
+    required this.connected,
+    required this.roomCode,
+    required this.deviceCheckingMap,
+    required this.deviceStatusMap,
+    required this.onStatusUpdate,
+  });
+
+  @override
+  State<IotDeviceCard> createState() => _IotDeviceCardState();
+}
+
+class _IotDeviceCardState extends State<IotDeviceCard> {
+  bool get isChecking => widget.deviceCheckingMap[widget.device.deviceId] ?? false;
+  String get deviceStatus => widget.deviceStatusMap[widget.device.deviceId] ?? '';
+
+  IconData _getDeviceIcon(String deviceId) {
+    switch (deviceId.toLowerCase()) {
+      case 'smart_lock':
+        return Icons.lock;
+      case 'sensor_door':
+        return Icons.sensor_door;
+      case 'camera':
+        return Icons.videocam;
+      case 'thermostat':
+        return Icons.thermostat;
+      case 'light':
+        return Icons.lightbulb;
+      case 'fan':
+        return Icons.air;
+      case 'sensor_motion':
+        return Icons.sensors;
+      case 'alarm':
+        return Icons.alarm;
+      default:
+        return Icons.device_hub;
+    }
+  }
+
+  Future<void> _checkDeviceStatus() async {
+    widget.deviceCheckingMap[widget.device.deviceId] = true;
+    widget.onStatusUpdate();
+    
+    try {
+      final iotService = IotDeviceService();
+      final status = await iotService.callAPICheckIOTDevice(
+        // widget.roomCode,
+        widget.connected!.connectionId,
+      );
+      
+      widget.deviceStatusMap[widget.device.deviceId] = status;
+      widget.deviceCheckingMap[widget.device.deviceId] = false;
+      widget.onStatusUpdate();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              status == 'online' 
+                ? '✓ ${widget.device.name} đang hoạt động'
+                : '✗ ${widget.device.name} không phản hồi',
+            ),
+            backgroundColor: status == 'online' 
+              ? const Color(0xFF10B981) 
+              : const Color(0xFFEF4444),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      widget.deviceCheckingMap[widget.device.deviceId] = false;
+      widget.onStatusUpdate();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi kiểm tra ${widget.device.name}: $e'),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isConnected = widget.connected?.isConnected ?? false;
+    final bool isPending = widget.connected != null && !widget.connected!.isConnected;
+    final bool isReady = deviceStatus == 'online';
+    
+    Color bg;
+    Color borderColor;
+    IconData statusIcon;
+    String statusText;
+    String statusSubtitle;
+
+    // Chỉ màu xanh khi đã kết nối VÀ đã sẵn sàng (online)
+    if (isConnected && isReady) {
+      bg = const Color(0xFF10B981).withOpacity(0.05);
+      borderColor = const Color(0xFF10B981);
+      statusIcon = Icons.check_circle;
+      statusText = 'Đã kết nối';
+      statusSubtitle = 'Thiết bị sẵn sàng hoạt động';
+    } else if (isConnected) {
+      // Đã kết nối nhưng chưa sẵn sàng hoặc offline
+      bg = const Color(0xFF6B7280).withOpacity(0.05);
+      borderColor = const Color(0xFF6B7280);
+      statusIcon = Icons.check_circle;
+      statusText = 'Đã kết nối';
+      if (deviceStatus == 'offline') {
+        statusSubtitle = 'Thiết bị không phản hồi';
+      } else {
+        statusSubtitle = 'Đang kiểm tra trạng thái...';
+      }
+    } else if (isPending) {
+      // Chờ xác nhận
+      bg = const Color(0xFF6B7280).withOpacity(0.05);
+      borderColor = const Color(0xFF6B7280);
+      statusIcon = Icons.pending;
+      statusText = 'Chờ xác nhận';
+      statusSubtitle = 'Đang chờ thiết bị phản hồi';
+    } else {
+      // Chưa kết nối
+      bg = const Color(0xFF6B7280).withOpacity(0.05);
+      borderColor = const Color(0xFF6B7280);
+      statusIcon = Icons.link_off;
+      statusText = 'Chưa kết nối';
+      statusSubtitle = 'Thiết bị chưa được liên kết';
+    }
+
+    IconData deviceIcon = _getDeviceIcon(widget.device.deviceId);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      child: Row(
+        children: [
+          // Icon thiết bị
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: borderColor.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(deviceIcon, color: borderColor, size: 24),
+          ),
+          const SizedBox(width: 12),
+          
+          // Thông tin thiết bị
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.device.name,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2C3E50),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  widget.device.description,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                // Status badges
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    // Badge trạng thái kết nối
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: isConnected ? const Color(0xFF10B981).withOpacity(0.15) : borderColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(statusIcon, size: 14, color: isConnected ? const Color(0xFF10B981) : borderColor),
+                          const SizedBox(width: 4),
+                          Text(
+                            statusText,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: isConnected ? const Color(0xFF10B981) : borderColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Badge trạng thái sẵn sàng (chỉ hiển thị khi đã kết nối)
+                    if (isConnected && deviceStatus.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: deviceStatus == 'online' 
+                            ? const Color(0xFF10B981).withOpacity(0.15)
+                            : const Color(0xFFEF4444).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              deviceStatus == 'online' 
+                                ? Icons.check_circle_outline 
+                                : Icons.warning_amber_rounded,
+                              size: 14,
+                              color: deviceStatus == 'online' 
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFFEF4444),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              deviceStatus == 'online' ? 'Đã sẵn sàng' : 'Chưa sẵn sàng',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: deviceStatus == 'online' 
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFEF4444),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          // Nút refresh trạng thái
+          Tooltip(
+            message: statusSubtitle,
+            child: IconButton(
+              onPressed: isChecking ? null : _checkDeviceStatus,
+              icon: isChecking
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(borderColor),
+                    ),
+                  )
+                : Icon(Icons.refresh, color: borderColor),
+              tooltip: 'Kiểm tra trạng thái thiết bị',
+            ),
+          ),
+        ],
       ),
     );
   }

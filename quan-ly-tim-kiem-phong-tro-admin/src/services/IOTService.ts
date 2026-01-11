@@ -12,6 +12,7 @@ type ServiceResult = {
     otp?: string;
     roomCode?: string;
     online?: boolean;
+    pingCode?: string | null;
 };
 
 export const IOTService = {
@@ -70,9 +71,12 @@ export const IOTService = {
             return {    status: "fail", message: "Invalid room code" };
         }
         
-        await db.collection("iot_device_in_apartment").doc(roomCode).set({
+        // Sử dụng composite key: roomCode_deviceId
+        const docId = `${roomCode}_${deviceId}`;
+        await db.collection("iot_device_in_apartment").doc(docId).set({
             IoTDeviceID: type_iot,
             ApartmentID: apartment.Id,
+            RoomCode: roomCode,
             Otp: otp,
             Status: "pending",
             DeviceID: deviceId,
@@ -81,7 +85,7 @@ export const IOTService = {
 
         try {
             const io = getIO();
-            io.to(roomCode).emit("otp_received", { otp, roomCode });
+            io.to(roomCode).emit("otp_received", { otp, roomCode, deviceId });
         } catch (e) {
             // Socket might not be initialized; log but keep flow
             console.warn("Socket not initialized or emit failed", e);
@@ -161,14 +165,69 @@ export const IOTService = {
     },
 
     /**
-     * Trigger an online check (ping) for a device by room code.
+     * Lấy PingCode hiện tại của thiết bị theo roomCode và deviceId
+     */
+    getPingCode: async (roomCode: string, deviceId: string): Promise<ServiceResult> => {
+        if (!roomCode || !deviceId) {
+            return { status: "error", message: "Thiếu mã phòng hoặc mã thiết bị", pingCode: null };
+        }
+
+        const docId = `${roomCode}_${deviceId}`;
+        const docRef = db.collection("iot_device_in_apartment").doc(docId);
+        const doc = await docRef.get();
+
+        if (!doc.exists) {
+            return { status: "fail", message: "Device not found", pingCode: null };
+        }
+
+        const data = doc.data();
+        return {
+            status: "success",
+            message: "PingCode fetched",
+            pingCode: data?.PingCode || null,
+            roomCode,
+        };
+    },
+
+    /**
+     * Thiết bị gửi PingReply để xác nhận đang online
+     */
+    updatePingReply: async (roomCode: string, deviceId: string, pingReply?: string): Promise<ServiceResult> => {
+        if (!roomCode || !deviceId) {
+            return { status: "error", message: "Thiếu mã phòng hoặc mã thiết bị" };
+        }
+        if (!pingReply) {
+            return { status: "fail", message: "Missing pingReply" };
+        }
+
+        const docId = `${roomCode}_${deviceId}`;
+        const docRef = db.collection("iot_device_in_apartment").doc(docId);
+        const doc = await docRef.get();
+
+        if (!doc.exists) {
+            return { status: "fail", message: "Device not found" };
+        }
+
+        await docRef.update({ PingReply: pingReply });
+
+        return {
+            status: "success",
+            message: "PingReply updated",
+            roomCode,
+        };
+    },
+
+    /**
+     * Trigger an online check (ping) for a device by room code and device ID.
      * It writes a random PingCode and waits briefly for PingReply.
      */
-    checkDevice: async (roomCode: string): Promise<ServiceResult> => {
-        if (!roomCode) {
-            return { status: "error", message: "Thiếu mã phòng" };
+    checkDevice: async (roomCode: string, deviceId: string): Promise<ServiceResult> => {
+        if (!roomCode || !deviceId) {
+            return { status: "error", message: "Thiếu mã phòng hoặc mã thiết bị" };
         }
-        const docRef = db.collection("iot_device_in_apartment").doc(roomCode);
+        const docId = `${roomCode}_${deviceId}`;
+        console.log(`Checking device with docId: ${docId}`);
+        const docRef = db.collection("iot_device_in_apartment").doc(docId);
         const doc = await docRef.get();
         if (!doc.exists) {
             return { status: "fail", message: "Không tìm thấy thiết bị" };
@@ -203,11 +262,12 @@ export const IOTService = {
     /**
      * Delete device mapping document
      */
-    deleteDevice: async (roomCode: string): Promise<ServiceResult> => {
-        if (!roomCode) {
-            return { status: "error", message: "Missing roomCode" };
+    deleteDevice: async (roomCode: string, deviceId: string): Promise<ServiceResult> => {
+        if (!roomCode || !deviceId) {
+            return { status: "error", message: "Missing roomCode or deviceId" };
         }
-        const docRef = db.collection("iot_device_in_apartment").doc(roomCode);
+        const docId = `${roomCode}_${deviceId}`;
+        const docRef = db.collection("iot_device_in_apartment").doc(docId);
         const doc = await docRef.get();
         if (!doc.exists) {
             return { status: "fail", message: "Device not found" };

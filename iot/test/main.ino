@@ -54,7 +54,7 @@ void pollPingCode() {
   }
 
   HTTPClient http;
-  String url = hostServer + "/api/iot/devices/" + roomCode + "/ping";
+  String url = hostServer + "/api/iot/devices/" + roomCode + "/ping?deviceId=" + device_id;
 
   http.begin(url);
   int httpResponseCode = http.GET();
@@ -88,7 +88,7 @@ void updatePingReply(String pingCode) {
   http.begin(url);
   http.addHeader("Content-Type", "application/json");
 
-  String postData = "{\"pingReply\":\"" + pingCode + "\"}";
+  String postData = "{\"deviceId\":\"" + device_id + "\",\"pingReply\":\"" + pingCode + "\"}";
   int httpResponseCode = http.POST(postData);
 
   if (httpResponseCode == 200) {

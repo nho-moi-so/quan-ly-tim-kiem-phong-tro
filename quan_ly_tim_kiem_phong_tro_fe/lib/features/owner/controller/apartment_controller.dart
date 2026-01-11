@@ -305,16 +305,26 @@ class ApartmentController {
         .toList();
   }
 
-  //==check ổ khóa có kết nối không để tạm ở đây
-  Future<bool> checkIOTConnection(String codeRoom) async {
-    IOTOtp otp = await _iotOtpService.getOTPbyId(codeRoom);
-    if(otp.Status == "verified"){
-      return true;
-    }
-    else{
-      return false;
-    }
-  }
+  // //==check ổ khóa có kết nối không để tạm ở đây
+  // Future<Map<String, String>> checkIOTConnection(String codeRoom) async {
+  //   IOTOtp otp = await _iotOtpService.getOTPbyId(codeRoom);
+  //   if(otp.Status == "verified"){
+  //     //call api check iot device
+  //     String status = await _callAPICheckIOTDevice(codeRoom);
+  //     if(status == "online"){
+  //       return {"status": "online",
+  //               "message": "Thiết bị đang trực tuyến"};
+  //     }
+  //     else{
+  //       return {"status": "offline",
+  //               "message": "Thiết bị không phản hồi sau 5 giây"};
+  //     }
+  //   }
+  //   else{
+  //     return {"status": "unverified",
+  //             "message": "Thiết bị chưa được xác thực"};
+  //   }
+  // }
 
   // Kiểm tra mã phòng có unique không
   Future<bool> isRoomCodeUnique(String roomCode) async {
@@ -414,4 +424,6 @@ class ApartmentController {
     
     return randomName + extension;
   }
+
+  
 }

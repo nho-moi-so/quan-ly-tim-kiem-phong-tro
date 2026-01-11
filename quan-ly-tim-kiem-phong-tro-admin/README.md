@@ -33,12 +33,22 @@
 
 ## 🏠 IoT APIs (Smart Lock)
 
-| Method | Endpoint | Body | Mô tả |
-|--------|----------|------|-------|
+| Method | Endpoint | Body/Params | Mô tả |
+|--------|----------|-------------|-------|
 | GET | `/api/iot/test` | - | Test endpoint |
-| POST | `/api/iot/connect-room` | `roomCode` | Tạo OTP và gửi qua Socket.io |
+| POST | `/api/iot/connect-room` | `roomCode, type_iot, deviceId` | Tạo OTP và gửi qua Socket.io |
 | POST | `/api/iot/verify-otp` | `otpCode, roomCode` | Xác thực OTP để mở khóa |
 | POST | `/api/iot/verify-password` | `password, roomCode` | Xác thực password để mở khóa |
+| GET | `/api/iot/devices/:roomCode/ping?deviceId=xxx` | Query: `deviceId` | Lấy PingCode hiện tại của thiết bị |
+| POST | `/api/iot/devices/:roomCode/ping` | `deviceId, pingReply` | Thiết bị gửi PingReply để cập nhật lên server |
+| POST | `/api/iot/devices/:roomCode/check` | `deviceId` | Kiểm tra trạng thái kết nối/thiết bị |
+| DELETE | `/api/iot/devices/:roomCode/delete?deviceId=xxx` | Query: `deviceId` | Xóa thiết bị khỏi phòng |
+
+**Ghi chú:**
+- Mỗi phòng có thể có nhiều thiết bị, do đó cần truyền `deviceId` để xác định thiết bị cụ thể.
+- Document ID trong Firestore sử dụng format: `{roomCode}_{deviceId}`
+- Website dùng POST `/api/iot/devices/:roomCode/check` với `deviceId` trong body để kiểm tra thiết bị còn online không.
+- Firmware/thiết bị dùng GET `/api/iot/devices/:roomCode/ping?deviceId=xxx` để lấy PingCode và POST `/api/iot/devices/:roomCode/ping` với `deviceId` và `pingReply` trong body để trả lời.
 
 ## 🛠️ Utility APIs
 
@@ -53,5 +63,5 @@
 
 | Event | Direction | Data | Mô tả |
 |-------|-----------|------|-------|
-| `otp_received` | Server → Client | `{ otp, roomCode }` | Gửi OTP đến mobile app |
+| `otp_received` | Server → Client | `{ otp, roomCode, deviceId }` | Gửi OTP đến mobile app cho thiết bị cụ thể |
 | `iot-verified` | Server → Client | `{ roomCode, status, message }` | Thông báo xác thực thành công |

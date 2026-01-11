@@ -64,13 +64,19 @@ export default function ThietBiDaKetNoiPage() {
       content: desc,
     });
   };
-
-  const handleCheck = async (roomCode: string) => {
-    setCheckingDeviceId(roomCode);
+  const handleCheck = async (roomCode: string, deviceId: string, rowId?: string) => {
+    // Use rowId (document id) to track which row is being checked for button/loading state
+    setCheckingDeviceId(rowId || deviceId);
     setIsCheckingDevice(true);
-    const device = rows.find(r => r.Id === roomCode);
+    const device = rows.find(
+      (r) => (rowId && r.Id === rowId) || r.DeviceID === deviceId || r.ApartmentCode === roomCode
+    );
     try {
-      const res = await fetch(`/api/iot/devices/${roomCode}/check`, { method: "POST" });
+      const res = await fetch(`/api/iot/devices/${roomCode}/check`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId }),
+      });
       const json = await res.json();
       const isOnline = json.status === "success";
       setCheckResult({ device: device!, isOnline });
@@ -131,7 +137,7 @@ export default function ThietBiDaKetNoiPage() {
         <Space>
           {record.StatusRaw !== "pending" && (
             <Button 
-              onClick={() => handleCheck(record.Id)}
+              onClick={() => handleCheck(record.ApartmentCode!, record.DeviceID, record.Id)}
               loading={checkingDeviceId === record.Id}
               disabled={checkingDeviceId === record.Id}
             >
@@ -152,7 +158,7 @@ export default function ThietBiDaKetNoiPage() {
       <Space style={{ marginBottom: 12 }}>
         <Button onClick={fetchDevices} loading={loading}>Làm mới</Button>
       </Space>
-      <Spin spinning={isCheckingDevice} tip={`Đang kiểm tra thiết bị ${rows.find(r => r.Id === checkingDeviceId)?.DeviceID || ''}...`}>
+      <Spin spinning={isCheckingDevice} tip={`Đang kiểm tra thiết bị ${rows.find(r => r.Id === checkingDeviceId)?.DeviceType || ''} của căn hộ ${rows.find(r => r.Id === checkingDeviceId)?.ApartmentCode || ''}...`}>
         <Table
           rowKey={(r) => r.Id}
           columns={columns}
