@@ -162,6 +162,58 @@ void setup(){
   lcd.setCursor(0, 0);
   lcd.print("San sang!");
   delay(1000);
+
+  // ================ GỌI API RE-CONNECT ================
+  // Kiểm tra xem device đã được kết nối với phòng nào chưa
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Kiem tra ket noi");
+  lcd.setCursor(0, 1);
+  lcd.print("...");
+  
+  HTTPClient http;
+  String url = hostServer + "/api/iot/re-connect";
+  http.begin(url);
+  http.addHeader("Content-Type", "application/json");
+  
+  String postData = "{\"deviceId\":\"" + device_id + "\"}";
+  int httpResponseCode = http.POST(postData);
+  
+  if (httpResponseCode > 0) {
+    String payload = http.getString();
+    StaticJsonDocument<200> doc;
+    DeserializationError error = deserializeJson(doc, payload);
+    
+    if (!error) {
+      String status = doc["status"];
+      
+      if (status == "success") {
+        // Device đã được kết nối trước đó
+        roomCode = doc["roomCode"].as<String>();
+        
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Da ket noi!");
+        lcd.setCursor(0, 1);
+        lcd.print("Phong: " + roomCode);
+        delay(2000);
+      } else {
+        // Device chưa được kết nối
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Chua ket noi!");
+        lcd.setCursor(0, 1);
+        lcd.print("Can nhap ma phong");
+        delay(2000);
+      }
+    }
+  } else {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Loi reconnect API");
+    delay(1500);
+  }
+  http.end();
 }
 void loop(){
     // Kiểm tra lại kết nối mỗi 10 giây
@@ -260,6 +312,7 @@ void loop(){
       delay(2000);
       
       if(status == "success"){
+        // roomCodeData = roomCodeData + "_" + device_id; // luu roomCodeData voi deviceId
         //===================================================goi /api/iot/verify-otp
         
         // Nhập OTP từ Keypad
@@ -320,7 +373,7 @@ void loop(){
         http.addHeader("Content-Type", "application/json");
 
         // Dữ liệu JSON để gửi
-        postData = "{\"otpCode\":\"" +passwordData+ "\",\"roomCode\":\""+roomCodeData+"\"}";
+        postData = "{\"otpCode\":\"" +passwordData+ "\",\"roomCode\":\""+roomCodeData+"\",\"deviceId\":\"" + device_id + "\"}";
         httpResponseCode = http.POST(postData);
         
         if (httpResponseCode > 0) {
@@ -448,7 +501,7 @@ void loop(){
     String url = hostServer + "/api/iot/verify-password";
     http.begin(url);
     http.addHeader("Content-Type", "application/json");
-    String postData = "{\"password\":\"" + inputPassword + "\",\"roomCode\":\"" + roomCode + "\"}";
+    String postData = "{\"password\":\"" + inputPassword + "\",\"roomCode\":\"" + roomCode + "\",\"deviceId\":\"" + device_id + "\"}";
     int httpResponseCode = http.POST(postData);
 
     if (httpResponseCode > 0) {

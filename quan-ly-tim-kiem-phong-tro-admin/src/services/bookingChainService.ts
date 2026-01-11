@@ -118,7 +118,7 @@ export const bookingChainService = {
         
         // Kiểm tra contract có tồn tại không (chỉ cần isValid = true)
         if (!contract.isValid) {
-            throw new Error(`Contract with hash ${contractHash} does not exist or has been voided`);
+            return { verified: false };
         }
 
         // Trả về thông tin contract (không quan tâm status PAID hay CANCELLED)

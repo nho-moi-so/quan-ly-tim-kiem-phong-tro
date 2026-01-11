@@ -102,15 +102,16 @@ export const IOTService = {
     /**
      * Verify OTP for a room, update status, and emit success event
      */
-    verifyOtp: async (otpCode: string, roomCode: string): Promise<ServiceResult> => {
-        if (!otpCode || !roomCode) {
-            return { status: "error", message: "Missing otpCode or roomCode" };
+    verifyOtp: async (otpCode: string, roomCode: string, deviceId: string): Promise<ServiceResult> => {
+        if (!otpCode || !roomCode || !deviceId) {
+            return { status: "error", message: "Missing otpCode, roomCode, or deviceId" };
         }
 
-        const docRef = db.collection("iot_device_in_apartment").doc(roomCode);
+        const docId = `${roomCode}_${deviceId}`;
+        const docRef = db.collection("iot_device_in_apartment").doc(docId);
         const doc = await docRef.get();
         if (!doc.exists) {
-            return { status: "error", message: "OTP not found for this room" };
+            return { status: "error", message: "OTP not found for this device" };
         }
 
         const data = doc.data();
@@ -126,23 +127,24 @@ export const IOTService = {
             const io = getIO();
             io.to(roomCode).emit("iot-verified", {
                 roomCode,
+                deviceId,
                 status: "success",
                 message: "OTP verified successfully",
             });
-            console.log(`Emitted iot-verified to room: ${roomCode}`);
+            console.log(`Emitted iot-verified to room: ${roomCode} for device: ${deviceId}`);
         } catch (e) {
             console.warn("Socket emit failed", e);
         }
 
-        return { status: "success", message: `verified success to roomCode is ${roomCode}` };
+        return { status: "success", message: `verified success to roomCode ${roomCode}, device ${deviceId}` };
     },
 
     /**
      * Verify password of an apartment by room code
      */
-    verifyPassword: async (password: string, roomCode: string): Promise<ServiceResult> => {
-        if (!password || !roomCode) {
-            return { status: "error", message: "Missing password or roomCode" };
+    verifyPassword: async (password: string, roomCode: string, deviceId: string): Promise<ServiceResult> => {
+        if (!password || !roomCode || !deviceId) {
+            return { status: "error", message: "Missing password, roomCode, or deviceId" };
         }
 
         const apartment = await ApartmentRepository.getByRoomCode(roomCode);
@@ -158,6 +160,17 @@ export const IOTService = {
                 message: "Incorrect password",
             };
         }
+
+        // Cập nhật trạng thái verified trong Firestore (không cần emit event)
+        const docId = `${roomCode}_${deviceId}`;
+        const docRef = db.collection("iot_device_in_apartment").doc(docId);
+        const doc = await docRef.get();
+        
+        if (doc.exists) {
+            await docRef.update({ Status: "verified" });
+            console.log(`✅ Password verified and status updated for room: ${roomCode}, device: ${deviceId}`);
+        }
+
         return {
             status: "success",
             message: "Password verified successfully",
@@ -274,5 +287,39 @@ export const IOTService = {
         }
         await docRef.delete();
         return { status: "success", message: "Device deleted", roomCode };
+    },
+
+    /**
+     * Re-connect: Kiểm tra xem device đã được kết nối với phòng nào chưa
+     * Dùng khi IoT khởi động lại (mất điện, reset)
+     */
+    reConnect: async (deviceId: string): Promise<ServiceResult> => {
+        if (!deviceId) {
+            return { status: "error", message: "Missing deviceId" };
+        }
+
+        // Tìm device trong collection iot_device_in_apartment với Status = "verified"
+        const querySnapshot = await db.collection("iot_device_in_apartment")
+            .where("DeviceID", "==", deviceId)
+            .where("Status", "==", "verified")
+            .limit(1)
+            .get();
+
+        if (querySnapshot.empty) {
+            return { 
+                status: "fail", 
+                message: "No room connected. Please enter room code." 
+            };
+        }
+
+        const doc = querySnapshot.docs[0];
+        const data = doc.data();
+        const roomCode = data.RoomCode;
+
+        return {
+            status: "success",
+            message: "Device reconnected successfully",
+            roomCode: roomCode,
+        };
     },
 };

@@ -102,14 +102,22 @@ class ContractController {
     var apartment = await _apartmentService.getApartmentByCode(apartmentCode);
     //tim email owner va guest
     var owner = await _userService.getUserByEmail(ownerEmail);
+    if(owner == null) {
+      print("Owner with email $ownerEmail not found.");
+      return false;
+    }
     var guest = await _userService.getUserByEmail(guestEmail);
-
+    if(guest == null) {
+      print("Guest with email $guestEmail not found.");
+      return false;
+    }
+    //chuẩn bị dữ liệu để gọi api hash_blockchain
 
     String preparedBookingId = contractId;
     String preparedApartmentId = apartment.apartmentID!;
     String preparedPrice = double.parse(price).toInt().toString();
-    String preparedOwnerEmail = owner!.userID!;
-    String preparedGuestEmail = guest!.userID!;
+    String preparedOwnerId = owner!.userID!;
+    String preparedGuestId = guest!.userID!;
     String preparedPassword = apartment.password!;
     String preparedCheckinDate = checkinDate
         .toUtc()
@@ -120,8 +128,8 @@ class ContractController {
     print("bookingId: $preparedBookingId");
     print("apartmentId: $preparedApartmentId");
     print("price: $preparedPrice");
-    print("ownerEmail: $preparedOwnerEmail");
-    print("guestEmail: $preparedGuestEmail");
+    print("ownerId: $preparedOwnerId");
+    print("guestId: $preparedGuestId");
     print("password: $preparedPassword");
     print("checkinDate: $preparedCheckinDate");
     print("checkoutDate: $preparedCheckoutDate");
@@ -130,14 +138,14 @@ class ContractController {
       bookingId: preparedBookingId,
       apartmentId: preparedApartmentId,
       price: int.parse(preparedPrice),
-      ownerId: preparedOwnerEmail,
-      guestId: preparedGuestEmail,
+      ownerId: preparedOwnerId,
+      guestId: preparedGuestId,
       password: preparedPassword,
     );
     print("hashFromBlockchain: $hashFromBlockchain");
     //gọi api verify
     if (hashFromBlockchain != null) {
-      bool isVerified = await _callAPIVerifyBlockchain(hashFromBlockchain);
+      bool isVerified = await _callAPIVerifyBlockchain(hashFromBlockchain, checkinDate: preparedCheckinDate, checkoutDate: preparedCheckoutDate);
       print("Is Verified: $isVerified");
       return isVerified;
     }
@@ -251,7 +259,7 @@ class ContractController {
   }
 
   // call api verify blockchain
-  Future<bool> _callAPIVerifyBlockchain(String hashBlockchain) async {
+  Future<bool> _callAPIVerifyBlockchain(String hashBlockchain, {required String checkinDate, required String checkoutDate}) async {
     // 1. Cấu hình Domain Server
     final String? serverDomain = dotenv.env['HOST_SERVER'];
     if (serverDomain == null) {
@@ -287,18 +295,32 @@ class ContractController {
             jsonResponse['data'] != null) {
           
           // Lấy trạng thái verified từ data
+          if(jsonResponse['data']['contract_info'] != null &&
+            jsonResponse['data']['contract_info']["checkinDate"] != null &&
+            jsonResponse['data']['contract_info']["checkoutDate"] != null) {
+            String serverCheckinDate = jsonResponse['data']['contract_info']["checkinDate"];
+            String serverCheckoutDate = jsonResponse['data']['contract_info']["checkoutDate"];
+
+            // So sánh ngày checkin và checkout
+            if (serverCheckinDate != checkinDate || serverCheckoutDate != checkoutDate) {
+              print('❌ Date mismatch: Server Check-in: $serverCheckinDate, Provided Check-in: $checkinDate');
+              print('❌ Date mismatch: Server Check-out: $serverCheckoutDate, Provided Check-out: $checkoutDate');
+              return false;
+            }
+          }
+          
           bool isVerified = jsonResponse['data']['verified'] ?? false;
           
           if (isVerified) {
             // Có thể log thêm thông tin hợp đồng nếu cần
             var contractInfo = jsonResponse['data']['contract_info'];
-            print('Contract Validated. Status: ${contractInfo['statusText']}');
+            print('✅ Contract Validated. Status: ${contractInfo['statusText']}');
             return true;
           }
         }
       }
 
-      print('Verify failed or Invalid Hash: ${response.body}');
+      print('❌ Verify failed or Invalid Hash: ${response.body}');
       return false;
 
     } catch (e) {
@@ -309,3 +331,5 @@ class ContractController {
 
 
 }
+
+

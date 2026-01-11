@@ -24,3 +24,24 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+  
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const result = await BookingService.verifyBookingWithBlockchain(body);
+    return NextResponse.json(
+      result,
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error verifying booking:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: `${error instanceof Error ? error.message : ""}`,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}

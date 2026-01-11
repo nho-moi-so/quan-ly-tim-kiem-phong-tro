@@ -463,7 +463,9 @@ class _ContractDetailScreenState extends State<ContractDetailScreen> {
                                             apartmentCode: _apartmentCodeCtrl
                                                 .text
                                                 .trim(),
-                                            price: _rawPrice.toString(),
+                                            price: _priceCtrl.text
+                                                .trim()
+                                                .replaceAll('.', ''), // Loại bỏ dấu chấm phân cách
                                             ownerEmail: _ownerEmailCtrl.text
                                                 .trim(),
                                             guestEmail: _guestEmailCtrl.text

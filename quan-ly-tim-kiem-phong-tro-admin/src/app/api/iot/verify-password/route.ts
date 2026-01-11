@@ -5,15 +5,16 @@ import z from "zod";
 
 const VerifyPasswordInputSchema = z.object({
     password: z.string(),
-    roomCode: z.string()
+    roomCode: z.string(),
+    deviceId: z.string()
 });
 
 export async function POST(request: Request) {
     try{
         const json = await request.json();
-        const { password, roomCode } = VerifyPasswordInputSchema.parse(json);
+        const { password, roomCode, deviceId } = VerifyPasswordInputSchema.parse(json);
 
-        const verifyPasswordResult = await IOTService.verifyPassword(password, roomCode);
+        const verifyPasswordResult = await IOTService.verifyPassword(password, roomCode, deviceId);
 
         return NextResponse.json({...verifyPasswordResult});
     }
