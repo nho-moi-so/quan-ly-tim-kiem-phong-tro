@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_datetime.dart';
 
 class ExtendInfoWidget extends StatelessWidget {
   final String checkInTime;
@@ -60,7 +61,7 @@ class ExtendInfoWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      "Nhận phòng - $checkInTime\nTrả phòng - $checkOutTime",
+                      "Nhận phòng - ${formatDateTime(DateTime.parse(checkInTime))}\nTrả phòng - ${formatDateTime(DateTime.parse(checkOutTime))}",
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w400,

@@ -92,6 +92,8 @@ class Apartment{
     - images: List<string>
     - status: string
     - address: string
+    - latitude: double
+    - longitude: double
     - type: string
     - require: List<string>
 

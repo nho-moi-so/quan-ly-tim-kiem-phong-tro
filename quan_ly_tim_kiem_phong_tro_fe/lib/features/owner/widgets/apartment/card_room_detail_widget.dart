@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/apartment_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
@@ -9,6 +11,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/model/iot_device.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/iot_device_service.dart';
 
 import '../../viewmodel/room_detail.dart';
+import 'map_picker_dialog.dart';
 
 class CardRoomDetailWidget extends StatefulWidget {
   final RoomDetail initialData;
@@ -57,6 +60,10 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
   // Trạng thái check IOT device
   final Map<String, bool> _deviceCheckingMap = {}; // deviceId -> đang check hay không
   final Map<String, String> _deviceStatusMap = {}; // deviceId -> "online"/"offline"/""
+  
+  // Biến lưu tọa độ
+  double? _selectedLatitude;
+  double? _selectedLongitude;
   
   // Biến Future cho IOT devices
   Future<List<dynamic>>? _iotDevicesFuture;
@@ -127,6 +134,10 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     descriptionController = TextEditingController(text: widget.initialData.description);
   addressController = TextEditingController(text: widget.initialData.address);
   requirementController = TextEditingController(text: widget.initialData.requirement);
+  
+  // Khởi tạo tọa độ từ dữ liệu ban đầu
+  _selectedLatitude = widget.initialData.latitude;
+  _selectedLongitude = widget.initialData.longitude;
 
   selectedUtilities = [...widget.initialData.utilities];
   selectedRoomType = widget.initialData.roomType.isNotEmpty ? widget.initialData.roomType : (widget.roomTypes.isNotEmpty ? widget.roomTypes.first : null);
@@ -510,8 +521,116 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
             const SizedBox(height: 16),
             _buildLabeledInput('Mô Tả Thêm', descriptionController, maxLines: 3),
             const SizedBox(height: 16),
-            _buildLabeledInput('Địa chỉ', addressController),
+            // Địa chỉ với nút mở bản đồ
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Địa chỉ',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1F2937),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF4C6FFF).withOpacity(0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: TextFormField(
+                          controller: addressController,
+                          maxLines: 2,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 2),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: 'Nhập địa chỉ hoặc chọn trên bản đồ',
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Nút mở bản đồ
+                    Material(
+                      color: const Color(0xFF4C6FFF),
+                      borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () async {
+                          final result = await showDialog<LocationResult>(
+                            context: context,
+                            builder: (context) => MapPickerDialog(
+                              initialAddress: addressController.text,
+                              initialLatitude: _selectedLatitude,
+                              initialLongitude: _selectedLongitude,
+                            ),
+                          );
+                          
+                          if (result != null) {
+                            setState(() {
+                              addressController.text = result.address;
+                              _selectedLatitude = result.latitude;
+                              _selectedLongitude = result.longitude;
+                            });
+                          }
+                        },
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          alignment: Alignment.center,
+                          child: const Icon(
+                            Icons.map_outlined,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_selectedLatitude != null && _selectedLongitude != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tọa độ: ${_selectedLatitude!.toStringAsFixed(6)}, ${_selectedLongitude!.toStringAsFixed(6)}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ],
+            ),
             const SizedBox(height: 16),
+            
+            // Hiển thị bản đồ nếu có tọa độ
+            if (_selectedLatitude != null && _selectedLongitude != null) ...[
+              _buildMapPreview(),
+              const SizedBox(height: 16),
+            ],
+            
             _buildLabeledInput('Yêu cầu', requirementController, maxLines: 2),
             const SizedBox(height: 16),
             const Text(
@@ -880,6 +999,8 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     utilities: selectedUtilities,
                     roomState: selectedRoomState ?? '',
                     address: addressController.text,
+                    latitude: _selectedLatitude,
+                    longitude: _selectedLongitude,
                     requirement: requirementController.text,
                     roomType: selectedRoomType ?? '',
                     // Save all images to a writable directory with random names and return the new paths
@@ -1355,6 +1476,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
           print('❌ Error auto-checking device ${connected.iotDeviceId}: $e');
           if (mounted) {
             setState(() {
+              _deviceStatusMap[connected.iotDeviceId] = 'offline';
               _deviceCheckingMap[connected.iotDeviceId] = false;
             });
           }
@@ -1443,6 +1565,183 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                 letterSpacing: 0.3,
               ),
             ),
+    );
+  }
+
+  /// Widget hiển thị bản đồ xem trước vị trí
+  Widget _buildMapPreview() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.map_outlined,
+              size: 20,
+              color: Color(0xFF4C6FFF),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Vị trí trên bản đồ',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1F2937),
+              ),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle,
+                    size: 14,
+                    color: Color(0xFF10B981),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Đã chọn vị trí',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF10B981),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          height: 200,
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xFF4C6FFF), width: 2),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF4C6FFF).withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Stack(
+              children: [
+                FlutterMap(
+                  options: MapOptions(
+                    initialCenter: LatLng(_selectedLatitude!, _selectedLongitude!),
+                    initialZoom: 15,
+                    interactionOptions: const InteractionOptions(
+                      flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+                    ),
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.example.quan_ly_tim_kiem_phong_tro_fe',
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: LatLng(_selectedLatitude!, _selectedLongitude!),
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.location_pin,
+                            color: Color(0xFFEF4444),
+                            size: 40,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                // Nút xem full map
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: Material(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    elevation: 2,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () async {
+                        final result = await showDialog<LocationResult>(
+                          context: context,
+                          builder: (context) => MapPickerDialog(
+                            initialAddress: addressController.text,
+                            initialLatitude: _selectedLatitude,
+                            initialLongitude: _selectedLongitude,
+                          ),
+                        );
+                        
+                        if (result != null) {
+                          setState(() {
+                            addressController.text = result.address;
+                            _selectedLatitude = result.latitude;
+                            _selectedLongitude = result.longitude;
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.fullscreen,
+                              size: 18,
+                              color: Color(0xFF4C6FFF),
+                            ),
+                            const SizedBox(width: 4),
+                            const Text(
+                              'Xem đầy đủ',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF4C6FFF),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Icon(
+              Icons.my_location,
+              size: 14,
+              color: Colors.grey[600],
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                'Tọa độ: ${_selectedLatitude!.toStringAsFixed(6)}, ${_selectedLongitude!.toStringAsFixed(6)}',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -1731,13 +2030,14 @@ class _IotDeviceCardState extends State<IotDeviceCard> {
         );
       }
     } catch (e) {
+      widget.deviceStatusMap[widget.device.deviceId] = 'offline';
       widget.deviceCheckingMap[widget.device.deviceId] = false;
       widget.onStatusUpdate();
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi khi kiểm tra ${widget.device.name}: $e'),
+            content: Text('✗ ${widget.device.name} không thể kết nối'),
             backgroundColor: const Color(0xFFEF4444),
           ),
         );

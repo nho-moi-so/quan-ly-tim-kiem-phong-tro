@@ -9,6 +9,8 @@ class Apartment {
   String? status;
   String? password;
   String? address;
+  double? latitude;
+  double? longitude;
   List<String>? requirement;
   String? type;
   String? userID;
@@ -24,6 +26,8 @@ class Apartment {
     this.status,
     this.password,
     this.address,
+    this.latitude,
+    this.longitude,
     this.requirement,
     this.type,
     this.userID,
@@ -40,6 +44,8 @@ class Apartment {
         status: map['Status'] ?? '',
         password: map['Password'] ?? '',
         address: map['Address'] ?? '',
+        latitude: map['Latitude']?.toDouble(),
+        longitude: map['Longitude']?.toDouble(),
         requirement: List<String>.from(map['Requirements'] ?? []),
         type: map['Type'] ?? '',
         userID: map['UserID'] ?? '',
@@ -55,6 +61,8 @@ class Apartment {
         'Status': status,
         'Password': password,
         'Address': address,
+        'Latitude': latitude,
+        'Longitude': longitude,
         'Requirements': requirement,
         'Type': type,
         'UserID': userID,

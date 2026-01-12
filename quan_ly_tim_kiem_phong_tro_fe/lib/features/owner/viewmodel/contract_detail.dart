@@ -20,6 +20,8 @@ class ContractDetail {
   String? ratingText; //: "9.2 Trên cả tuyệt vời",
   //String address; //: "45, Nguyễn văn cừ, an bình cần thơ",
   double? rating; //: 4, // số sao vàng
+  double? latitude; // Vĩ độ
+  double? longitude; // Kinh độ
 
   DateTime? checkInTime; //: DateTime(2023, 10, 1, 14, 0).toString(), 
   DateTime? checkOutTime; //: DateTime(2023, 10, 2, 12, 0).toString(), 
@@ -48,6 +50,8 @@ class ContractDetail {
     this.imageUrlMap,
     this.ratingText,
     this.rating,
+    this.latitude,
+    this.longitude,
     this.checkInTime,
     this.checkOutTime,
     this.extraInfo,

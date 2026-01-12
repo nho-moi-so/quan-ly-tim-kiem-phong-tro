@@ -67,6 +67,8 @@ class ContractController {
       imageUrlMap: "https://maps.app.goo.gl/D9n1mdjx7YEBCBPD9",
       ratingText: "9.2 Trên cả tuyệt vời",
       rating: 4.0,
+      latitude: apartment.latitude,
+      longitude: apartment.longitude,
       checkInTime: contract.startDate,
       checkOutTime: contract.endDate,
       extraInfo: "Không có thêm thông tin",

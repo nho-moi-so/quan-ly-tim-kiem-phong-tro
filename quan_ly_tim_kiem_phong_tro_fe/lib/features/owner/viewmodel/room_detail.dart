@@ -15,6 +15,8 @@ class RoomDetail {
   List<String> images;
 
   String address;
+  double? latitude;
+  double? longitude;
 
   String requirement;
 
@@ -34,6 +36,8 @@ class RoomDetail {
     this.roomState = '',
     this.images = const [],
     this.address = '',
+    this.latitude,
+    this.longitude,
     this.requirement = '',
   });
 }

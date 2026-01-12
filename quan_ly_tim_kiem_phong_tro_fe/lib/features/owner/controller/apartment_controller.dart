@@ -78,6 +78,8 @@ class ApartmentController {
         description: roomCardDetail.description,
         status: roomCardDetail.room_status == '' ? 'Available' : roomCardDetail.room_status,
         address: roomCardDetail.address,
+        latitude: roomCardDetail.latitude,
+        longitude: roomCardDetail.longitude,
         type: roomCardDetail.roomType,
         requirement: roomCardDetail.requirement.split(',').map((e) => e.trim()).toList(),
         userID: fb_auth.FirebaseAuth.instance.currentUser!.uid,
@@ -144,6 +146,9 @@ class ApartmentController {
         foundApartment.maxOccupancy = int.parse(roomCardDetail.maxCapacity);
         foundApartment.description = roomCardDetail.description;
         foundApartment.status = roomCardDetail.room_status;
+        foundApartment.address = roomCardDetail.address;
+        foundApartment.latitude = roomCardDetail.latitude;
+        foundApartment.longitude = roomCardDetail.longitude;
 
         Apartment updatedApartment = await _apartmentService.updateApartment(foundApartment);
         print('Apartment updated with ID: ${updatedApartment.apartmentID}');
@@ -201,6 +206,8 @@ class ApartmentController {
                 utilities: amenities,
                 images: List<String>.from(apartment.pathImage as Iterable),
                 address: apartment.address ?? '',
+                latitude: apartment.latitude,
+                longitude: apartment.longitude,
                 // roomType: apartment.type ?? 'Studio',
                 requirement: (apartment.requirement != null && apartment.requirement is List<String>)
                   ? (apartment.requirement as List<String>).join(', ')

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/contract_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/contract_detail.dart';
@@ -745,12 +747,7 @@ class _ContractDetailScreenState extends State<ContractDetailScreen> {
                   features: contractDetail!.features,
                 ),
                 const SizedBox(height: 16),
-                LocationReviewWidget(
-                  imageUrl: contractDetail!.imageUrlMap!,
-                  ratingText: contractDetail!.ratingText!,
-                  address: contractDetail!.address!,
-                  rating: contractDetail!.rating!,
-                ),
+                _buildInteractiveMap(),
                 const SizedBox(height: 16),
                 ExtendInfoWidget(
                   checkInTime: contractDetail!.checkInTime.toString(),
@@ -1089,6 +1086,178 @@ class _ContractDetailScreenState extends State<ContractDetailScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInteractiveMap() {
+    // Vị trí mặc định nếu không có tọa độ
+    final lat = contractDetail?.latitude ?? 10.8231;
+    final lon = contractDetail?.longitude ?? 106.6297;
+    final address = contractDetail?.address ?? 'Địa chỉ không có sẵn';
+    
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFF4C6FFF), width: 2),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFF4C6FFF).withOpacity(0.1),
+                  const Color(0xFF4C6FFF).withOpacity(0.05),
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF4C6FFF), Color(0xFF7C3AED)],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.location_on,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Vị trí trên bản đồ',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                ),
+                if (contractDetail?.ratingText != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      contractDetail!.ratingText!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          
+          // Map
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(10),
+              bottomRight: Radius.circular(10),
+            ),
+            child: SizedBox(
+              height: 250,
+              child: FlutterMap(
+                options: MapOptions(
+                  initialCenter: LatLng(lat, lon),
+                  initialZoom: 15,
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.example.quan_ly_tim_kiem_phong_tro_fe',
+                  ),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: LatLng(lat, lon),
+                        width: 50,
+                        height: 50,
+                        child: const Icon(
+                          Icons.location_pin,
+                          color: Color(0xFFEF4444),
+                          size: 50,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Address footer
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(10),
+                bottomRight: Radius.circular(10),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.location_on,
+                  size: 18,
+                  color: Color(0xFF4C6FFF),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    address,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                ),
+                if (contractDetail?.rating != null) ...[
+                  Row(
+                    children: List.generate(
+                      5,
+                      (index) => Icon(
+                        index < (contractDetail!.rating ?? 0).round()
+                            ? Icons.star
+                            : Icons.star_border,
+                        size: 16,
+                        color: const Color(0xFFFFC107),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
