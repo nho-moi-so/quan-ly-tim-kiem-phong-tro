@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/user_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/change_password_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/edit_profile_screen.dart';
 
@@ -188,7 +189,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildInfoCard(
                         icon: Icons.verified_outlined,
                         title: 'Trạng thái',
-                        value: _getStatusDisplay(userData?['Status']),
+                        value: getStatusDisplayProfileScreen(userData?['Status']),
                         color: _getStatusColor(userData?['Status']),
                       ),
                     ],
@@ -657,20 +658,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
   
-  String _getStatusDisplay(String? status) {
-    switch (status?.toLowerCase()) {
-      case 'approved':
-        return 'Đã xác minh';
-      case 'pending':
-        return 'Đang chờ duyệt';
-      case 'rejected':
-        return 'Bị từ chối';
-      case 'active':
-        return 'Chờ xác minh';
-      default:
-        return 'Chưa xác minh';
-    }
-  }
   
   Color _getStatusColor(String? status) {
     switch (status?.toLowerCase()) {

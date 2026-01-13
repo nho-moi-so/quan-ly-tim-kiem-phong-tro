@@ -107,51 +107,50 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                   const SizedBox(height: 16),
                   _infoField(label: 'Nội dung', controller: postDescriptionController, fullWidth: true, multiline: true, icon: Icons.description, hint: 'Nhập nội dung bài đăng...'),
                   const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: _normalizePostStatus(postStatusController.text.isNotEmpty ? postStatusController.text : 'Draft'),
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.info, color: Color(0xFF4C6FFF)),
-                      labelText: 'Trạng Thái',
-                      labelStyle: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Noto Sans',
-                        color: Color(0xFF6B7280),
+                  IgnorePointer(
+                    ignoring: true,
+                    child: DropdownButtonFormField<String>(
+                      value: _normalizePostStatus(postStatusController.text.isNotEmpty ? postStatusController.text : 'Draft'),
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.info, color: Color(0xFF9CA3AF)),
+                        labelText: 'Trạng Thái',
+                        labelStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Noto Sans',
+                          color: Color(0xFF6B7280),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        isDense: true,
+                        filled: true,
+                        fillColor: const Color(0xFFF9FAFB),
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
+                      items: PostController().getAllPostStatus().map((status) {
+                        return DropdownMenuItem<String>(
+                          value: status['value'],
+                          child: Text(status['label'] ?? status['value'] ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: null,
+                      disabledHint: Text(
+                        _getStatusLabel(postStatusController.text.isNotEmpty ? postStatusController.text : 'Draft'),
+                        style: const TextStyle(
+                          color: Color(0xFF1F2937),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFBFCDE6), width: 2),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 2),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      isDense: true,
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    items: PostController().getAllPostStatus().map((status) {
-                      return DropdownMenuItem<String>(
-                        value: status['value'],
-                        child: Text(status['label'] ?? status['value'] ?? ''),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        postStatusController.text = value ?? 'Draft';
-                      });
-                      if (widget.onStatusChanged != null && value != null) {
-                        widget.onStatusChanged!(value, widget.postDetail);
-                      }
-                    },
-                    disabledHint: Text(
-                      postStatusController.text.isNotEmpty ? postStatusController.text : 'Nháp',
-                      style: const TextStyle(color: Colors.black),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -282,6 +281,9 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                         ),
                       ),
                       const SizedBox(width: 16),
+                      // Chỉ hiển thị nút Cập Nhật/Tạo khi status là Pending hoặc Draft
+                      if (_normalizePostStatus(postStatusController.text) == 'Pending' || 
+                          _normalizePostStatus(postStatusController.text) == 'Draft')
                       Expanded(
                         child: Container(
                           height: 44,
@@ -701,12 +703,13 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
     // Normalize status to match PostStatus.values (Draft, Pending, Approved, Rejected)
     final statusLower = status.toLowerCase();
     if (statusLower == 'draft' || statusLower == 'nháp') return 'Draft';
+    if (statusLower == 'hidden' || statusLower == 'đã ẩn') return 'Hidden';
     if (statusLower == 'pending' || statusLower == 'đang chờ duyệt') return 'Pending';
     if (statusLower == 'approved' || statusLower == 'đã duyệt') return 'Approved';
     if (statusLower == 'rejected' || statusLower == 'bị từ chối') return 'Rejected';
     
     // If already in correct format, return as-is
-    if (['Draft', 'Pending', 'Approved', 'Rejected'].contains(status)) {
+    if (['Draft', 'Hidden', 'Pending', 'Approved', 'Rejected'].contains(status)) {
       return status;
     }
     

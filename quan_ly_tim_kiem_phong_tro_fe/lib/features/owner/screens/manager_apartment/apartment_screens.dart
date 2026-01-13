@@ -5,8 +5,10 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/user_con
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/detail_apartment_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_card_info.dart';
 
+import '../../widgets/common/filter_chip_widget.dart';
 import '../../widgets/widgets.dart';
 
+enum RoomFilter { rented, available }
 
 class ApartmentScreen extends StatefulWidget {
   const ApartmentScreen({super.key});
@@ -19,7 +21,7 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
   
   //get all list card infor
   Future<List<RoomCardInfo>> roomCards = ApartmentController().getSummaryRoom( FirebaseAuth.instance.currentUser!.uid);
-  RoomFilter currentFilter = RoomFilter.all;
+  RoomFilter currentFilter = RoomFilter.rented;
 
   // Method để refresh danh sách phòng
   void _refreshRoomList() {
@@ -30,8 +32,6 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
 
   List<RoomCardInfo> _filterRooms(List<RoomCardInfo> rooms) {
     switch (currentFilter) {
-      case RoomFilter.all:
-        return rooms;
       case RoomFilter.rented:
         // Lọc phòng đang ở (có khách thuê)
         return rooms.where((room) => 
@@ -343,8 +343,22 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
               SizedBox(
               height: screenHeight * 0.01,
               ),
-              LabelStatusWidget(
-                initialFilter: currentFilter,
+              FilterChipWidget<RoomFilter>(
+                currentFilter: currentFilter,
+                options: [
+                  FilterOption(
+                    label: 'Đang Ở',
+                    icon: Icons.home_rounded,
+                    color: const Color(0xFFEF4444),
+                    value: RoomFilter.rented,
+                  ),
+                  FilterOption(
+                    label: 'Đang Trống',
+                    icon: Icons.door_front_door_rounded,
+                    color: const Color(0xFF10B981),
+                    value: RoomFilter.available,
+                  ),
+                ],
                 onFilterChanged: (filter) {
                   setState(() {
                     currentFilter = filter;
@@ -373,12 +387,9 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
                   } else if (snapshot.hasData) {
                     final filteredRooms = _filterRooms(snapshot.data!);
                     if (filteredRooms.isEmpty) {
-                      String message = 'Chưa có phòng nào';
-                      if (currentFilter == RoomFilter.rented) {
-                        message = 'Chưa có phòng nào đang được thuê';
-                      } else if (currentFilter == RoomFilter.available) {
-                        message = 'Chưa có phòng trống';
-                      }
+                      String message = currentFilter == RoomFilter.rented
+                        ? 'Chưa có phòng nào đang được thuê'
+                        : 'Chưa có phòng trống';
                       return EmptyStateWidget(
                         title: 'Không có phòng',
                         message: message,

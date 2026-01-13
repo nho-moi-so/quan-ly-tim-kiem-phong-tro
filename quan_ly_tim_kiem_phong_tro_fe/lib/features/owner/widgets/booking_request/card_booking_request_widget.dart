@@ -69,7 +69,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
 
   String _displayStatus(String status) {
     final s = status.toLowerCase();
-    if (s.contains('approved') || s.contains('duyệt') || s.contains('xác nhận')) return 'Đã duyệt';
+    if (s.contains('approved') || s.contains('duyệt') || s.contains('xác nhận')) return 'Đã thanh toán';
     if (s.contains('cancelled') || s.contains('hủy') || s.contains('từ chối')) return 'Đã hủy';
     if (s.contains('pending') || s.contains('chờ')) return 'Chờ xử lý';
     if (s.contains('completed') || s.contains('hoàn thành')) return 'Hoàn thành';

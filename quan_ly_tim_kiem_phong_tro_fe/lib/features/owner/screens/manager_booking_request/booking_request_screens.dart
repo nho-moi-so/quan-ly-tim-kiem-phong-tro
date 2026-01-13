@@ -4,7 +4,10 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/booking_
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_contract/contract_detail_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/booking_request_summary.dart';
 
+import '../../widgets/common/filter_chip_widget.dart';
 import '../../widgets/widgets.dart';
+
+enum BookingFilter { approved, cancelled }
 
 class BookingRequestScreens extends StatefulWidget {
   @override
@@ -12,7 +15,7 @@ class BookingRequestScreens extends StatefulWidget {
 }
 
 class _BookingRequestScreensState extends State<BookingRequestScreens> {
-  String selectedStatus = 'Approved';
+  BookingFilter currentFilter = BookingFilter.approved;
   final BookingRequestController _bookingRequestController = BookingRequestController();
 
   List<BookingRequestSummary> allRequests = [];
@@ -42,7 +45,9 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
   Widget build(BuildContext context) {
     // Lọc theo status và ngày
     var filteredRequests = allRequests.where((r) {
-      final statusMatch = selectedStatus == 'All' || r.status == selectedStatus;
+      final statusMatch = currentFilter == BookingFilter.approved 
+        ? r.status == 'Approved'
+        : r.status == 'Cancelled';
       final date = r.checkinDate;
       // Nếu chưa chọn filter ngày thì luôn true
       if (filterFrom == null && filterTo == null) return statusMatch;
@@ -80,17 +85,29 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
               ],
               ),
               //filter status
-              FliterStatusWidget(
-                onStatusChanged: (status) {
+              FilterChipWidget<BookingFilter>(
+                currentFilter: currentFilter,
+                options: [
+                  FilterOption(
+                    label: 'Đã duyệt',
+                    icon: Icons.check_circle_rounded,
+                    color: const Color(0xFF10B981),
+                    value: BookingFilter.approved,
+                  ),
+                  FilterOption(
+                    label: 'Đã hủy',
+                    icon: Icons.cancel_rounded,
+                    color: const Color(0xFFEF4444),
+                    value: BookingFilter.cancelled,
+                  ),
+                ],
+                onFilterChanged: (filter) {
                   setState(() {
-                    selectedStatus = status;
+                    currentFilter = filter;
                   });
                 },
-                tabs: [
-                  'Approved',
-                  'Cancelled',
-                ],
               ),
+              SizedBox(height: screenHeight * 0.01),
               // //search by date
               SearchByDateWidget(
                 onDateRangeChanged: (from, to) async {
@@ -114,9 +131,9 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                 : filteredRequests.isEmpty
                   ? EmptyStateWidget(
                       title: 'Không có yêu cầu đặt phòng',
-                      message: selectedStatus == 'All' 
-                        ? 'Chưa có yêu cầu đặt phòng nào'
-                        : 'Không tìm thấy yêu cầu với trạng thái "$selectedStatus"',
+                      message: currentFilter == BookingFilter.approved
+                        ? 'Không có yêu cầu đặt phòng đã duyệt'
+                        : 'Không có yêu cầu đặt phòng đã hủy',
                     )
                   : Column(
                 children: filteredRequests

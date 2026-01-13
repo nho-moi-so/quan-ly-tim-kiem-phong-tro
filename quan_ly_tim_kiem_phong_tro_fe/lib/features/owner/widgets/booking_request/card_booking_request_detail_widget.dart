@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/booking_request_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/booking_request_detail.dart';
 
 class CardBookingRequestDetailWidget extends StatefulWidget {
@@ -63,20 +64,7 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
     }
   }
 
-  String _getStatusInVietnamese(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'Đang chờ';
-      case 'approved':
-        return 'Đã duyệt';
-      case 'cancelled':
-        return 'Đã hủy';
-      case 'completed':
-        return 'Hoàn thành';
-      default:
-        return status;
-    }
-  }
+
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
@@ -280,7 +268,7 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
                         const Divider(height: 24),
                         buildInfoRow('Check-out', _formatDateTime(bookingRequestDetail!.checkOutDate!), Icons.logout_rounded),
                         const Divider(height: 24),
-                        buildInfoRowWithStatus('Trạng thái', _getStatusInVietnamese(bookingRequestDetail!.status ?? ''), statusColor),
+                        buildInfoRowWithStatus('Trạng thái', getStatusInVietnameseCardBookingRequestDetailWidget(bookingRequestDetail!.status ?? ''), statusColor),
                         const Divider(height: 24),
                         buildInfoRow('Tiền phòng', '${formatCurrency(bookingRequestDetail!.price ?? 0.0)} VND', Icons.attach_money_rounded),
                       ],

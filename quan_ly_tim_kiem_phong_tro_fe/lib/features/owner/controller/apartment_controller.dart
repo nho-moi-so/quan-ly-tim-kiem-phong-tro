@@ -177,22 +177,22 @@ class ApartmentController {
               String roomId = apartmentId;
 
               Apartment apartment = await _apartmentService.getApartmentById(roomId);
-              print("==============1============");
+              // print("==============1============");
               //lay id cua amenity cua apartment
               List<String> amenities = [];
               List<AmenityInApartment> amenityInApartment = await _amenityInApartmentService.getAmenityInApartmentByApartmentId(apartmentId);
-              print("==============2============");
-              print(amenityInApartment.length);
+              // print("==============2============");
+              // print(amenityInApartment.length);
               //lay thong tin cua amenity dua vao id cua amenity trong amenitySnapshot
               for (var amenityDoc in amenityInApartment) {
-                print(amenityDoc.amenityId);
+                // print(amenityDoc.amenityId);
                 Amenity amenitySnapshot = await _amenityService.getAmenityById(amenityDoc.amenityId);
-                print(amenitySnapshot.description);
+                // print(amenitySnapshot.description);
                 amenities.add(amenitySnapshot.description);
 
               }
-              print('Amenities: $amenities');
-              print("==============3============");
+                // print('Amenities: $amenities');
+                // print("==============3============");
               //lấy thông tin chi tiết của phòng === này là dữ liệu giả
               RoomDetail roomDetail = RoomDetail(
                 roomId: apartmentId,
@@ -214,8 +214,8 @@ class ApartmentController {
                   : '',
                 roomType: apartment.type ?? '',
               );
-              print("==============4============");
-              print(roomDetail.roomType); //done
+              // print("==============4============");
+              // print(roomDetail.roomType); //done
     return roomDetail;
   }
 

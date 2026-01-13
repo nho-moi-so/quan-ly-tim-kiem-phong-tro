@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 
 class RoomPostItemWidget extends StatelessWidget {
   final String postId;
@@ -33,20 +34,7 @@ class RoomPostItemWidget extends StatelessWidget {
     }
   }
 
-  String _getStatusInVietnamese(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'Đang chờ';
-      case 'approved':
-        return 'Đã duyệt';
-      case 'rejected':
-        return 'Đã từ chối';
-      case 'hidden':
-        return 'Đã ẩn';
-      default:
-        return status;
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +192,7 @@ class RoomPostItemWidget extends StatelessWidget {
                           ],
                         ),
                         child: Text(
-                          _getStatusInVietnamese(status),
+                          getStatusInVietnameseRoomPostItemWidget(status),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,

@@ -12,22 +12,19 @@
 
 class ApartmentStatus {
   static const available = "Available";
-  static const pending = "Pending";
-  static const booked = "Booked";
-  static const occupied = "Occupied";
+  static const fixing = "Fixing";
+  static const rented = "Rented";
 
   static const values = [
     available,
-    pending,
-    booked,
-    occupied,
+    fixing,
+    rented,
   ];
 
   static const localized = {
     available: "Đang có sẵn",
-    pending: "Đang chờ",
-    booked: "Đã đặt",
-    occupied: "Đang ở",
+    fixing: "Đang sửa chữa",
+    rented: "Đã cho thuê",
   };
 
   static String toVietnamese(String status) {
@@ -72,12 +69,14 @@ class BookingRequestStatus {
 //kiểm tra status của post
 class PostStatus {
   static const draft = "Draft";
+  static const hidden = "Hidden";
   static const pending = "Pending";
   static const approved = "Approved";
   static const rejected = "Rejected";
 
   static const values = [
     draft,
+    hidden,
     pending,
     approved,
     rejected,
@@ -85,6 +84,7 @@ class PostStatus {
 
   static const localized = {
     draft: "Nháp",
+    hidden: "Đã ẩn",
     pending: "Đang chờ duyệt",
     approved: "Đã duyệt",
     rejected: "Bị từ chối",
@@ -104,8 +104,59 @@ class PostStatus {
   }
 }
 
-//kiểm tra status của user
 
-//kiểm tra status của contract
+  // các hàm status
+  String getStatusDisplayProfileScreen(String? status) {
+      switch (status?.toLowerCase()) {
+        case 'approved':
+          return 'Đã xác minh';
+        case 'pending':
+          return 'Đang chờ duyệt';
+        case 'rejected':
+          return 'Bị từ chối';
+        case 'active':
+          return 'Chờ xác minh';
+        default:
+          return 'Chưa xác minh';
+      }
+  }
+  
+  String getStatusInVietnameseCardRoomWidget(String status) {
+    if (status.contains('Available')) {
+      return 'Còn trống';
+    } else if (status.contains('Rented')) {
+      return 'Đang ở';
+    }
+    return status;
+  }
 
-//kiểm tra status của contentViolation
+    String getStatusInVietnameseCardBookingRequestDetailWidget(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'Đang chờ';
+      case 'approved':
+        return 'Đã thanh toán';
+      case 'cancelled':
+        return 'Đã hủy';
+      case 'completed':
+        return 'Hoàn thành';
+      default:
+        return status;
+    }
+  }
+
+    String getStatusInVietnameseRoomPostItemWidget(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'Đang chờ duyệt';
+      case 'approved':
+        return 'Đã duyệt';
+      case 'rejected':
+        return 'Đã từ chối';
+      case 'hidden':
+        return 'Đã ẩn';
+      default:
+        return status;
+    }
+  }
+  

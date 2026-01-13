@@ -4,20 +4,14 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_con
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_post/detail_post_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
 
+import '../../helpers/status_constants.dart';
 import '../../viewmodel/room_card_info.dart';
 class CardRoomWidget extends StatelessWidget {
   final RoomCardInfo data;
 
   const CardRoomWidget({super.key, required this.data});
 
-  String _getStatusInVietnamese(String status) {
-    if (status.contains('Available')) {
-      return 'Còn trống';
-    } else if (status.contains('Rented')) {
-      return 'Đang ở';
-    }
-    return status;
-  }
+
 
   Color _getStatusColor(String status) {
     if (status.contains('Còn trống') || status.contains('Available')) {
@@ -129,7 +123,7 @@ class CardRoomWidget extends StatelessWidget {
                     ],
                   ),
                   child: Text(
-                    _getStatusInVietnamese(data.status),
+                    getStatusInVietnameseCardRoomWidget(data.status),
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
