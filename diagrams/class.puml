@@ -4,6 +4,15 @@ left to right direction
 'down           up
 '       right
 
+' userStatus {
+'     ACTIVE,"Mới đăng ký, chưa làm gì.","Xem phòng, sửa profile, nhưng KHÔNG ĐƯỢC đăng bài."
+'     PENDING,"Đã gửi yêu cầu, chờ Admin duyệt.","Hiện thông báo: ""Đang chờ duyệt""."
+'     APPROVED,Đã được Admin duyệt (Tương đương Verified).,Được phép Đăng bài (Create Apartment).
+'     REJECTED,"Yêu cầu bị từ chối.","Hiện thông báo: ""Yêu cầu bị từ chối. Vui lòng liên hệ Admin để biết thêm chi tiết."""
+'     LOCKED,"Vi phạm, bị Admin khóa.",Không đăng nhập được hoặc bị chặn mọi tính năng.
+' }
+
+
 class User{
     - id: string
     - fullName: string

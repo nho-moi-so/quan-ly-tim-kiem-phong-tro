@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/detail_apartment_screen.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/new_customer_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_contract/contract_detail_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_post/detail_post_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_detail.dart';
@@ -15,7 +14,7 @@ class CardRoomWidget extends StatelessWidget {
     if (status.contains('Available')) {
       return 'Còn trống';
     } else if (status.contains('Rented')) {
-      return 'Đã thuê';
+      return 'Đang ở';
     }
     return status;
   }
@@ -23,7 +22,7 @@ class CardRoomWidget extends StatelessWidget {
   Color _getStatusColor(String status) {
     if (status.contains('Còn trống') || status.contains('Available')) {
       return const Color(0xFF10B981);
-    } else if (status.contains('Đã thuê') || status.contains('Rented')) {
+    } else if (status.contains('Đang ở') || status.contains('Rented')) {
       return const Color(0xFFEF4444);
     }
     return const Color(0xFF6B7280);
@@ -239,63 +238,34 @@ class CardRoomWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                // Second row: Delete and Edit/Add Customer
-                Row(
-                  children: [
-                    Expanded(
-                      child: _actionButton(
-                        label: 'Xóa',
-                        icon: Icons.delete_rounded,
-                        bgColor: const Color(0xFFEF4444),
-                        textColor: Colors.white,
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Row(
-                                children: const [
-                                  Icon(Icons.check_circle, color: Colors.white, size: 20),
-                                  SizedBox(width: 8),
-                                  Text('Xoá thành công'),
-                                ],
-                              ),
-                              backgroundColor: const Color(0xFFEF4444),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _actionButton(
-                        label: data.tenantName == "Chưa có khách thuê" ? 'Thêm Khách' : 'Chỉnh Sửa',
-                        icon: data.tenantName == "Chưa có khách thuê" 
-                            ? Icons.person_add_rounded 
-                            : Icons.edit_rounded,
-                        bgColor: const Color(0xFF8B5CF6),
-                        textColor: Colors.white,
-                        onTap: () async {
-                          if (data.tenantName == "Chưa có khách thuê") {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (context) => NewCustomerScreen()),
-                            );
-                          } else {
-                            RoomDetail roomDetail = await data.onViewDetail();
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => DetailApartmentScreen(roomDetail: roomDetail),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                // Second row: Delete button (only show when room is not rented)
+                if (data.tenantName == "Chưa có khách thuê") ...[
+                  const SizedBox(height: 8),
+                  _actionButton(
+                    label: 'Xóa',
+                    icon: Icons.delete_rounded,
+                    bgColor: const Color(0xFFEF4444),
+                    textColor: Colors.white,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: const [
+                              Icon(Icons.check_circle, color: Colors.white, size: 20),
+                              SizedBox(width: 8),
+                              Text('Xoá thành công'),
+                            ],
+                          ),
+                          backgroundColor: const Color(0xFFEF4444),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ],
             ),
           ),

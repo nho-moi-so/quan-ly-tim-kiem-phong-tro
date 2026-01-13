@@ -16,6 +16,8 @@ class UserService {
           fullName: data['Username'],
           email: data['Email'],
           phone: data['Phone'],
+          role: data['Role'],
+          status: data['Status'],
         ),
       );
     }
@@ -32,6 +34,8 @@ class UserService {
       fullName: data['Fullname'],
       email: data['Email'],
       phone: data['Phone'],
+      role: data['Role'],
+      status: data['Status'],
     );
   }
 
@@ -49,6 +53,8 @@ class UserService {
         fullName: data['Fullname'],
         email: data['Email'],
         phone: data['Phone'],
+        role: data['Role'],
+        status: data['Status'],
       );
     }
     return null; // Trả về null nếu không tìm thấy người dùng
@@ -68,6 +74,8 @@ class UserService {
         fullName: data['Fullname'],
         email: data['Email'],
         phone: data['Phone'],
+        role: data['Role'],
+        status: data['Status'],
       );
     }
     return null; // Trả về null nếu không tìm thấy người dùng
@@ -77,6 +85,12 @@ class UserService {
   //createUser
 
   //updateUser
+  Future<User> updateUserStatus(String id, String status) async {
+    await firestore.collection("users").doc(id).update({
+      'Status': status,
+    });
+    return getUserById(id);
+  }
 
   //deleteUser
 }

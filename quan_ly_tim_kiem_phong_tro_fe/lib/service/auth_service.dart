@@ -37,7 +37,9 @@ class AuthService {
         'Fullname': signUpViewModel.username,
         'Phone': signUpViewModel.phone,
         'Email': signUpViewModel.email,
-        'Role': signUpViewModel.role // Lưu role được chọn
+        'Role': signUpViewModel.role, // Lưu role được chọn
+        'Status': 'ACTIVE',
+
         // Không lưu password dạng plain text!
       });
 

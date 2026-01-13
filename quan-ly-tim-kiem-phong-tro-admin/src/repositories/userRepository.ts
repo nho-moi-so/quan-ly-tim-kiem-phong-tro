@@ -14,6 +14,7 @@ export interface User {
     Phone?: string;
     Role?: string;
     ViewStatistics?: string;
+    Status?: string;
 }
 
 /**

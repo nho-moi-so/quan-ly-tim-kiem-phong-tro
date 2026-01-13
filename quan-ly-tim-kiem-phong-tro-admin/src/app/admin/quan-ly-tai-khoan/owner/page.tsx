@@ -44,6 +44,9 @@ export default function DanhSachTaiKhoanOwner() {
           const v = (s || '').toLowerCase();
           if (v === 'locked') return 'Bị khóa';
           if (v === 'active') return 'Hoạt động';
+          if (v === 'pending') return 'Chờ duyệt';
+          if (v === 'approved') return 'Đã duyệt';
+          if (v === 'rejected') return 'Đã từ chối';
           return s;
         };
         const transformedData: TableData[] = result.data.map((owner: OwnerData) => ({
@@ -118,12 +121,13 @@ export default function DanhSachTaiKhoanOwner() {
       key: "trangThaiNgayTao",
       align: "center",
       render: (_, record) => {
-        const color =
-          record.trangThai === "Hoạt động"
-            ? "green"
-            : record.trangThai === "Bị khóa"
-            ? "red"
-            : "orange";
+        let color = "orange";
+        if (record.trangThai === "Hoạt động") color = "green";
+        else if (record.trangThai === "Bị khóa") color = "red";
+        else if (record.trangThai === "Chờ duyệt") color = "blue";
+        else if (record.trangThai === "Đã duyệt") color = "green";
+        else if (record.trangThai === "Đã từ chối") color = "volcano";
+        
         return (
           <Space>
             <Tag color={color}>{record.trangThai}</Tag>
@@ -146,7 +150,51 @@ export default function DanhSachTaiKhoanOwner() {
           >
             Xem
           </Button>
-          {record.trangThai === 'Bị khóa' ? (
+          {record.trangThai === 'Chờ duyệt' ? (
+            <>
+              <Button
+                type="primary"
+                style={{ backgroundColor: '#52c41a' }}
+                onClick={async () => {
+                  try {
+                    const res = await fetch(`/api/users/owners/${record.userId}/approve`, { method: 'POST' });
+                    const json = await res.json();
+                    if (json.status === 'success') {
+                      message.success('Duyệt tài khoản thành công');
+                      fetchOwners();
+                    } else {
+                      message.error(json.message || 'Có lỗi xảy ra');
+                    }
+                  } catch (e) {
+                    console.error('Approve owner error:', e);
+                    message.error('Lỗi khi duyệt tài khoản');
+                  }
+                }}
+              >
+                Duyệt
+              </Button>
+              <Button
+                danger
+                onClick={async () => {
+                  try {
+                    const res = await fetch(`/api/users/owners/${record.userId}/reject`, { method: 'POST' });
+                    const json = await res.json();
+                    if (json.status === 'success') {
+                      message.success('Từ chối tài khoản thành công');
+                      fetchOwners();
+                    } else {
+                      message.error(json.message || 'Có lỗi xảy ra');
+                    }
+                  } catch (e) {
+                    console.error('Reject owner error:', e);
+                    message.error('Lỗi khi từ chối tài khoản');
+                  }
+                }}
+              >
+                Từ chối
+              </Button>
+            </>
+          ) : record.trangThai === 'Bị khóa' ? (
             <Button
               type="primary"
               onClick={async () => {
@@ -189,12 +237,6 @@ export default function DanhSachTaiKhoanOwner() {
               Khóa
             </Button>
           )}
-          {/* <Button
-            danger
-            onClick={() => console.log("Xóa tài khoản", record.maTaiKhoan)}
-          >
-            Xóa
-          </Button> */}
         </Space>
       ),
     },

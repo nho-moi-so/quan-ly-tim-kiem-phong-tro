@@ -48,7 +48,7 @@ export const UserService = {
                 fullName: owner.Fullname,
                 email: owner.Email,
                 phone: owner.Phone,
-                status: owner.OwnerStatus ?? "active",
+                status: owner.Status ?? "active",
             });
         }
         return ownerSummaries;
@@ -65,7 +65,7 @@ export const UserService = {
             fullName: user.Fullname,
             email: user.Email,
             phone: user.Phone,
-            status: user.OwnerStatus ?? "active",
+            status: user.Status ?? "active",
             registeredAt: "2023-01-01" //== Hardcoded for now
         };
     },
@@ -104,6 +104,24 @@ export const UserService = {
         }
         const updated = await UserRepository.update(ownerId, { OwnerStatus: 'active' });
         return { userCode: updated.Id, status: updated.OwnerStatus ?? 'active' };
+    },
+
+    approveOwner: async (ownerId: string) => {
+        const user = await UserRepository.getById(ownerId);
+        if (!user || user.Role !== 'owner') {
+            throw new Error('Owner not found');
+        }
+        const updated = await UserRepository.update(ownerId, { Status: 'APPROVED' });
+        return { userCode: updated.Id, status: updated.Status.toUpperCase() ?? 'APPROVED' };
+    },
+
+    rejectOwner: async (ownerId: string) => {
+        const user = await UserRepository.getById(ownerId);
+        if (!user || user.Role !== 'owner') {
+            throw new Error('Owner not found');
+        }
+        const updated = await UserRepository.update(ownerId, { Status: 'REJECTED' });
+        return { userCode: updated.Id, status: updated.Status.toUpperCase() ?? 'REJECTED' };
     },
 
     getUserByEmail: async (email: string) => {
