@@ -138,5 +138,56 @@ export const UserService = {
             fullName: user.Fullname,
             role: user.Role
         };
+    },
+
+    /**
+     * Get admin user by email
+     */
+    getAdminByEmail: async (email: string) => {
+        const users = await UserRepository.getAll();
+        const user = users.find(u => u.Email === email && u.Role === 'admin');
+        
+        if (!user) {
+            return null;
+        }
+
+        return {
+            userId: user.Id,
+            email: user.Email,
+            fullName: user.Fullname,
+            phone: user.Phone,
+            role: user.Role
+        };
+    },
+
+    /**
+     * Update admin profile
+     */
+    updateAdminProfile: async (userId: string, data: { fullName?: string; phone?: string }) => {
+        const user = await UserRepository.getById(userId);
+        
+        if (!user || user.Role !== 'admin') {
+            throw new Error('Admin not found');
+        }
+
+        const updateData: { Fullname?: string; Phone?: string } = {};
+        
+        if (data.fullName) {
+            updateData.Fullname = data.fullName;
+        }
+        
+        if (data.phone !== undefined) {
+            updateData.Phone = data.phone;
+        }
+
+        const updated = await UserRepository.update(userId, updateData);
+        
+        return {
+            userId: updated.Id,
+            email: updated.Email,
+            fullName: updated.Fullname,
+            phone: updated.Phone,
+            role: updated.Role
+        };
     }
 };

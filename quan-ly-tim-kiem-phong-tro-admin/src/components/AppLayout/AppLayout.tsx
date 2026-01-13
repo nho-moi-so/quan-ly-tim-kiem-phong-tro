@@ -1,16 +1,18 @@
 "use client";
 
+import { auth } from "@/lib/firebase/config";
 import {
-  AppstoreOutlined,
-  DashboardOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  UserOutlined
+    AppstoreOutlined,
+    DashboardOutlined,
+    LogoutOutlined,
+    MenuFoldOutlined,
+    MenuUnfoldOutlined,
+    UserOutlined
 } from "@ant-design/icons";
 import type { GetProps, MenuProps } from "antd";
-import { Avatar, Button, Input, Layout, Menu, theme } from "antd";
+import { Avatar, Button, Dropdown, Input, Layout, Menu, message, Modal, theme } from "antd";
 import { useRouter } from "next/navigation";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 
 type MenuItem = Required<MenuProps>["items"][number];
 type SearchProps = GetProps<typeof Input.Search>;
@@ -22,19 +24,44 @@ const UserList = ["U", "Lucy", "Tom", "Edward"];
 const ColorList = ["#f56a00", "#7265e6", "#ffbf00", "#00a2ae"];
 const GapList = [4, 3, 2, 1];
 
-const UserAvatar: React.FC = () => {
-  const [user] = useState(UserList[0]);
-  const [color] = useState(ColorList[0]);
-  const [gap] = useState(GapList[0]);
+interface UserAvatarProps {
+  userName?: string;
+  onProfileClick: () => void;
+  onLogoutClick: () => void;
+}
+
+const UserAvatar: React.FC<UserAvatarProps> = ({ userName, onProfileClick, onLogoutClick }) => {
+  const displayName = userName || "A";
+  const color = ColorList[0];
+
+  const dropdownItems: MenuProps['items'] = [
+    {
+      key: 'profile',
+      icon: <UserOutlined />,
+      label: 'Thông tin cá nhân',
+      onClick: onProfileClick,
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'Đăng xuất',
+      danger: true,
+      onClick: onLogoutClick,
+    },
+  ];
 
   return (
-    <Avatar
-      style={{ backgroundColor: color, verticalAlign: "middle" }}
-      size="large"
-      gap={gap}
-    >
-      {user}
-    </Avatar>
+    <Dropdown menu={{ items: dropdownItems }} placement="bottomRight" trigger={['click']}>
+      <Avatar
+        style={{ backgroundColor: color, verticalAlign: "middle", cursor: "pointer" }}
+        size="large"
+      >
+        {displayName.charAt(0).toUpperCase()}
+      </Avatar>
+    </Dropdown>
   );
 };
 
@@ -47,10 +74,43 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [userName, setUserName] = useState<string>("");
   const router = useRouter();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  useEffect(() => {
+    // Get user info from localStorage
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setUserName(user.fullName || "Admin");
+    }
+  }, []);
+
+  const handleProfileClick = () => {
+    router.push("/admin/profile");
+  };
+
+  const handleLogoutClick = () => {
+    setLogoutModalVisible(true);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      localStorage.removeItem("user");
+      localStorage.removeItem("idToken");
+      message.success("Đăng xuất thành công!");
+      router.push("/auth/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      message.error("Có lỗi xảy ra khi đăng xuất");
+    }
+    setLogoutModalVisible(false);
+  };
 
   const items: MenuItem[] = [
     {
@@ -202,7 +262,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </div>
 
           {/* Avatar */}
-          <UserAvatar />
+          <UserAvatar 
+            userName={userName}
+            onProfileClick={handleProfileClick}
+            onLogoutClick={handleLogoutClick}
+          />
         </Header>
 
         <Content
@@ -217,6 +281,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           {children}
         </Content>
       </Layout>
+
+      <Modal
+        title="Xác nhận đăng xuất"
+        open={logoutModalVisible}
+        onOk={handleLogout}
+        onCancel={() => setLogoutModalVisible(false)}
+        okText="Đăng xuất"
+        cancelText="Hủy"
+        okButtonProps={{ danger: true }}
+      >
+        <p>Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?</p>
+      </Modal>
     </Layout>
   );
 };
