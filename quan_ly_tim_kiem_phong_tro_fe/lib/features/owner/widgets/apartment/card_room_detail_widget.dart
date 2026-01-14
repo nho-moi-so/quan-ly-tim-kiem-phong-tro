@@ -282,9 +282,9 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                       ),
                     ),
                     // Chỉ hiện nút check và random khi đang tạo mới (roomCode rỗng ban đầu)
-                    // if (widget.initialData.roomCode.isEmpty)
-                    //   const SizedBox(width: 8),
-                    // if (widget.initialData.roomCode.isEmpty)
+                    if (widget.initialData.roomCode.isEmpty)
+                      const SizedBox(width: 8),
+                    if (widget.initialData.roomCode.isEmpty)
                       // Nút kiểm tra
                       Material(
                         color: const Color(0xFF4C6FFF),
@@ -333,9 +333,9 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                           ),
                         ),
                       ),
-                    // if (widget.initialData.roomCode.isEmpty)
-                    //   const SizedBox(width: 8),
-                    // if (widget.initialData.roomCode.isEmpty)
+                    if (widget.initialData.roomCode.isEmpty)
+                      const SizedBox(width: 8),
+                    if (widget.initialData.roomCode.isEmpty)
                       // Nút random
                       Material(
                         color: const Color(0xFF10B981),
@@ -980,7 +980,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                if (selectedRoomState != ApartmentStatus.rented)
+                // if (selectedRoomState != ApartmentStatus.rented)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1068,6 +1068,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                           },
                         ),
                       const SizedBox(height: 12),
+                      if (selectedRoomState != ApartmentStatus.rented)
                       // Nút thêm ảnh đẹp hơn
                       InkWell(
                         onTap: _pickImages,
@@ -1950,61 +1951,62 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                   ],
                 ),
                 // Nút xem full map
-                Positioned(
-                  bottom: 8,
-                  right: 8,
-                  child: Material(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    elevation: 2,
-                    child: InkWell(
+                if (selectedRoomState != ApartmentStatus.rented)
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Material(
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
-                      onTap: () async {
-                        final result = await showDialog<LocationResult>(
-                          context: context,
-                          builder: (context) => MapPickerDialog(
-                            initialAddress: addressController.text,
-                            initialLatitude: _selectedLatitude,
-                            initialLongitude: _selectedLongitude,
-                          ),
-                        );
-
-                        if (result != null) {
-                          setState(() {
-                            addressController.text = result.address;
-                            _selectedLatitude = result.latitude;
-                            _selectedLongitude = result.longitude;
-                          });
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.fullscreen,
-                              size: 18,
-                              color: Color(0xFF4C6FFF),
+                      elevation: 2,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () async {
+                          final result = await showDialog<LocationResult>(
+                            context: context,
+                            builder: (context) => MapPickerDialog(
+                              initialAddress: addressController.text,
+                              initialLatitude: _selectedLatitude,
+                              initialLongitude: _selectedLongitude,
                             ),
-                            const SizedBox(width: 4),
-                            const Text(
-                              'Xem đầy đủ',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                          );
+
+                          if (result != null) {
+                            setState(() {
+                              addressController.text = result.address;
+                              _selectedLatitude = result.latitude;
+                              _selectedLongitude = result.longitude;
+                            });
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.fullscreen,
+                                size: 18,
                                 color: Color(0xFF4C6FFF),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              const Text(
+                                'Xem đầy đủ',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF4C6FFF),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -2089,37 +2091,38 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
               ),
             ),
           ),
-          // Nút xóa
-          Positioned(
-            top: 4,
-            right: 4,
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  if (isNetworkImage) {
-                    initialImages.removeAt(index);
-                  } else {
-                    _images.removeAt(index - initialImages.length);
-                  }
-                });
-              },
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEF4444),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+          // Nút xóa - chỉ hiển thị khi không phải trạng thái Rented
+          if (selectedRoomState != ApartmentStatus.rented)
+            Positioned(
+              top: 4,
+              right: 4,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    if (isNetworkImage) {
+                      initialImages.removeAt(index);
+                    } else {
+                      _images.removeAt(index - initialImages.length);
+                    }
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white, size: 16),
                 ),
-                child: const Icon(Icons.close, color: Colors.white, size: 16),
               ),
             ),
-          ),
         ],
       ),
     );

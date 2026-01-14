@@ -22,6 +22,10 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
   //get all list card infor
   Future<List<RoomCardInfo>> roomCards = ApartmentController().getSummaryRoom( FirebaseAuth.instance.currentUser!.uid);
   RoomFilter currentFilter = RoomFilter.rented;
+  
+  // Pagination variables
+  int _currentPage = 1;
+  final int _itemsPerPage = 5;
 
   // Method để refresh danh sách phòng
   void _refreshRoomList() {
@@ -31,19 +35,45 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
   }
 
   List<RoomCardInfo> _filterRooms(List<RoomCardInfo> rooms) {
+    List<RoomCardInfo> filtered;
     switch (currentFilter) {
       case RoomFilter.rented:
         // Lọc phòng đang ở (có khách thuê)
-        return rooms.where((room) => 
+        filtered = rooms.where((room) => 
           room.tenantName != "Chưa có khách thuê" && 
           (room.status == 'Rented' || room.status.contains('Rented'))
         ).toList();
+        break;
       case RoomFilter.available:
         // Lọc phòng còn trống (chưa có khách thuê hoặc status là đang trống)
-        return rooms.where((room) => 
+        filtered = rooms.where((room) => 
           room.tenantName == "Chưa có khách thuê" || 
           (room.status == 'Available' || room.status.contains('Available'))
         ).toList();
+        break;
+    }
+    
+    // Apply pagination
+    final startIndex = 0;
+    final endIndex = _currentPage * _itemsPerPage;
+    if (endIndex >= filtered.length) {
+      return filtered;
+    }
+    return filtered.sublist(startIndex, endIndex);
+  }
+  
+  int _getTotalFilteredCount(List<RoomCardInfo> rooms) {
+    switch (currentFilter) {
+      case RoomFilter.rented:
+        return rooms.where((room) => 
+          room.tenantName != "Chưa có khách thuê" && 
+          (room.status == 'Rented' || room.status.contains('Rented'))
+        ).length;
+      case RoomFilter.available:
+        return rooms.where((room) => 
+          room.tenantName == "Chưa có khách thuê" || 
+          (room.status == 'Available' || room.status.contains('Available'))
+        ).length;
     }
   }
 
@@ -362,6 +392,7 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
                 onFilterChanged: (filter) {
                   setState(() {
                     currentFilter = filter;
+                    _currentPage = 1; // Reset pagination khi đổi filter
                   });
                 },
               ),
@@ -385,8 +416,11 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
                       icon: Icons.error_outline,
                     );
                   } else if (snapshot.hasData) {
-                    final filteredRooms = _filterRooms(snapshot.data!);
-                    if (filteredRooms.isEmpty) {
+                    final allRooms = snapshot.data!;
+                    final totalCount = _getTotalFilteredCount(allRooms);
+                    final filteredRooms = _filterRooms(allRooms);
+                    
+                    if (totalCount == 0) {
                       String message = currentFilter == RoomFilter.rented
                         ? 'Chưa có phòng nào đang được thuê'
                         : 'Chưa có phòng trống';
@@ -396,8 +430,84 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
                         icon: Icons.home_outlined,
                       );
                     }
+                    
+                    final hasMore = filteredRooms.length < totalCount;
+                    
                     return Column(
-                      children: filteredRooms.map((card) => CardRoomWidget(data: card,)).toList(),
+                      children: [
+                        // Hiển thị số lượng
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            'Hiển thị ${filteredRooms.length} / $totalCount phòng',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF6B7280),
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ),
+                        // Danh sách phòng
+                        ...filteredRooms.map((card) => CardRoomWidget(data: card,)).toList(),
+                        // Nút xem thêm
+                        if (hasMore)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Container(
+                              width: double.infinity,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF4C6FFF), Color(0xFF6B8AFF)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _currentPage++;
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Text(
+                                          'Xem thêm',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                            fontFamily: 'Inter',
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     );
                   }
                   return const SizedBox.shrink();

@@ -21,6 +21,10 @@ class _PostScreenState extends State<PostScreen> {
   List<PostSummary> _posts = [];
   bool _isLoading = true;
   PostFilter currentFilter = PostFilter.pending;
+  
+  // Pagination variables
+  int _currentPage = 1;
+  final int _itemsPerPage = 5;
 
   @override
   void initState() {
@@ -37,22 +41,54 @@ class _PostScreenState extends State<PostScreen> {
   }
 
   List<PostSummary> _filterPosts(List<PostSummary> posts) {
+    List<PostSummary> filtered;
+    switch (currentFilter) {
+      case PostFilter.pending:
+        filtered = posts.where((post) => 
+          post.status?.toLowerCase() == 'pending' || 
+          post.status?.toLowerCase() == 'đang chờ duyệt'
+        ).toList();
+        break;
+      case PostFilter.approved:
+        filtered = posts.where((post) => 
+          post.status?.toLowerCase() == 'approved' || 
+          post.status?.toLowerCase() == 'đã duyệt'
+        ).toList();
+        break;
+      case PostFilter.rejected:
+        filtered = posts.where((post) => 
+          post.status?.toLowerCase() == 'rejected' || 
+          post.status?.toLowerCase() == 'bị từ chối'
+        ).toList();
+        break;
+    }
+    
+    // Apply pagination
+    final startIndex = 0;
+    final endIndex = _currentPage * _itemsPerPage;
+    if (endIndex >= filtered.length) {
+      return filtered;
+    }
+    return filtered.sublist(startIndex, endIndex);
+  }
+  
+  int _getTotalFilteredCount(List<PostSummary> posts) {
     switch (currentFilter) {
       case PostFilter.pending:
         return posts.where((post) => 
           post.status?.toLowerCase() == 'pending' || 
           post.status?.toLowerCase() == 'đang chờ duyệt'
-        ).toList();
+        ).length;
       case PostFilter.approved:
         return posts.where((post) => 
           post.status?.toLowerCase() == 'approved' || 
           post.status?.toLowerCase() == 'đã duyệt'
-        ).toList();
+        ).length;
       case PostFilter.rejected:
         return posts.where((post) => 
           post.status?.toLowerCase() == 'rejected' || 
           post.status?.toLowerCase() == 'bị từ chối'
-        ).toList();
+        ).length;
     }
   }
 
@@ -121,6 +157,7 @@ class _PostScreenState extends State<PostScreen> {
                 onFilterChanged: (filter) {
                   setState(() {
                     currentFilter = filter;
+                    _currentPage = 1; // Reset pagination khi đổi filter
                   });
                 },
               ),
@@ -135,38 +172,126 @@ class _PostScreenState extends State<PostScreen> {
                   message: 'Bạn chưa có bài đăng nào',
                   icon: Icons.post_add,
                 )
-              else if (_filterPosts(_posts).isEmpty)
-                EmptyStateWidget(
-                  title: 'Không có bài đăng',
-                  message: _getEmptyMessage(),
-                  icon: Icons.post_add,
-                )
-              else
-                ..._filterPosts(_posts).map((post) => RoomPostItemWidget(
-                      postId: post.postId!,
-                      roomName: post.roomNumber!,
-                      postDate: "${post.postDate?.day.toString().padLeft(2, '0')}/${post.postDate?.month.toString().padLeft(2, '0')}/${post.postDate?.year}",
-                      status: post.status!,
-                      imageUrl: post.imageUrl!,
-                      onAction: (postId, action) {
-                        if (action == 'view') {
-                          // Xử lý xem chi tiết
-                          print("Xem chi tiết bài viết: $postId");
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailPostScreen(postId: postId),
+              else ...[  
+                // Số lượng bài đăng
+                Builder(
+                  builder: (context) {
+                    final totalCount = _getTotalFilteredCount(_posts);
+                    final filteredPosts = _filterPosts(_posts);
+                    
+                    if (totalCount == 0) {
+                      return EmptyStateWidget(
+                        title: 'Không có bài đăng',
+                        message: _getEmptyMessage(),
+                        icon: Icons.post_add,
+                      );
+                    }
+                    
+                    final hasMore = filteredPosts.length < totalCount;
+                    
+                    return Column(
+                      children: [
+                        // Hiển thị số lượng
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            'Hiển thị ${filteredPosts.length} / $totalCount bài đăng',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF6B7280),
+                              fontFamily: 'Inter',
                             ),
-                          );
-                        } else if (action == 'edit') {
-                          // Xử lý chỉnh sửa
-                          print("Chỉnh sửa bài viết: $postId");
-                        } else if (action == 'delete') {
-                          print("Xóa bài viết: $postId");
-                          // Xử lý xóa bài viết
-                        }
-                      },
-                    )),
+                          ),
+                        ),
+                        // Danh sách bài đăng
+                        ...filteredPosts.map((post) => RoomPostItemWidget(
+                              postId: post.postId!,
+                              roomName: post.roomNumber!,
+                              postDate: "${post.postDate?.day.toString().padLeft(2, '0')}/${post.postDate?.month.toString().padLeft(2, '0')}/${post.postDate?.year}",
+                              status: post.status!,
+                              imageUrl: post.imageUrl!,
+                              onAction: (postId, action) {
+                                if (action == 'view') {
+                                  // Xử lý xem chi tiết
+                                  print("Xem chi tiết bài viết: $postId");
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailPostScreen(postId: postId),
+                                    ),
+                                  );
+                                } else if (action == 'edit') {
+                                  // Xử lý chỉnh sửa
+                                  print("Chỉnh sửa bài viết: $postId");
+                                } else if (action == 'delete') {
+                                  print("Xóa bài viết: $postId");
+                                  // Xử lý xóa bài viết
+                                }
+                              },
+                            )),
+                        // Nút xem thêm
+                        if (hasMore)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Container(
+                              width: double.infinity,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF4C6FFF), Color(0xFF6B8AFF)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _currentPage++;
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Text(
+                                          'Xem thêm',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                            fontFamily: 'Inter',
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ],
             ],
           ),
         ),

@@ -23,6 +23,10 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
 
   DateTime? filterFrom;
   DateTime? filterTo;
+  
+  // Pagination variables
+  int _currentPage = 1;
+  final int _itemsPerPage = 5;
 
   @override
   void initState() {
@@ -104,6 +108,7 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                 onFilterChanged: (filter) {
                   setState(() {
                     currentFilter = filter;
+                    _currentPage = 1; // Reset pagination khi đổi filter
                   });
                 },
               ),
@@ -115,6 +120,7 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                   filterTo = to;
                   setState(() {
                     _isLoading = true;
+                    _currentPage = 1; // Reset pagination khi tìm kiếm
                   });
                   final results = await _bookingRequestController
                       .searchBookingRequestByStartDateAndEndDate(FirebaseAuth.instance.currentUser!.uid, from, to);
@@ -135,55 +141,140 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                         ? 'Không có yêu cầu đặt phòng đã duyệt'
                         : 'Không có yêu cầu đặt phòng đã hủy',
                     )
-                  : Column(
-                children: filteredRequests
-                    .map((req) => CardBookingRequestWidget(
-                          bookingId: req.bookingId ?? '',
-                          bookingCode: req.bookingCode ?? '',
-                          customerName: req.customerName ?? '',
-                          checkinCheckout: req.checkinCheckout ?? '',
-                          status: req.status ?? '',
-                          checkinDate: req.checkinDate != null
-                              ? "${req.checkinDate!.day.toString().padLeft(2, '0')}/${req.checkinDate!.month.toString().padLeft(2, '0')}/${req.checkinDate!.year}"
-                              : 'Không có thông tin',
-                          checkoutDate: req.checkoutDate != null
-                              ? "${req.checkoutDate!.day.toString().padLeft(2, '0')}/${req.checkoutDate!.month.toString().padLeft(2, '0')}/${req.checkoutDate!.year}"
-                              : 'Không có thông tin',
-                          totalPrice: req.totalPrice,
-                          cancelReason: 'Khách hàng đổi ý', //== Lấy từ database
-                          isRefunded: false, //== Lấy từ database
-                          onConfirm: (action) async {
-                              if (action == BookingAction.viewContract) {
-                                //== Hiển thị màn hình hợp đồng
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Row(
-                                      children: [
-                                        const Icon(Icons.description, color: Colors.white),
-                                        const SizedBox(width: 12),
-                                        Text('Xem hợp đồng: ${req.bookingCode}'),
-                                      ],
+                  : Builder(
+                      builder: (context) {
+                        final totalCount = filteredRequests.length;
+                        final startIndex = 0;
+                        final endIndex = _currentPage * _itemsPerPage;
+                        final paginatedRequests = endIndex >= totalCount 
+                          ? filteredRequests 
+                          : filteredRequests.sublist(startIndex, endIndex);
+                        final hasMore = paginatedRequests.length < totalCount;
+                        
+                        return Column(
+                          children: [
+                            // Hiển thị số lượng
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Text(
+                                'Hiển thị ${paginatedRequests.length} / $totalCount yêu cầu',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF6B7280),
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ),
+                            // Danh sách yêu cầu
+                            ...paginatedRequests
+                                .map((req) => CardBookingRequestWidget(
+                                      bookingId: req.bookingId ?? '',
+                                      bookingCode: req.bookingCode ?? '',
+                                      customerName: req.customerName ?? '',
+                                      checkinCheckout: req.checkinCheckout ?? '',
+                                      status: req.status ?? '',
+                                      checkinDate: req.checkinDate != null
+                                          ? "${req.checkinDate!.day.toString().padLeft(2, '0')}/${req.checkinDate!.month.toString().padLeft(2, '0')}/${req.checkinDate!.year}"
+                                          : 'Không có thông tin',
+                                      checkoutDate: req.checkoutDate != null
+                                          ? "${req.checkoutDate!.day.toString().padLeft(2, '0')}/${req.checkoutDate!.month.toString().padLeft(2, '0')}/${req.checkoutDate!.year}"
+                                          : 'Không có thông tin',
+                                      totalPrice: req.totalPrice,
+                                      cancelReason: 'Khách hàng đổi ý', //== Lấy từ database
+                                      isRefunded: false, //== Lấy từ database
+                                      onConfirm: (action) async {
+                                          if (action == BookingAction.viewContract) {
+                                            //== Hiển thị màn hình hợp đồng
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Row(
+                                                  children: [
+                                                    const Icon(Icons.description, color: Colors.white),
+                                                    const SizedBox(width: 12),
+                                                    Text('Xem hợp đồng: ${req.bookingCode}'),
+                                                  ],
+                                                ),
+                                                backgroundColor: const Color(0xFF10B981),
+                                                duration: const Duration(seconds: 2),
+                                                behavior: SnackBarBehavior.floating,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(10),
+                                                ),
+                                              ),
+                                            );
+                                            //== Hiển thị màn hình hợp đồng
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => ContractDetailScreen(contractId: req.bookingId ?? ''),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ))
+                                .toList(),
+                            // Nút xem thêm
+                            if (hasMore)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFF4C6FFF), Color(0xFF6B8AFF)],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
-                                    backgroundColor: const Color(0xFF10B981),
-                                    duration: const Duration(seconds: 2),
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          _currentPage++;
+                                        });
+                                      },
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Center(
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            const Text(
+                                              'Xem thêm',
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.white,
+                                                fontFamily: 'Inter',
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            const Icon(
+                                              Icons.keyboard_arrow_down_rounded,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                );
-                                //== Hiển thị màn hình hợp đồng
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ContractDetailScreen(contractId: req.bookingId ?? ''),
-                                  ),
-                                );
-                              }
-                            },
-                          ))
-                    .toList(),
-              ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
               SizedBox(height: screenHeight * 0.02),
             ],
           ),

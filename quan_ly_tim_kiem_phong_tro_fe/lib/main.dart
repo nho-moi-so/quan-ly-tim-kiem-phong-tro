@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/common/screens/register_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/socket_service.dart';
@@ -40,6 +41,17 @@ import 'service/navigation_service.dart';
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
+        // Thêm hỗ trợ tiếng Việt
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('vi', 'VN'), // Tiếng Việt
+          Locale('en', 'US'), // Tiếng Anh
+        ],
+        locale: const Locale('vi', 'VN'), // Set mặc định là tiếng Việt
         navigatorKey: navigationService.navigatorKey, // ← BẮT BUỘC
         initialRoute: '/login', // Đổi từ '/' sang '/main'
         routes: {

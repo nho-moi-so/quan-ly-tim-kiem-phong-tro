@@ -24,6 +24,10 @@ class _MessageScreenState extends State<MessageScreen> {
   bool _isLoading = true;
   bool _isSearching = false;
   String _searchQuery = '';
+  
+  // Pagination variables
+  int _currentPage = 1;
+  final int _itemsPerPage = 8;
 
   @override
   void initState() {
@@ -86,6 +90,7 @@ class _MessageScreenState extends State<MessageScreen> {
       _searchQuery = query;
       _isSearching = true;
       _searchedUsers = [];
+      _currentPage = 1; // Reset pagination khi tìm kiếm
     });
 
     if (query.isEmpty) {
@@ -419,19 +424,105 @@ class _MessageScreenState extends State<MessageScreen> {
                             message: 'Bạn chưa có tin nhắn nào',
                             icon: Icons.chat_bubble_outline,
                           )
-                        : Column(
-                          children: _filteredMessages
-                            .map((msg) => ChatItem(
-                                avatarUrl: msg.avatarUrl,
-                                name: msg.name,
-                                message: msg.message,
-                                status: msg.status,
-                                onTap: () {
-                                  _showChatBottomSheet(context, msg);
-                                },
-                              ))
-                            .toList(),
-                        ),
+                        : Builder(
+                            builder: (context) {
+                              final totalCount = _filteredMessages.length;
+                              final startIndex = 0;
+                              final endIndex = _currentPage * _itemsPerPage;
+                              final paginatedMessages = endIndex >= totalCount 
+                                ? _filteredMessages 
+                                : _filteredMessages.sublist(startIndex, endIndex);
+                              final hasMore = paginatedMessages.length < totalCount;
+                              
+                              return Column(
+                                children: [
+                                  // Hiển thị số lượng
+                                  if (totalCount > 0)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 8),
+                                      child: Text(
+                                        'Hiển thị ${paginatedMessages.length} / $totalCount cuộc trò chuyện',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xFF6B7280),
+                                          fontFamily: 'Inter',
+                                        ),
+                                      ),
+                                    ),
+                                  // Danh sách tin nhắn
+                                  ...paginatedMessages
+                                    .map((msg) => ChatItem(
+                                        avatarUrl: msg.avatarUrl,
+                                        name: msg.name,
+                                        message: msg.message,
+                                        status: msg.status,
+                                        onTap: () {
+                                          _showChatBottomSheet(context, msg);
+                                        },
+                                      ))
+                                    .toList(),
+                                  // Nút xem thêm
+                                  if (hasMore)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [Color(0xFF4C6FFF), Color(0xFF6B8AFF)],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                _currentPage++;
+                                              });
+                                            },
+                                            borderRadius: BorderRadius.circular(12),
+                                            child: Center(
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: const [
+                                                  Text(
+                                                    'Xem thêm',
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.white,
+                                                      fontFamily: 'Inter',
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 8),
+                                                  Icon(
+                                                    Icons.keyboard_arrow_down_rounded,
+                                                    color: Colors.white,
+                                                    size: 20,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
                 
             ],
           ),
