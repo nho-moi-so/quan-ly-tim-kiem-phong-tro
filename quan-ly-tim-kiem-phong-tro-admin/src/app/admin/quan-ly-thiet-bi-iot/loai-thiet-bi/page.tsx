@@ -7,6 +7,7 @@ type DeviceTypeRow = {
   Id: string;
   Name: string;
   Description?: string;
+  connectionCount?: number;
 };
 
 export default function LoaiThietBiPage() {
@@ -94,10 +95,18 @@ export default function LoaiThietBiPage() {
           <Button onClick={() => handleView(record)}>Xem</Button>
           <Button type="primary" onClick={() => handleEdit(record)}>Chỉnh sửa</Button>
           <Popconfirm 
-            title="Xác nhận xóa loại thiết bị?" 
+            title={record.connectionCount && record.connectionCount > 0 ? "Không thể xóa loại thiết bị này vì đang có thiết bị kết nối sử dụng" : "Xác nhận xóa loại thiết bị?"}
             onConfirm={() => handleDelete(record.Id)}
+            disabled={record.connectionCount && record.connectionCount > 0}
           >
-            <Button danger type="primary">Xóa</Button>
+            <Button 
+              danger 
+              type="primary"
+              disabled={record.connectionCount && record.connectionCount > 0}
+              title={record.connectionCount && record.connectionCount > 0 ? `Có ${record.connectionCount} thiết bị đang kết nối` : ""}
+            >
+              Xóa
+            </Button>
           </Popconfirm>
         </Space>
       ),

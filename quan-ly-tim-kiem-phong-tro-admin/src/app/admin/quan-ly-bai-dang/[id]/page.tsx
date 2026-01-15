@@ -63,13 +63,15 @@ export default function Page() {
 
   // Get badge status
   const getStatusBadge = (status: string) => {
+    const lowerStatus = (status || '').toLowerCase();
     const statusMap: { [key: string]: { status: any; text: string } } = {
-      Approved: { status: "success", text: "Đã duyệt" },
-      Pending: { status: "processing", text: "Chờ duyệt" },
-      Rejected: { status: "error", text: "Bị từ chối" },
+      approved: { status: "success", text: "Đã duyệt" },
+      pending: { status: "processing", text: "Chờ duyệt" },
+      rejected: { status: "error", text: "Bị từ chối" },
+      hidden: { status: "default", text: "Đã ẩn" },
     };
     
-    const statusInfo = statusMap[status] || { status: "default", text: status };
+    const statusInfo = statusMap[lowerStatus] || { status: "default", text: status };
     return <Badge status={statusInfo.status} text={statusInfo.text} />;
   };
 
@@ -102,37 +104,27 @@ export default function Page() {
     },
     {
       key: "3",
-      label: "Khu",
-      children: data.location,
-    },
-    {
-      key: "4",
-      label: "Diện tích",
-      children: data.area,
-    },
-    {
-      key: "5",
       label: "Giá thuê",
       children: formatCurrency(data.dailyRate),
     },
     {
-      key: "6",
+      key: "4",
       label: "Địa chỉ",
       span: 2,
       children: data.address,
     },
     {
-      key: "7",
+      key: "5",
       label: "Ngày đăng",
       children: data.publishDate,
     },
     {
-      key: "8",
+      key: "6",
       label: "Trạng thái",
       children: getStatusBadge(data.status),
     },
     {
-      key: "9",
+      key: "7",
       label: "Mô tả chi tiết",
       span: 3,
       children: data.description,

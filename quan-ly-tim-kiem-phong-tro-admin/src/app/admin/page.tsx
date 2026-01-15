@@ -56,24 +56,28 @@ export default function Page() {
 
         // Fetch posts statistics
         const postsRes = await fetch("/api/posts");
-        const posts = await postsRes.json();
+        const postsJson = await postsRes.json();
+        const posts = postsJson.status === "success" ? postsJson.data : [];
 
         // Fetch guests statistics
         const guestsRes = await fetch("/api/users/guests");
-        const guests = await guestsRes.json();
+        const guestsJson = await guestsRes.json();
+        const guests = guestsJson.status === "success" ? guestsJson.data : [];
 
         // Fetch owners statistics
         const ownersRes = await fetch("/api/users/owners");
-        const owners = await ownersRes.json();
+        const ownersJson = await ownersRes.json();
+        const owners = ownersJson.status === "success" ? ownersJson.data : [];
 
         // Calculate statistics
         const postStats = posts.reduce(
           (acc: any, post: any) => {
             acc.total++;
-            if (post.trangThai === "pending") acc.pending++;
-            else if (post.trangThai === "approved") acc.approved++;
-            else if (post.trangThai === "rejected") acc.rejected++;
-            else if (post.trangThai === "hidden") acc.hidden++;
+            const status = (post.status || '').toLowerCase();
+            if (status === "pending") acc.pending++;
+            else if (status === "approved") acc.approved++;
+            else if (status === "rejected") acc.rejected++;
+            else if (status === "hidden") acc.hidden++;
             return acc;
           },
           { total: 0, pending: 0, approved: 0, rejected: 0, hidden: 0 }
@@ -82,8 +86,9 @@ export default function Page() {
         const guestStats = guests.reduce(
           (acc: any, guest: any) => {
             acc.total++;
-            if (guest.GuestStatus === "active") acc.active++;
-            else if (guest.GuestStatus === "locked") acc.locked++;
+            const status = (guest.status || '').toLowerCase();
+            if (status === "active") acc.active++;
+            else if (status === "locked") acc.locked++;
             return acc;
           },
           { total: 0, active: 0, locked: 0 }
@@ -92,8 +97,9 @@ export default function Page() {
         const ownerStats = owners.reduce(
           (acc: any, owner: any) => {
             acc.total++;
-            if (owner.OwnerStatus === "active") acc.active++;
-            else if (owner.OwnerStatus === "locked") acc.locked++;
+            const status = (owner.status || '').toLowerCase();
+            if (status === "active") acc.active++;
+            else if (status === "locked") acc.locked++;
             return acc;
           },
           { total: 0, active: 0, locked: 0 }

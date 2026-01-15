@@ -41,7 +41,8 @@ export default function DanhSachTaiKhoanGuest() {
 
       if (result.status === "success" && result.data) {
         const toVN = (s: string) => {
-          const v = (s || '').toLowerCase();
+          if (!s) return 'Không xác định';
+          const v = s.toLowerCase();
           if (v === 'locked') return 'Bị khóa';
           if (v === 'active') return 'Hoạt động';
           return s;

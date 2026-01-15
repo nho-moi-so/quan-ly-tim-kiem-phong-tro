@@ -1,3 +1,4 @@
+import { IoTDeviceInDepartmentRepository } from "@/repositories/iotDeviceInDepartmentRepository";
 import { IoTDeviceRepository } from "@/repositories/iotDeviceRepository";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -59,6 +60,17 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
     if (!id) {
       return NextResponse.json(
         { status: "fail", message: "Missing id" },
+        { status: 400 }
+      );
+    }
+
+    // Check if there are any connected devices with this device type
+    const allConnectedDevices = await IoTDeviceInDepartmentRepository.getAll();
+    const hasConnections = allConnectedDevices.some((device) => device.DeviceID === id);
+    
+    if (hasConnections) {
+      return NextResponse.json(
+        { status: "fail", message: "Không thể xóa loại thiết bị này vì đang có thiết bị kết nối sử dụng" },
         { status: 400 }
       );
     }

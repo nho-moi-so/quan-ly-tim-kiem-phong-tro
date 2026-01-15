@@ -2,7 +2,7 @@
 import { formatId } from "@/lib/formatId";
 import { tranlateStatus } from "@/lib/tranlateStatus";
 import type { TableColumnsType } from "antd";
-import { Button, Flex, Input, message, Space, Table, Typography } from "antd";
+import { Button, Flex, Input, message, Space, Table, Tag, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -100,6 +100,14 @@ export default function Page() {
       dataIndex: "trangThai",
       key: "trangThai",
       align: "center",
+      render: (status: string) => {
+        let color = 'default';
+        if (status === 'Đang chờ duyệt') color = 'orange';
+        else if (status === 'Đã duyệt') color = 'green';
+        else if (status === 'Đã từ chối') color = 'red';
+        else if (status === 'Đã ẩn') color = 'gray';
+        return <Tag color={color}>{status}</Tag>;
+      },
     },
     {
       title: "Hành động",

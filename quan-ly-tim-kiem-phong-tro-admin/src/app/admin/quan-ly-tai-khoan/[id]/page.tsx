@@ -14,6 +14,25 @@ interface UserDetail {
   registeredAt: string;
 }
 
+enum UserStatus {
+  ACTIVE = "active",
+  PENDING = "pending",
+  APPROVED = "approved",
+  LOCKED = "locked"
+}
+
+const UserStatusLabel: Record<UserStatus, string> = {
+  [UserStatus.ACTIVE]: "Hoạt động",
+  [UserStatus.PENDING]: "Chờ duyệt",
+  [UserStatus.APPROVED]: "Đã duyệt",
+  [UserStatus.LOCKED]: "Bị khóa"
+};
+
+const getUserStatusLabel = (status: string): string => {
+  const statusLower = status?.toLowerCase() as UserStatus;
+  return UserStatusLabel[statusLower] || status;
+};
+
 export default function Page() {
   const { id } = useParams<{ id: string }>();
   const searchParams = useSearchParams();
@@ -99,7 +118,7 @@ export default function Page() {
     {
       key: "5",
       label: "Trạng thái",
-      children: data.status,
+      children: getUserStatusLabel(data.status),
     },
     {
       key: "6",

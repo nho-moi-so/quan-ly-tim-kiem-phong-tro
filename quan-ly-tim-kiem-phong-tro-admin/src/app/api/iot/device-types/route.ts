@@ -1,3 +1,4 @@
+import { IoTDeviceInDepartmentRepository } from "@/repositories/iotDeviceInDepartmentRepository";
 import { IoTDeviceRepository } from "@/repositories/iotDeviceRepository";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -11,7 +12,15 @@ const CreateSchema = z.object({
 export async function GET() {
   try {
     const data = await IoTDeviceRepository.getAll();
-    return NextResponse.json({ status: "success", data });
+    const allConnectedDevices = await IoTDeviceInDepartmentRepository.getAll();
+    
+    // Add connection count to each device type
+    const dataWithConnections = data.map((device) => ({
+      ...device,
+      connectionCount: allConnectedDevices.filter((conn) => conn.DeviceID === device.Id).length,
+    }));
+    
+    return NextResponse.json({ status: "success", data: dataWithConnections });
   } catch (err: unknown) {
     return NextResponse.json(
       { status: "fail", message: err instanceof Error ? err.message : "Unknown error" },

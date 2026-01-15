@@ -108,6 +108,7 @@ const QuanLyLichDatPhongPage: React.FC = () => {
 
   const handleSave = async () => {
     try {
+      setIsVerifyingIntegrity(true);
       const values = await form.validateFields();
       const payload = {
         booking_id: values.booking_id,
@@ -185,6 +186,8 @@ const QuanLyLichDatPhongPage: React.FC = () => {
     } catch (error) {
       console.error('Verify failed:', error);
       message.error(`Lỗi: ${error instanceof Error ? error.message : 'Vui lòng kiểm tra lại các trường!'}`);
+    } finally {
+      setIsVerifyingIntegrity(false);
     }
   };
 
@@ -273,7 +276,7 @@ const QuanLyLichDatPhongPage: React.FC = () => {
       title: 'Phòng',
       dataIndex: 'room_name',
       key: 'room_name',
-      width: 220,
+      width: 150,
     },
     {
       title: 'Check-in',
@@ -331,9 +334,9 @@ const QuanLyLichDatPhongPage: React.FC = () => {
         <h1 style={{ fontSize: '24px', fontWeight: 600, margin: 0 }}>
           Quản lý đặt phòng
         </h1>
-        <p style={{ color: '#666', marginTop: '8px' }}>
+        {/* <p style={{ color: '#666', marginTop: '8px' }}>
           Quản lý và theo dõi tất cả các đơn đặt phòng trong hệ thống
-        </p>
+        </p> */}
       </div>
 
       <div style={{ marginBottom: 12 }}>
@@ -367,9 +370,18 @@ const QuanLyLichDatPhongPage: React.FC = () => {
           }}>
             Đóng
           </Button>,
-          <Button key="save" type="primary" icon={<SafetyOutlined />} onClick={handleSave}>
-            Kiểm tra Blockchain
-          </Button>,
+          ...(selectedBooking?.status !== 'pending' ? [
+            <Button 
+              key="save" 
+              type="primary" 
+              icon={<SafetyOutlined spin={isVerifyingIntegrity} />} 
+              onClick={handleSave}
+              loading={isVerifyingIntegrity}
+              title="Kiểm tra tính toàn vẹn của dữ liệu booking trên blockchain. Hệ thống sẽ so sánh dữ liệu trên blockchain với dữ liệu hiện tại để đảm bảo không có sự thay đổi trái phép."
+            >
+              Kiểm tra Blockchain
+            </Button>
+          ] : []),
         ]}
         width={800}
       >

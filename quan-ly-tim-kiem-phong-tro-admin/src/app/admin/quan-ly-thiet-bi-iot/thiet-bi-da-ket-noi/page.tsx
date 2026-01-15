@@ -1,7 +1,7 @@
 "use client";
 import { tranlateStatus } from "@/lib/tranlateStatus";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
-import { Button, message, Modal, Popconfirm, Space, Spin, Table, Typography } from "antd";
+import { Button, message, Modal, Popconfirm, Space, Spin, Table, Tag, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 
@@ -14,6 +14,7 @@ type DeviceRow = {
   Status?: string; // hiển thị tiếng Việt
   StatusRaw?: string; // giá trị gốc từ server
   CreationDate?: string;
+  ReadyStatus?: string; // 'Đã sẵn sàng' or 'Chưa sẵn sàng'
 };
 
 export default function ThietBiDaKetNoiPage() {
@@ -39,6 +40,7 @@ export default function ThietBiDaKetNoiPage() {
           Status: tranlateStatus.tranlateToVietnameseStatusIoT(d.Status),
           StatusRaw: d.Status,
           CreationDate: d.CreationDate,
+          ReadyStatus: d.PingReply ? 'Đã sẵn sàng' : 'Chưa sẵn sàng',
         }));
         setRows(data);
       } else {
@@ -127,8 +129,17 @@ export default function ThietBiDaKetNoiPage() {
     },
     {
       title: "Trạng thái",
-      dataIndex: "Status",
-      key: "Status",
+      key: "CombinedStatus",
+      render: (_, record) => (
+        <>
+          <Tag color={record.Status === 'Đã kết nối' ? 'blue' : 'orange'}>
+            {record.Status}
+          </Tag>
+          <Tag color={record.ReadyStatus === 'Đã sẵn sàng' ? 'green' : 'orange'}>
+            {record.ReadyStatus}
+          </Tag>
+        </>
+      ),
     },
     {
       title: "Hành động",
