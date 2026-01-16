@@ -84,8 +84,8 @@ export const UserService = {
         if (!user || user.Role !== 'owner') {
             throw new Error('Owner not found');
         }
-        const updated = await UserRepository.update(ownerId, { OwnerStatus: 'locked' });
-        return { userCode: updated.Id, status: updated.OwnerStatus ?? 'locked' };
+        const updated = await UserRepository.update(ownerId, { Status: 'locked' });
+        return { userCode: updated.Id, status: updated.Status ?? 'locked' };
     },
 
     unlockGuest: async (guestId: string) => {
@@ -102,8 +102,8 @@ export const UserService = {
         if (!user || user.Role !== 'owner') {
             throw new Error('Owner not found');
         }
-        const updated = await UserRepository.update(ownerId, { OwnerStatus: 'active' });
-        return { userCode: updated.Id, status: updated.OwnerStatus ?? 'active' };
+        const updated = await UserRepository.update(ownerId, { Status: 'active' });
+        return { userCode: updated.Id, status: updated.Status ?? 'active' };
     },
 
     approveOwner: async (ownerId: string) => {

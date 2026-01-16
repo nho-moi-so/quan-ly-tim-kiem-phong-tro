@@ -101,20 +101,51 @@ class AuthController {
         password,
       );
 
-      if (userData != null) {
-        return {
-          'success': true,
-          'message': 'Đăng nhập thành công!',
-          'userData': userData,
-          'role': userData['Role'] as String?,
-        };
-      } else {
+      // Check account status
+      if(userData['Status'].toString().toLowerCase() == "locked"){
         return {
           'success': false,
-          'message': 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.',
-          'errorCode': 'LOGIN_FAILED',
+          'message': 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.',
+          'errorCode': 'ACCOUNT_LOCKED',
         };
       }
+      
+      return {
+        'success': true,
+        'message': 'Đăng nhập thành công!',
+        'userData': userData,
+        'role': userData['Role'] as String?,
+      };
+    } on EmailNotFoundException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+        'errorCode': e.errorCode,
+      };
+    } on WrongPasswordException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+        'errorCode': e.errorCode,
+      };
+    } on UserDisabledException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+        'errorCode': e.errorCode,
+      };
+    } on UserDataNotFoundException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+        'errorCode': e.errorCode,
+      };
+    } on AuthException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+        'errorCode': e.errorCode,
+      };
     } catch (e) {
       return _handleLoginError(e);
     }

@@ -1,6 +1,52 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+// ============ Custom Exceptions ============
+class AuthException implements Exception {
+  final String message;
+  final String? errorCode;
+
+  AuthException({
+    required this.message,
+    this.errorCode,
+  });
+
+  @override
+  String toString() => message;
+}
+
+class EmailNotFoundException extends AuthException {
+  EmailNotFoundException()
+      : super(
+          message: 'Email không tồn tại',
+          errorCode: 'USER_NOT_FOUND',
+        );
+}
+
+class WrongPasswordException extends AuthException {
+  WrongPasswordException()
+      : super(
+          message: 'Mật khẩu không đúng',
+          errorCode: 'WRONG_PASSWORD',
+        );
+}
+
+class UserDisabledException extends AuthException {
+  UserDisabledException()
+      : super(
+          message: 'Tài khoản đã bị vô hiệu hóa',
+          errorCode: 'USER_DISABLED',
+        );
+}
+
+class UserDataNotFoundException extends AuthException {
+  UserDataNotFoundException()
+      : super(
+          message: 'Không tìm thấy thông tin tài khoản',
+          errorCode: 'USER_DATA_NOT_FOUND',
+        );
+}
+
 class SignUpViewModel {
   String username = '';
   String phone = '';
@@ -52,7 +98,14 @@ class AuthService {
 
 
   //=======================HAM DANG NHAP================
-  Future<Map<String, dynamic>?> loginUser(String email, String password) async {
+  /// Đăng nhập người dùng
+  /// 
+  /// Throw các exception cụ thể:
+  /// - EmailNotFoundException: Email không tồn tại
+  /// - WrongPasswordException: Mật khẩu không đúng
+  /// - UserDisabledException: Tài khoản đã bị vô hiệu hóa
+  /// - AuthException: Lỗi khác
+  Future<Map<String, dynamic>> loginUser(String email, String password) async {
     try {
       // Đăng nhập bằng Firebase Auth
       UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -68,11 +121,31 @@ class AuthService {
         // Trả về thông tin user, bao gồm cả role nếu có
         return userData;
       } else {
-        return null;
+        // Nếu không tìm thấy user data trong Firestore
+        throw UserDataNotFoundException();
+      }
+    } on FirebaseAuthException catch (e) {
+      // Xử lý các exception từ Firebase Auth
+      if (e.code == 'user-not-found') {
+        throw EmailNotFoundException();
+      } else if (e.code == 'wrong-password') {
+        throw WrongPasswordException();
+      } else if (e.code == 'invalid-credential') {
+        // Firebase SDK mới trả về invalid-credential thay vì wrong-password
+        throw WrongPasswordException();
+      } else if (e.code == 'user-disabled') {
+        throw UserDisabledException();
+      } else {
+        throw AuthException(
+          message: 'Lỗi đăng nhập: ${e.message}',
+          errorCode: e.code,
+        );
       }
     } catch (e) {
-      print('Error logging in user: $e');
-      return null;
+      throw AuthException(
+        message: 'Lỗi không xác định: ${e.toString()}',
+        errorCode: 'UNKNOWN_ERROR',
+      );
     }
   }
 
