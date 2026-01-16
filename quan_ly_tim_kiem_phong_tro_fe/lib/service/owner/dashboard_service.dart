@@ -283,11 +283,10 @@ class DashboardService {
         throw Exception('User not logged in');
       }
 
+      // Lấy tất cả apartments của user (không dùng orderBy để tránh cần index)
       final apartmentsSnapshot = await _firestore
           .collection('Apartments')
           .where('UserID', isEqualTo: userId)
-          .orderBy('CreatedDate', descending: true)
-          .limit(5)
           .get();
 
       List<RecentRoom> recentRooms = [];
@@ -301,10 +300,15 @@ class DashboardService {
           status: data['Status'] ?? '',
           dailyRate: (data['DailyRate'] as num?)?.toDouble() ?? 0.0,
           pathImage: List<String>.from(data['PathImage'] ?? []),
+          createdDate: data['CreatedDate'] != null 
+              ? (data['CreatedDate'] as Timestamp).toDate()
+              : DateTime.now(),
         ));
       }
 
-      return recentRooms;
+      // Sort theo ngày tạo (mới nhất trước) và lấy 5 phòng đầu
+      recentRooms.sort((a, b) => b.createdDate.compareTo(a.createdDate));
+      return recentRooms.take(5).toList();
     } catch (e) {
       print('Error getting recent rooms: $e');
       return [];
@@ -383,6 +387,7 @@ class RecentRoom {
   final String status;
   final double dailyRate;
   final List<String> pathImage;
+  final DateTime createdDate;
 
   RecentRoom({
     required this.apartmentId,
@@ -391,5 +396,7 @@ class RecentRoom {
     required this.status,
     required this.dailyRate,
     required this.pathImage,
+    required this.createdDate,
   });
 }
+

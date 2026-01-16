@@ -1,54 +1,108 @@
-//done
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
+/// TagWithIconWidget - Header title component for screens
+/// 
+/// Follows UI Design Guideline Section 5.2 & 5.4
+/// 
+/// Usage:
+/// ```dart
+/// TagWithIconWidget(title: "Tên màn hình")
+/// 
+/// // With custom icon
+/// TagWithIconWidget(
+///   title: "Tên màn hình",
+///   icon: Icons.dashboard_rounded,
+/// )
+/// 
+/// // With subtitle
+/// TagWithIconWidget(
+///   title: "Tên màn hình",
+///   subtitle: "Mô tả phụ",
+/// )
+/// ```
 class TagWithIconWidget extends StatelessWidget {
-  // Constructor
   final String title;
-  const TagWithIconWidget({super.key, required this.title});
-  // const TagWithIconWidget({super.key});
+  final String? subtitle;
+  final IconData icon;
+  final bool showIcon;
+
+  const TagWithIconWidget({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.icon = Icons.home_rounded,
+    this.showIcon = true,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 214,
-      height: 34,
-      child: Row(
-        children: [
-          // Icon trái (SVG)
-          Padding(
-            padding: const EdgeInsets.only(top: 5),
-            child: SizedBox(
-              width: 21,
-              height: 24,
-              child: SvgPicture.asset(
-          'assets/frame_bagach.svg',
-          fit: BoxFit.contain,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          // Nút có border-radius
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (showIcon) ...[
+          // Icon container với gradient theo guideline
           Container(
-            width: 183,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: ShapeDecoration(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF4C6FFF), Color(0xFF7C3AED)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ),
-            child: Row(
-              children: [
-
-              Text(
-                  title,
-                  style: TextStyle(fontSize: 14),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
+          const SizedBox(width: 12),
         ],
-      ),
+        // Title + Subtitle
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Noto Sans',
+                  color: Color(0xFF1A1F36),
+                  letterSpacing: -0.3,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  subtitle!,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'Noto Sans',
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w400,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

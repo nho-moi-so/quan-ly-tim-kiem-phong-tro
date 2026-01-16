@@ -122,7 +122,7 @@ class _PostScreenState extends State<PostScreen> {
               Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TagWithIconWidget(title: "Quảng lý bài đăng"),
+                TagWithIconWidget(title: "Quản lý bài đăng"),
                 // ButtonAddWidget(
                 //   title: "Thêm bài đăng mới", 
                 //   screen: DetailPostScreen(postId: ''),

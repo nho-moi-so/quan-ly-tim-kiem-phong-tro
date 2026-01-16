@@ -88,6 +88,9 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                 TagWithIconWidget(title: "Danh sách đặt phòng"),
               ],
               ),
+              SizedBox(height: screenHeight * 0.01),
+              // SearchBarWidget(),
+              SizedBox(height: screenHeight * 0.015),
               //filter status
               FilterChipWidget<BookingFilter>(
                 currentFilter: currentFilter,
