@@ -18,6 +18,9 @@ export 'booking_request/search_by_date_widget.dart';
 export 'bottom_nav_widget.dart';
 //common
 export 'common/loading_widget.dart';
+export 'common/quick_actions_widget.dart';
+export 'common/recent_rooms_widget.dart';
+export 'common/statistic_card_widget.dart';
 export 'contact/extend_info_widget.dart';
 export 'contact/location_review_widget.dart';
 export 'contact/password_display_widget.dart';
