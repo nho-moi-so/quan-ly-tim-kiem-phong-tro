@@ -361,6 +361,19 @@ class ApartmentController {
     return code;
   }
 
+  // Lấy mật khẩu phòng dựa trên room code
+  Future<String> getRoomPassword(String roomCode) async {
+    try {
+      
+      Apartment? apartment = await _apartmentService.getApartmentByCode(roomCode);
+      return apartment.password ?? '';
+
+    } catch (e) {
+      print('Error getting room password: $e');
+      throw Exception('Không thể lấy mật khẩu phòng');
+    }
+  }
+
  
   Future<String?> _uploadImageToServer(String filePath) async {
     // 1. Cấu hình Domain Server (Thay bằng IP/Domain thật của bạn)

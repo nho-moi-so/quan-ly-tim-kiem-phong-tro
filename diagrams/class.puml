@@ -100,13 +100,15 @@ class Apartment{
     - dailyRate: decimal
     - maxOccupancy: int
     - description: string
-    - images: List<string>
+    - pathImages: List<string>
     - status: string
     - address: string
     - latitude: double
     - longitude: double
     - type: string
-    - require: List<string>
+    - requires: List<string>
+    ' mật khẩu mở khóa căn hộ cho chủ căn hộ nếu không có người thuê
+    - password: string 
 
 
 }
