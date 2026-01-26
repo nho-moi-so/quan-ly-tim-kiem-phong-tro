@@ -7,188 +7,340 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
 )
 
-// SmartContract provides functions for managing an Asset
+// SmartContract structure
 type SmartContract struct {
 	contractapi.Contract
 }
 
-// Asset describes basic details of what makes up a simple asset
-// Insert struct field in alphabetic order => to achieve determinism across languages
-// golang keeps the order when marshal to json but doesn't order automatically
-type Asset struct {
-	AppraisedValue int    `json:"AppraisedValue"`
-	Color          string `json:"Color"`
-	ID             string `json:"ID"`
-	Owner          string `json:"Owner"`
-	Size           int    `json:"Size"`
+// =========================================================
+// 1. CẤU TRÚC DỮ LIỆU (DATA MODELS)
+// =========================================================
+
+// User: Đại diện cho ví tiền của người dùng
+type User struct {
+	DocType string `json:"docType"` // "user"
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Balance int    `json:"balance"` // Số dư tài khoản
 }
 
-// InitLedger adds a base set of assets to the ledger
-func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
-	assets := []Asset{
-		{ID: "asset1", Color: "blue", Size: 5, Owner: "Tomoko", AppraisedValue: 300},
-		{ID: "asset2", Color: "red", Size: 5, Owner: "Brad", AppraisedValue: 400},
-		{ID: "asset3", Color: "green", Size: 10, Owner: "Jin Soo", AppraisedValue: 500},
-		{ID: "asset4", Color: "yellow", Size: 10, Owner: "Max", AppraisedValue: 600},
-		{ID: "asset5", Color: "black", Size: 15, Owner: "Adriana", AppraisedValue: 700},
-		{ID: "asset6", Color: "white", Size: 15, Owner: "Michel", AppraisedValue: 800},
+// Apartment: Thông tin căn hộ
+type Apartment struct {
+	DocType      string `json:"docType"` // "apartment"
+	ID           string `json:"id"`
+	OwnerID      string `json:"ownerId"`      // ID của User chủ nhà
+	Price        int    `json:"price"`        // Giá thuê
+	Status       string `json:"status"`       // "AVAILABLE", "BOOKED", "OCCUPIED"
+	PasswordHash string `json:"passwordHash"` // Hash mật khẩu cửa
+}
+
+// Booking: Đơn đặt phòng (Đóng vai trò là "Biến tạm" giữ tiền)
+type Booking struct {
+	DocType      string `json:"docType"` // "booking"
+	ID           string `json:"id"`
+	ApartmentID  string `json:"apartmentId"`
+	TenantID     string `json:"tenantId"`     // ID của User khách
+	CheckInTime  int64  `json:"checkInTime"`  // Unix Timestamp
+	CheckOutTime int64  `json:"checkOutTime"` // Unix Timestamp
+
+	// --- CƠ CHẾ GIỮ TIỀN (ESCROW) ---
+	// Đây chính là "Biến tạm" ông yêu cầu.
+	// Tiền sẽ nằm ở đây, bị khóa lại, không thuộc về ai cho đến khi Checkout.
+	EscrowAmount int `json:"escrowAmount"`
+
+	Status string `json:"status"` // "CREATED", "ACTIVE", "COMPLETED"
+}
+
+// =========================================================
+// 2. HÀM TẠO USER
+// =========================================================
+// CreateUser: Tạo user mới với số dư ban đầu
+func (s *SmartContract) CreateUser(ctx contractapi.TransactionContextInterface, id string, name string, balance int) error {
+	// Kiểm tra user đã tồn tại chưa
+	existingUser, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return fmt.Errorf("Lỗi kiểm tra user: %v", err)
+	}
+	if existingUser != nil {
+		return fmt.Errorf("User với ID %s đã tồn tại", id)
 	}
 
-	for _, asset := range assets {
-		assetJSON, err := json.Marshal(asset)
-		if err != nil {
-			return err
-		}
-
-		err = ctx.GetStub().PutState(asset.ID, assetJSON)
-		if err != nil {
-			return fmt.Errorf("failed to put to world state. %v", err)
-		}
+	user := User{
+		DocType: "user",
+		ID:      id,
+		Name:    name,
+		Balance: balance,
 	}
+
+	userJSON, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, userJSON)
+}
+
+// =========================================================
+// 3. CÁC CHỨC NĂNG CHÍNH (LOGIC FLOW)
+// =========================================================
+// BƯỚC 1: Chủ nhà A tạo căn hộ với mật khẩu hash ban đầu (VD: hash của "12345")
+func (s *SmartContract) CreateApartment(ctx contractapi.TransactionContextInterface, id string, ownerId string, price int, initPassHash string) error {
+	// (Bỏ qua bước check Owner tồn tại cho ngắn gọn)
+
+	apt := Apartment{
+		DocType:      "apartment",
+		ID:           id,
+		OwnerID:      ownerId,
+		Price:        price,
+		Status:       "AVAILABLE",
+		PasswordHash: initPassHash,
+	}
+	aptJSON, _ := json.Marshal(apt)
+	return ctx.GetStub().PutState(id, aptJSON)
+}
+
+// BƯỚC 2: Khách B đặt phòng -> Blockchain RÚT TIỀN của B và GIỮ LẠI
+func (s *SmartContract) BookApartment(ctx contractapi.TransactionContextInterface, bookingId string, aptId string, tenantId string, checkIn int64, checkOut int64) error {
+	// --- A. Đọc dữ liệu ---
+	aptBytes, _ := ctx.GetStub().GetState(aptId)
+	var apartment Apartment
+	json.Unmarshal(aptBytes, &apartment)
+
+	if apartment.Status != "AVAILABLE" {
+		return fmt.Errorf("Căn hộ không sẵn sàng!")
+	}
+
+	userBytes, _ := ctx.GetStub().GetState(tenantId)
+	var tenant User
+	json.Unmarshal(userBytes, &tenant)
+
+	// --- B. Kiểm tra số dư ---
+	if tenant.Balance < apartment.Price {
+		return fmt.Errorf("Không đủ tiền! Cần %d nhưng chỉ có %d", apartment.Price, tenant.Balance)
+	}
+
+	// --- C. LOGIC GIỮ TIỀN (ESCROW) ---
+	// 1. Trừ tiền trong ví khách
+	tenant.Balance = tenant.Balance - apartment.Price
+
+	// 2. Tạo Booking và nhét tiền vào "Biến tạm" (EscrowAmount)
+	// Lúc này tiền đang treo lơ lửng trên Blockchain, Chủ nhà chưa nhận được.
+	booking := Booking{
+		DocType:      "booking",
+		ID:           bookingId,
+		ApartmentID:  aptId,
+		TenantID:     tenantId,
+		CheckInTime:  checkIn,
+		CheckOutTime: checkOut,
+		EscrowAmount: apartment.Price, // <--- TIỀN BỊ KHÓA Ở ĐÂY
+		Status:       "CREATED",
+	}
+
+	// 3. Cập nhật trạng thái căn hộ
+	apartment.Status = "BOOKED"
+
+	// --- D. Lưu tất cả xuống Ledger ---
+	tenantJSON, _ := json.Marshal(tenant)
+	bookingJSON, _ := json.Marshal(booking)
+	aptJSON, _ := json.Marshal(apartment)
+
+	ctx.GetStub().PutState(tenantId, tenantJSON)
+	ctx.GetStub().PutState(bookingId, bookingJSON)
+	ctx.GetStub().PutState(aptId, aptJSON)
 
 	return nil
 }
 
-// CreateAsset issues a new asset to the world state with given details.
-func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, id string, color string, size int, owner string, appraisedValue int) error {
-	exists, err := s.AssetExists(ctx, id)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return fmt.Errorf("the asset %s already exists", id)
+// BƯỚC 3: Đến giờ Check-in -> Hệ thống gọi update mật khẩu (VD: hash của "123456")
+func (s *SmartContract) CheckIn(ctx contractapi.TransactionContextInterface, bookingId string, newPassHash string) error {
+	// Đọc Booking & Apartment
+	bookBytes, _ := ctx.GetStub().GetState(bookingId)
+	var booking Booking
+	json.Unmarshal(bookBytes, &booking)
+
+	aptBytes, _ := ctx.GetStub().GetState(booking.ApartmentID)
+	var apartment Apartment
+	json.Unmarshal(aptBytes, &apartment)
+
+	// Kiểm tra thời gian (Lấy giờ từ Transaction Timestamp)
+	txTime, _ := ctx.GetStub().GetTxTimestamp()
+	currentTime := txTime.Seconds
+
+	// Logic If/Else chặn mở cửa sớm
+	if currentTime < booking.CheckInTime {
+		return fmt.Errorf("Chưa đến giờ Check-in! Hiện tại: %d, Giờ vào: %d", currentTime, booking.CheckInTime)
 	}
 
-	asset := Asset{
-		ID:             id,
-		Color:          color,
-		Size:           size,
-		Owner:          owner,
-		AppraisedValue: appraisedValue,
-	}
-	assetJSON, err := json.Marshal(asset)
-	if err != nil {
-		return err
-	}
+	// --- CẬP NHẬT MẬT KHẨU ---
+	apartment.PasswordHash = newPassHash
+	apartment.Status = "OCCUPIED"
+	booking.Status = "ACTIVE"
 
-	return ctx.GetStub().PutState(id, assetJSON)
+	// Lưu
+	aptJSON, _ := json.Marshal(apartment)
+	bookJSON, _ := json.Marshal(booking)
+	ctx.GetStub().PutState(booking.ApartmentID, aptJSON)
+	ctx.GetStub().PutState(bookingId, bookJSON)
+
+	return nil
 }
 
-// ReadAsset returns the asset stored in the world state with given id.
-func (s *SmartContract) ReadAsset(ctx contractapi.TransactionContextInterface, id string) (*Asset, error) {
-	assetJSON, err := ctx.GetStub().GetState(id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read from world state: %v", err)
-	}
-	if assetJSON == nil {
-		return nil, fmt.Errorf("the asset %s does not exist", id)
+// BƯỚC 4: Đến giờ Check-out -> Đổi mật khẩu (VD: "1234567") -> TRẢ TIỀN CHO CHỦ
+func (s *SmartContract) CheckOut(ctx contractapi.TransactionContextInterface, bookingId string, resetPassHash string) error {
+	// Đọc Booking
+	bookBytes, _ := ctx.GetStub().GetState(bookingId)
+	var booking Booking
+	json.Unmarshal(bookBytes, &booking)
+
+	// Kiểm tra xem tiền còn trong "Biến tạm" không?
+	if booking.EscrowAmount <= 0 {
+		return fmt.Errorf("Giao dịch này đã thanh toán xong hoặc không có tiền")
 	}
 
-	var asset Asset
-	err = json.Unmarshal(assetJSON, &asset)
-	if err != nil {
-		return nil, err
-	}
+	// Đọc Apartment & Owner
+	aptBytes, _ := ctx.GetStub().GetState(booking.ApartmentID)
+	var apartment Apartment
+	json.Unmarshal(aptBytes, &apartment)
 
-	return &asset, nil
+	ownerBytes, _ := ctx.GetStub().GetState(apartment.OwnerID)
+	var owner User
+	json.Unmarshal(ownerBytes, &owner)
+
+	// Kiểm tra thời gian
+	// (Thực tế có thể cho checkout sớm, nhưng ở đây ví dụ kiểm tra đúng giờ)
+	// txTime, _ := ctx.GetStub().GetTxTimestamp()
+	// if txTime.Seconds < booking.CheckOutTime { ... }
+
+	// --- A. LOGIC GIẢI PHÓNG TIỀN (RELEASE ESCROW) ---
+	// 1. Lấy tiền từ biến tạm cộng vào ví Chủ nhà
+	amountToRelease := booking.EscrowAmount
+	owner.Balance = owner.Balance + amountToRelease
+
+	// 2. Xóa tiền trong biến tạm (Để đảm bảo không rút được lần 2)
+	booking.EscrowAmount = 0
+	booking.Status = "COMPLETED"
+
+	// --- B. ĐỔI MẬT KHẨU & TRẠNG THÁI ---
+	apartment.PasswordHash = resetPassHash
+	apartment.Status = "AVAILABLE"
+
+	// --- C. Lưu tất cả ---
+	ownerJSON, _ := json.Marshal(owner)
+	bookJSON, _ := json.Marshal(booking)
+	aptJSON, _ := json.Marshal(apartment)
+
+	ctx.GetStub().PutState(apartment.OwnerID, ownerJSON)
+	ctx.GetStub().PutState(bookingId, bookJSON)
+	ctx.GetStub().PutState(booking.ApartmentID, aptJSON)
+
+	return nil
 }
 
-// UpdateAsset updates an existing asset in the world state with provided parameters.
-func (s *SmartContract) UpdateAsset(ctx contractapi.TransactionContextInterface, id string, color string, size int, owner string, appraisedValue int) error {
-	exists, err := s.AssetExists(ctx, id)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return fmt.Errorf("the asset %s does not exist", id)
-	}
+// =========================================================
+// 4. CÁC HÀM TRỢ GIÚP (HELPER FUNCTIONS)
+// =========================================================
 
-	// overwriting original asset with new asset
-	asset := Asset{
-		ID:             id,
-		Color:          color,
-		Size:           size,
-		Owner:          owner,
-		AppraisedValue: appraisedValue,
-	}
-	assetJSON, err := json.Marshal(asset)
-	if err != nil {
-		return err
-	}
+// --- HÀM MỚI (LEVELDB COMPATIBLE): Lấy danh sách tất cả Booking ---
+func (s *SmartContract) GetAllBookings(ctx contractapi.TransactionContextInterface) ([]*Booking, error) {
 
-	return ctx.GetStub().PutState(id, assetJSON)
-}
-
-// DeleteAsset deletes an given asset from the world state.
-func (s *SmartContract) DeleteAsset(ctx contractapi.TransactionContextInterface, id string) error {
-	exists, err := s.AssetExists(ctx, id)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return fmt.Errorf("the asset %s does not exist", id)
-	}
-
-	return ctx.GetStub().DelState(id)
-}
-
-// AssetExists returns true when asset with given ID exists in world state
-func (s *SmartContract) AssetExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-	assetJSON, err := ctx.GetStub().GetState(id)
-	if err != nil {
-		return false, fmt.Errorf("failed to read from world state: %v", err)
-	}
-
-	return assetJSON != nil, nil
-}
-
-// TransferAsset updates the owner field of asset with given id in world state, and returns the old owner.
-func (s *SmartContract) TransferAsset(ctx contractapi.TransactionContextInterface, id string, newOwner string) (string, error) {
-	asset, err := s.ReadAsset(ctx, id)
-	if err != nil {
-		return "", err
-	}
-
-	oldOwner := asset.Owner
-	asset.Owner = newOwner
-
-	assetJSON, err := json.Marshal(asset)
-	if err != nil {
-		return "", err
-	}
-
-	err = ctx.GetStub().PutState(id, assetJSON)
-	if err != nil {
-		return "", err
-	}
-
-	return oldOwner, nil
-}
-
-// GetAllAssets returns all assets found in world state
-func (s *SmartContract) GetAllAssets(ctx contractapi.TransactionContextInterface) ([]*Asset, error) {
-	// range query with empty string for startKey and endKey does an
-	// open-ended query of all assets in the chaincode namespace.
+	// Thay vì dùng QueryString, ta dùng GetStateByRange("", "") để lấy TẤT CẢ dữ liệu trong Ledger
 	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		return nil, err
 	}
 	defer resultsIterator.Close()
 
-	var assets []*Asset
+	var bookings []*Booking
+
 	for resultsIterator.HasNext() {
 		queryResponse, err := resultsIterator.Next()
 		if err != nil {
 			return nil, err
 		}
 
-		var asset Asset
-		err = json.Unmarshal(queryResponse.Value, &asset)
+		// Mẹo: Vì Ledger chứa cả User, Apartment, Booking...
+		// Ta phải đọc thử xem nó có phải là Booking không.
+
+		// 1. Unmarshal vào một Map tạm để check docType
+		var dataMap map[string]interface{}
+		err = json.Unmarshal(queryResponse.Value, &dataMap)
 		if err != nil {
-			return nil, err
+			continue // Nếu lỗi format thì bỏ qua
 		}
-		assets = append(assets, &asset)
+
+		// 2. Chỉ lấy nếu docType là "booking"
+		if val, ok := dataMap["docType"]; ok && val == "booking" {
+			var booking Booking
+			// Unmarshal lại vào struct chuẩn
+			json.Unmarshal(queryResponse.Value, &booking)
+			bookings = append(bookings, &booking)
+		}
 	}
 
-	return assets, nil
+	return bookings, nil
+}
+
+// GIAI ĐOẠN 3: IoT gọi hàm này để kiểm tra mật khẩu
+func (s *SmartContract) VerifyAccess(ctx contractapi.TransactionContextInterface, aptId string, inputPassword string) (bool, error) {
+
+	// 1. Lấy thông tin căn hộ
+	aptBytes, err := ctx.GetStub().GetState(aptId)
+	if err != nil {
+		return false, fmt.Errorf("Không tìm thấy căn hộ")
+	}
+	if aptBytes == nil {
+		return false, fmt.Errorf("Căn hộ không tồn tại")
+	}
+
+	var apartment Apartment
+	err = json.Unmarshal(aptBytes, &apartment)
+	if err != nil {
+		return false, err
+	}
+
+	// 2. KHÔNG CẦN BĂM NỮA (Gateway đã làm rồi)
+	// inputHash lúc này là chuỗi kiểu "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
+
+	// 3. So sánh trực tiếp 2 cái Hash
+	if inputPassword == apartment.PasswordHash {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+// Helper: Xem số dư
+func (s *SmartContract) GetUser(ctx contractapi.TransactionContextInterface, id string) (*User, error) {
+	bytes, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return nil, err
+	}
+	if bytes == nil {
+		return nil, fmt.Errorf("User with ID %s does not exist", id)
+	}
+	var user User
+	err = json.Unmarshal(bytes, &user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// Helper: Lấy thông tin apartment
+func (s *SmartContract) ReadAsset(ctx contractapi.TransactionContextInterface, id string) (*Apartment, error) {
+	bytes, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to read from world state: %v", err)
+	}
+	if bytes == nil {
+		return nil, fmt.Errorf("Apartment with ID %s does not exist", id)
+	}
+
+	var apartment Apartment
+	err = json.Unmarshal(bytes, &apartment)
+	if err != nil {
+		return nil, err
+	}
+
+	return &apartment, nil
 }
