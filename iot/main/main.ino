@@ -38,6 +38,7 @@ String roomCode = "";
 
 //thông tin host server
 String hostServer = "http://192.168.2.144:3000";
+String blockchainServer = "http://192.168.2.144:4000";
 
 //Thông tin của thiết bị iot này
 String type_iot = "smart_lock";
@@ -297,6 +298,7 @@ void loop(){
 
       // Lấy giá trị "status" và "message"
       String status = doc["status"];
+      bool access = doc["access"] | false;
       String message = doc["message"];
 
       // Hiển thị kết quả trên LCD
@@ -498,10 +500,10 @@ void loop(){
 
     // Gửi mật khẩu kiểm tra
     HTTPClient http;
-    String url = hostServer + "/api/iot/verify-password";
+    String url = blockchainServer + "/api/verify";
     http.begin(url);
     http.addHeader("Content-Type", "application/json");
-    String postData = "{\"password\":\"" + inputPassword + "\",\"roomCode\":\"" + roomCode + "\",\"deviceId\":\"" + device_id + "\"}";
+    String postData = "{\"password\":\"" + inputPassword + "\",\"roomCode\":\"" + roomCode + "\"}";
     int httpResponseCode = http.POST(postData);
 
     if (httpResponseCode > 0) {
@@ -513,7 +515,7 @@ void loop(){
       
       lcd.clear();
       lcd.setCursor(0, 0);
-      if (status == "success") {
+      if (status == "success" && access) {
         if (currentAngle != 90) {
           lcd.print("Mo cua...");
           myServo.write(90);      // xoay đến 90° và giữ
@@ -525,8 +527,10 @@ void loop(){
         } else {
           lcd.print("Da mo roi!");
         }
-      } else {
+      } else if (status == "success" && !access) {
         lcd.print("Sai mat khau!");
+      } else {
+        lcd.print("Loi xac thuc!");
       }
       lcd.setCursor(0, 1);
       lcd.print(message.substring(0, 16));
@@ -551,5 +555,153 @@ void loop(){
     http.end();
   }
 
- 
+  // =================================================================================
+  // LOGIC MỚI: XỬ LÝ ĐÓNG/MỞ CỬA
+  // =================================================================================
+
+  // 1. Hiển thị màn hình chờ dựa trên trạng thái cửa
+  lcd.clear();
+  lcd.setCursor(0, 0);
+
+  if (currentAngle == 90) {
+    // Cửa đang MỞ
+    lcd.print("Cua dang MO");
+    lcd.setCursor(0, 1);
+    lcd.print("Nhan # de DONG");
+  } else {
+    // Cửa đang ĐÓNG
+    String line1 = "Ma phong:" + roomCode;
+    if (line1.length() > 16) line1 = line1.substring(0, 16);
+    lcd.print(line1);
+    lcd.setCursor(0, 1);
+    lcd.print("Nhan # de nhap MK");
+  }
+
+  // 2. Vòng lặp chờ nhấn nút
+  bool startLoginProcess = false; // Biến cờ để biết có vào nhập mật khẩu không
+
+  while (true) {
+    // Kiểm tra và poll PingCode trong khi chờ nhập
+    delayWithPoll();
+
+    char k = keypad.getKey();
+
+    if (k == '#') {
+      if (currentAngle == 90) {
+        // --- TRƯỜNG HỢP CỬA ĐANG MỞ -> ĐÓNG CỬA ---
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Dang dong cua...");
+
+        myServo.write(0);      // Quay servo về 0 độ
+        currentAngle = 0;      // Cập nhật trạng thái
+        delay(1000);
+
+        lcd.clear();
+        lcd.print("Cua da dong!");
+        delay(1000);
+        break; // Thoát vòng lặp chờ, quay lại đầu loop() để hiện trạng thái "Đã đóng"
+      } else {
+        // --- TRƯỜNG HỢP CỬA ĐANG ĐÓNG -> NHẬP MẬT KHẨU ---
+        startLoginProcess = true; // Bật cờ để chạy đoạn code nhập pass bên dưới
+        break;
+      }
+    }
+    delay(50);
+  }
+
+  // 3. Chỉ thực hiện nhập mật khẩu nếu cờ startLoginProcess được bật
+  if (startLoginProcess) {
+
+    // Màn hình nhập mật khẩu (Code cũ giữ nguyên)
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Nhap mat khau:");
+    String inputPassword = "";
+    lcd.setCursor(0, 1);
+    lcd.print("#:OK *:Xoa");
+    delay(1500);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Mat khau:");
+    lcd.setCursor(0, 1);
+    inputPassword = "";
+    bool inputComplete = false;
+
+    while (!inputComplete) {
+      delayWithPoll();
+      char key = keypad.getKey();
+      if (key) {
+        if (key == '#') {
+          if (inputPassword.length() > 0) inputComplete = true;
+        } else if (key == '*') {
+          if (inputPassword.length() > 0) {
+            inputPassword.remove(inputPassword.length() - 1);
+            lcd.setCursor(0, 1);
+            lcd.print("                ");
+            lcd.setCursor(0, 1);
+            lcd.print(inputPassword);
+          }
+        } else {
+          if (inputPassword.length() < 16) {
+            inputPassword += key;
+            lcd.print(key);
+          }
+        }
+      }
+    }
+
+    // Gửi mật khẩu kiểm tra
+    HTTPClient http;
+    String url = blockchainServer + "/api/verify";
+    http.begin(url);
+    http.addHeader("Content-Type", "application/json");
+    String postData = "{\"password\":\"" + inputPassword + "\",\"roomCode\":\"" + roomCode + "\"}"; // Sửa lại body JSON đúng format
+    int httpResponseCode = http.POST(postData);
+
+    if (httpResponseCode > 0) {
+      String payload = http.getString();
+      StaticJsonDocument<200> doc;
+      DeserializationError error = deserializeJson(doc, payload);
+      String status = doc["status"];
+      bool access = doc["access"]; // Lấy biến access từ JSON trả về
+      String message = doc["message"];
+
+      lcd.clear();
+      lcd.setCursor(0, 0);
+
+      if (status == "success" && access) {
+          lcd.print("Mo cua...");
+          myServo.write(90);      // xoay đến 90°
+          currentAngle = 90;      // Lưu trạng thái mở
+          delay(500);
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Cua da mo!");
+      } else if (status == "success" && !access) {
+        lcd.print("Sai mat khau!");
+      } else {
+        lcd.print("Loi xac thuc!");
+      }
+      lcd.setCursor(0, 1);
+      lcd.print(message.substring(0, 16));
+      delay(2000);
+
+      if (error) {
+        lcd.clear();
+        lcd.print("Loi JSON!");
+        delay(1500);
+        http.end();
+        return;
+      }
+    } else {
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Loi ket noi!");
+      lcd.setCursor(0, 1);
+      lcd.print(http.errorToString(httpResponseCode));
+      delay(2000);
+    }
+    http.end();
+  }
 }
