@@ -42,7 +42,7 @@ note bottom of manage_account: Thay đổi, Đổi mật khẩu, Đăng xuất, 
 usecase "Yêu cầu xác minh tài khoản" as request_owner_verification
 
 usecase "Quản lý căn hộ" as manage_apartment
-note bottom of manage_apartment: Thêm, Sửa, Xóa căn hộ, Tìm kiếm, Xem, Kết nối khóa cửa IoT
+note bottom of manage_apartment: Thêm, Sửa, Xóa căn hộ, Tìm kiếm, Xem
 ' usecase "Kết nối khóa cửa IoT" as connect_iot_lock
 ' manage_apartment .. connect_iot_lock: extend
 
@@ -56,6 +56,8 @@ usecase "Quản lý bài đăng" as manage_post
 note bottom of manage_post: Tạo, Sửa, Ẩn, Xóa bài đăng
 usecase "Nhắn tin" as messaging
 usecase "Thống kê" as statistics
+usecase "Xác thực dữ liệu đặt phòng" as verify_booking_data
+view_booking_contract .. verify_booking_data: extend
 
 ' Các chức năng của Người thuê
 ' usecase "Quản lý tài khoản" as manage_account
@@ -114,6 +116,7 @@ note bottom of manage_iot_devices: Thêm, Sửa, Xóa và kiểm tra thiết b�
 (Owner) -- (manage_post)
 (Owner) -- (messaging)
 (Owner) -- (statistics)
+(Owner) -- (manage_iot_devices)
 
 
 'Người thuê

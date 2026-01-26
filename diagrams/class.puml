@@ -22,7 +22,7 @@ class User{
     - cccd: string
 
     + Login(): void
-    + LoginOut(): void
+    + Logout(): void
     + UpdateInfo(): void
 }
 
@@ -43,7 +43,7 @@ class Owner{
     + ManagementPost(): void
     + ManageContract(): void
     ' + ManageBookingRequest(): void
-    + ConnectToIoTDevice(): void
+    + ManageIoTDevices(): void
 }
 ' Owner --> OwnerStatus
 
@@ -71,6 +71,8 @@ class Admin{
 
     + ManagePost(): void
     + ManageUser(): void
+    + ManageContract(): void
+    + ManageIoTDevices(): void
     + ViewStatistics(): void
     
 }
@@ -98,13 +100,15 @@ class Apartment{
     - dailyRate: decimal
     - maxOccupancy: int
     - description: string
-    - images: List<string>
+    - pathImages: List<string>
     - status: string
     - address: string
     - latitude: double
     - longitude: double
     - type: string
-    - require: List<string>
+    - requires: List<string>
+    ' mật khẩu mở khóa căn hộ cho chủ căn hộ nếu không có người thuê
+    - password: string 
 
 
 }
@@ -117,12 +121,12 @@ class Amenity{
     - name: string
     - description: string
     ' vật dụng có thể định lượng được (ví dụ: khăn giấy, xà phòng, nước uống ...) hoặc không định lượng được (ví dụ: wifi, truyền hình cáp, bãi đỗ xe ...) 
-    - isQuantifiable: bool
+    ' - isQuantifiable: bool
 }
 Apartment "1" -- "0..*" Amenity: includes
 class AmenityInApartment{
     - id: string
-    - quantity: int
+    ' - quantity: int
     - isAvailable: bool
 }
 (Apartment, Amenity) .. AmenityInApartment: contains

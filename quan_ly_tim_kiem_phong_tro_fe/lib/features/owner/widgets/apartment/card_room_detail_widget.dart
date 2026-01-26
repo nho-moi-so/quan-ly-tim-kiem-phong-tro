@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
@@ -1715,6 +1716,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     deviceCheckingMap: _deviceCheckingMap,
                     deviceStatusMap: _deviceStatusMap,
                     onStatusUpdate: () => setState(() {}),
+                    onDeviceTap: (deviceId) => _handleDeviceTap(deviceId),
                   );
                 }).toList(),
               ],
@@ -1723,6 +1725,332 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
         ),
       ],
     );
+  }
+
+  /// Xử lý khi tap vào device, đặc biệt cho smart lock
+  Future<void> _handleDeviceTap(String deviceId) async {
+    if (deviceId.toLowerCase() == 'smart_lock') {
+      // Kiểm tra trạng thái phòng
+      if (selectedRoomState == ApartmentStatus.rented) {
+        _showRoomRentedDialog();
+      } else {
+        await _showRoomPasswordDialog();
+      }
+    }
+  }
+
+  /// Hiển thị dialog thông báo phòng đang được thuê
+  void _showRoomRentedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEF4444).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.lock_outline,
+                color: Color(0xFFEF4444),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Phòng đang được thuê',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1A1F36),
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: const Text(
+            'Phòng hiện tại đang có người ở, không thể xem mật khẩu hiện tại.',
+            style: TextStyle(
+              fontSize: 14,
+              color: Color(0xFF6B7280),
+              height: 1.4,
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF4C6FFF),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            child: const Text(
+              'Đã hiểu',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Hiển thị dialog mật khẩu phòng
+  Future<void> _showRoomPasswordDialog() async {
+    try {
+      final password = await ApartmentController().getRoomPassword(
+        roomCodeController.text.trim(),
+      );
+      
+      if (!mounted) return;
+      
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF4C6FFF), Color(0xFF7C3AED)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.vpn_key,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Mật khẩu phòng',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1A1F36),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Mã phòng: ${roomCodeController.text}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF6B7280),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFFFAFBFF),
+                        Color(0xFFFFFFFF),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                      width: 2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.password,
+                        color: Color(0xFF4C6FFF),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          password,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1F2937),
+                            letterSpacing: 2.0,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          await Clipboard.setData(ClipboardData(text: password));
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text('Đã copy mật khẩu!'),
+                                  ],
+                                ),
+                                backgroundColor: Color(0xFF10B981),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.copy,
+                          color: Color(0xFF4C6FFF),
+                          size: 20,
+                        ),
+                        tooltip: 'Copy mật khẩu',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4C6FFF).withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.info_outline,
+                        color: Color(0xFF4C6FFF),
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Nhấn vào icon copy để sao chép mật khẩu',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF4C6FFF),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF4C6FFF),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text(
+                'Đóng',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.error_outline,
+                  color: Color(0xFFEF4444),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Lỗi lấy mật khẩu',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1A1F36),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              'Không thể lấy mật khẩu phòng. Vui lòng thử lại sau.',
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF6B7280),
+                height: 1.4,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF4C6FFF),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text(
+                'Đóng',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   /// Tự động check trạng thái các thiết bị đã kết nối
@@ -2232,6 +2560,7 @@ class IotDeviceCard extends StatefulWidget {
   final Map<String, bool> deviceCheckingMap;
   final Map<String, String> deviceStatusMap;
   final VoidCallback onStatusUpdate;
+  final Function(String)? onDeviceTap;
 
   const IotDeviceCard({
     super.key,
@@ -2241,6 +2570,7 @@ class IotDeviceCard extends StatefulWidget {
     required this.deviceCheckingMap,
     required this.deviceStatusMap,
     required this.onStatusUpdate,
+    this.onDeviceTap,
   });
 
   @override
@@ -2380,148 +2710,183 @@ class _IotDeviceCardState extends State<IotDeviceCard> {
         border: Border.all(color: borderColor, width: 1.5),
       ),
       child: Row(
-        children: [
-          // Icon thiết bị
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: borderColor.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(deviceIcon, color: borderColor, size: 24),
+      children: [
+        // Icon thiết bị
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: borderColor.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
           ),
-          const SizedBox(width: 12),
+          child: Icon(deviceIcon, color: borderColor, size: 24),
+        ),
+        const SizedBox(width: 12),
 
-          // Thông tin thiết bị
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.device.name,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF2C3E50),
+        // Thông tin thiết bị
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.device.name,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2C3E50),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                widget.device.description,
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 6),
+              // Status badges
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  // Badge trạng thái kết nối
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isConnected
+                          ? const Color(0xFF10B981).withOpacity(0.15)
+                          : borderColor.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          statusIcon,
+                          size: 14,
+                          color: isConnected
+                              ? const Color(0xFF10B981)
+                              : borderColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          statusText,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: isConnected
+                                ? const Color(0xFF10B981)
+                                : borderColor,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  widget.device.description,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                // Status badges
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  children: [
-                    // Badge trạng thái kết nối
+                  // Badge trạng thái sẵn sàng (chỉ hiển thị khi đã kết nối)
+                  if (isConnected && deviceStatus.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: isConnected
+                        color: deviceStatus == 'online'
                             ? const Color(0xFF10B981).withOpacity(0.15)
-                            : borderColor.withOpacity(0.15),
+                            : const Color(0xFFEF4444).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            statusIcon,
+                            deviceStatus == 'online'
+                                ? Icons.check_circle_outline
+                                : Icons.warning_amber_rounded,
                             size: 14,
-                            color: isConnected
+                            color: deviceStatus == 'online'
                                 ? const Color(0xFF10B981)
-                                : borderColor,
+                                : const Color(0xFFEF4444),
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            statusText,
+                            deviceStatus == 'online'
+                                ? 'Đã sẵn sàng'
+                                : 'Chưa sẵn sàng',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: isConnected
+                              color: deviceStatus == 'online'
                                   ? const Color(0xFF10B981)
-                                  : borderColor,
+                                  : const Color(0xFFEF4444),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    // Badge trạng thái sẵn sàng (chỉ hiển thị khi đã kết nối)
-                    if (isConnected && deviceStatus.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: deviceStatus == 'online'
-                              ? const Color(0xFF10B981).withOpacity(0.15)
-                              : const Color(0xFFEF4444).withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              deviceStatus == 'online'
-                                  ? Icons.check_circle_outline
-                                  : Icons.warning_amber_rounded,
-                              size: 14,
-                              color: deviceStatus == 'online'
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFFEF4444),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              deviceStatus == 'online'
-                                  ? 'Đã sẵn sàng'
-                                  : 'Chưa sẵn sàng',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: deviceStatus == 'online'
-                                    ? const Color(0xFF10B981)
-                                    : const Color(0xFFEF4444),
-                              ),
-                            ),
-                          ],
-                        ),
+                ],
+              ),
+              // Nút xem mật khẩu cho smart lock đã kết nối
+              if (widget.device.deviceId.toLowerCase() == 'smart_lock' && 
+                  isConnected && 
+                  widget.onDeviceTap != null)
+                const SizedBox(height: 8),
+              if (widget.device.deviceId.toLowerCase() == 'smart_lock' && 
+                  isConnected && 
+                  widget.onDeviceTap != null)
+                SizedBox(
+                  height: 32,
+                  child: ElevatedButton.icon(
+                    onPressed: () => widget.onDeviceTap!(widget.device.deviceId),
+                    icon: const Icon(
+                      Icons.vpn_key,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                    label: const Text(
+                      'Xem mật khẩu',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
-                  ],
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4C6FFF),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 2,
+                    ),
+                  ),
                 ),
-              ],
-            ),
+            ],
           ),
+        ),
 
-          // Nút refresh trạng thái
-          Tooltip(
-            message: statusSubtitle,
-            child: IconButton(
-              onPressed: isChecking ? null : _checkDeviceStatus,
-              icon: isChecking
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(borderColor),
-                      ),
-                    )
-                  : Icon(Icons.refresh, color: borderColor),
-              tooltip: 'Kiểm tra trạng thái thiết bị',
-            ),
+        // Nút refresh trạng thái
+        Tooltip(
+          message: statusSubtitle,
+          child: IconButton(
+            onPressed: isChecking ? null : _checkDeviceStatus,
+            icon: isChecking
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(borderColor),
+                    ),
+                  )
+                : Icon(Icons.refresh, color: borderColor),
+            tooltip: 'Kiểm tra trạng thái thiết bị',
           ),
-        ],
-      ),
+        ),
+      ],
+    ),
     );
   }
 }
