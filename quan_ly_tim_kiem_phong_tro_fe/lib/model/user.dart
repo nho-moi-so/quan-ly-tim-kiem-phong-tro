@@ -15,6 +15,7 @@ class User {
   final String? guestStatus;
   final int? reviewCount;
   String? status;
+  String? balance;
 
   User({
     this.userID,
@@ -33,5 +34,6 @@ class User {
     this.guestStatus,
     this.reviewCount,
     this.status,
+    this.balance,
   });
 }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/user_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/change_password_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/edit_profile_screen.dart';
@@ -151,6 +152,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       title: 'Họ và tên',
                       value: userData?['Fullname'] ?? 'Chưa cập nhật',
                       color: const Color(0xFF4C6FFF),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildInfoCard(
+                      icon: Icons.account_balance_wallet_outlined,
+                      title: 'Số dư hiện tại',
+                      value: userData?['Balance'] != null ? formatCurrency(userData!['Balance']).toString() : 'Chưa cập nhật',
+                      color: const Color(0xFFFB923C),
                     ),
                     const SizedBox(height: 12),
                     

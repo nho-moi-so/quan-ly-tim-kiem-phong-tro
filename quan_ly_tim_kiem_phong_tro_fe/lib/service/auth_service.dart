@@ -84,6 +84,7 @@ class AuthService {
         'Phone': signUpViewModel.phone,
         'Email': signUpViewModel.email,
         'Role': signUpViewModel.role, // Lưu role được chọn
+        'Balance': 0,
         'Status': 'ACTIVE',
 
         // Không lưu password dạng plain text!
