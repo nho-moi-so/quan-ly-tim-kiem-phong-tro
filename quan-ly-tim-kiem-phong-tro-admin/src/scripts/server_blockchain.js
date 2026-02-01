@@ -5,6 +5,7 @@
  * 2. Hệ thống tự động quét và xử lý check-in/check-out
  * Cách chạy: node server_blockchain.js
  */
+import { ApartmentRepository } from '@/repositories/apartmentRepository';
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -71,9 +72,12 @@ function generateRandomPin() {
 // ========================================
 
 app.post('/api/verify', async (req, res) => {
-    const { apartmentId, password } = req.body;
+    const { roomCode, password } = req.body;
     
-    console.log(`\n📩 [API] Nhận yêu cầu từ IoT: Apt=${apartmentId}, Pass=${password}`);
+    console.log(`\n📩 [API] Nhận yêu cầu từ IoT: RoomCode=${roomCode}, Pass=${password}`);
+
+    //từ roomCode lấy apartmentId
+    const apartmentId = await ApartmentRepository.getApartmentIdByRoomCode(roomCode); 
 
     if (!apartmentId || !password) {
         return res.status(400).json({ error: 'Thiếu apartmentId hoặc password' });
