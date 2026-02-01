@@ -20,6 +20,7 @@ class User{
     - phone: string
     - password: string
     - cccd: string
+    - balance: decimal
 
     + Login(): void
     + Logout(): void
@@ -189,10 +190,9 @@ class ContentVilolation{
 ' ContentVilolation --> ContentVilolationStatus
 
 ' enum ContractStatus {
-'     ACTIVE
-'     APPROVED
-'     CANCELLED
-'     PENDING
+    ' "AVAILABLE"
+    ' "BOOKED"
+    ' "OCCUPIED"
 ' }
 
 Guest "0..*" -- "0..*" Apartment: book

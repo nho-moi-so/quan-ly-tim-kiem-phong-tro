@@ -38,7 +38,7 @@ rectangle "Ứng dụng quản lý & tìm kiếm căn hộ thông minh tích h�
 usecase "Đăng nhập" as login
 usecase "Đăng ký" as register
 usecase "Quản lý tài khoản" as manage_account
-note bottom of manage_account: Thay đổi, Đổi mật khẩu, Đăng xuất, Xóa tài khoản,
+note bottom of manage_account: Thay đổi, Đổi mật khẩu, Đăng xuất, Xóa tài khoản, Nạp tiền, Rút tiền
 usecase "Yêu cầu xác minh tài khoản" as request_owner_verification
 
 usecase "Quản lý căn hộ" as manage_apartment
