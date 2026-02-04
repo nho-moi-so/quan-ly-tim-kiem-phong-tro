@@ -251,6 +251,8 @@ class Transaction{
     - gatewayTransactionId: string
     ' ngày thanh toán
     - paymentDate: datetime
+    ' DEPOSIT (Nạp), WITHDRAW (Rút), PAYMENT (Trả Invoice)
+    - type: string
     - status: string
 }
 Invoice "1" -down- "1..*" Transaction: includes
