@@ -298,9 +298,6 @@ func (s *SmartContract) VerifyAccess(ctx contractapi.TransactionContextInterface
 		return false, err
 	}
 
-	// 2. KHÔNG CẦN BĂM NỮA (Gateway đã làm rồi)
-	// inputHash lúc này là chuỗi kiểu "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
-
 	// 3. So sánh trực tiếp 2 cái Hash
 	if inputPassword == apartment.PasswordHash {
 		return true, nil
