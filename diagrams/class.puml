@@ -20,6 +20,7 @@ class User{
     - phone: string
     - password: string
     - cccd: string
+    - balance: decimal
 
     + Login(): void
     + Logout(): void
@@ -189,10 +190,9 @@ class ContentVilolation{
 ' ContentVilolation --> ContentVilolationStatus
 
 ' enum ContractStatus {
-'     ACTIVE
-'     APPROVED
-'     CANCELLED
-'     PENDING
+    ' "AVAILABLE"
+    ' "BOOKED"
+    ' "OCCUPIED"
 ' }
 
 Guest "0..*" -- "0..*" Apartment: book
@@ -214,12 +214,15 @@ class Contract{
 }
 ' Contract --> ContractStatus
 (Guest, Apartment) .. Contract: have
+
+
 ' enum InvoiceStatus {
 '     PAID
 '     UNPAID
 '     PENDING
 '     CANCELLED
 ' }
+
 class Invoice{
     - id: string
     - code: string
@@ -235,6 +238,24 @@ class Invoice{
 }
 Invoice "0..*" -- "1"Contract : has
 ' Invoice --> InvoiceStatus
+' enum TransactionStatus {
+'     SUCCESS
+'     FAILED
+' }
+
+class Transaction{
+    - id: string
+    - amount: decimal
+    - paymentMethod: string
+    ' mã giao dịch từ cổng thanh toán dùng để đối soát
+    - gatewayTransactionId: string
+    ' ngày thanh toán
+    - paymentDate: datetime
+    ' DEPOSIT (Nạp), WITHDRAW (Rút), PAYMENT (Trả Invoice)
+    - type: string
+    - status: string
+}
+Invoice "1" -down- "1..*" Transaction: includes
 class InvoiceDetail{
     - id: string
     ' phí thuê phòng, phí dọn dẹp, chăm sóc thú cưng, phí dịch vụ khác
