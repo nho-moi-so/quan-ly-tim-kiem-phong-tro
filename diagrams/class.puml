@@ -109,7 +109,7 @@ class Apartment{
     - type: string
     - requires: List<string>
     ' mật khẩu mở khóa căn hộ cho chủ căn hộ nếu không có người thuê
-    - password: string 
+    - passwordHash: string 
 
 
 }
@@ -208,7 +208,7 @@ class Contract{
     - clause: List<string>
     - status: string
     - pathFile: string
-    - password: string
+    - EscrowAmount: decimal
 
 
 }
