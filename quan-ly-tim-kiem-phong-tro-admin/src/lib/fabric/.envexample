@@ -1,0 +1,21 @@
+FABRIC_CHANNEL_NAME=mychannel //tên channel đã tạo
+
+FABRIC_CHAINCODE_NAME=basic  //tên chaincode khi deploy
+
+FABRIC_MSP_ID=Org1MSP //MSP của org (xem trong organizations của network, hoặc file configtx.yaml). Ví dụ Org1MSP.
+
+FABRIC_CRYPTO_PATH=/absolute/path/to/org1.example.com //Set FABRIC_CRYPTO_PATH to the absolute path of your org1.example.com folder.
+
+FABRIC_USER_NAME=User1@org1.example.com //is the folder name under users (e.g. User1@org1.example.com).
+
+FABRIC_PEER_NAME=peer0.org1.example.com //tên peer trong thư mục crypto (peers/peer0.org1.example.com) hoặc docker compose.
+
+FABRIC_PEER_ENDPOINT=localhost:7051 //host:port của peer (thường localhost:7051 nếu chạy local).
+
+FABRIC_PEER_HOST_ALIAS=peer0.org1.example.com // giống FABRIC_PEER_NAME để override TLS hostname.
+
+FABRIC_KEY_DIR = //$FABRIC_CRYPTO_PATH/users/User1@org1.example.com/msp/keystore
+
+FABRIC_CERT_PATH = //$FABRIC_CRYPTO_PATH/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem
+
+FABRIC_TLS_CERT_PATH = //$FABRIC_CRYPTO_PATH/peers/peer0.org1.example.com/tls/ca.crt
