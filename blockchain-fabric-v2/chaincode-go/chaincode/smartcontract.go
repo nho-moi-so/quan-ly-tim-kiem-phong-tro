@@ -376,6 +376,24 @@ func (s *SmartContract) GetAllContracts(ctx contractapi.TransactionContextInterf
 	return contracts, nil
 }
 
+// getcontractbyid
+func (s *SmartContract) GetContractById(ctx contractapi.TransactionContextInterface, contractId string) (*Contract, error) {
+	bytes, err := ctx.GetStub().GetState(contractId)
+	if err != nil {
+		return nil, err
+	}
+	if bytes == nil {
+		return nil, fmt.Errorf("Contract with ID %s does not exist", contractId)
+	}
+	var contract Contract
+	err = json.Unmarshal(bytes, &contract)
+	if err != nil {
+		return nil, err
+	}
+	return &contract, nil
+}
+
+// getUserById
 func (s *SmartContract) GetUserById(ctx contractapi.TransactionContextInterface, id string) (*User, error) {
 	bytes, err := ctx.GetStub().GetState(id)
 	if err != nil {

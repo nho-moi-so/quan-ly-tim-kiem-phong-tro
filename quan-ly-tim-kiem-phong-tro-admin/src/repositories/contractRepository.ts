@@ -15,6 +15,7 @@ export interface Contract {
     ApartmentId?: string;
     InvoiceId?: string;
     UserID?: string;
+    EscrowAmount?: number;
 }
 
 export type CreateContractData = Omit<Contract, "Id">;

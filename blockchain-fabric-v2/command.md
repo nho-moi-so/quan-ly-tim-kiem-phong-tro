@@ -13,6 +13,7 @@ sudo rm -rf channel-artifacts
 
 ./network.sh createChannel -c rentingchannel //khong viet hoa, khong _, khong khoang trang
 ./network.sh deployCC -c rentingchannel -ccn renting -ccp ../chaincode-go/ -ccl go 
+./network.sh deployCC -c rentingchannel -ccn renting -ccp ../chaincode-go/ -ccl go -ccv 2.0 -ccs 2
 
 
 
