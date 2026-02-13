@@ -15,6 +15,8 @@ export interface User {
     Role?: string;
     ViewStatistics?: string;
     Status?: string;
+    Balance?: number;
+    Password?: string;
 }
 
 /**

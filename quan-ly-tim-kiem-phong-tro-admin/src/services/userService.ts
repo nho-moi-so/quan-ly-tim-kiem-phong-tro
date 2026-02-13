@@ -1,6 +1,47 @@
 import { UserRepository } from "@/repositories/userRepository";
+import 'dotenv/config';
+import { createFabricClient } from '../lib/fabric/fabricClient';
+import { BlockchainFabricRepository } from '../repositories/blockchainFabricRepository';
 
+const {contract, close} = await createFabricClient();
+const repoBlockchainFabric = new BlockchainFabricRepository(contract);
 export const UserService = {
+    createUser: async (data: {
+        balance: number;
+        cccd: string;
+        email: string;
+        fullName: string;
+        password: string;
+        phone: string;
+        role: 'GUEST' | 'OWNER' | 'ADMIN';
+        status: 'ACTIVE' | 'LOCKED';
+    }) => {
+        
+        //tao user tren firebase
+        const newUser = await UserRepository.create({
+            Balance: data.balance,
+            Cccd: data.cccd,
+            Email: data.email,
+            Fullname: data.fullName,
+            Password: data.password,
+            Phone: data.phone,
+            Role: data.role.toLocaleLowerCase(),
+            Status: data.status.toLocaleLowerCase(),
+        });
+        console.log("New user created in Firebase with ID:", newUser.Id);
+        //tao user tren blockchain
+        try{
+
+            const blockchainUser = await repoBlockchainFabric.createUser(newUser.Id, data.fullName, data.balance, data.role);
+        }
+        catch(err){
+            //neu tao tren blockchain that bai thi xoa tren firebase
+            await UserRepository.delete(newUser.Id);
+            throw err;
+        }
+        return newUser;
+    },
+
     getAllGests: async () => {
         // get list of guest users
         const users = await UserRepository.getAll();
