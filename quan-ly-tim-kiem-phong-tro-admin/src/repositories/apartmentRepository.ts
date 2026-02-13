@@ -7,14 +7,15 @@ export interface Apartment{
     CodeApartment: string;
     DailyRate: number;
     Decription: string;
-    Deposit: number;
     MaxOccupancy: number;
     Password: string;
-    PathImage: string;
+    PathImage: string[];
     Requirements: string;
     Status: string;
     Type: string;
     UserID: string;
+    Latitude?: number;
+    Longitude?: number;
 }
 
 export type CreateApartmentData = Omit<Apartment, "Id">;
@@ -22,13 +23,42 @@ export type UpdateApartmentData = Partial<Omit<Apartment, "Id">>;
 
 const COLLECTION_NAME = "apartment";
 
+const normalizePathImage = (value: unknown): string[] => {
+    if (!value) {
+        return [];
+    }
+    if (Array.isArray(value)) {
+        return value.map((item) => String(item)).filter(Boolean);
+    }
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) {
+                return parsed.map((item) => String(item)).filter(Boolean);
+            }
+        } catch {
+            // Fall through to split below.
+        }
+        return value
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean);
+    }
+    return [];
+};
+
 export class ApartmentRepository {
     static async getAll(): Promise<Apartment[]> {
         try {
             const snapshot = await db.collection(COLLECTION_NAME).get();
             const items: Apartment[] = [];
             snapshot.forEach((doc) => {
-                items.push({ Id: doc.id, ...doc.data() } as Apartment);
+                const data = doc.data();
+                items.push({
+                    Id: doc.id,
+                    ...data,
+                    PathImage: normalizePathImage(data.PathImage),
+                } as Apartment);
             });
             return items;
         } catch (error) {
@@ -41,7 +71,12 @@ export class ApartmentRepository {
         try {
             const doc = await db.collection(COLLECTION_NAME).doc(id).get();
             if (!doc.exists) return null;
-            return { Id: doc.id, ...doc.data() } as Apartment;
+            const data = doc.data();
+            return {
+                Id: doc.id,
+                ...data,
+                PathImage: normalizePathImage(data?.PathImage),
+            } as Apartment;
         } catch (error) {
             console.error("Error getting apartment by ID:", error);
             throw error;
@@ -53,7 +88,12 @@ export class ApartmentRepository {
             const payload = { ...data, createdAt: admin.firestore.Timestamp.now() };
             const docRef = await db.collection(COLLECTION_NAME).add(payload as any);
             const doc = await docRef.get();
-            return { Id: doc.id, ...doc.data() } as Apartment;
+            const docData = doc.data();
+            return {
+                Id: doc.id,
+                ...docData,
+                PathImage: normalizePathImage(docData?.PathImage),
+            } as Apartment;
         } catch (error) {
             console.error("Error creating apartment:", error);
             throw error;
@@ -65,7 +105,12 @@ export class ApartmentRepository {
             const docRef = db.collection(COLLECTION_NAME).doc(id);
             await docRef.update(updateData as any);
             const doc = await docRef.get();
-            return { Id: doc.id, ...doc.data() } as Apartment;
+            const data = doc.data();
+            return {
+                Id: doc.id,
+                ...data,
+                PathImage: normalizePathImage(data?.PathImage),
+            } as Apartment;
         } catch (error) {
             console.error("Error updating apartment:", error);
             throw error;
@@ -92,7 +137,12 @@ export class ApartmentRepository {
                 return null;
             }
             const doc = querySnapshot.docs[0];
-            return { Id: doc.id, ...doc.data() } as Apartment;
+            const data = doc.data();
+            return {
+                Id: doc.id,
+                ...data,
+                PathImage: normalizePathImage(data.PathImage),
+            } as Apartment;
         } catch (error) {
             console.error("Error getting apartment by room code:", error);
             throw error;

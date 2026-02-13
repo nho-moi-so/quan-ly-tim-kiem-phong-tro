@@ -28,7 +28,7 @@ export const UserService = {
             Role: data.role.toLocaleLowerCase(),
             Status: data.status.toLocaleLowerCase(),
         });
-        console.log("New user created in Firebase with ID:", newUser.Id);
+        // console.log("New user created in Firebase with ID:", newUser.Id);
         //tao user tren blockchain
         try{
 
