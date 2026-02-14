@@ -2,6 +2,7 @@ import { createFabricClient } from "@/lib/fabric/fabricClient";
 import { ApartmentRepository } from "@/repositories/apartmentRepository";
 import { BlockchainFabricRepository } from "@/repositories/blockchainFabricRepository";
 import { ContractRepository } from "@/repositories/contractRepository";
+import { UserRepository } from "@/repositories/userRepository";
 import admin from "firebase-admin";
 
 const {contract, close} = await createFabricClient();
@@ -35,11 +36,20 @@ export const ContractService = {
             throw new Error("Apartment is not available for booking");
         }
         const diffMs = endDateMs - startDateMs;
-        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        if (days <= 0) {
+        if (diffMs <= 0) {
             throw new Error("Invalid booking duration");
         }
-        const escrowAmount = apartment.DailyRate * days;
+        const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        const escrowAmount = apartment.DailyRate * Math.max(1, days);
+        //trừ tiền của khách
+        const user = await UserRepository.getById(data.userId);
+        if(!user){
+            throw new Error("User not found");
+        }
+        if(user.Balance < escrowAmount){
+            throw new Error("Insufficient balance");
+        }
+        await UserRepository.update(data.userId, { Balance: user.Balance - escrowAmount });
 
         const contractData = await ContractRepository.create({
             ApartmentId: data.apartmentId,
@@ -49,6 +59,8 @@ export const ContractService = {
             EscrowAmount: escrowAmount,
             Status: "CREATED",
         });
+        
+        
         //tao du lieu tren blockchain
         try{
             const blockchainContract = await repoBlockchainFabric.bookApartment(
@@ -58,6 +70,7 @@ export const ContractService = {
                 startDateSec,
                 endDateSec
             );
+            
             await ApartmentRepository.update(data.apartmentId, { Status: "booked" });
         }
         catch(err){

@@ -3,6 +3,7 @@ package chaincode
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
@@ -131,13 +132,17 @@ func (s *SmartContract) BookApartment(ctx contractapi.TransactionContextInterfac
 	//tinh tien
 	start := time.Unix(startDate, 0)
 	end := time.Unix(endDate, 0)
-	days := int(end.Sub(start).Hours() / 24)
-	if days <= 0 {
+	diffSeconds := end.Sub(start).Seconds()
+	if diffSeconds <= 0 {
 		return fmt.Errorf("So ngay thue khong hop le")
+	}
+	days := int(math.Ceil(diffSeconds / 86400))
+	if days < 1 {
+		days = 1
 	}
 	var totalPrice = apartment.DailyRate * days
 	if guest.Balance < totalPrice {
-		fmt.Errorf("Không đủ tiền! Cần %d nhưng chỉ có %d", totalPrice, guest.Balance)
+		return fmt.Errorf("Không đủ tiền! Cần %d nhưng chỉ có %d", totalPrice, guest.Balance)
 	}
 
 	//logic tru tien

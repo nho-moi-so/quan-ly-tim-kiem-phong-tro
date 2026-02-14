@@ -14,7 +14,7 @@ export const UserService = {
         password: string;
         phone: string;
         role: 'GUEST' | 'OWNER' | 'ADMIN';
-        status: 'ACTIVE' | 'LOCKED';
+        status: string;
     }) => {
         
         //tao user tren firebase

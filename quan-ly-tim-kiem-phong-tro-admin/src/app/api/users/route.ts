@@ -12,7 +12,7 @@ const CreateUserSchema = z.object({
     password: z.string().min(6),
     phone: z.string().min(10).max(15),
     role: z.enum(['GUEST', 'OWNER', 'ADMIN']),
-    status: z.enum(['ACTIVE', 'LOCKED'])
+    status: z.string()
 });
 
 export const POST = async (request: Request) => {
