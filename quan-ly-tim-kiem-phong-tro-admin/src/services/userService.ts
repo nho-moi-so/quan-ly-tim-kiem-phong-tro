@@ -8,7 +8,7 @@ const repoBlockchainFabric = new BlockchainFabricRepository(contract);
 export const UserService = {
     createUser: async (data: {
         balance: number;
-        cccd: string;
+        cccd?: string;
         email: string;
         fullName: string;
         password: string;
@@ -152,6 +152,9 @@ export const UserService = {
         if (!user || user.Role !== 'owner') {
             throw new Error('Owner not found');
         }
+        //cap nhat tren fabric
+        await repoBlockchainFabric.updateUserById(ownerId, user.Fullname, 'APPROVED', user.Role.toUpperCase() as any);
+        //cap nhat tren firebase
         const updated = await UserRepository.update(ownerId, { Status: 'APPROVED' });
         return { userCode: updated.Id, status: updated.Status.toUpperCase() ?? 'APPROVED' };
     },

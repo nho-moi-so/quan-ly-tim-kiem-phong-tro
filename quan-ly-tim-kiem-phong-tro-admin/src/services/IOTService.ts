@@ -1,11 +1,15 @@
+import { createFabricClient } from "@/lib/fabric/fabricClient";
 import { db } from "@/lib/firebase/admin";
 import { getIO } from "@/lib/socket";
 import { ApartmentRepository } from "@/repositories/apartmentRepository";
+import { BlockchainFabricRepository } from "@/repositories/blockchainFabricRepository";
 import { IoTDeviceInDepartmentRepository } from "@/repositories/iotDeviceInDepartmentRepository";
 import { IoTDeviceRepository } from "@/repositories/iotDeviceRepository";
 import { UserRepository } from "@/repositories/userRepository";
 import admin from "firebase-admin";
-
+const crypto = require('crypto');
+const {contract, close} = await createFabricClient();
+const repoBlockchainFabric = new BlockchainFabricRepository(contract);
 type ServiceResult = {
     status: "success" | "fail" | "error";
     message: string;
@@ -14,6 +18,9 @@ type ServiceResult = {
     online?: boolean;
     pingCode?: string | null;
 };
+function hashPassword(password) {
+    return crypto.createHash('sha256').update(password).digest('hex');
+}
 
 export const IOTService = {
     /**
@@ -165,7 +172,18 @@ export const IOTService = {
         const docId = `${roomCode}_${deviceId}`;
         const docRef = db.collection("iot_device_in_apartment").doc(docId);
         const doc = await docRef.get();
-        
+        //tao mat khau moi cho thiet bi iot
+        const newPassword = Array.from(crypto.getRandomValues(new Uint8Array(8)) as Uint8Array)
+                .map((x: number) => x % 10)
+                .join('');
+            //hash mật khẩu mới trước khi lưu
+        const newPasswordHash = hashPassword(newPassword);
+        //cap nhat mau khau hash cho apartment tren blockchain
+        await repoBlockchainFabric.updatePasswordApartment(apartment.Id, newPasswordHash);
+        //cap nhat mau khau raw cho apartment tren firebase
+        const apartmentRef = db.collection("apartments").doc(apartment.Id);
+        await apartmentRef.update({ Password: newPassword });
+
         if (doc.exists) {
             await docRef.update({ Status: "verified" });
             console.log(`✅ Password verified and status updated for room: ${roomCode}, device: ${deviceId}`);

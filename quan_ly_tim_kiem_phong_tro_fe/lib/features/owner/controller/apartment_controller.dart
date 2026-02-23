@@ -70,28 +70,49 @@ class ApartmentController {
         }
       }
       
-      Apartment apartment = Apartment(
-        codeApartment: roomCardDetail.roomCode,
-        dailyRate: double.parse(cleanPrice),
-        deposit: cleanDeposit.isEmpty ? 0.0 : double.parse(cleanDeposit),
-        maxOccupancy: int.parse(roomCardDetail.maxCapacity),
-        description: roomCardDetail.description,
-        status: roomCardDetail.room_status == '' ? 'Available' : roomCardDetail.room_status,
-        address: roomCardDetail.address,
-        latitude: roomCardDetail.latitude,
-        longitude: roomCardDetail.longitude,
-        type: roomCardDetail.roomType,
-        requirement: roomCardDetail.requirement.split(',').map((e) => e.trim()).toList(),
-        userID: fb_auth.FirebaseAuth.instance.currentUser!.uid,
-        pathImage: finalImageUrls,
-      );
+      // Apartment apartment = Apartment(
+      //   codeApartment: roomCardDetail.roomCode,
+      //   dailyRate: double.parse(cleanPrice),
+      //   deposit: cleanDeposit.isEmpty ? 0.0 : double.parse(cleanDeposit),
+      //   maxOccupancy: int.parse(roomCardDetail.maxCapacity),
+      //   description: roomCardDetail.description,
+      //   status: roomCardDetail.room_status == '' ? 'Available' : roomCardDetail.room_status,
+      //   address: roomCardDetail.address,
+      //   latitude: roomCardDetail.latitude,
+      //   longitude: roomCardDetail.longitude,
+      //   type: roomCardDetail.roomType,
+      //   requirement: roomCardDetail.requirement.split(',').map((e) => e.trim()).toList(),
+      //   userID: fb_auth.FirebaseAuth.instance.currentUser!.uid,
+      //   pathImage: finalImageUrls,
+      // );
 
-      Apartment createdApartment = await _apartmentService.createApartment(apartment);
-      print('Apartment created with ID: ${createdApartment.apartmentID}');
+      // Apartment createdApartment = await _apartmentService.createApartment(apartment);
+      // print('Apartment created with ID: ${createdApartment.apartmentID}');
 
-      // dò amenity để thêm vào amenityInApartment
-      print('🔍 DEBUG - Utilities to add: ${roomCardDetail.utilities}');
-      print('🔍 DEBUG - Number of utilities: ${roomCardDetail.utilities.length}');
+      // // dò amenity để thêm vào amenityInApartment
+      // print('🔍 DEBUG - Utilities to add: ${roomCardDetail.utilities}');
+      // print('🔍 DEBUG - Number of utilities: ${roomCardDetail.utilities.length}');
+
+      final String? serverDomain = dotenv.env['HOST_SERVER'];
+      if(serverDomain == null) {
+        throw Exception('HOST_SERVER is not defined in .env file');
+      }
+      var uri = Uri.parse('$serverDomain/api/apartments');
+      Map<String, dynamic> body ={
+        "address": roomCardDetail.address,
+        "codeApartment": roomCardDetail.roomCode,
+        "dailyRate": double.parse(cleanPrice),
+        "decription": roomCardDetail.description,
+        "latitude": roomCardDetail.latitude,
+        "longitude": roomCardDetail.longitude,
+        "maxOccupancy": int.parse(roomCardDetail.maxCapacity),
+        "password": "",
+        "pathImage": finalImageUrls,
+        "requirements": roomCardDetail.requirement.split(',').map((e) => e.trim()).toList(),
+        "status": "AVAILABLE",
+        "type": roomCardDetail.roomType,
+        "userId": fb_auth.FirebaseAuth.instance.currentUser!.uid,
+      }
       
       for (String amenityName in roomCardDetail.utilities) {
         print('➡️ Processing amenity: "$amenityName"');

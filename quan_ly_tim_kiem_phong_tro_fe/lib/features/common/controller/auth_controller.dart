@@ -46,21 +46,43 @@ class AuthController {
         role: role,
       );
 
-      // Call service to register
-      final result = await _authService.registerUser(signUpViewModel);
+      // // Call service to register
+      // final result = await _authService.registerUser(signUpViewModel);
 
-      if (result) {
+      final String? serverDomain = dotenv.env['SERVER_DOMAIN'];
+      if (serverDomain == null) {
+        throw Exception('SERVER_DOMAIN not defined in .env file');
+      }
+      var uri = Uri.parse('$serverDomain/api/users');
+      Map<String, dynamic> body ={
+        'email': email,
+        'fullName': username,
+        'password': password,
+        'phone': phone,
+        'role': role.toUpperCase(),
+        'status': 'ACTIVE',
+      }
+      var response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      )
+      if(response.statusCode == 200 || response.statusCode == 201) {
         return {
           'success': true,
           'message': 'Đăng ký thành công! Vui lòng đăng nhập.',
         };
-      } else {
+      } else if (response.statusCode == 400) {
+        var jsonResponse = jsonDecode(response.body);
         return {
           'success': false,
-          'message': 'Đăng ký thất bại. Vui lòng thử lại.',
+          'message': "Đăng ký thất bại: ${jsonResponse['message']}",
           'errorCode': 'REGISTRATION_FAILED',
         };
+      } else {
+        throw Exception('Failed to register user: ${response.body}');
       }
+      
     } catch (e) {
       return _handleRegistrationError(e);
     }

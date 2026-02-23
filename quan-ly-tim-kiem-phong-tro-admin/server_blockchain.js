@@ -39,6 +39,14 @@ function hashPassword(password) {
 function getCurrentTimestamp() {
 	return Math.floor(Date.now() / 1000);
 }
+function randomPassword(length = 8) {
+	const chars = '0123456789';
+	let result = '';
+	for (let i = 0; i < length; i++) {
+		result += chars[Math.floor(Math.random() * chars.length)];
+	}
+	return result;
+}
 
 async function withFabricContract(handler) {
 	const { contract, close } = await createFabricClient();
@@ -48,6 +56,7 @@ async function withFabricContract(handler) {
 		close();
 	}
 }
+
 
 // ========================================
 // PHẦN 1: REST API CHO IOT
@@ -129,7 +138,7 @@ async function scanAndProcess() {
 				if (booking.Status === 'CREATED' && now >= booking.StartDate) {
 					console.log(`   [CLOCKER] Phát hiện đơn ${booking.id} đến giờ Check-in!`);
 
-					const newPass = '123456';
+					const newPass = randomPassword(6);
 					const newPassHash = hashPassword(newPass);
 
 					try {
@@ -154,7 +163,7 @@ async function scanAndProcess() {
 				if (booking.Status === 'ACTIVE' && now >= booking.EndDate) {
 					console.log(`   [CLOCKER] Phát hiện đơn ${booking.id} đến giờ Check-out!`);
 
-					const resetPass = '1234567';
+					const resetPass = randomPassword(7);
 					const resetPassHash = hashPassword(resetPass);
 
 					try {
