@@ -255,6 +255,7 @@ class Transaction{
     - type: string
     - status: string
 }
+Transaction "1" -- "0..*" User: made
 Invoice "1" -down- "1..*" Transaction: includes
 class InvoiceDetail{
     - id: string

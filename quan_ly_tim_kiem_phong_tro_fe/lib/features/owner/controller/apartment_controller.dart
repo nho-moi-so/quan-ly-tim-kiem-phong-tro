@@ -112,7 +112,48 @@ class ApartmentController {
         "status": "AVAILABLE",
         "type": roomCardDetail.roomType,
         "userId": fb_auth.FirebaseAuth.instance.currentUser!.uid,
-      }
+      };
+      var response = await http.post(
+        uri, 
+        headers: {'Content-Type': 'application/json'}, 
+        body: jsonEncode(body));
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Map<String, dynamic> jsonResponse;
+        try {
+          jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        } catch (e) {
+          print('❌ Invalid create apartment response JSON: $e');
+          print('❌ Raw response body: ${response.body}');
+          return false;
+        }
+
+        final String apiStatus = (jsonResponse['status'] ?? '').toString().toLowerCase();
+        final String apiMessage = (jsonResponse['message'] ?? 'Unknown error').toString();
+
+        if (apiStatus != 'success') {
+          print('❌ Create apartment failed: $apiMessage');
+          return false;
+        }
+
+        final dynamic data = jsonResponse['data'];
+        if (data is! Map<String, dynamic>) {
+          print('❌ Create apartment success nhưng thiếu data hợp lệ');
+          return false;
+        }
+
+        final String createdApartmentId =
+            (data['Id'] ?? data['id'] ?? data['apartmentID'] ?? data['apartmentId'] ?? '').toString();
+
+        if (createdApartmentId.isEmpty) {
+          print('❌ Không tìm thấy apartment ID trong response: $data');
+          return false;
+        }
+
+        print('✅ Apartment created with ID: $createdApartmentId');
+
+        // Dò amenity để thêm vào amenityInApartment
+        print('🔍 DEBUG - Utilities to add: ${roomCardDetail.utilities}');
+        print('🔍 DEBUG - Number of utilities: ${roomCardDetail.utilities.length}');
       
       for (String amenityName in roomCardDetail.utilities) {
         print('➡️ Processing amenity: "$amenityName"');
@@ -124,12 +165,12 @@ class ApartmentController {
             print('✅ Found amenity: ${amenity.description} (ID: ${amenity.amenityID})');
             
             final amenityInApartment = AmenityInApartment(
-              apartmentId: createdApartment.apartmentID!,
+              apartmentId: createdApartmentId,
               amenityId: amenity.amenityID,
               isAvailable: true,
             );
             
-            print('📝 Creating AmenityInApartment: apartmentId=${createdApartment.apartmentID}, amenityId=${amenity.amenityID}');
+            // print('📝 Creating AmenityInApartment: apartmentId=${createdApartment.}, amenityId=${amenity.amenityID}');
             
             await _amenityInApartmentService.createAmenityInApartment(amenityInApartment);
             
@@ -145,6 +186,18 @@ class ApartmentController {
       
       print('✅ Finished processing all amenities');
       return true; // thành công
+      }
+
+      String serverMessage = 'Unknown server error';
+      try {
+        final dynamic errorResponse = jsonDecode(response.body);
+        if (errorResponse is Map<String, dynamic>) {
+          serverMessage = (errorResponse['message'] ?? serverMessage).toString();
+        }
+      } catch (_) {}
+
+      print('❌ Create apartment HTTP ${response.statusCode}: $serverMessage');
+      return false;
     } catch (e) {
       print('Error creating apartment: $e');
       return false; // thất bại
@@ -184,7 +237,7 @@ class ApartmentController {
   //deleteApartment
   Future<bool> deleteApartment(String apartmentId) async{
     try{
-      await _apartmentService.deleteApartment("wDcTehYPI2siB6cj6cle");
+      await _apartmentService.deleteApartment(apartmentId);
       return true;
     }
     catch(e){

@@ -1,5 +1,8 @@
-import 'package:quan_ly_tim_kiem_phong_tro_fe/service/auth_service.dart';
+import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http; // Để gọi API upload
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/auth_service.dart';
 /// Controller quản lý logic authentication
 /// Tách biệt logic nghiệp vụ khỏi UI
 class AuthController {
@@ -61,12 +64,12 @@ class AuthController {
         'phone': phone,
         'role': role.toUpperCase(),
         'status': 'ACTIVE',
-      }
+      };
       var response = await http.post(
         uri,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(body),
-      )
+      );
       if(response.statusCode == 200 || response.statusCode == 201) {
         return {
           'success': true,

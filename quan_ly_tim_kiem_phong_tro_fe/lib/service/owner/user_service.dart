@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/transaction.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/user.dart';
 class UserService {
     //connect to firebase
@@ -90,6 +91,36 @@ class UserService {
       'Status': status,
     });
     return getUserById(id);
+  }
+
+  Future<String> createTransaction(TransactionModel transaction) async {
+    final docRef = await firestore.collection('transaction').add(transaction.toMap());
+    return docRef.id;
+  }
+
+  Future<List<TransactionModel>> getPendingWithdrawTransactionsByUser(String userId) async {
+    final snapshot = await firestore
+        .collection('transaction')
+        .where('UserID', isEqualTo: userId)
+        .where('Type', isEqualTo: 'WITHDRAW')
+        .where('Status', isEqualTo: 'PENDING')
+        .get();
+
+    return snapshot.docs
+        .map((doc) => TransactionModel.fromMap(doc.id, doc.data()))
+        .toList();
+  }
+
+  Future<void> undoAllPendingWithdrawTransactionsByUser(String userId) async {
+    final pendingTransactions = await getPendingWithdrawTransactionsByUser(userId);
+    final WriteBatch batch = firestore.batch();
+
+    for (final transaction in pendingTransactions) {
+      final docRef = firestore.collection('transaction').doc(transaction.id);
+      batch.delete(docRef);
+    }
+
+    await batch.commit();
   }
 
   //deleteUser
