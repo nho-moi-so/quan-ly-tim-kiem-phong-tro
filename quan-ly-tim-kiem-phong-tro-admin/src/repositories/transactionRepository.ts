@@ -11,11 +11,31 @@ export interface Transaction {
     Status: string; //PENDING, COMPLETED, FAILED
     UserID: string;
     InvoiceID?: string; // Chỉ có khi Type là PAYMENT
+    CompletedAt?: Date;
+    BankSummary?: string;
+    TxHash?: string;
 }
 export type CreateTransactionData = Omit<Transaction, "Id">;
 export type UpdateTransactionData = Partial<Omit<Transaction, "Id">>;
 
 const COLLECTION_NAME = "transaction";
+
+const mapTransactionDoc = (doc: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>): Transaction => {
+    const data = doc.data();
+    const paymentDate = data.PaymentDate?.toDate ? data.PaymentDate.toDate() : data.PaymentDate;
+    const completedAt = data.CompletedAt?.toDate
+        ? data.CompletedAt.toDate()
+        : data.completed_at?.toDate
+            ? data.completed_at.toDate()
+            : data.CompletedAt ?? data.completed_at;
+
+    return {
+        Id: doc.id,
+        ...data,
+        PaymentDate: paymentDate,
+        CompletedAt: completedAt,
+    } as Transaction;
+};
 
 export class TransactionRepository {
     static async getAll(): Promise<Transaction[]> {
@@ -23,12 +43,7 @@ export class TransactionRepository {
             const snapshot = await db.collection(COLLECTION_NAME).get();
             const items: Transaction[] = [];
             snapshot.forEach((doc) => {
-                const data = doc.data();
-                items.push({
-                    Id: doc.id,
-                    ...data,
-                    PaymentDate: data.PaymentDate.toDate(),
-                } as Transaction);
+                items.push(mapTransactionDoc(doc));
             });
             return items;
         } catch (error) {
@@ -43,12 +58,7 @@ export class TransactionRepository {
             if (!doc.exists) {
                 return null;
             }
-            const data = doc.data()!;
-            return {
-                Id: doc.id,
-                ...data,
-                PaymentDate: data.PaymentDate.toDate(),
-            } as Transaction;
+            return mapTransactionDoc(doc as FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>);
         } catch (error) {
             console.error("Error fetching transaction by ID:", error);
             throw error;
@@ -63,16 +73,27 @@ export class TransactionRepository {
                 .get();
             const items: Transaction[] = [];
             snapshot.forEach((doc) => {
-                const data = doc.data();
-                items.push({
-                    Id: doc.id,
-                    ...data,
-                    PaymentDate: data.PaymentDate.toDate(),
-                } as Transaction);
+                items.push(mapTransactionDoc(doc));
             });
             return items;
         } catch (error) {
             console.error("Error fetching transactions by status and type:", error);
+            throw error;
+        }
+    }
+
+    static async getByType(type: string): Promise<Transaction[]> {
+        try {
+            const snapshot = await db.collection(COLLECTION_NAME)
+                .where("Type", "==", type)
+                .get();
+            const items: Transaction[] = [];
+            snapshot.forEach((doc) => {
+                items.push(mapTransactionDoc(doc));
+            });
+            return items;
+        } catch (error) {
+            console.error("Error fetching transactions by type:", error);
             throw error;
         }
     }
@@ -109,12 +130,7 @@ export class TransactionRepository {
             const snapshot = await db.collection(COLLECTION_NAME).where("UserID", "==", userId).get();
             const items: Transaction[] = [];
             snapshot.forEach((doc) => {
-                const data = doc.data();
-                items.push({
-                    Id: doc.id,
-                    ...data,
-                    PaymentDate: data.PaymentDate.toDate(),
-                } as Transaction);
+                items.push(mapTransactionDoc(doc));
             });
             return items;
         } catch (error) {

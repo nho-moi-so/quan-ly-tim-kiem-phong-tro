@@ -2,12 +2,12 @@
 
 import { auth } from "@/lib/firebase/config";
 import {
-    AppstoreOutlined,
-    DashboardOutlined,
-    LogoutOutlined,
-    MenuFoldOutlined,
-    MenuUnfoldOutlined,
-    UserOutlined
+  AppstoreOutlined,
+  DashboardOutlined,
+  LogoutOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  UserOutlined
 } from "@ant-design/icons";
 import type { GetProps, MenuProps } from "antd";
 import { Avatar, Button, Dropdown, Input, Layout, Menu, message, Modal, theme } from "antd";
@@ -176,6 +176,23 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       label: "Quản Lý Đặt Phòng",
       icon: <AppstoreOutlined />,
       onClick: () => router.push("/admin/quan-ly-lich-dat-phong"),
+    },
+    {
+      key: "quan-ly-giao-dich",
+      label: "Quản Lý Giao Dịch",
+      icon: <AppstoreOutlined />,
+      children: [
+        {
+          key: "lich-su-giao-dich",
+          label: "Lịch Sử Giao Dịch",
+          onClick: () => router.push("/admin/quan-ly-giao-dich/lich-su-giao-dich"),
+        },
+        {
+          key: "yeu-cau-rut-tien",
+          label: "Yêu Cầu Rút Tiền",
+          onClick: () => router.push("/admin/quan-ly-giao-dich/yeu-cau-rut-tien"),
+        },
+      ],
     },
   ];
 

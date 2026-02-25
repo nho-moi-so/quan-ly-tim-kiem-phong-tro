@@ -1,5 +1,7 @@
+import "@/lib/firebase/admin";
 import { UserRepository } from "@/repositories/userRepository";
 import 'dotenv/config';
+import admin from "firebase-admin";
 import { createFabricClient } from '../lib/fabric/fabricClient';
 import { BlockchainFabricRepository } from '../repositories/blockchainFabricRepository';
 
@@ -16,30 +18,44 @@ export const UserService = {
         role: 'GUEST' | 'OWNER' | 'ADMIN';
         status: string;
     }) => {
-        
-        //tao user tren firebase
-        const newUser = await UserRepository.create({
-            Balance: data.balance,
-            Cccd: data.cccd,
-            Email: data.email,
-            Fullname: data.fullName,
-            Password: data.password,
-            Phone: data.phone,
-            Role: data.role.toLocaleLowerCase(),
-            Status: data.status.toLocaleLowerCase(),
-        });
-        // console.log("New user created in Firebase with ID:", newUser.Id);
-        //tao user tren blockchain
-        try{
+        let authUid: string | null = null;
+        let newUser: Awaited<ReturnType<typeof UserRepository.create>> | null = null;
 
-            const blockchainUser = await repoBlockchainFabric.createUser(newUser.Id, data.fullName, data.balance, data.role);
-        }
-        catch(err){
-            //neu tao tren blockchain that bai thi xoa tren firebase
-            await UserRepository.delete(newUser.Id);
+        try {
+            const authUser = await admin.auth().createUser({
+                email: data.email,
+                password: data.password,
+                displayName: data.fullName,
+            });
+            authUid = authUser.uid;
+
+            //tao user tren firebase/firestore
+            newUser = await UserRepository.create({
+                Id: authUid,
+                Balance: data.balance,
+                Cccd: data.cccd,
+                Email: data.email,
+                Fullname: data.fullName,
+                Password: data.password,
+                Phone: data.phone,
+                Role: data.role.toLocaleLowerCase(),
+                Status: data.status.toLocaleLowerCase(),
+            });
+
+            //tao user tren blockchain
+            await repoBlockchainFabric.createUser(newUser.Id, data.fullName, data.balance, data.role);
+            return newUser;
+        } catch (err) {
+            if (newUser?.Id) {
+                await UserRepository.delete(newUser.Id).catch(() => undefined);
+            }
+
+            if (authUid) {
+                await admin.auth().deleteUser(authUid).catch(() => undefined);
+            }
+
             throw err;
         }
-        return newUser;
     },
 
     getAllGests: async () => {

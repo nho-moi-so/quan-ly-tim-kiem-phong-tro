@@ -20,9 +20,9 @@ export interface User {
 }
 
 /**
- * User data for creation (without Id)
+ * User data for creation (optionally with Id)
  */
-export type CreateUserData = Omit<User, "Id">;
+export type CreateUserData = Omit<User, "Id"> & { Id?: string };
 
 /**
  * User data for updates (partial)
@@ -88,11 +88,16 @@ export class UserRepository {
      */
     static async create(userData: CreateUserData): Promise<User> {
         try {
-            const docRef = await db.collection(COLLECTION_NAME).add(userData);
+            const { Id, ...data } = userData;
+            const docRef = Id
+                ? db.collection(COLLECTION_NAME).doc(Id)
+                : db.collection(COLLECTION_NAME).doc();
+
+            await docRef.set(data);
             const doc = await docRef.get();
 
             return {
-                Id: docRef.id,
+                Id: doc.id,
                 ...doc.data(),
             } as User;
         } catch (error) {
