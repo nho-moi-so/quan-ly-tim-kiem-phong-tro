@@ -16,7 +16,7 @@ export const ApartmentService = {
         maxOccupancy: number;
         password?: string;    
         pathImage?: string[];
-        requirements?: string;
+        requirements?: string[];
         status?: string;
         type?: string;
         userId: string;
@@ -32,7 +32,7 @@ export const ApartmentService = {
             MaxOccupancy: data.maxOccupancy,
             Password: data.password,
             PathImage: data.pathImage ?? [],
-            Requirements: data.requirements,
+            Requirements: (data.requirements ?? []).join(','),
             Status: data.status,
             Type: data.type,
             UserID: data.userId,

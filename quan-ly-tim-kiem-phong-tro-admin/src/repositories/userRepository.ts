@@ -31,6 +31,12 @@ export type UpdateUserData = Partial<Omit<User, "Id">>;
 
 const COLLECTION_NAME = "users";
 
+const removeUndefined = <T extends Record<string, unknown>>(obj: T): Partial<T> => {
+    return Object.fromEntries(
+        Object.entries(obj).filter(([, value]) => value !== undefined)
+    ) as Partial<T>;
+};
+
 /**
  * UserRepository - CRUD operations for User collection
  */
@@ -89,11 +95,13 @@ export class UserRepository {
     static async create(userData: CreateUserData): Promise<User> {
         try {
             const { Id, ...data } = userData;
+            const cleanedData = removeUndefined(data);
+
             const docRef = Id
                 ? db.collection(COLLECTION_NAME).doc(Id)
                 : db.collection(COLLECTION_NAME).doc();
 
-            await docRef.set(data);
+            await docRef.set(cleanedData);
             const doc = await docRef.get();
 
             return {
@@ -115,7 +123,9 @@ export class UserRepository {
     static async update(userId: string, updateData: UpdateUserData): Promise<User> {
         try {
             const docRef = db.collection(COLLECTION_NAME).doc(userId);
-            await docRef.update(updateData);
+            const cleanedUpdateData = removeUndefined(updateData as Record<string, unknown>);
+
+            await docRef.update(cleanedUpdateData);
 
             const doc = await docRef.get();
             return {
@@ -142,4 +152,23 @@ export class UserRepository {
             throw error;
         }
     }
+    static async updateBalance(userId: string, amount: number): Promise<void> {
+        try {
+            const userRef = db.collection(COLLECTION_NAME).doc(userId);
+            await db.runTransaction(async (transaction) => {
+                const userDoc = await transaction.get(userRef);
+                if (!userDoc.exists) {
+                    throw new Error("User not found");
+                }
+
+                const currentBalance = userDoc.data()?.Balance || 0;
+                const newBalance = currentBalance + amount;
+
+                transaction.update(userRef, { Balance: newBalance });
+            });
+        } catch (error) {
+            console.error("Error updating user balance:", error);
+            throw error;
+        }
+    };
 }

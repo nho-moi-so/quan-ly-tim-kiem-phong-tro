@@ -7,6 +7,8 @@
 #include <ESP32Servo.h>
 #include <Keypad.h>
 
+void updatePingReply(String pingCode);
+
 //LCD
 // LiquidCrystal_I2C lcd(0x27, 16, 2); //0x27 hoặc 0x3F
 
@@ -580,3 +582,4 @@ void loop(){
 
  
 }
+

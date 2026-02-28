@@ -139,6 +139,18 @@ export const IOTService = {
                 message: "OTP verified successfully",
             });
             console.log(`Emitted iot-verified to room: ${roomCode} for device: ${deviceId}`);
+            const apartmentRef = await ApartmentRepository.getByRoomCode(roomCode);
+            //tao mat khau moi cho thiet bi iot
+            const newPassword = Array.from(crypto.getRandomValues(new Uint8Array(8)) as Uint8Array)
+                    .map((x: number) => x % 10)
+                    .join('');
+            //hash mật khẩu mới trước khi lưu
+            const newPasswordHash = hashPassword(newPassword);
+            //cap nhat mau khau hash cho apartment tren blockchain
+            await repoBlockchainFabric.updatePasswordApartment(apartmentRef.Id, newPasswordHash);
+            //cap nhat mau khau raw cho apartment tren firebase
+            await ApartmentRepository.update(apartmentRef.Id, { Password: newPassword });
+            console.log(`Updated password for apartment ${apartmentRef.Id} after OTP verification`);
         } catch (e) {
             console.warn("Socket emit failed", e);
         }
@@ -154,35 +166,12 @@ export const IOTService = {
             return { status: "error", message: "Missing password, roomCode, or deviceId" };
         }
 
-        const apartment = await ApartmentRepository.getByRoomCode(roomCode);
-        if (!apartment) {
-            return {
-                status: "fail",
-                message: "Invalid room code",
-            };
-        }
-        if (apartment.Password !== password) {
-            return {
-                status: "fail",
-                message: "Incorrect password",
-            };
-        }
 
         // Cập nhật trạng thái verified trong Firestore (không cần emit event)
         const docId = `${roomCode}_${deviceId}`;
         const docRef = db.collection("iot_device_in_apartment").doc(docId);
         const doc = await docRef.get();
-        //tao mat khau moi cho thiet bi iot
-        const newPassword = Array.from(crypto.getRandomValues(new Uint8Array(8)) as Uint8Array)
-                .map((x: number) => x % 10)
-                .join('');
-            //hash mật khẩu mới trước khi lưu
-        const newPasswordHash = hashPassword(newPassword);
-        //cap nhat mau khau hash cho apartment tren blockchain
-        await repoBlockchainFabric.updatePasswordApartment(apartment.Id, newPasswordHash);
-        //cap nhat mau khau raw cho apartment tren firebase
-        const apartmentRef = db.collection("apartments").doc(apartment.Id);
-        await apartmentRef.update({ Password: newPassword });
+        
 
         if (doc.exists) {
             await docRef.update({ Status: "verified" });

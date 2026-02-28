@@ -453,3 +453,12 @@ func (s *SmartContract) GetApartmentById(ctx contractapi.TransactionContextInter
 	}
 	return &apartment, nil
 }
+
+// getPasswordHashByApartmentId
+func (s *SmartContract) GetPasswordHashByApartmentId(ctx contractapi.TransactionContextInterface, apartmentId string) (string, error) {
+	apartment, err := s.GetApartmentById(ctx, apartmentId)
+	if err != nil {
+		return "", err
+	}
+	return apartment.PasswordHash, nil
+}

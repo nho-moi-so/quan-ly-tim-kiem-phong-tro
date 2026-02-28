@@ -13,37 +13,52 @@ export const TransactionService = {
         gatewayTransactionId?: string;
         userId: string;
     }) => {
-        // Tạo giao dịch nạp tiền trên blockchain
-        try{
+        try {
+            // Tạo giao dịch nạp tiền trên blockchain
             await repoBlockchainFabric.deposit(data.userId, data.amount);
-        }
-        catch(err){
+        } catch (err) {
             console.error("Error during blockchain deposit transaction:", err);
+            console.error("Error details:", {
+                userId: data.userId,
+                amount: data.amount,
+                paymentMethod: data.paymentMethod,
+                gatewayTransactionId: data.gatewayTransactionId,
+            });
             throw new Error("Failed to create deposit transaction on blockchain");
-        }
-        finally{
+        } finally {
             await close();
         }
+
         // luu giao dich vao firebase sau khi giao dich tren blockchain thanh cong
         const transactionData = {
             Amount: data.amount,
-            PaymentMethod: data.paymentMethod,
-            GatewayTransactionId: data.gatewayTransactionId,
+            PaymentMethod: data.paymentMethod ?? "BANK_TRANSFER",
             PaymentDate: new Date(),
             Type: "DEPOSIT",
             Status: "COMPLETED",
             UserID: data.userId,
-        }
+            ...(data.gatewayTransactionId ? { GatewayTransactionId: data.gatewayTransactionId } : {}),
+        };
+
         const result = await TransactionRepository.create(transactionData);
+        //cong balance cho user
+        try {
+            await UserRepository.updateBalance(data.userId, data.amount);
+        } catch (err) {
+            console.error("Error updating user balance after deposit:", err);
+            // Optionally, you could implement a compensation mechanism here to revert the blockchain transaction if the database update fails
+            throw new Error("Failed to update user balance in database after deposit");
+        }
         if (!result) {
             console.error("Failed to create deposit transaction in database");
             throw new Error("Failed to create deposit transaction in database");
         }
+
         return {
             status: "success",
             message: "Deposit transaction created successfully",
             transactionId: result
-        }
+        };
     },
     requestWithdraw: async (data: {
         amount: number;
@@ -111,6 +126,14 @@ export const TransactionService = {
         }
         catch(err){
             throw new Error("Failed to update withdraw transaction status in database");
+        }
+        // tru balance cho user
+        try {
+            await UserRepository.updateBalance(transaction.UserID, -transaction.Amount);
+        } catch (err) {
+            console.error("Error updating user balance after approving withdraw:", err);
+            // Optionally, you could implement a compensation mechanism here to revert the blockchain transaction if the database update fails
+            throw new Error("Failed to update user balance in database after approving withdraw");
         }
         return {
             status: "success",

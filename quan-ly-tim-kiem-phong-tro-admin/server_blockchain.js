@@ -104,6 +104,36 @@ app.post('/api/verify', async (req, res) => {
 	}
 });
 
+app.post('/api/get-password', async (req, res) => {
+	const { roomCode } = req.body;
+
+	console.log(`\n[API] Nhận yêu cầu lấy mật khẩu: RoomCode=${roomCode}`);
+
+	if (!roomCode) {
+		return res.status(400).json({ error: 'Thiếu roomCode' });
+	}
+	const apartment = await ApartmentRepository.getByRoomCode(roomCode);
+	apartmentId = apartment?.Id;
+	if (!apartmentId) {
+		return res.status(404).json({ error: 'Không tìm thấy căn hộ với roomCode đã cho' });
+	}
+	try {
+		const resultBytes = await withFabricContract((contract) =>
+			contract.evaluateTransaction('GetPasswordHashByApartmentId', apartmentId)
+		);
+		const passwordHash = decoder.decode(resultBytes);
+
+		return res.json({
+			status: 'success',
+			apartmentId,
+			passwordHash,
+		});
+	} catch (error) {
+		console.error(`   [API] Lỗi lấy mật khẩu từ Blockchain: ${error.message}`);
+		return res.status(500).json({ error: error.message });
+	}
+});
+
 // ========================================
 // PHẦN 2: HỆ THỐNG TỰ ĐỘNG (CLOCKER)
 // ========================================

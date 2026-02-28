@@ -13,7 +13,7 @@ const CreateApartmentSchema = z.object({
     maxOccupancy: z.number().min(1),
     password: z.string().optional(),    
     pathImage: z.array(z.string()).optional(),
-    requirements: z.string().optional(),
+    requirements: z.array(z.string()).optional(),
     status: z.string().optional(),
     type: z.string().optional(),
     userId: z.string(),
