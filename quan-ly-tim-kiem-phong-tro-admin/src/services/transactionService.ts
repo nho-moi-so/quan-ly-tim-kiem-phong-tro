@@ -64,18 +64,19 @@ export const TransactionService = {
         amount: number;
         userId: string;
      }) => {
+        const { contract: withdrawContract, close: closeWithdraw } = await createFabricClient();
+        const withdrawRepo = new BlockchainFabricRepository(withdrawContract);
+
         // Tạo giao dịch rút tiền trên blockchain
         try{
-            await repoBlockchainFabric.requestWithdraw(data.userId, data.amount);
+            await withdrawRepo.requestWithdraw(data.userId, data.amount);
         }
         catch(err){
             console.error("Error during blockchain withdraw transaction:", err);
-            throw new Error("Failed to create withdraw transaction on blockchain");
-            
-            
+            throw new Error("Failed to create withdraw transaction on blockchain"); 
         }
         finally{
-            await close();
+            await closeWithdraw();
         }
         // luu giao dich vao firebase sau khi giao dich tren blockchain thanh cong
         const transactionData = {
