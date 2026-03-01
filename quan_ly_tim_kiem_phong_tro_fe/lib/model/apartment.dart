@@ -36,9 +36,9 @@ class Apartment {
   factory Apartment.fromMap(String id, Map<String, dynamic> map) => Apartment(
         apartmentID: id,
         codeApartment: map['CodeApartment'] ?? '',
-        dailyRate: (map['DailyRate'] as num).toDouble(),
-        deposit: (map['Deposit'] as num).toDouble(),
-        maxOccupancy: map['MaxOccupancy'] ?? 0,
+      dailyRate: (map['DailyRate'] as num?)?.toDouble() ?? 0.0,
+      deposit: (map['Deposit'] as num?)?.toDouble() ?? 0.0,
+      maxOccupancy: (map['MaxOccupancy'] as num?)?.toInt() ?? 0,
         description: map['Decription'] ?? '',
         pathImage: List<String>.from(map['PathImage'] ?? []),
         status: map['Status'] ?? '',

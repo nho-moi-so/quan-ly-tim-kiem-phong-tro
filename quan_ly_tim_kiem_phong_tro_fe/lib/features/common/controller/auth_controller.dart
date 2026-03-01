@@ -32,6 +32,7 @@ class AuthController {
         confirmPassword: confirmPassword,
       );
 
+      print("1");
       if (!validationResult['isValid']) {
         return {
           'success': false,
@@ -39,7 +40,7 @@ class AuthController {
           'errorCode': 'VALIDATION_ERROR',
         };
       }
-
+      print("2");
       // Create SignUpViewModel
       final signUpViewModel = SignUpViewModel(
         username: username.trim(),
@@ -51,12 +52,15 @@ class AuthController {
 
       // // Call service to register
       // final result = await _authService.registerUser(signUpViewModel);
-
-      final String? serverDomain = dotenv.env['SERVER_DOMAIN'];
+      print("3");
+      final String? serverDomain = dotenv.env['HOST_SERVER'];
+      print("serverDomain: $serverDomain");
+      // throw Exception('HOST_SERVER not defined in .env file');
       if (serverDomain == null) {
-        throw Exception('SERVER_DOMAIN not defined in .env file');
+        throw Exception('HOST_SERVER not defined in .env file');
       }
       var uri = Uri.parse('$serverDomain/api/users');
+      print("uri: $uri");
       Map<String, dynamic> body ={
         'email': email,
         'fullName': username,
@@ -70,12 +74,16 @@ class AuthController {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(body),
       );
+      print("response status: ${response.statusCode}");
+      print("8");
       if(response.statusCode == 200 || response.statusCode == 201) {
+        print("4");
         return {
           'success': true,
           'message': 'Đăng ký thành công! Vui lòng đăng nhập.',
         };
       } else if (response.statusCode == 400) {
+        print("5");
         var jsonResponse = jsonDecode(response.body);
         return {
           'success': false,
@@ -83,10 +91,12 @@ class AuthController {
           'errorCode': 'REGISTRATION_FAILED',
         };
       } else {
+        print("6");
         throw Exception('Failed to register user: ${response.body}');
       }
       
     } catch (e) {
+      print("7");
       return _handleRegistrationError(e);
     }
   }
@@ -301,7 +311,7 @@ class AuthController {
 
   /// Handle registration errors
   Map<String, dynamic> _handleRegistrationError(dynamic error) {
-    String message = 'Đăng ký thất bại';
+    String message = 'Đăng ký thất bại trong quá trình xử lý';
     String? errorCode;
 
     final errorString = error.toString().toLowerCase();

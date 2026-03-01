@@ -109,7 +109,7 @@ class ApartmentController {
         "password": "",
         "pathImage": finalImageUrls,
         "requirements": roomCardDetail.requirement.split(',').map((e) => e.trim()).toList(),
-        "status": "AVAILABLE",
+        "status": "Available",
         "type": roomCardDetail.roomType,
         "userId": fb_auth.FirebaseAuth.instance.currentUser!.uid,
       };
@@ -170,7 +170,7 @@ class ApartmentController {
               isAvailable: true,
             );
             
-            // print('📝 Creating AmenityInApartment: apartmentId=${createdApartment.}, amenityId=${amenity.amenityID}');
+            print('📝 Creating AmenityInApartment: apartmentId=$createdApartmentId, amenityId=${amenity.amenityID}');
             
             await _amenityInApartmentService.createAmenityInApartment(amenityInApartment);
             
@@ -409,10 +409,20 @@ class ApartmentController {
 
   // Kiểm tra mã phòng có unique không
   Future<bool> isRoomCodeUnique(String roomCode) async {
+    final normalizedCode = roomCode.trim();
+    print('Checking uniqueness for room code: "$normalizedCode"');
+
+    if (normalizedCode.isEmpty) {
+      return false;
+    }
+
     try {
-      List<Apartment> apartments = await _apartmentService.getAllApartment();
-      return !apartments.any((apt) => apt.codeApartment == roomCode);
+      await _apartmentService.getApartmentByCode(normalizedCode);
+      return false;
     } catch (e) {
+      if (e.toString().contains('not found')) {
+        return true;
+      }
       print('Error checking room code uniqueness: $e');
       return false;
     }

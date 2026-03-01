@@ -1,34 +1,11 @@
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <string>
-#include <ESP32Servo.h>
-#include <Keypad.h>
 #include <mbedtls/md.h>
 
-//LCD
-LiquidCrystal_I2C lcd(0x27, 16, 2); //0x27 hoặc 0x3F
-
-//keypad
-const byte ROWS = 4;
-const byte COLS = 4;
-
-char keys[ROWS][COLS] = {
-  {'1','2','3','A'},
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'*','0','#','D'}
-};
-byte rowPins[ROWS] = {32, 33, 25, 26}; // R1-R4
-byte colPins[COLS] = {27, 14, 12, 13}; // C1-C4
-Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
-
-// Servo
-int currentAngle = 0; //lưu góc quay hiện tại của servo
-Servo myServo;
-const int servoPin = 18; // Chân kết nối servo
+// Servo giả lập
+int currentAngle = 0; //lưu góc quay hiện tại của servo (giả lập)
 
 // Thông tin mạng WiFi
 const char* ssid = "MINH KHANG";       // Tên WiFi
@@ -38,8 +15,8 @@ const char* password = "20012016";     // Mật khẩu WiFi
 String roomCode = "";
 
 //thông tin host server
-String hostServer = "http://192.168.2.144:3000";
-String blockchainServer = "http://192.168.2.144:4000";
+String hostServer = "https://pluvious-shady-joline.ngrok-free.dev";
+String blockchainServer = "http://tnbvx-171-252-155-96.a.free.pinggy.link";
 
 //Thông tin của thiết bị iot này
 String type_iot = "smart_lock";
@@ -124,12 +101,9 @@ void updatePingReply(String pingCode) {
   int httpResponseCode = http.POST(postData);
 
   if (httpResponseCode == 200) {
-
+    Serial.println("[PingReply] Success");
   } else {
-    lcd.setCursor(0, 0);
-    lcd.println("[IoT] Error sending PingReply: " + String(httpResponseCode));
-    delay(1000);
-    lcd.clear();
+    Serial.println("[PingReply] Error: " + String(httpResponseCode));
   }
 
   http.end();
@@ -138,8 +112,8 @@ void updatePingReply(String pingCode) {
 void pollPasswordHash();
 
 void delayWithPoll() {
-      // Kiểm tra và poll PingCode trong khi chờ nhập
-  if (millis() - lastPollTime > 2000) {
+      //### Kiểm tra và poll PingCode trong khi chờ nhập
+  if (millis() - lastPollTime > 2000000) {
     pollPingCode();
     lastPollTime = millis();
   }
@@ -190,65 +164,58 @@ void pollPasswordHash() {
   http.end();
 }
 
+// Đọc 1 ký tự từ Serial (blocking, có poll)
+char serialGetKey() {
+  while (true) {
+    delayWithPoll();
+    if (Serial.available()) {
+      char ch = Serial.read();
+      if (ch == '\r' || ch == '\n') continue; // bỏ qua newline
+      return ch;
+    }
+    delay(50);
+  }
+}
+
 void setup(){
   Serial.begin(115200);
 
   delay(1000);
   
-  // Khởi tạo LCD
-  lcd.init();
-  lcd.backlight();
-  lcd.clear();
-  lcd.print("Khoi dong...");
+  Serial.println("\n\n===== SMART LOCK TEST (Serial thay LCD/Keypad/Servo) =====");
+  Serial.println("Khoi dong...");
   delay(1000);
   
   // Hiển thị trạng thái kết nối WiFi
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Ket noi WiFi...");
-  lcd.setCursor(0, 1);
-  lcd.print(ssid);
+  Serial.println("\nKet noi WiFi...");
+  Serial.println("SSID: " + String(ssid));
 
   WiFi.begin(ssid, password);
 
   int attempts = 0;
   while (WiFi.status() != WL_CONNECTED && attempts < 20) {
     delay(500);
-    lcd.print(".");
+    Serial.print(".");
     attempts++;
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("WiFi ket noi!");
-    lcd.setCursor(0, 1);
-    lcd.print(WiFi.localIP());
+    Serial.println("\nWiFi ket noi!");
+    Serial.println("IP: " + WiFi.localIP().toString());
     delay(2000);
   } else {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("WiFi that bai!");
+    Serial.println("\nWiFi that bai!");
     delay(2000);
   }
 
-  // Khởi tạo Servo
-  myServo.setPeriodHertz(50);
-  myServo.attach(servoPin, 500, 2400);
-  myServo.write(currentAngle); // Góc ban đầu
+  // Giả lập Servo: góc ban đầu = 0
+  currentAngle = 0;
   
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("San sang!");
+  Serial.println("San sang!");
   delay(1000);
 
   // ================ GỌI API RE-CONNECT ================
-  // Kiểm tra xem device đã được kết nối với phòng nào chưa
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Kiem tra ket noi");
-  lcd.setCursor(0, 1);
-  lcd.print("...");
+  Serial.println("\nKiem tra ket noi...");
   
   HTTPClient http;
   String url = hostServer + "/api/iot/re-connect";
@@ -267,180 +234,141 @@ void setup(){
       String status = doc["status"];
       
       if (status == "success") {
-        // Device đã được kết nối trước đó
         roomCode = doc["roomCode"].as<String>();
         
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Da ket noi!");
-        lcd.setCursor(0, 1);
-        lcd.print("Phong: " + roomCode);
+        Serial.println("Da ket noi!");
+        Serial.println("Phong: " + roomCode);
         delay(2000);
       } else {
-        // Device chưa được kết nối
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Chua ket noi!");
-        lcd.setCursor(0, 1);
-        lcd.print("Can nhap ma phong");
+        Serial.println("Chua ket noi!");
+        Serial.println("Can nhap ma phong");
         delay(2000);
       }
     }
   } else {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Loi reconnect API");
+    Serial.println("Loi reconnect API");
     delay(1500);
   }
   http.end();
 }
+
 void loop(){
-  // Poll PingCode mỗi 500ms để cập nhật PingReply
+  // Poll PingCode + PasswordHash
   delayWithPoll();
 
   //neu roomCode rong thi ket noi iot voi app
   if(roomCode == ""){
     //===================================goi /api/iot/connect-room============================
     
-    // Nhập roomCode từ Keypad
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Nhap Ma Phong:");
-    lcd.setCursor(0, 1);
-    lcd.print("#:OK *:Xoa");
+    Serial.println("\nNhap Ma Phong:");
+    Serial.println("#:OK *:Xoa");
     delay(1500);
     
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Ma Phong:");
-    lcd.setCursor(0, 1);
+    Serial.print("Ma Phong: ");
     
     String roomCodeData = "";
     bool inputComplete = false;
     
     while (!inputComplete) {
-      // Kiểm tra và poll PingCode trong khi chờ nhập
       delayWithPoll();
       
-      char key = keypad.getKey();
+      char key = serialGetKey();
       if (key) {
         if (key == '#') {
           if (roomCodeData.length() > 0) {
-            inputComplete = true; // Kết thúc nhập
+            inputComplete = true;
+            Serial.println();
           }
         } else if (key == '*') {
           if (roomCodeData.length() > 0) {
-            roomCodeData.remove(roomCodeData.length() - 1); // Xóa ký tự cuối
-            lcd.setCursor(0, 1);
-            lcd.print("                "); // Xóa dòng
-            lcd.setCursor(0, 1);
-            lcd.print(roomCodeData);
+            roomCodeData.remove(roomCodeData.length() - 1);
+            Serial.print("\r");
+            Serial.print("Ma Phong: " + roomCodeData + "  ");
+            Serial.print("\r");
+            Serial.print("Ma Phong: " + roomCodeData);
           }
         } else {
-          if (roomCodeData.length() < 16) { // Giới hạn độ dài
+          if (roomCodeData.length() < 16) {
             roomCodeData += key;
-            lcd.print(key);
+            Serial.print(key);
           }
         }
       }
     }
     
-    // Hiển thị đang kết nối
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Dang ket noi...");
-    lcd.setCursor(0, 1);
-    lcd.print(roomCodeData);
+    Serial.println("Dang ket noi...");
+    Serial.println("Ma phong: " + roomCodeData);
     
     HTTPClient http;
     String url = hostServer + "/api/iot/connect-room";
     http.begin(url);
     http.addHeader("Content-Type", "application/json");
 
-    // Dữ liệu JSON để gửi
     String postData = "{\"roomCode\":\"" + roomCodeData + "\",\"type_iot\":\"" + type_iot + "\",\"deviceId\":\"" + device_id + "\"}";
     int httpResponseCode = http.POST(postData);
     
     if (httpResponseCode > 0) {
       String payload = http.getString();
 
-      // --- Phân tích JSON ---
       StaticJsonDocument<200> doc;
       DeserializationError error = deserializeJson(doc, payload);
 
-      // Lấy giá trị "status" và "message"
       String status = doc["status"];
       bool access = doc["access"] | false;
       String message = doc["message"];
 
-      // Hiển thị kết quả trên LCD
-      lcd.clear();
-      lcd.setCursor(0, 0);
       if (status == "success") {
-        lcd.print("Thanh cong!");
+        Serial.println("Thanh cong!");
       } else {
-        lcd.print("That bai!");
+        Serial.println("That bai!");
       }
-      lcd.setCursor(0, 1);
-      lcd.print(message.substring(0, 16)); // Giới hạn 16 ký tự
+      Serial.println(message.substring(0, 16));
       delay(2000);
       
       if(status == "success"){
-        // roomCodeData = roomCodeData + "_" + device_id; // luu roomCodeData voi deviceId
         //===================================================goi /api/iot/verify-otp
         
-        // Nhập OTP từ Keypad
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Nhap OTP (6 so):");
-        lcd.setCursor(0, 1);
-        lcd.print("#:OK *:Xoa");
+        Serial.println("\nNhap OTP (6 so):");
+        Serial.println("#:OK *:Xoa");
         delay(1500);
         
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("OTP:");
-        lcd.setCursor(0, 1);
+        Serial.print("OTP: ");
         
         String passwordData = "";
         inputComplete = false;
         
         while (!inputComplete) {
-          // Kiểm tra và poll PingCode trong khi chờ nhập
           delayWithPoll();
           
-          char key = keypad.getKey();
+          char key = serialGetKey();
           if (key) {
             if (key == '#') {
               if (passwordData.length() == 6) {
-                inputComplete = true; // OTP phải đủ 6 số
+                inputComplete = true;
+                Serial.println();
               } else {
-                lcd.setCursor(0, 0);
-                lcd.print("OTP phai 6 so!  ");
+                Serial.println("\nOTP phai 6 so!");
                 delay(1000);
-                lcd.setCursor(0, 0);
-                lcd.print("OTP:            ");
+                Serial.print("OTP: " + passwordData);
               }
             } else if (key == '*') {
               if (passwordData.length() > 0) {
                 passwordData.remove(passwordData.length() - 1);
-                lcd.setCursor(0, 1);
-                lcd.print("                ");
-                lcd.setCursor(0, 1);
-                lcd.print(passwordData);
+                Serial.print("\r");
+                Serial.print("OTP: " + passwordData + "  ");
+                Serial.print("\r");
+                Serial.print("OTP: " + passwordData);
               }
             } else if (key >= '0' && key <= '9') {
               if (passwordData.length() < 6) {
                 passwordData += key;
-                lcd.print(key);
+                Serial.print(key);
               }
             }
           }
         }
         
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Xac thuc OTP...");
+        Serial.println("Xac thuc OTP...");
         
         url = hostServer + "/api/iot/verify-otp";
         http.begin(url);
@@ -448,10 +376,12 @@ void loop(){
 
         // Dữ liệu JSON để gửi
         postData = "{\"otpCode\":\"" +passwordData+ "\",\"roomCode\":\""+roomCodeData+"\",\"deviceId\":\"" + device_id + "\"}";
+        Serial.println("POST: " + postData);
         httpResponseCode = http.POST(postData);
         
         if (httpResponseCode > 0) {
           payload = http.getString();
+          Serial.println("Response: " + payload);
           //  --- Phân tích JSON ---
           StaticJsonDocument<200> docVerifyOTP;
           DeserializationError error = deserializeJson(docVerifyOTP, payload);
@@ -461,144 +391,120 @@ void loop(){
           String message = docVerifyOTP["message"];
 
           // Hiển thị kết quả OTP trên LCD
-          lcd.clear();
-          lcd.setCursor(0, 0);
+          // lcd.clear();
+          // lcd.setCursor(0, 0);
           if (status == "success") {
-            lcd.print("OTP dung!");
+            // lcd.print("OTP dung!");
+            Serial.println("OTP dung!");
             roomCode = roomCodeData; // Lưu roomCode
-            lcd.setCursor(0, 1);
-            lcd.print("Da ket noi!");
+            // lcd.setCursor(0, 1);
+            // lcd.print("Da ket noi!");
+            Serial.println("Da ket noi!");
           } else {
-            lcd.print("OTP sai!");
-            lcd.setCursor(0, 1);
-            lcd.print(message.substring(0, 16));
+            // lcd.print("OTP sai!");
+            // lcd.setCursor(0, 1);
+            // lcd.print(message.substring(0, 16));
+            Serial.println("OTP sai!");
+            Serial.println("Message: " + message);
           }
           delay(2000);
 
           if (error) {
-            lcd.clear();
-            lcd.setCursor(0, 0);
-            lcd.print("Loi JSON!");
+            Serial.println("Loi JSON!");
             delay(1500);
             return;
           }
         } else {
-          lcd.clear();
-          lcd.setCursor(0, 0);
-          lcd.print("Loi POST OTP:");
-          lcd.setCursor(0, 1);
-          lcd.print(http.errorToString(httpResponseCode));
+          Serial.println("Loi POST OTP:");
+          Serial.println(http.errorToString(httpResponseCode));
           delay(2000);
         }
       }
       
-
       if (error) {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Loi JSON!");
+        Serial.println("Loi JSON!");
         delay(1500);
         return;
       }    
     }
     else {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Loi ket noi!");
-        lcd.setCursor(0, 1);
-        lcd.print(http.errorToString(httpResponseCode));
+        Serial.println("Loi ket noi!");
+        Serial.println(http.errorToString(httpResponseCode));
         delay(2000);
     }
     http.end();
   }
   else{
     // Hiển thị mã phòng + hướng dẫn, chờ nhấn '#' để vào nhập mật khẩu
-    lcd.clear();
-    lcd.setCursor(0, 0);
     String line1 = "Ma phong:" + roomCode;
     if (line1.length() > 16) line1 = line1.substring(0, 16);
-    lcd.print(line1);
-    lcd.setCursor(0, 1);
-    lcd.print("Nhan # de nhap MK");
+    Serial.println("\n" + line1);
+    Serial.println("Nhan # de nhap MK");
 
     // Chờ '#'
     while (true) {
-      // Kiểm tra và poll PingCode trong khi chờ nhập
       delayWithPoll();
       
-      char k = keypad.getKey();
+      char k = serialGetKey();
       if (k == '#') break;
       delay(50);
     }
 
     // Màn hình nhập mật khẩu
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Nhap mat khau:");
-    String inputPassword = "";
-    lcd.setCursor(0, 1);
-    lcd.print("#:OK *:Xoa");
+    Serial.println("\nNhap mat khau:");
+    Serial.println("#:OK *:Xoa");
     delay(1500);
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Mat khau:");
-    lcd.setCursor(0, 1);
-    inputPassword = "";
+    Serial.print("Mat khau: ");
+    String inputPassword = "";
     bool inputComplete = false;
     while (!inputComplete) {
-      // Kiểm tra và poll PingCode trong khi chờ nhập
       delayWithPoll();
       
-      char key = keypad.getKey();
+      char key = serialGetKey();
       if (key) {
         if (key == '#') {
-          if (inputPassword.length() > 0) inputComplete = true;
+          if (inputPassword.length() > 0) {
+            inputComplete = true;
+            Serial.println();
+          }
         } else if (key == '*') {
           if (inputPassword.length() > 0) {
             inputPassword.remove(inputPassword.length() - 1);
-            lcd.setCursor(0, 1);
-            lcd.print("                ");
-            lcd.setCursor(0, 1);
-            lcd.print(inputPassword);
+            Serial.print("\r");
+            Serial.print("Mat khau: " + inputPassword + "  ");
+            Serial.print("\r");
+            Serial.print("Mat khau: " + inputPassword);
           }
         } else {
           if (inputPassword.length() < 16) {
             inputPassword += key;
-            lcd.print(key);
+            Serial.print(key);
           }
         }
       }
     }
 
     // Xác thực offline: chỉ hash và so sánh với currentPasswordHash đã lưu
-    lcd.clear();
-    lcd.setCursor(0, 0);
-
     if (currentPasswordHash.length() == 0) {
-      lcd.print("Chua co du lieu");
-      lcd.setCursor(0, 1);
-      lcd.print("hash mat khau");
+      Serial.println("Chua co du lieu");
+      Serial.println("hash mat khau");
       delay(2000);
     } else {
       String inputPasswordHash = hashPassword(inputPassword);
 
       if (inputPasswordHash == currentPasswordHash) {
         if (currentAngle != 90) {
-          lcd.print("Mo cua...");
-          myServo.write(90);      // xoay đến 90° và giữ
-          currentAngle = 90;
+          Serial.println("Mo cua...");
+          currentAngle = 90; // giả lập servo xoay 90°
           delay(500);
-          lcd.clear();
-          lcd.setCursor(0, 0);
-          lcd.print("Cua da mo!");
+          Serial.println("Cua da mo!");
         } else {
-          lcd.print("Da mo roi!");
+          Serial.println("Da mo roi!");
         }
       } else {
-        lcd.print("Sai mat khau!");
+        Serial.println("Sai mat khau!");
       }
-      lcd.setCursor(0, 1);
-      lcd.print("Offline compare");
+      Serial.println("Offline compare");
       delay(2000);
     }
   }
@@ -608,50 +514,36 @@ void loop(){
   // =================================================================================
 
   // 1. Hiển thị màn hình chờ dựa trên trạng thái cửa
-  lcd.clear();
-  lcd.setCursor(0, 0);
-
   if (currentAngle == 90) {
-    // Cửa đang MỞ
-    lcd.print("Cua dang MO");
-    lcd.setCursor(0, 1);
-    lcd.print("Nhan # de DONG");
+    Serial.println("\nCua dang MO");
+    Serial.println("Nhan # de DONG");
   } else {
-    // Cửa đang ĐÓNG
     String line1 = "Ma phong:" + roomCode;
     if (line1.length() > 16) line1 = line1.substring(0, 16);
-    lcd.print(line1);
-    lcd.setCursor(0, 1);
-    lcd.print("Nhan # de nhap MK");
+    Serial.println("\n" + line1);
+    Serial.println("Nhan # de nhap MK");
   }
 
   // 2. Vòng lặp chờ nhấn nút
-  bool startLoginProcess = false; // Biến cờ để biết có vào nhập mật khẩu không
+  bool startLoginProcess = false;
 
   while (true) {
-    // Kiểm tra và poll PingCode trong khi chờ nhập
     delayWithPoll();
 
-    char k = keypad.getKey();
+    char k = serialGetKey();
 
     if (k == '#') {
       if (currentAngle == 90) {
         // --- TRƯỜNG HỢP CỬA ĐANG MỞ -> ĐÓNG CỬA ---
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Dang dong cua...");
-
-        myServo.write(0);      // Quay servo về 0 độ
-        currentAngle = 0;      // Cập nhật trạng thái
+        Serial.println("Dang dong cua...");
+        currentAngle = 0; // giả lập servo quay về 0°
         delay(1000);
-
-        lcd.clear();
-        lcd.print("Cua da dong!");
+        Serial.println("Cua da dong!");
         delay(1000);
-        break; // Thoát vòng lặp chờ, quay lại đầu loop() để hiện trạng thái "Đã đóng"
+        break;
       } else {
         // --- TRƯỜNG HỢP CỬA ĐANG ĐÓNG -> NHẬP MẬT KHẨU ---
-        startLoginProcess = true; // Bật cờ để chạy đoạn code nhập pass bên dưới
+        startLoginProcess = true;
         break;
       }
     }
@@ -661,69 +553,56 @@ void loop(){
   // 3. Chỉ thực hiện nhập mật khẩu nếu cờ startLoginProcess được bật
   if (startLoginProcess) {
 
-    // Màn hình nhập mật khẩu (Code cũ giữ nguyên)
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Nhap mat khau:");
-    String inputPassword = "";
-    lcd.setCursor(0, 1);
-    lcd.print("#:OK *:Xoa");
+    Serial.println("\nNhap mat khau:");
+    Serial.println("#:OK *:Xoa");
     delay(1500);
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Mat khau:");
-    lcd.setCursor(0, 1);
-    inputPassword = "";
+    Serial.print("Mat khau: ");
+    String inputPassword = "";
     bool inputComplete = false;
 
     while (!inputComplete) {
       delayWithPoll();
-      char key = keypad.getKey();
+      char key = serialGetKey();
       if (key) {
         if (key == '#') {
-          if (inputPassword.length() > 0) inputComplete = true;
+          if (inputPassword.length() > 0) {
+            inputComplete = true;
+            Serial.println();
+          }
         } else if (key == '*') {
           if (inputPassword.length() > 0) {
             inputPassword.remove(inputPassword.length() - 1);
-            lcd.setCursor(0, 1);
-            lcd.print("                ");
-            lcd.setCursor(0, 1);
-            lcd.print(inputPassword);
+            Serial.print("\r");
+            Serial.print("Mat khau: " + inputPassword + "  ");
+            Serial.print("\r");
+            Serial.print("Mat khau: " + inputPassword);
           }
         } else {
           if (inputPassword.length() < 16) {
             inputPassword += key;
-            lcd.print(key);
+            Serial.print(key);
           }
         }
       }
     }
 
     // Xác thực offline: chỉ hash và so sánh với currentPasswordHash đã lưu
-    lcd.clear();
-    lcd.setCursor(0, 0);
-
     if (currentPasswordHash.length() == 0) {
-      lcd.print("Chua co du lieu");
-      lcd.setCursor(0, 1);
-      lcd.print("hash mat khau");
+      Serial.println("Chua co du lieu");
+      Serial.println("hash mat khau");
       delay(2000);
     } else {
       String inputPasswordHash = hashPassword(inputPassword);
 
       if (inputPasswordHash == currentPasswordHash) {
-          lcd.print("Mo cua...");
-          myServo.write(90);      // xoay đến 90°
-          currentAngle = 90;      // Lưu trạng thái mở
+          Serial.println("Mo cua...");
+          currentAngle = 90; // giả lập servo xoay 90°
           delay(500);
-          lcd.clear();
-          lcd.setCursor(0, 0);
-          lcd.print("Cua da mo!");
+          Serial.println("Cua da mo!");
       } else {
-        lcd.print("Sai mat khau!");
+        Serial.println("Sai mat khau!");
       }
-      lcd.setCursor(0, 1);
-      lcd.print("Offline compare");
+      Serial.println("Offline compare");
       delay(2000);
     }
   }
