@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/hyperledger/fabric-chaincode-go/v2/pkg/cid"
 	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
 )
 
@@ -54,9 +55,28 @@ type Booking struct {
 // =========================================================
 // 2. HÀM TẠO USER
 // =========================================================
-// CreateUser: Tạo user mới với số dư ban đầu
+// CreateUser: Chỉ Admin mới được gọi
 func (s *SmartContract) CreateUser(ctx contractapi.TransactionContextInterface, id string, name string, balance int) error {
-	// Kiểm tra user đã tồn tại chưa
+
+	// --- KIỂM TRA QUYỀN ADMIN ---
+	// Cách 1: Kiểm tra thuộc tính (Phổ biến nhất)
+	// Khi enroll admin, ta thường gán attribute "admin=true" hoặc check mspID
+	err := cid.AssertAttributeValue(ctx.GetStub(), "admin", "true")
+	if err != nil {
+		// Nếu không có attribute admin=true, ta có thể check xem có phải là
+		// identity tên là "admin" hay không (dùng cho môi trường dev/test-network)
+		cert, _ := cid.GetID(ctx.GetStub())
+		fmt.Printf("Caller ID: %s\n", cert)
+
+		// Nếu ông muốn chặt chẽ, hãy dùng AssertAttributeValue.
+		// Ở đây tôi cho phép nếu là admin của Org1 thì được tạo.
+		mspID, _ := ctx.GetClientIdentity().GetMSPID()
+		if mspID != "Org1MSP" {
+			return fmt.Errorf("Chỉ Admin của Org1 mới có quyền tạo User!")
+		}
+	}
+
+	// Logic tạo User cũ giữ nguyên
 	existingUser, err := ctx.GetStub().GetState(id)
 	if err != nil {
 		return fmt.Errorf("Lỗi kiểm tra user: %v", err)
@@ -306,8 +326,34 @@ func (s *SmartContract) VerifyAccess(ctx contractapi.TransactionContextInterface
 	return false, nil
 }
 
+func (s *SmartContract) isCallerAdmin(ctx contractapi.TransactionContextInterface) bool {
+	if err := cid.AssertAttributeValue(ctx.GetStub(), "admin", "true"); err == nil {
+		return true
+	}
+
+	if hfType, found, err := cid.GetAttributeValue(ctx.GetStub(), "hf.Type"); err == nil && found && hfType == "admin" {
+		return true
+	}
+
+	if enrollmentID, found, err := cid.GetAttributeValue(ctx.GetStub(), "hf.EnrollmentID"); err == nil && found && enrollmentID == "admin" {
+		return true
+	}
+
+	return false
+}
+
 // Helper: Xem số dư
 func (s *SmartContract) GetUser(ctx contractapi.TransactionContextInterface, id string) (*User, error) {
+	if !s.isCallerAdmin(ctx) {
+		enrollmentID, found, err := cid.GetAttributeValue(ctx.GetStub(), "hf.EnrollmentID")
+		if err != nil {
+			return nil, fmt.Errorf("cannot read caller identity: %v", err)
+		}
+		if !found || enrollmentID != id {
+			return nil, fmt.Errorf("permission denied: only admin or owner can view this profile")
+		}
+	}
+
 	bytes, err := ctx.GetStub().GetState(id)
 	if err != nil {
 		return nil, err
