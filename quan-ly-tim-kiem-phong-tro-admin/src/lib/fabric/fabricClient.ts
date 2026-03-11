@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 import * as grpc from '@grpc/grpc-js';
-import { connect, signers, Contract, Gateway } from '@hyperledger/fabric-gateway';
+import { connect, Contract, Gateway, signers } from '@hyperledger/fabric-gateway';
 
 export type FabricConfig = {
 	channelName: string;
@@ -19,8 +19,11 @@ export type FabricConfig = {
 
 const defaultCryptoPath = path.resolve(
 	process.cwd(),
-	'src',
-	'scripts',
+	'..',
+	'blockchain-fabric-v2',
+	'test-network',
+	'organizations',
+	'peerOrganizations',
 	'org1.example.com'
 );
 
@@ -39,7 +42,7 @@ const loadConfigFromEnv = (): FabricConfig => {
 			path.resolve(cryptoPath, 'users', userName, 'msp', 'keystore'),
 		certPath:
 			process.env.FABRIC_CERT_PATH ||
-			path.resolve(cryptoPath, 'users', userName, 'msp', 'signcerts', `${userName}-cert.pem`),
+		path.resolve(cryptoPath, 'users', userName, 'msp', 'signcerts', 'cert.pem'),
 		tlsCertPath:
 			process.env.FABRIC_TLS_CERT_PATH ||
 			path.resolve(cryptoPath, 'peers', peerName, 'tls', 'ca.crt'),

@@ -1,12 +1,13 @@
+import { ca } from "@/lib/fabric/caClient";
 import "@/lib/firebase/admin";
 import { UserRepository } from "@/repositories/userRepository";
+import { WalletBlockchainRepository } from "@/repositories/walletBlockchainRepository";
 import 'dotenv/config';
+import { Gateway, Wallets, X509Identity } from 'fabric-network';
 import admin from "firebase-admin";
 import { createFabricClient } from '../lib/fabric/fabricClient';
 import { BlockchainFabricRepository } from '../repositories/blockchainFabricRepository';
 
-const {contract, close} = await createFabricClient();
-const repoBlockchainFabric = new BlockchainFabricRepository(contract);
 export const UserService = {
     createUser: async (data: {
         balance: number;
@@ -20,7 +21,14 @@ export const UserService = {
     }) => {
         let authUid: string | null = null;
         let newUser: Awaited<ReturnType<typeof UserRepository.create>> | null = null;
+        console.log("==1==");
 
+        // Khởi tạo fabric client
+        const {contract, close} = await createFabricClient();
+        const repoBlockchainFabric = new BlockchainFabricRepository(contract);
+        console.log("==2==");
+
+        const gateway = new Gateway();
         try {
             const authUser = await admin.auth().createUser({
                 email: data.email,
@@ -28,6 +36,7 @@ export const UserService = {
                 displayName: data.fullName,
             });
             authUid = authUser.uid;
+            console.log("==3==");
 
             //tao user tren firebase/firestore
             newUser = await UserRepository.create({
@@ -41,9 +50,59 @@ export const UserService = {
                 Role: data.role.toLocaleLowerCase(),
                 Status: data.status.toLocaleLowerCase(),
             });
+            //lay idenity cua admin tren firebase de tao user tren blockchain
+            const masterAdmin = await WalletBlockchainRepository.getIdentityFromFirebase('master-admin') as X509Identity; //== Hardcoded master admin ID
+            if (!masterAdmin) {
+                throw new Error("Master admin identity not found in Firebase");
+            }
+            console.log("==4==");
+            try{
+                //TẠO VÍ TRONG BỘ NHỚ (In-Memory Wallet) để lấy context
+                const memoryWallet = await Wallets.newInMemoryWallet();
+                await memoryWallet.put('admin', masterAdmin);
 
-            //tao user tren blockchain
-            await repoBlockchainFabric.createUser(newUser.Id, data.fullName, data.balance, data.role);
+                //Lấy provider và adminUser context
+                const provider = memoryWallet.getProviderRegistry().getProvider(masterAdmin.type);
+                const adminUser = await provider.getUserContext(masterAdmin, 'admin');
+
+                //Bây giờ mới dùng adminUser này để Register qua CA
+                const secret = await ca.register({
+                    affiliation: 'org1.department1',
+                    enrollmentID: authUid,
+                    role: 'client'
+                }, adminUser);
+                const enrollment = await ca.enroll({
+                    enrollmentID: authUid,
+                    enrollmentSecret: secret
+                });
+                await WalletBlockchainRepository.create({
+                                UserID: authUid,
+                                CredentialsCertificate: enrollment.certificate,
+                                CredentialsPrivateKey: enrollment.key.toBytes(),
+                                MSPID: 'Org1MSP',
+                                Type: 'X.509'
+                            });
+            }
+            catch(err){
+                console.error("Failed to register/enroll user with CA, rolling back user creation: ", err);
+                throw new Error("Failed to register/enroll user with CA");
+            }
+                       
+            console.log("==5==");
+            // 6. BLOCKCHAIN: Tạo bản ghi User trên Ledger bằng Master Admin identity
+            try{
+                await repoBlockchainFabric.createUserWithMasterAdmin(
+                    masterAdmin,
+                    newUser.Id, 
+                    data.fullName, 
+                    data.balance,
+                    data.role.toUpperCase() as any
+                );
+            }catch(err){
+                console.error("Failed to create user on blockchain, rolling back user creation: ", err);
+                throw new Error("Failed to create user on blockchain");
+            }
+            
             return newUser;
         } catch (err) {
             if (newUser?.Id) {
@@ -55,6 +114,9 @@ export const UserService = {
             }
 
             throw err;
+        } finally {
+            // Đóng connection
+            await close();
         }
     },
 
@@ -164,15 +226,35 @@ export const UserService = {
     },
 
     approveOwner: async (ownerId: string) => {
+                // Khởi tạo fabric client
+        const {contract, close} = await createFabricClient();
+        const repoBlockchainFabric = new BlockchainFabricRepository(contract);
+        try{
         const user = await UserRepository.getById(ownerId);
         if (!user || user.Role !== 'owner') {
             throw new Error('Owner not found');
         }
-        //cap nhat tren fabric
-        await repoBlockchainFabric.updateUserById(ownerId, user.Fullname, 'APPROVED', user.Role.toUpperCase() as any);
+        // Cap nhat tren fabric bang master admin
+        const masterAdmin = await WalletBlockchainRepository.getIdentityFromFirebase('master-admin') as X509Identity;
+        if (!masterAdmin) {
+            throw new Error("Master admin identity not found in Firebase");
+        }
+        await repoBlockchainFabric.updateUserWithMasterAdmin(
+            masterAdmin,
+            ownerId,
+            user.Fullname,
+            'APPROVED',
+            user.Role.toUpperCase() as any
+        );
         //cap nhat tren firebase
         const updated = await UserRepository.update(ownerId, { Status: 'APPROVED' });
         return { userCode: updated.Id, status: updated.Status.toUpperCase() ?? 'APPROVED' };
+        }catch(err){
+            console.error("Failed to approve owner: ", err);
+            throw new Error("Failed to approve owner");
+        }finally{
+            await close();
+        }
     },
 
     rejectOwner: async (ownerId: string) => {

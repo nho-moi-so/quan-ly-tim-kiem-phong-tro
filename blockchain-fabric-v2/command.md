@@ -16,6 +16,17 @@ trước khi tắt máy: docker stop $(docker ps -aq)
 mở máy lại: docker start $(docker ps -aq)
 
 
+# Thêm đường dẫn file thực thi
+export PATH=${PWD}/../bin:$PATH
+# Chỉ định file cấu hình
+export FABRIC_CFG_PATH=$PWD/../config/
+# Cấu hình chứng chỉ TLS để giao tiếp an toàn
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+export CORE_PEER_ADDRESS=localhost:7051
+
 peer chaincode query -C rentingchannel -n renting -c '{"function":"GetUserById","Args":["dSbOpLyc0IO3Be9Ci9DMidE8i7b2"]}'
 
 

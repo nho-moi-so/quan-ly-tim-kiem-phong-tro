@@ -6,6 +6,8 @@ import { BlockchainFabricRepository } from "@/repositories/blockchainFabricRepos
 import { IoTDeviceInDepartmentRepository } from "@/repositories/iotDeviceInDepartmentRepository";
 import { IoTDeviceRepository } from "@/repositories/iotDeviceRepository";
 import { UserRepository } from "@/repositories/userRepository";
+import { WalletBlockchainRepository } from "@/repositories/walletBlockchainRepository";
+import { X509Identity } from "fabric-network";
 import admin from "firebase-admin";
 const crypto = require('crypto');
 const {contract, close} = await createFabricClient();
@@ -147,7 +149,17 @@ export const IOTService = {
             //hash mật khẩu mới trước khi lưu
             const newPasswordHash = hashPassword(newPassword);
             //cap nhat mau khau hash cho apartment tren blockchain
-            await repoBlockchainFabric.updatePasswordApartment(apartmentRef.Id, newPasswordHash);
+            try{
+                //lay identity tu firebase de tao tren blockchain
+                const walletUser = await WalletBlockchainRepository.getIdentityFromFirebase(apartmentRef.UserID) as X509Identity;
+                await repoBlockchainFabric.updatePasswordApartmentWithUser(walletUser, apartmentRef.Id, newPasswordHash);
+            }
+            catch(err){
+                console.error("Error updating password on blockchain:", err);
+                //nếu cập nhật mật khẩu trên blockchain thất bại, thì xóa document iot_device_in_apartment để thiết bị phải kết nối lại từ đầu
+                await docRef.delete();
+                return { status: "error", message: "Failed to update password on blockchain. Please try connecting again." };
+            }
             //cap nhat mau khau raw cho apartment tren firebase
             await ApartmentRepository.update(apartmentRef.Id, { Password: newPassword });
             console.log(`Updated password for apartment ${apartmentRef.Id} after OTP verification`);

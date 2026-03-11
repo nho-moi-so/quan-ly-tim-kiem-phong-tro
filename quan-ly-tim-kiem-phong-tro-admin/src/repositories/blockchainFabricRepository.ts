@@ -1,4 +1,6 @@
+import { ccp } from '@/lib/fabric/caClient';
 import { Contract } from '@hyperledger/fabric-gateway';
+import { Gateway, Wallets, X509Identity } from 'fabric-network';
 
 //===================dinh nghia lai cac struct tu go trong typescript===========
 ////user
@@ -52,6 +54,8 @@ export class BlockchainFabricRepository{
         const text = new TextDecoder().decode(result);
         return JSON.parse(text) as T;
     }
+
+
 
     //=====user function=====
     async createUser(
@@ -166,7 +170,298 @@ export class BlockchainFabricRepository{
         return this.parseResult<IContract[]>(result);
     }
 
+    //===admin identity functions===
+    async createUserWithMasterAdmin(
+        masterAdminIdentity: X509Identity,
+        userId: string,
+        fullName: string,
+        balance: number,
+        role: UserRole
+    ): Promise<void> {
+        const gateway = new Gateway();
+        try {
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('admin', masterAdminIdentity);
+            
+            await gateway.connect(ccp as any, {
+                wallet: memoryWallet,
+                identity: 'admin',
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            
+            const network = await gateway.getNetwork('rentingchannel');
+            const contract = network.getContract('renting');
+            
+            await contract.submitTransaction('CreateUser', userId, fullName, balance.toString(), role);
+        } finally {
+            gateway.disconnect();
+        }
+    }
 
+    async updateUserWithMasterAdmin(
+        masterAdminIdentity: X509Identity,
+        id: string,
+        fullName: string,
+        status: UserStatus,
+        role: UserRole
+    ): Promise<IUser> {
+        const gateway = new Gateway();
+        try {
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('admin', masterAdminIdentity);
+            
+            await gateway.connect(ccp as any, {
+                wallet: memoryWallet,
+                identity: 'admin',
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            
+            const network = await gateway.getNetwork('rentingchannel');
+            const contract = network.getContract('renting');
+            
+            const result = await contract.submitTransaction('UpdateUserById', id, fullName, status, role);
+            const text = new TextDecoder().decode(result);
+            return JSON.parse(text) as IUser;
+        } finally {
+            gateway.disconnect();
+        }
+    }
+
+    async depositWithMasterAdmin(
+        masterAdminIdentity: X509Identity,
+        userId: string,
+        amount: number
+    ): Promise<void> {
+        const gateway = new Gateway();
+        try {
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('admin', masterAdminIdentity);
+            
+            await gateway.connect(ccp as any, {
+                wallet: memoryWallet,
+                identity: 'admin',
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            
+            const network = await gateway.getNetwork('rentingchannel');
+            const contract = network.getContract('renting');
+            
+            await contract.submitTransaction('Deposit', userId, amount.toString());
+        } finally {
+            gateway.disconnect();
+        }
+    }
+
+    async finishWithdrawWithMasterAdmin(
+        masterAdminIdentity: X509Identity,
+        userId: string,
+        amount: number
+    ): Promise<void> {
+        const gateway = new Gateway();
+        try {
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('admin', masterAdminIdentity);
+            
+            await gateway.connect(ccp as any, {
+                wallet: memoryWallet,
+                identity: 'admin',
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            
+            const network = await gateway.getNetwork('rentingchannel');
+            const contract = network.getContract('renting');
+            
+            await contract.submitTransaction('FinishWithDraw', userId, amount.toString());
+        } finally {
+            gateway.disconnect();
+        }
+    }
+
+    // User wallet functions
+    async createApartmentWithUser(
+        userIdentity: X509Identity,
+        id: string,
+        ownerId: string,
+        dailyRate: number
+    ): Promise<void> {
+        const gateway = new Gateway();
+        try {
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('user', userIdentity);
+            
+            await gateway.connect(ccp as any, {
+                wallet: memoryWallet,
+                identity: 'user',
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            
+            const network = await gateway.getNetwork('rentingchannel');
+            const contract = network.getContract('renting');
+            
+            await contract.submitTransaction('CreateApartment', id, ownerId, dailyRate.toString());
+        } finally {
+            gateway.disconnect();
+        }
+    }
+
+    async updatePasswordApartmentWithUser(
+        userIdentity: X509Identity,
+        id: string,
+        passwordHash: string
+    ): Promise<void> {
+        const gateway = new Gateway();
+        try {
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('user', userIdentity);
+            
+            await gateway.connect(ccp as any, {
+                wallet: memoryWallet,
+                identity: 'user',
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            
+            const network = await gateway.getNetwork('rentingchannel');
+            const contract = network.getContract('renting');
+            
+            await contract.submitTransaction('UpdatePasswordApartment', id, passwordHash);
+        } finally {
+            gateway.disconnect();
+        }
+    }
+
+    async bookApartmentWithUser(
+        userIdentity: X509Identity,
+        contractId: string,
+        apartmentId: string,
+        guestId: string,
+        startDate: number,
+        endDate: number
+    ): Promise<void> {
+        const gateway = new Gateway();
+        try {
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('user', userIdentity);
+            
+            await gateway.connect(ccp as any, {
+                wallet: memoryWallet,
+                identity: 'user',
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            
+            const network = await gateway.getNetwork('rentingchannel');
+            const contract = network.getContract('renting');
+            
+            await contract.submitTransaction(
+                'BookApartment',
+                contractId,
+                apartmentId,
+                guestId,
+                startDate.toString(),
+                endDate.toString()
+            );
+        } finally {
+            gateway.disconnect();
+        }
+    }
+
+    async cancelBookingWithUser(
+        userIdentity: X509Identity,
+        contractId: string
+    ): Promise<void> {
+        const gateway = new Gateway();
+        try {
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('user', userIdentity);
+            
+            await gateway.connect(ccp as any, {
+                wallet: memoryWallet,
+                identity: 'user',
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            
+            const network = await gateway.getNetwork('rentingchannel');
+            const contract = network.getContract('renting');
+            
+            await contract.submitTransaction('CancelBooking', contractId);
+        } finally {
+            gateway.disconnect();
+        }
+    }
+
+    async checkInWithUser(
+        userIdentity: X509Identity,
+        contractId: string,
+        newPasswordHash: string
+    ): Promise<void> {
+        const gateway = new Gateway();
+        try {
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('user', userIdentity);
+            
+            await gateway.connect(ccp as any, {
+                wallet: memoryWallet,
+                identity: 'user',
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            
+            const network = await gateway.getNetwork('rentingchannel');
+            const contract = network.getContract('renting');
+            
+            await contract.submitTransaction('CheckIn', contractId, newPasswordHash);
+        } finally {
+            gateway.disconnect();
+        }
+    }
+
+    async checkOutWithUser(
+        userIdentity: X509Identity,
+        contractId: string,
+        resetPasswordHash: string
+    ): Promise<void> {
+        const gateway = new Gateway();
+        try {
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('user', userIdentity);
+            
+            await gateway.connect(ccp as any, {
+                wallet: memoryWallet,
+                identity: 'user',
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            
+            const network = await gateway.getNetwork('rentingchannel');
+            const contract = network.getContract('renting');
+            
+            await contract.submitTransaction('CheckOut', contractId, resetPasswordHash);
+        } finally {
+            gateway.disconnect();
+        }
+    }
+
+    async requestWithdrawWithUser(
+        userIdentity: X509Identity,
+        userId: string,
+        amount: number
+    ): Promise<void> {
+        const gateway = new Gateway();
+        try {
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('user', userIdentity);
+            
+            await gateway.connect(ccp as any, {
+                wallet: memoryWallet,
+                identity: 'user',
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            
+            const network = await gateway.getNetwork('rentingchannel');
+            const contract = network.getContract('renting');
+            
+            await contract.submitTransaction('RequestWithDraw', userId, amount.toString());
+        } finally {
+            gateway.disconnect();
+        }
+    }
 
 }
 

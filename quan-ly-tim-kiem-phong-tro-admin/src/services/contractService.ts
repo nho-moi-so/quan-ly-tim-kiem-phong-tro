@@ -3,6 +3,8 @@ import { ApartmentRepository } from "@/repositories/apartmentRepository";
 import { BlockchainFabricRepository } from "@/repositories/blockchainFabricRepository";
 import { ContractRepository } from "@/repositories/contractRepository";
 import { UserRepository } from "@/repositories/userRepository";
+import { WalletBlockchainRepository } from "@/repositories/walletBlockchainRepository";
+import { X509Identity } from "fabric-network";
 import admin from "firebase-admin";
 
 const {contract, close} = await createFabricClient();
@@ -63,7 +65,11 @@ export const ContractService = {
         
         //tao du lieu tren blockchain
         try{
-            const blockchainContract = await repoBlockchainFabric.bookApartment(
+            //lay identity tu firebase de tao tren blockchain
+            const walletUser = await WalletBlockchainRepository.getIdentityFromFirebase(data.userId) as X509Identity;
+
+            await repoBlockchainFabric.bookApartmentWithUser(
+                walletUser,
                 contractData.Id,
                 data.apartmentId,
                 data.userId,

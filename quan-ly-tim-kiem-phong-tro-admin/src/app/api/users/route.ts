@@ -1,6 +1,5 @@
 // ID, Balance, CCCD, Email, Fullname, Password, Phone, Role, Status
 
-import { UserService } from "@/services/userService";
 import { NextResponse } from "next/server";
 import z from "zod";
 
@@ -20,17 +19,31 @@ export const POST = async (request: Request) => {
         const body = await request.json();
         const parsedData = CreateUserSchema.parse(body);
 
-        //call service to create user
+        console.log('🔄 Dynamic importing UserService...');
+        
+        // Dynamic import để tránh webpack bundling issues
+        const { UserService } = await import("@/services/userService");
+        
+        console.log('✅ UserService imported, creating user...');
         const result = await UserService.createUser(parsedData);
 
         return NextResponse.json({
             status: "success",
             message: "User created successfully",
-            data: result
+            data: {
+                userId: result.Id,
+                email: result.Email,
+                fullName: result.Fullname,
+                phone: result.Phone,
+                role: result.Role,
+                status: result.Status,
+                balance: result.Balance
+            }
         }, { status: 201 });
     }
 
     catch(err : unknown){
+        console.error('❌ API Route Error:', err);
         return NextResponse.json({
             status: "fail",
             message: err instanceof Error ? err.message : "Unknown error"

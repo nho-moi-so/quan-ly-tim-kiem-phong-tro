@@ -1,11 +1,13 @@
 import { createFabricClient } from "@/lib/fabric/fabricClient";
 import { ApartmentRepository } from "@/repositories/apartmentRepository";
 import { BlockchainFabricRepository } from "@/repositories/blockchainFabricRepository";
+import { WalletBlockchainRepository } from "@/repositories/walletBlockchainRepository";
+import { X509Identity } from "fabric-network";
 
-const {contract, close} = await createFabricClient();
-const repoBlockchainFabric = new BlockchainFabricRepository(contract);
+
 
 export const ApartmentService = {
+    
     createApartment: async (data: {
         address: string;
         codeApartment: string;
@@ -21,6 +23,8 @@ export const ApartmentService = {
         type?: string;
         userId: string;
     }) => {
+        const {contract, close} = await createFabricClient();
+        const repoBlockchainFabric = new BlockchainFabricRepository(contract);
         //tao apartment tren firebase
         const newApartment = await ApartmentRepository.create({
             Address: data.address,
@@ -39,12 +43,22 @@ export const ApartmentService = {
         });
         //tao apartment tren blockchain
         try{
-            const blockchainApartment = await repoBlockchainFabric.createApartment(newApartment.Id, data.userId, data.dailyRate);
+            //lay id tu firebase de tao tren blockchain
+            const walletUser = await WalletBlockchainRepository.getIdentityFromFirebase(data.userId) as X509Identity;
+
+            await repoBlockchainFabric.createApartmentWithUser(
+                walletUser,
+                newApartment.Id, 
+                data.userId, 
+                data.dailyRate);
         }
         catch(err){
             //neu tao tren blockchain that bai thi xoa tren firebase
             await ApartmentRepository.delete(newApartment.Id);
             throw err;
+        }
+        finally{
+            await close();
         }
         return newApartment;
     },

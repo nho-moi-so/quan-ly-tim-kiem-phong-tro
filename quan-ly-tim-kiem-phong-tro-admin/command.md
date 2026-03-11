@@ -5,3 +5,4 @@ copy cai ngrok link vao file .env cua app mobile
 
 date -d "+2 minutes" +%s
 
+echo "YOUR_BASE64_HERE" | base64 -d | openssl x509 -noout -subject
