@@ -1,0 +1,44 @@
+version: '2.1'
+
+services:
+  explorerdb.example.com:
+    image: hyperledger/explorer-db:latest
+    container_name: explorerdb.example.com
+    environment:
+      - DATABASE_DATABASE=fabricexplorer
+      - DATABASE_USERNAME=hppoc
+      - DATABASE_PASSWORD=password
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    networks:
+      - fabric_test
+
+  explorer.example.com:
+    image: hyperledger/explorer:latest
+    container_name: explorer.example.com
+    environment:
+      - DATABASE_HOST=explorerdb.example.com
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=fabricexplorer
+      - DATABASE_USERNAME=hppoc
+      - DATABASE_PASSWD=password
+      - EXPLORER_CONFIG_FILE_PATH=/opt/explorer/app/platform/fabric/config.json
+      - EXPLORER_APP_ROOT=app
+      - DISCOVERY_AS_LOCALHOST=false
+    command: ["./start.sh"]
+    working_dir: /opt/explorer
+    volumes:
+      - ./config/config.json:/opt/explorer/app/platform/fabric/config.json
+      - ./connection-profile:/opt/explorer/app/platform/fabric/connection-profile
+      - ../blockchain-fabric-v2/test-network/organizations:/tmp/crypto
+    ports:
+      - "8080:8080"
+    depends_on:
+      - explorerdb.example.com
+    networks:
+      - fabric_test
+
+networks:
+  fabric_test:
+    external:
+      name: fabric_test
