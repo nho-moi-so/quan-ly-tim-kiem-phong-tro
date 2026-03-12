@@ -8,7 +8,16 @@
     "start": "NODE_ENV=production node server.js",
     "lint": "next lint",
     "gen": "node src/scripts/generate-component.js",
-    "test": "jest"
+    "test": "jest",
+    "fabric:health": "ts-node src/script-fabric-blockchain/healthCheck.ts",
+    "fabric:setup-admin": "ts-node src/script-fabric-blockchain/enrollAdmin.js",
+    "fabric:create-users": "ts-node src/script-fabric-blockchain/createUserCertificates.ts",
+    "fabric:sync-users": "ts-node src/script-fabric-blockchain/syncFirebaseToFabricUser.ts",
+    "fabric:manager": "src/script-fabric-blockchain/wallet-manager.sh",
+    "fabric:test": "npm run fabric:health && echo 'All fabric tests passed'",
+    "fabric:demo": "npm run fabric:setup-admin && npm run fabric:create-users && npm run fabric:health",
+    "fabric:backup": "src/script-fabric-blockchain/wallet-manager.sh backup",
+    "fabric:clean": "src/script-fabric-blockchain/wallet-manager.sh clean"
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.1.0",

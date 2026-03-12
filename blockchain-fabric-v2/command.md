@@ -30,3 +30,10 @@ export CORE_PEER_ADDRESS=localhost:7051
 peer chaincode query -C rentingchannel -n renting -c '{"function":"GetUserById","Args":["dSbOpLyc0IO3Be9Ci9DMidE8i7b2"]}'
 
 
+
+peer channel fetch newest newest_block.pb -c rentingchannel --orderer localhost:7050 --tls --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+configtxlator proto_decode --input newest_block.pb --type common.Block | jq '.data.data[0].payload.header.signature_header.creator'
+
+echo "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNwekNDQWsyZ0F3SUJBZ0lVRWhxY1ZWUXo0dzJLM3M1UmlxNGg2akdTZFRjd0NnWUlLb1pJemowRUF3SXc..." | base64 -d | openssl x509 -text -noout
+
