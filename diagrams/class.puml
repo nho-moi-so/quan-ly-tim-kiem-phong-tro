@@ -27,6 +27,15 @@ class User{
     + UpdateInfo(): void
 }
 
+class WalletBlockchain{
+    - mspId: string
+    - type: string
+    - version: string
+    - credentialsCertificate: string
+    - credentialsPrivateKey: string
+}
+User "1" -- "0..1" WalletBlockchain: has
+
 ' enum OwnerStatus {
 '     APPROVED
 '     PENDING
