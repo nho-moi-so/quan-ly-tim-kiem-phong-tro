@@ -85,6 +85,8 @@ services:
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0org1"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../../config:/etc/hyperledger/peercfg
       - ../organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com:/etc/hyperledger/fabric
       - peer0.org1.example.com:/var/hyperledger/production
     working_dir: /root
@@ -124,6 +126,8 @@ services:
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0org2"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../../config:/etc/hyperledger/peercfg
       - ../organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com:/etc/hyperledger/fabric
       - peer0.org2.example.com:/var/hyperledger/production
     working_dir: /root
