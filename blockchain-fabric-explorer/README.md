@@ -121,6 +121,51 @@ ls ../blockchain-fabric-v2/test-network/organizations/peerOrganizations/org1.exa
 # Cập nhật đường dẫn nếu cần
 ```
 
+#### Cách tìm nhanh giá trị trong `network-config.json`
+
+Lưu ý: file JSON không hỗ trợ comment (`//`, `/* */`). Thay vào đó, dùng lệnh tìm theo key/value để rà cấu hình.
+
+```bash
+# Tìm theo key trong network-config.json
+grep -nE '"channels"|"organizations"|"peers"|"mspid"|"url"|"path"' connection-profile/network-config.json
+
+# Tìm theo giá trị quan trọng
+grep -nE 'rentingchannel|Org1MSP|peer0\.org1\.example\.com|Admin@org1\.example\.com|tls/ca\.crt' connection-profile/network-config.json
+```
+
+Nếu muốn đọc đúng field JSON thay vì grep chuỗi:
+
+```bash
+# Cần cài jq trước nếu máy chưa có
+jq '.channels | keys' connection-profile/network-config.json
+jq '.organizations.Org1.mspid' connection-profile/network-config.json
+jq '.organizations.Org1.adminPrivateKey.path' connection-profile/network-config.json
+jq '.peers["peer0.org1.example.com"].tlsCACerts.path' connection-profile/network-config.json
+```
+
+Đối chiếu các giá trị này sang thư mục `blockchain-fabric-v2`:
+
+```bash
+cd ../
+grep -RIn --exclude-dir=.git -E 'rentingchannel|Org1MSP|peer0\.org1\.example\.com|Admin@org1\.example\.com|tls/ca\.crt' blockchain-fabric-v2
+```
+
+Các file thường ra kết quả nhanh nhất để đối chiếu:
+- `blockchain-fabric-v2/command.md`
+- `blockchain-fabric-v2/README.md`
+- `blockchain-fabric-v2/test-network/configtx/configtx.yaml`
+- `blockchain-fabric-v2/test-network/scripts/envVar.sh`
+
+Mẹo kiểm tra path trước khi chạy Explorer:
+
+```bash
+# Tồn tại key của Admin Org1?
+ls ../blockchain-fabric-v2/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/
+
+# Tồn tại TLS CA của peer0 Org1?
+ls ../blockchain-fabric-v2/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+```
+
 ### Bước 4: Khởi động Explorer
 ```bash
 # Khởi động services

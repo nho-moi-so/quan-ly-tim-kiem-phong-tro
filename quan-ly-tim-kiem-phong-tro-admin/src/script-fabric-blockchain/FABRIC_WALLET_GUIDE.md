@@ -37,6 +37,7 @@ User Application ↔️ Wallet ↔️ Fabric Network
 
 ### 1. **X.509 Certificates và PKI**
 ```typescript
+// walletBlockchainRepository.ts (getIdentityFromFirebase method)
 interface Identity {
     mspId: string;           // Organization identifier  
     type: string;            // Identity type (X.509)
@@ -63,6 +64,7 @@ interface Identity {
 
 #### **Registration Process**:
 ```typescript
+// userService.ts (createUser method)
 // Admin đăng ký user mới trên CA
 const secret = await ca.register({
     affiliation: 'org1.department1',
@@ -73,6 +75,7 @@ const secret = await ca.register({
 
 #### **Enrollment Process**:
 ```typescript
+// userService.ts (createUser method)
 // User enrolled để lấy certificates
 const enrollment = await ca.enroll({
     enrollmentID: 'user123',
