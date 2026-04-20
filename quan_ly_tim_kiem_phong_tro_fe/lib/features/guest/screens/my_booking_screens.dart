@@ -5,7 +5,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/model/booking_request.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/contract.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/booking_service.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/contract_service.dart'; 
-
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/my_back_button.dart'; 
 class MyBookingScreens extends StatefulWidget {
   const MyBookingScreens({super.key});
 
@@ -28,8 +28,8 @@ class _MyBookingScreensState extends State<MyBookingScreens> with SingleTickerPr
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     
-    final User? user = FirebaseAuth.instance.currentUser;
-    final String currentUserId = user?.uid ?? 'guest'; 
+    const String currentUserId = "dYSjvUDL2vwRrSgqiDHy"; 
+
 
     _futureBookings = _bookingService.getBookingRequestsByUser(); 
     _contractStream = _contractService.getContractsByUserId(currentUserId);
@@ -46,6 +46,7 @@ class _MyBookingScreensState extends State<MyBookingScreens> with SingleTickerPr
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const MyBackButton(), 
         title: const Text("Quản Lý Đặt Phòng & Hợp Đồng"),
         bottom: TabBar(
           controller: _tabController,

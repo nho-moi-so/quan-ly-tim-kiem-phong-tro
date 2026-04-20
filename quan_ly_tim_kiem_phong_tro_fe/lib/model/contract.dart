@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 class Contract {
   final String contractID;
   final String userId;
@@ -68,6 +67,7 @@ class Contract {
       ApartmentId: map['ApartmentId'],
     );
   }
+  
 
   Map<String, dynamic> toMap() => {
     'StartDate': Timestamp.fromDate(startDate),

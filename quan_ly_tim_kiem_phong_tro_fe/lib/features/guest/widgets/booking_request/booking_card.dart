@@ -31,9 +31,9 @@ class BookingCard extends StatelessWidget {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'pending':
-      case 'chờ duyệt':
-        return Colors.orange;
+      case 'Approved':
+      case 'thành công':
+        return const Color.fromARGB(255, 87, 172, 44);
       case 'active':
       case 'approved':
       case 'đang hoạt động':

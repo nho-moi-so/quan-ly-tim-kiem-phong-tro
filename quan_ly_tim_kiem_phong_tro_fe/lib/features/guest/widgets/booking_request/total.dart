@@ -156,7 +156,7 @@ class _TotalState extends State<Total> {
                         await FirebaseFirestore.instance
                             .collection('contract')
                             .add({
-                              'UserID': 'guest', 
+                              'UserID': 'dYSjvUDL2vwRrSgqiDHy', 
                               'ApartmentId':
                                   widget.apartment.ApartmentID ??
                                   'unknown',
@@ -165,7 +165,7 @@ class _TotalState extends State<Total> {
                               'EndDate': widget.criteria?.checkOut
                                   ?.toIso8601String(),
                               'Total': widget.totalAmount,
-                              'Status': 'pending',
+                              'Status': 'Approved',
                               'CreatedDate': FieldValue.serverTimestamp(),
                               'UpdateDate': DateTime.now(),
                             });
