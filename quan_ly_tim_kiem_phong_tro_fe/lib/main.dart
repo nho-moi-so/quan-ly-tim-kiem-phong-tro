@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/home_page_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/login_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/signup_email_screens.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/welcome_screens.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/view_contract_screens.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -29,12 +31,15 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      initialRoute: '/signup',
+      initialRoute: '/home',
 
       routes: {
+        '/welcomscreen': (context) => const WelcomeScreen(),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpEmailScreen(),
         '/home': (context) => const HomePageScreen(),
+        //'/contract': (context) => const ViewContractScreens(),
+        
       },
     );
   }

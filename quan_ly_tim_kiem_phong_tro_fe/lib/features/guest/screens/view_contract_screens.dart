@@ -7,6 +7,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/apartment/a
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/apartment/apartment_amenities.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/booking_request/booking_card.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/booking_request/total.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/thanhtoan_vnpay.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/search_criteria.dart';
 
 class ViewContractScreens extends StatelessWidget {
