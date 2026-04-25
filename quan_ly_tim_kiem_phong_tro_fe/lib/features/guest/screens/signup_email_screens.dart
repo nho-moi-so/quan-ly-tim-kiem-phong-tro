@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 //import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/auth_service.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/controller/auth_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/login_screens.dart';
 
 class SignUpEmailScreen extends StatefulWidget {
   const SignUpEmailScreen({super.key});
@@ -18,6 +19,7 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmController = TextEditingController();
+
   File? cccdFront;
   File? cccdBack;
 
@@ -26,54 +28,41 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
   bool hideConfirm = true;
   bool acceptTerms = false;
 
+  final AuthController _authController = AuthController();
+
   /// ROLE
   String selectedRole = "guest";
 
   Future<void> signUp() async {
-    if (passwordController.text != confirmController.text) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Passwords do not match")));
-      return;
-    }
+    final result = await _authController.registerUser(
+      username: fullnameController.text.trim(),
+      phone: phoneController.text.trim(),
+      email: emailController.text.trim(),
+      password: passwordController.text,
+      confirmPassword: confirmController.text,
+      role: selectedRole,
+      cccdFront: cccdFront,
+      cccdBack: cccdBack,
+    );
 
-    if (!acceptTerms) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Please accept terms")));
-      return;
-    }
+    if (!mounted) return;
 
-    try {
-      final res = await AuthService.register(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-        fullName: fullnameController.text.trim(),
-        phone: phoneController.text.trim(),
-        role: selectedRole,
-        cccdFront: cccdFront,
-        cccdBack: cccdBack,
-      );
-      if (res["status"] == "success") {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Đăng ký thành công")));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          result["message"] ??
+              (result["success"] ? "Đăng ký thành công!" : "Đăng ký thất bại!"),
+        ),
+        backgroundColor: result["success"] ? Colors.green : Colors.red,
+      ),
+    );
 
-        Navigator.pop(context); // quay về login
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res["message"] ?? "Đăng ký thất bại")),
-        );
-      }
-    } catch (e) {
-      print(e);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Lỗi kết nối server")));
+    if (result["success"]) {
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     }
   }
 
-  Future pickFront() async {
+  Future<void> pickFront() async {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
@@ -83,7 +72,7 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
     }
   }
 
-  Future pickBack() async {
+  Future<void> pickBack() async {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
@@ -335,10 +324,14 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text("Already have an account? "),
-
                     GestureDetector(
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
+                        );
                       },
                       child: const Text(
                         "Log in",
