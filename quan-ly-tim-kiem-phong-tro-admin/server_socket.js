@@ -1,7 +1,7 @@
-const express = require('express');
-const next = require('next');
-const http = require('http');
-const { initSocket } = require('./src/lib/socket');
+import express from 'express';
+import http from 'http';
+import next from 'next';
+import { initSocket } from './src/lib/socket.js';
 
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
@@ -10,7 +10,9 @@ const handle = app.getRequestHandler();
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
-app.prepare().then(() => {
+(async () => {
+  await app.prepare();
+  
   const server = express();
 
   // Parse json for REST endpoints (if you add Express routes)
@@ -27,7 +29,7 @@ app.prepare().then(() => {
   // Mount any Express-only routes under a namespace so they can safely
   // use body-parsing middleware without interfering with Next's request handling.
   try {
-    const expressRoutes = require('./src/server/expressRoutes');
+    const { default: expressRoutes } = await import('./src/server/expressRoutes.js');
     server.use('/express-api', express.json(), expressRoutes);
   } catch (e) {
     // ignore if routes not present / cannot be loaded
@@ -40,4 +42,4 @@ app.prepare().then(() => {
   httpServer.listen(PORT, HOST, () => {
     console.log(`> Server listening on http://${HOST}:${PORT}`);
   });
-});
+})();

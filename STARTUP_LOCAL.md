@@ -79,8 +79,14 @@ unset FABRIC_CFG_PATH CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH CORE_PEER_LOCALM
 # Đứng ở: blockchain-fabric-v2/test-network/
 export PATH=${PWD}/../bin:$PATH
 
+```
+```bash
 cryptogen generate --config=./organizations/cryptogen/crypto-config-org1.yaml --output="organizations"
+```
+```bash
 cryptogen generate --config=./organizations/cryptogen/crypto-config-org2.yaml --output="organizations"
+```
+```bash
 cryptogen generate --config=./organizations/cryptogen/crypto-config-orderer.yaml --output="organizations"
 ```
 
@@ -246,6 +252,36 @@ peer lifecycle chaincode querycommitted \
 > ✅ Thấy chaincode `renting` với sequence 1, cả 2 org approved là OK!
 
 ---
+### Chạy `setAnchorPeer.sh` cho mỗi org (tùy chọn nhưng khuyến nghị để tối ưu routing)
+```bash
+cd /root/quan-ly-tim-kiem-phong-tro/blockchain-fabric-v2/test-network
+
+# Set anchor peer cho Org1
+export FABRIC_CFG_PATH=${PWD}/../config
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_ADDRESS=localhost:7051
+
+bash scripts/setAnchorPeer.sh 1 rentingchannel
+```
+
+```bash
+# Set anchor peer cho Org2
+export CORE_PEER_LOCALMSPID="Org2MSP"
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+export CORE_PEER_ADDRESS=localhost:9051
+
+bash scripts/setAnchorPeer.sh 2 rentingchannel
+```
+
+
+### Tạo connection.json: sẽ được dùng để kết nối admin server → Fabric network.
+```bash
+bash organizations/ccp-generate.sh
+```
 
 ### D. Test Chaincode
 
@@ -315,22 +351,24 @@ peer lifecycle chaincode commit \
 ```bash
 cd quan-ly-tim-kiem-phong-tro-admin
 npm install   # Lần đầu
+npm install -D tsx
 ```
 
 **Bước 1 — Enroll Admin** (lần đầu setup):
 ```bash
-npm run fabric:setup-admin
+cd /root/quan-ly-tim-kiem-phong-tro/quan-ly-tim-kiem-phong-tro-admin
+npx tsx src/script-fabric-blockchain/setupMasterAdmin.ts
 ```
 
 **Bước 2 — Sync Users** từ Firebase lên Fabric:
 ```bash
-npm run fabric:sync-users
+cd /root/quan-ly-tim-kiem-phong-tro/quan-ly-tim-kiem-phong-tro-admin
+npx tsx src/script-fabric-blockchain/syncFirebaseToFabricUser.ts
 ```
 
 **Bước 3 — Sync Apartments** từ Firebase lên Fabric:
 ```bash
-# ⚠️ Không có npm script riêng — chạy trực tiếp bằng ts-node
-npx ts-node src/script-fabric-blockchain/syncFirebaseToFabricApartment.ts
+npx tsx src/script-fabric-blockchain/syncFirebaseToFabricApartment.ts
 ```
 
 **Kiểm tra kết nối Fabric (tùy chọn):**
@@ -345,7 +383,7 @@ npm run fabric:health
 ```bash
 # Bước 1: Lấy tên file private key (thay đổi sau mỗi lần reset network)
 ls blockchain-fabric-v2/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/
-# Ví dụ: abc123def456_sk
+# Ví dụ: priv_sk hoặc abc123def456_sk (tên file có thể khác, nhưng luôn kết thúc _sk)
 
 # Bước 2: Cập nhật tên file vào connection-profile/network-config.json
 # (phần adminPrivateKey.path)

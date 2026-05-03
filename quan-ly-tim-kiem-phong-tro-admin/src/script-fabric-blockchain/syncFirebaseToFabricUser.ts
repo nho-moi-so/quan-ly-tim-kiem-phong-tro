@@ -73,13 +73,12 @@ async function createMasterAdminIdentity() {
             '/root/quan-ly-tim-kiem-phong-tro/blockchain-fabric-v2/test-network/organizations/peerOrganizations/org1.example.com'
         );
 
-        const certPath = path.resolve(
+        const certDir = path.resolve(
             cryptoPath,
             'users',
             'Admin@org1.example.com',
             'msp',
-            'signcerts',
-            'cert.pem'
+            'signcerts'
         );
 
         const keyPath = path.resolve(
@@ -90,8 +89,13 @@ async function createMasterAdminIdentity() {
             'keystore'
         );
 
-        // Đọc certificate
-        const certificate = fs.readFileSync(certPath, 'utf8');
+        // Tự động tìm file cert trong thư mục signcerts
+        const certFiles = fs.readdirSync(certDir);
+        const certFile = certFiles.find(file => file.endsWith('.pem'));
+        if (!certFile) {
+            throw new Error('Không tìm thấy certificate file trong signcerts');
+        }
+        const certificate = fs.readFileSync(path.resolve(certDir, certFile), 'utf8');
 
         // Đọc private key từ thư mục keystore
         const keyFiles = fs.readdirSync(keyPath);
@@ -117,9 +121,33 @@ async function createMasterAdminIdentity() {
 }
 
 /**
- * Sync một user từ Firebase vào Fabric (bao gồm cả wallet certificates từ CA)
+ * Tạo CA Admin Identity bằng cách enroll trực tiếp với CA
+ * Identity này có quyền register/enroll users với CA
  */
-async function syncUserToFabric(fabricUser, masterAdminIdentity, firebaseUser) {
+async function createCAAdminIdentity() {
+    try {
+        const enrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
+        return {
+            credentials: {
+                certificate: enrollment.certificate,
+                privateKey: enrollment.key.toBytes(),
+            },
+            mspId: 'Org1MSP',
+            type: 'X.509',
+        };
+    } catch (error) {
+        console.error('Lỗi tạo CA Admin Identity:', error);
+        throw error;
+    }
+}
+
+/**
+ * Sync một user từ Firebase vào Fabric (bao gồm cả wallet certificates từ CA)
+ * Sử dụng 2 identity riêng biệt:
+ * - caAdminIdentity: để register/enroll user với CA
+ * - mspAdminIdentity: để submit transaction lên blockchain
+ */
+async function syncUserToFabric(fabricUser, caAdminIdentity, mspAdminIdentity, firebaseUser) {
     const gateway = new Gateway();
     try {
         console.log(`🔄 Syncing user: ${firebaseUser.Email} (${fabricUser.id})`);
@@ -129,15 +157,15 @@ async function syncUserToFabric(fabricUser, masterAdminIdentity, firebaseUser) {
         if (existingWallet.length === 0) {
             console.log(`🔑 Tạo wallet certificates cho user: ${fabricUser.id}`);
             
-            // Tạo in-memory wallet với master admin để register user với CA
-            const memoryWallet = await Wallets.newInMemoryWallet();
-            await memoryWallet.put('admin', masterAdminIdentity);
+            // Tạo in-memory wallet với CA admin để register user với CA
+            const caWallet = await Wallets.newInMemoryWallet();
+            await caWallet.put('admin', caAdminIdentity);
             
-            const provider = memoryWallet.getProviderRegistry().getProvider(masterAdminIdentity.type);
-            const adminUser = await provider.getUserContext(masterAdminIdentity, 'admin');
+            const provider = caWallet.getProviderRegistry().getProvider(caAdminIdentity.type);
+            const adminUser = await provider.getUserContext(caAdminIdentity, 'admin');
             
             try {
-                // Register user với CA
+                // Register user với CA (dùng CA Admin)
                 const secret = await ca.register({
                     affiliation: 'org1.department1',
                     enrollmentID: fabricUser.id,
@@ -168,16 +196,16 @@ async function syncUserToFabric(fabricUser, masterAdminIdentity, firebaseUser) {
             console.log(`⏭️ User ${fabricUser.id} đã có wallet certificates, bỏ qua`);
         }
         
-        // 2. Tạo user record trên blockchain
+        // 2. Tạo user record trên blockchain (dùng MSP Admin)
         console.log(`⛓️ Tạo user ${fabricUser.id} trên blockchain...`);
         
-        // Tạo in-memory wallet mới cho việc submit transaction
-        const memoryWallet = await Wallets.newInMemoryWallet();
-        await memoryWallet.put('admin', masterAdminIdentity);
+        // Tạo in-memory wallet với MSP admin cho việc submit transaction
+        const mspWallet = await Wallets.newInMemoryWallet();
+        await mspWallet.put('admin', mspAdminIdentity);
 
-        // Connect với master admin identity
+        // Connect với MSP admin identity (có quyền trên channel)
         await gateway.connect(ccp as any, {
-            wallet: memoryWallet,
+            wallet: mspWallet,
             identity: 'admin',
             discovery: { enabled: true, asLocalhost: true }
         });
@@ -223,14 +251,17 @@ export async function syncFirebaseUsersToFabric() {
         console.log('🔄 Đang transform dữ liệu users...');
         const fabricUsers = firebaseUsers.map(transformFirebaseUserToFabricUser);
 
-        // 3. Lấy Master Admin Identity từ Firebase
-        console.log('🔑 Đang lấy Master Admin Identity từ Firebase...');
-        const masterAdminIdentity = await WalletBlockchainRepository.getIdentityFromFirebase('master-admin');
-        if (!masterAdminIdentity) {
-            throw new Error('Master admin identity not found in Firebase. Vui lòng chạy setup master admin trước.');
-        }
+        // 3. Tạo CA Admin Identity (để register users với CA)
+        console.log('🔑 Đang tạo CA Admin Identity...');
+        const caAdminIdentity = await createCAAdminIdentity();
+        console.log('✅ CA Admin Identity sẵn sàng');
 
-        // 4. Sync từng user vào Fabric (bao gồm cả wallet certificates)
+        // 4. Tạo MSP Admin Identity (để submit transaction lên blockchain)
+        console.log('🔑 Đang tạo MSP Admin Identity từ filesystem...');
+        const mspAdminIdentity = await createMasterAdminIdentity();
+        console.log('✅ MSP Admin Identity sẵn sàng');
+
+        // 5. Sync từng user vào Fabric (bao gồm cả wallet certificates)
         console.log('🔄 Bắt đầu sync users vào Fabric với wallet certificates...');
         
         let successCount = 0;
@@ -241,7 +272,7 @@ export async function syncFirebaseUsersToFabric() {
             const firebaseUser = firebaseUsers[i];
             
             try {
-                await syncUserToFabric(fabricUser, masterAdminIdentity, firebaseUser);
+                await syncUserToFabric(fabricUser, caAdminIdentity, mspAdminIdentity, firebaseUser);
                 successCount++;
                 
                 // Đợi một chút giữa các users để tránh overload CA
@@ -287,7 +318,8 @@ async function runSyncScript() {
 }
 
 // Chạy script nếu file này được execute trực tiếp
-if (require.main === module) {
+
+if (import.meta.url === `file://${process.argv[1]}`) {
     runSyncScript();
 }
 

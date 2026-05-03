@@ -50,7 +50,7 @@ check_certificates() {
         exit 1
     fi
     
-    PRIVATE_KEY=$(ls $KEYSTORE_DIR/*.sk 2>/dev/null | head -1)
+    PRIVATE_KEY=$(ls $KEYSTORE_DIR/*_sk $KEYSTORE_DIR/*.sk 2>/dev/null | head -1)
     if [ -z "$PRIVATE_KEY" ]; then
         print_color "❌ Không tìm thấy private key" "$RED"
         exit 1
@@ -62,7 +62,7 @@ check_certificates() {
     # Update private key path in network config if needed
     if ! grep -q "$PRIVATE_KEY_NAME" connection-profile/network-config.json; then
         print_color "🔄 Cập nhật private key path..." "$YELLOW"
-        sed -i "s|/tmp/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/.*_sk|/tmp/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/$PRIVATE_KEY_NAME|g" connection-profile/network-config.json
+        sed -i "s|/tmp/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/[^\"]*|/tmp/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/$PRIVATE_KEY_NAME|g" connection-profile/network-config.json
         print_color "✅ Đã cập nhật private key path" "$GREEN"
     fi
 }

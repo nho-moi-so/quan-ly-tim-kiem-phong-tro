@@ -5,23 +5,23 @@
  * 2. Hệ thống tự động quét và xử lý check-in/check-out
  * Cách chạy: node server_blockchain.js
  */
-const path = require('path');
+import 'dotenv/config';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 process.env.TS_NODE_PROJECT = path.resolve(__dirname, 'tsconfig.server.json');
 
-require('dotenv/config');
-require('ts-node/register/transpile-only');
-require('tsconfig-paths/register');
-
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const crypto = require('crypto');
-const { TextDecoder } = require('util');
-const { createFabricClient } = require('./src/lib/fabric/fabricClient');
-const { ApartmentRepository } = require('./src/repositories/apartmentRepository');
-const { UserRepository } = require('./src/repositories/userRepository');
-const { ContractRepository } = require('./src/repositories/contractRepository');
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import crypto from 'crypto';
+import express from 'express';
+import { TextDecoder } from 'util';
+import { createFabricClient } from './src/lib/fabric/fabricClient.ts';
+import { ApartmentRepository } from './src/repositories/apartmentRepository.ts';
+import { ContractRepository } from './src/repositories/contractRepository.ts';
+import { UserRepository } from './src/repositories/userRepository.ts';
 
 // --- CẤU HÌNH EXPRESS ---
 const app = express();

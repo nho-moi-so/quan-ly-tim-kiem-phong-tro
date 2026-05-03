@@ -198,7 +198,7 @@ async function runSyncScript() {
 }
 
 // Chạy script nếu file này được execute trực tiếp
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
     runSyncScript();
 }
 

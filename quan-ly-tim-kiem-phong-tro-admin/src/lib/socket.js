@@ -1,10 +1,10 @@
-const { Server } = require('socket.io');
+import { Server } from 'socket.io';
 
 // Use global object to share socket instance between server.js and Next.js webpack bundles
 // This prevents Next.js from creating a separate io instance when bundling API routes
 const globalForSocket = global;
 
-function initSocket(server) {
+export function initSocket(server) {
   if (globalForSocket.__socketIO) {
     return globalForSocket.__socketIO;
   }
@@ -43,11 +43,9 @@ function initSocket(server) {
   return io;
 }
 
-function getIO() {
+export function getIO() {
   if (!globalForSocket.__socketIO) {
     throw new Error('Socket not initialized');
   }
   return globalForSocket.__socketIO;
 }
-
-module.exports = { initSocket, getIO };

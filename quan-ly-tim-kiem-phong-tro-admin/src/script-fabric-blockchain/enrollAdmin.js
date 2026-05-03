@@ -1,3 +1,4 @@
+// node src/script-fabric-blockchain/enrollAdmin.js
 const { ca } = require('./caClient');
 const path = require('path');
 

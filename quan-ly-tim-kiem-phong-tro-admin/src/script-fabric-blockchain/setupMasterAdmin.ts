@@ -15,13 +15,12 @@ async function enrollMasterAdminWithRegistrarRights() {
             '/root/quan-ly-tim-kiem-phong-tro/blockchain-fabric-v2/test-network/organizations/peerOrganizations/org1.example.com'
         );
 
-        const certPath = path.resolve(
+        const certDir = path.resolve(
             cryptoPath,
             'users',
             'Admin@org1.example.com',
             'msp',
-            'signcerts',
-            'cert.pem'
+            'signcerts'
         );
 
         const keyPath = path.resolve(
@@ -32,8 +31,13 @@ async function enrollMasterAdminWithRegistrarRights() {
             'keystore'
         );
 
-        // Đọc certificate
-        const certificate = fs.readFileSync(certPath, 'utf8');
+        // Tự động tìm file cert trong thư mục signcerts
+        const certFiles = fs.readdirSync(certDir);
+        const certFile = certFiles.find(file => file.endsWith('.pem'));
+        if (!certFile) {
+            throw new Error('Không tìm thấy certificate file trong signcerts');
+        }
+        const certificate = fs.readFileSync(path.resolve(certDir, certFile), 'utf8');
 
         // Đọc private key từ thư mục keystore
         const keyFiles = fs.readdirSync(keyPath);
@@ -63,7 +67,7 @@ async function enrollMasterAdminWithRegistrarRights() {
         } else {
             console.log('🆕 Tạo mới master-admin identity...');
             // Tạo mới master-admin identity với certificate từ cryptogen
-            await WalletBlockchainRepository.create({
+            await WalletBlockchainRepository.upsertById('master-admin', {
                 UserID: 'master-admin',
                 CredentialsCertificate: certificate,
                 CredentialsPrivateKey: privateKey,
@@ -81,8 +85,10 @@ async function enrollMasterAdminWithRegistrarRights() {
     }
 }
 
+
 // Chạy script nếu file này được execute trực tiếp
-if (require.main === module) {
+
+if (import.meta.url === `file://${process.argv[1]}`) {
     enrollMasterAdminWithRegistrarRights()
         .then(() => {
             console.log('✅ Hoàn thành setup master admin');

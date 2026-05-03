@@ -1,18 +1,19 @@
 {
   "name": "quan-ly-tim-kiem-phong-tro-admin",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
-    "dev": "node server_socket.js & node server_blockchain.js",
+    "dev": "node server_socket.js & npx tsx server_blockchain.js",
     "build": "next build",
     "start": "NODE_ENV=production node server.js",
     "lint": "next lint",
     "gen": "node src/scripts/generate-component.js",
     "test": "jest",
-    "fabric:health": "ts-node src/script-fabric-blockchain/healthCheck.ts",
-    "fabric:setup-admin": "ts-node src/script-fabric-blockchain/enrollAdmin.js",
-    "fabric:create-users": "ts-node src/script-fabric-blockchain/createUserCertificates.ts",
-    "fabric:sync-users": "ts-node src/script-fabric-blockchain/syncFirebaseToFabricUser.ts",
+    "fabric:health": "tsx src/script-fabric-blockchain/healthCheck.ts",
+    "fabric:setup-admin": "tsx src/script-fabric-blockchain/setupMasterAdmin.ts",
+    "fabric:create-users": "tsx src/script-fabric-blockchain/createUserCertificates.ts",
+    "fabric:sync-users": "tsx src/script-fabric-blockchain/syncFirebaseToFabricUser.ts",
     "fabric:manager": "src/script-fabric-blockchain/wallet-manager.sh",
     "fabric:test": "npm run fabric:health && echo 'All fabric tests passed'",
     "fabric:demo": "npm run fabric:setup-admin && npm run fabric:create-users && npm run fabric:health",
@@ -50,7 +51,7 @@
     "jest": "^30.2.0",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }
