@@ -676,7 +676,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       final transaction = TransactionModel(
                                         id: '',
                                         amount: amount,
-                                        paymentMethod: 'BANK_TRANSFER',
+                                        paymentMethod: 'Chuyển khoản',
                                         gatewayTransactionId: null,
                                         paymentDate: DateTime.now(),
                                         type: 'WITHDRAW',

@@ -523,11 +523,4 @@ cd blockchain-fabric-explorer && ./explorer.sh stop
 | Mobile không connect | URL ngrok thay đổi | Cập nhật `HOST_SERVER` trong `.env` flutter |
 | IoT không kết nối WiFi | Password WiFi có ký tự lạ | Chỉ dùng số và `a`, `b`, `c`, `d` |
 
-**Reset hoàn toàn:**
-```bash
-cd blockchain-fabric-v2/test-network
-docker-compose -f compose/compose-test-net.yaml -f compose/compose-ca.yaml down --volumes --remove-orphans
-docker network prune -f
-rm -rf organizations/peerOrganizations organizations/ordererOrganizations channel-artifacts/*.block *.tar.gz
-# Sau đó chạy lại từ Bước 1.2
-```
+

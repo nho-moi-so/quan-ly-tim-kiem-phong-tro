@@ -1,17 +1,17 @@
 "use client";
 
 import {
-    Button,
-    Modal,
-    Popconfirm,
-    Select,
-    Space,
-    Table,
-    Tabs,
-    Tag,
-    Tooltip,
-    Typography,
-    message,
+  Button,
+  Modal,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
+  Tabs,
+  Tag,
+  Tooltip,
+  Typography,
+  message,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect, useMemo, useState } from "react";
@@ -20,6 +20,7 @@ const { Title, Text } = Typography;
 
 type TransactionType = "DEPOSIT" | "WITHDRAW" | string;
 type TransactionStatus = "PENDING" | "SUCCESS" | "COMPLETED" | "FAILED" | "REJECTED" | string;
+type PaymentMethod = "BANK_TRANSFER" | "VNPAY" | string;
 
 interface TransactionHistoryItem {
   id: string;
@@ -32,7 +33,7 @@ interface TransactionHistoryItem {
     phone: string;
   };
   payment_detail: {
-    method?: string | null;
+    method?: PaymentMethod | null;
     bank_name?: string | null;
     account_number?: string | null;
     account_holder?: string | null;
@@ -86,6 +87,12 @@ const getTypeTag = (type: TransactionType) => {
   if (upper === "WITHDRAW") return <Tag color="orange">Rút tiền</Tag>;
   return <Tag>{upper || "—"}</Tag>;
 };
+const getTypeText = (type: PaymentMethod) => {
+  const upper = type?.toUpperCase?.() ?? "";
+  if (upper === "BANK_TRANSFER") return "Chuyển khoản";
+  if (upper === "VNPAY") return "VNPAY";
+  return upper || "—";
+}
 
 const mapStatusToTab = (status: TransactionStatus): StatusTabKey => {
   const upper = status?.toUpperCase?.() ?? "";
@@ -250,7 +257,7 @@ export default function LichSuGiaoDichPage() {
         if (isDeposit) {
           return (
             <div>
-              <div>{detail.method || "—"}</div>
+              <div>{getTypeText(detail.method)}</div>
               <div style={{ fontSize: 12, color: "#8c8c8c" }}>Ref: {detail.gateway_ref || "—"}</div>
             </div>
           );
@@ -258,7 +265,7 @@ export default function LichSuGiaoDichPage() {
 
         return (
           <Space direction="vertical" size={0}>
-            <Text>{detail.bank_name || detail.method || "BANK_TRANSFER"}</Text>
+            <Text>{getTypeText(detail.method)}</Text>
             <Space size={8}>
               <Text>{detail.account_number || "—"}</Text>
               {detail.account_number && <Text copyable={{ text: detail.account_number }} />}
@@ -425,18 +432,54 @@ export default function LichSuGiaoDichPage() {
         footer={null}
       >
         {viewingItem && (
-          <Space direction="vertical" size={8} style={{ width: "100%" }}>
-            <Text><b>Mã GD:</b> {viewingItem.trans_code}</Text>
-            <Text><b>Người dùng:</b> {viewingItem.user.full_name} - {viewingItem.user.phone}</Text>
-            <Text><b>Loại GD:</b> {viewingItem.type}</Text>
-            <Text><b>Số tiền:</b> {viewingItem.type === "DEPOSIT" ? "+" : "-"} {formatCurrency(viewingItem.amount)}</Text>
-            <Text>
-              <b>Chi tiết thanh toán:</b> {viewingItem.payment_detail?.method || "—"}
-              {viewingItem.payment_detail?.gateway_ref ? ` - Ref: ${viewingItem.payment_detail.gateway_ref}` : ""}
-            </Text>
-            <Text><b>Blockchain:</b> {viewingItem.tx_hash || "—"}</Text>
-            <Text><b>Thời gian:</b> {formatDateTime(viewingItem.created_at)}</Text>
-            <Text><b>Trạng thái:</b> {viewingItem.status}</Text>
+          <Space direction="vertical" size={12} style={{ width: "100%" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "1px solid #f0f0f0" }}>
+              <Text><b>Mã GD:</b></Text>
+              <Text>{viewingItem.trans_code}</Text>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "1px solid #f0f0f0" }}>
+              <Text><b>Người dùng:</b></Text>
+              <Text>{viewingItem.user.full_name} - {viewingItem.user.phone}</Text>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "1px solid #f0f0f0" }}>
+              <Text><b>Loại GD:</b></Text>
+              <Text>{getTypeTag(viewingItem.type)}</Text>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "1px solid #f0f0f0" }}>
+              <Text><b>Số tiền:</b></Text>
+              <Text strong style={{ color: viewingItem.type.toUpperCase() === "DEPOSIT" ? "#52c41a" : "#ff4d4f" }}>
+                {viewingItem.type === "DEPOSIT" ? "+" : "-"} {formatCurrency(viewingItem.amount)}
+              </Text>
+            </div>
+            <div style={{ paddingBottom: 8, borderBottom: "1px solid #f0f0f0" }}>
+              <Text><b>Chi tiết thanh toán:</b></Text>
+              <div style={{ marginTop: 6, paddingLeft: 16 }}>
+                {viewingItem.type.toUpperCase() === "DEPOSIT" ? (
+                  <>
+                    <div>{getTypeText(viewingItem.payment_detail?.method || "—")}</div>
+                    <div style={{ fontSize: 12, color: "#8c8c8c" }}>Ref: {viewingItem.payment_detail?.gateway_ref || "—"}</div>
+                  </>
+                ) : (
+                  <>
+                    <div>{getTypeText(viewingItem.payment_detail?.method || "—")}</div>
+                    <div style={{ fontSize: 12, color: "#8c8c8c" }}>{viewingItem.payment_detail?.account_number || "—"}</div>
+                    <div style={{ fontSize: 12, color: "#8c8c8c" }}>{viewingItem.payment_detail?.account_holder || "—"}</div>
+                  </>
+                )}
+              </div>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "1px solid #f0f0f0" }}>
+              <Text><b>Chuỗi khối:</b></Text>
+              <Text>{viewingItem.tx_hash ? <Tooltip title={viewingItem.tx_hash}><a href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL || "#"}${viewingItem.tx_hash}`} target="_blank" rel="noreferrer">🔗 Xem</a></Tooltip> : "—"}</Text>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "1px solid #f0f0f0" }}>
+              <Text><b>Thời gian:</b></Text>
+              <Text>{formatDateTime(viewingItem.created_at)}</Text>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <Text><b>Trạng thái:</b></Text>
+              <Text>{getStatusTag(viewingItem.status)}</Text>
+            </div>
           </Space>
         )}
       </Modal>

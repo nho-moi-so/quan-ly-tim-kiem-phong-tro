@@ -42,7 +42,7 @@ const loadConfigFromEnv = (): FabricConfig => {
 			path.resolve(cryptoPath, 'users', userName, 'msp', 'keystore'),
 		certPath:
 			process.env.FABRIC_CERT_PATH ||
-		path.resolve(cryptoPath, 'users', userName, 'msp', 'signcerts', 'cert.pem'),
+		path.resolve(cryptoPath, 'users', userName, 'msp', 'signcerts', 'User1@org1.example.com-cert.pem'),
 		tlsCertPath:
 			process.env.FABRIC_TLS_CERT_PATH ||
 			path.resolve(cryptoPath, 'peers', peerName, 'tls', 'ca.crt'),

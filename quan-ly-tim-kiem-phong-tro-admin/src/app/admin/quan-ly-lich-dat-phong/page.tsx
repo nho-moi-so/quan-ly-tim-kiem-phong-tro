@@ -2,7 +2,7 @@
 
 import { formatId } from '@/lib/formatId';
 import { tranlateStatus } from '@/lib/tranlateStatus';
-import { CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, SafetyOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, CloseCircleOutlined, EyeOutlined } from '@ant-design/icons';
 import { Button, Col, DatePicker, Divider, Form, Input, InputNumber, message, Modal, Row, Spin, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -19,7 +19,7 @@ interface BookingData {
   checkin: string;
   checkout: string;
   price: string;
-  status: 'pending' | 'approved'| 'cancelled';
+  status: 'pending' | 'approved'| 'cancelled' | 'completed';
   room_name: string;
   transaction_hash?: string;
 }
@@ -86,6 +86,7 @@ const QuanLyLichDatPhongPage: React.FC = () => {
       pending: { color: 'orange', text: tranlateStatus.tranlateToVietnameseStatusBooking('pending') },
       approved: { color: 'blue', text: tranlateStatus.tranlateToVietnameseStatusBooking('approved') },
       cancelled: { color: 'red', text: tranlateStatus.tranlateToVietnameseStatusBooking('cancelled') },
+      completed: { color: 'green', text: tranlateStatus.tranlateToVietnameseStatusBooking('completed') },
     };
     const config = statusConfig[status] || { color: 'default', text: status };
     return <Tag color={config.color}>{config.text}</Tag>;
@@ -371,16 +372,16 @@ const QuanLyLichDatPhongPage: React.FC = () => {
             Đóng
           </Button>,
           ...(selectedBooking?.status !== 'pending' ? [
-            <Button 
-              key="save" 
-              type="primary" 
-              icon={<SafetyOutlined spin={isVerifyingIntegrity} />} 
-              onClick={handleSave}
-              loading={isVerifyingIntegrity}
-              title="Kiểm tra tính toàn vẹn của dữ liệu booking trên blockchain. Hệ thống sẽ so sánh dữ liệu trên blockchain với dữ liệu hiện tại để đảm bảo không có sự thay đổi trái phép."
-            >
-              Kiểm tra Blockchain
-            </Button>
+            // <Button 
+            //   key="save" 
+            //   type="primary" 
+            //   icon={<SafetyOutlined spin={isVerifyingIntegrity} />} 
+            //   onClick={handleSave}
+            //   loading={isVerifyingIntegrity}
+            //   title="Kiểm tra tính toàn vẹn của dữ liệu booking trên blockchain. Hệ thống sẽ so sánh dữ liệu trên blockchain với dữ liệu hiện tại để đảm bảo không có sự thay đổi trái phép."
+            // >
+            //   Kiểm tra Blockchain
+            // </Button>
           ] : []),
         ]}
         width={800}
