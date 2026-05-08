@@ -27,15 +27,44 @@ class DashboardService {
       int availableCount = 0;
       int maintenanceCount = 0;
 
+      List<String> apartmentIds = apartmentsSnapshot.docs.map((doc) => doc.id).toList();
+      Set<String> rentedApartmentIds = {};
+
+      if (apartmentIds.isNotEmpty) {
+        // Chia apartmentIds thành các batch nhỏ (Firestore giới hạn whereIn = 10)
+        for (int i = 0; i < apartmentIds.length; i += 10) {
+          final batchIds = apartmentIds.sublist(
+            i,
+            i + 10 > apartmentIds.length ? apartmentIds.length : i + 10,
+          );
+
+          final contractsSnapshot = await _firestore
+              .collection('Contracts')
+              .where('ApartmentId', whereIn: batchIds)
+              .get();
+
+          for (var contract in contractsSnapshot.docs) {
+            final data = contract.data();
+            if (data['EndDate'] != null) {
+              final endDate = (data['EndDate'] as Timestamp).toDate();
+              if (endDate.isAfter(DateTime.now())) {
+                rentedApartmentIds.add(data['ApartmentId']);
+              }
+            }
+          }
+        }
+      }
+
       for (var doc in apartmentsSnapshot.docs) {
-        String status = doc.data()['Status'] ?? '';
-        
-        if (status.toLowerCase() == 'rented' || status.toLowerCase() == 'đang thuê') {
+        if (rentedApartmentIds.contains(doc.id)) {
           rentedCount++;
-        } else if (status.toLowerCase() == 'available' || status.toLowerCase() == 'còn trống') {
-          availableCount++;
-        } else if (status.toLowerCase() == 'maintenance' || status.toLowerCase() == 'bảo trì') {
-          maintenanceCount++;
+        } else {
+          String status = doc.data()['Status'] ?? '';
+          if (status.toLowerCase() == 'maintenance' || status.toLowerCase() == 'bảo trì') {
+            maintenanceCount++;
+          } else {
+            availableCount++;
+          }
         }
       }
 

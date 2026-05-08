@@ -120,49 +120,56 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [statusColor, statusColor.withOpacity(0.8)],
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: statusColor.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [statusColor, statusColor.withOpacity(0.8)],
                           ),
-                        ],
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: statusColor.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.receipt_long_rounded, size: 20, color: Colors.white),
                       ),
-                      child: const Icon(Icons.receipt_long_rounded, size: 20, color: Colors.white),
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Mã Đơn',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF6B7280),
-                          ),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Mã Đơn',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF6B7280),
+                              ),
+                            ),
+                            Text(
+                              '#${widget.bookingId}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF1F2937),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ],
                         ),
-                        Text(
-                          '#${widget.bookingId}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF1F2937),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
@@ -389,22 +396,22 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
         ),
       );
       
-      if (widget.isRefunded != true) {
-        actionButtons.add(const SizedBox(width: 8));
-        actionButtons.add(
-          Expanded(
-            child: _actionButton(
-              label: 'Hoàn tiền',
-              icon: Icons.payments_rounded,
-              bgColor: const Color(0xFFF59E0B),
-              textColor: Colors.white,
-              onTap: () {
-                widget.onConfirm?.call(BookingAction.refund);
-              },
-            ),
-          ),
-        );
-      }
+      // if (widget.isRefunded != true) {
+      //   actionButtons.add(const SizedBox(width: 8));
+      //   actionButtons.add(
+      //     Expanded(
+      //       child: _actionButton(
+      //         label: 'Hoàn tiền',
+      //         icon: Icons.payments_rounded,
+      //         bgColor: const Color(0xFFF59E0B),
+      //         textColor: Colors.white,
+      //         onTap: () {
+      //           widget.onConfirm?.call(BookingAction.refund);
+      //         },
+      //       ),
+      //     ),
+      //   );
+      // }
     }
 
     return actionButtons;

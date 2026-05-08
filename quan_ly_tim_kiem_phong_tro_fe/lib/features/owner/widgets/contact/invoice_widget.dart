@@ -187,45 +187,45 @@ class InvoiceWidget extends StatelessWidget {
             ),
           ),
 
-          // Download button at bottom
-            if (onDownload != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                backgroundColor: Colors.blue.shade600,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 2,
-                ),
-                onPressed: isDownloading ? null : onDownload,
-                icon: isDownloading
-                  ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.black,
-                    ),
-                  )
-                  : const Icon(Icons.download_rounded, size: 20, color: Colors.black),
-                label: Text(
-                isDownloading ? 'Đang tải hóa đơn...' : 'Tải hóa đơn',
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.3,
-                  color: Colors.black,
-                ),
-                ),
-              ),
-              ),
-            ),
+          // // Download button at bottom
+          //   if (onDownload != null)
+          //   Padding(
+          //     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          //     child: SizedBox(
+          //     width: double.infinity,
+          //     child: ElevatedButton.icon(
+          //       style: ElevatedButton.styleFrom(
+          //       padding: const EdgeInsets.symmetric(vertical: 14),
+          //       backgroundColor: Colors.blue.shade600,
+          //       foregroundColor: Colors.black,
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(12),
+          //       ),
+          //       elevation: 2,
+          //       ),
+          //       onPressed: isDownloading ? null : onDownload,
+          //       icon: isDownloading
+          //         ? const SizedBox(
+          //           width: 20,
+          //           height: 20,
+          //           child: CircularProgressIndicator(
+          //           strokeWidth: 2,
+          //           color: Colors.black,
+          //           ),
+          //         )
+          //         : const Icon(Icons.download_rounded, size: 20, color: Colors.black),
+          //       label: Text(
+          //       isDownloading ? 'Đang tải hóa đơn...' : 'Tải hóa đơn',
+          //       style: const TextStyle(
+          //         fontSize: 15,
+          //         fontWeight: FontWeight.w700,
+          //         letterSpacing: 0.3,
+          //         color: Colors.white,
+          //       ),
+          //       ),
+          //     ),
+          //     ),
+          //   ),
           ],
           ),
     );

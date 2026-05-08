@@ -41,8 +41,8 @@ class _OwnerMainScreenState extends State<OwnerMainScreen> {
   }
 
   // Danh sách các màn hình tương ứng với từng tab
-  final List<Widget> _screens = [
-    const DashboardScreen(), // Hoặc ContractScreen nếu bạn có
+  List<Widget> get _screens => [
+    DashboardScreen(onSwitchTab: _onItemTapped),
     const ApartmentScreen(),
     BookingRequestScreens(),
     const PostScreen(),

@@ -31,12 +31,12 @@ class LoginScreens extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: screenHeight * 0.04),
+                SizedBox(height: screenHeight * 0.02),
                 
                 // Logo
-                LogoWidget(scale: 1.5),
+                LogoWidget(scale: 1.2),
                 
-                SizedBox(height: screenHeight * 0.02),
+                SizedBox(height: screenHeight * 0.015),
                 
                 // Welcome Text
                 const Text(
@@ -49,7 +49,7 @@ class LoginScreens extends StatelessWidget {
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 const Text(
                   'Quản lý và tìm kiếm căn hộ dễ dàng',
                   style: TextStyle(
@@ -60,12 +60,12 @@ class LoginScreens extends StatelessWidget {
                   ),
                 ),
                 
-                SizedBox(height: screenHeight * 0.04),
+                SizedBox(height: screenHeight * 0.03),
                 
                 // Login Form Card
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
@@ -91,7 +91,7 @@ class LoginScreens extends StatelessWidget {
                   child: const LogInForm(),
                 ),
                 
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.02),
                 
                 // Auth Switch
                 Center(
@@ -100,7 +100,7 @@ class LoginScreens extends StatelessWidget {
                   ),
                 ),
                 
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.02),
                 
                 // Footer Info
                 Container(

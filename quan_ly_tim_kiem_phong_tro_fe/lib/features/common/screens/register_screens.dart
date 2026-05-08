@@ -31,17 +31,17 @@ class RegisterScreens extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.02),
                 
                 // Logo
-                LogoWidget(scale: 1.5),
+                LogoWidget(scale: 1.2),
                 
-                SizedBox(height: screenHeight * 0.02),
+                SizedBox(height: screenHeight * 0.015),
                 
                 // Signup Form Card
                 SignupForm(),
                 
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.02),
                 
                 // Auth Switch
                 Center(
@@ -50,7 +50,7 @@ class RegisterScreens extends StatelessWidget {
                   ),
                 ),
                 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
               ],
             ),
           ),

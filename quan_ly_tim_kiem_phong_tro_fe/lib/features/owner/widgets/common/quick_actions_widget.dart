@@ -70,15 +70,15 @@ class QuickActionButton extends StatelessWidget {
 class QuickActionsWidget extends StatelessWidget {
   final VoidCallback? onAddRoom;
   final VoidCallback? onViewBookings;
-  final VoidCallback? onViewContracts;
-  final VoidCallback? onViewReports;
+  final VoidCallback? onViewPosts;
+  final VoidCallback? onViewContact;
 
   const QuickActionsWidget({
     super.key,
     this.onAddRoom,
     this.onViewBookings,
-    this.onViewContracts,
-    this.onViewReports,
+    this.onViewPosts,
+    this.onViewContact,
   });
 
   @override
@@ -130,7 +130,7 @@ class QuickActionsWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: QuickActionButton(
-                  title: 'Thêm phòng',
+                  title: 'Thêm phòng mới',
                   icon: Icons.add_home_rounded,
                   color: const Color(0xFF10B981),
                   onPressed: onAddRoom ?? () {},
@@ -139,8 +139,8 @@ class QuickActionsWidget extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: QuickActionButton(
-                  title: 'Yêu cầu thuê',
-                  icon: Icons.assignment_rounded,
+                  title: 'Đặt phòng',
+                  icon: Icons.book_online_rounded,
                   color: const Color(0xFF3B82F6),
                   onPressed: onViewBookings ?? () {},
                 ),
@@ -152,19 +152,19 @@ class QuickActionsWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: QuickActionButton(
-                  title: 'Hợp đồng',
-                  icon: Icons.description_rounded,
+                  title: 'Bài đăng',
+                  icon: Icons.article_rounded,
                   color: const Color(0xFFF59E0B),
-                  onPressed: onViewContracts ?? () {},
+                  onPressed: onViewPosts ?? () {},
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: QuickActionButton(
-                  title: 'Báo cáo',
-                  icon: Icons.assessment_rounded,
+                  title: 'Liên hệ',
+                  icon: Icons.contact_mail_rounded,
                   color: const Color(0xFF8B5CF6),
-                  onPressed: onViewReports ?? () {},
+                  onPressed: onViewContact ?? () {},
                 ),
               ),
             ],

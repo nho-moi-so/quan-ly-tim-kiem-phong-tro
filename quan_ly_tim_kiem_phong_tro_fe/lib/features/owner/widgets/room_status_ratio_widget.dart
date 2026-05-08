@@ -20,7 +20,7 @@ class RoomStatusRatioWidget extends StatefulWidget {
 class _RoomStatusRatioWidgetState extends State<RoomStatusRatioWidget> {
   @override
   Widget build(BuildContext context) {
-    // Tính toán phần trăm từ dữ liệu thực
+    // Tính toán phần trăm để hiển thị trong legend
     final rentedPercentage = widget.totalRooms > 0
         ? (widget.rentedCount / widget.totalRooms * 100)
         : 0.0;
@@ -28,15 +28,29 @@ class _RoomStatusRatioWidgetState extends State<RoomStatusRatioWidget> {
         ? (widget.availableCount / widget.totalRooms * 100)
         : 0.0;
 
-    final Map<String, double> dataMap = {
-      "Đang Thuê": rentedPercentage,
-      "Còn Trống": availablePercentage,
-    };
+    final Color rentedColor = const Color(0xFFEF4444);
+    final Color availableColor = const Color(0xFF10B981);
 
-    final List<Color> colorList = [
-      const Color(0xFFEF4444), // đỏ hiện đại (Đang Thuê)
-      const Color(0xFF10B981), // xanh hiện đại (Còn Trống)
-    ];
+    // Kiểm tra xem có dữ liệu không
+    final bool hasData = widget.rentedCount > 0 || widget.availableCount > 0;
+
+    // Dữ liệu cho PieChart (phải lớn hơn 0 để không lỗi)
+    final Map<String, double> pieChartDataMap = {};
+    final List<Color> pieChartColorList = [];
+
+    if (hasData) {
+      if (widget.rentedCount > 0) {
+        pieChartDataMap["Đang Thuê"] = widget.rentedCount.toDouble();
+        pieChartColorList.add(rentedColor);
+      }
+      if (widget.availableCount > 0) {
+        pieChartDataMap["Còn Trống"] = widget.availableCount.toDouble();
+        pieChartColorList.add(availableColor);
+      }
+    } else {
+      pieChartDataMap["Chưa có dữ liệu"] = 1.0;
+      pieChartColorList.add(const Color(0xFFE2E8F0));
+    }
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -130,10 +144,10 @@ class _RoomStatusRatioWidgetState extends State<RoomStatusRatioWidget> {
                 child: AspectRatio(
                   aspectRatio: 1,
                   child: PieChart(
-                    dataMap: dataMap,
+                    dataMap: pieChartDataMap,
                     animationDuration: const Duration(milliseconds: 1000),
                     chartType: ChartType.ring,
-                    colorList: colorList,
+                    colorList: pieChartColorList,
                     chartRadius: MediaQuery.of(context).size.width / 3.5,
                     ringStrokeWidth: 32,
                     centerText: "${widget.totalRooms}",
@@ -150,15 +164,9 @@ class _RoomStatusRatioWidgetState extends State<RoomStatusRatioWidget> {
                       showChartValues: true,
                       showChartValuesInPercentage: true,
                       showChartValuesOutside: false,
-                      // chartValueStyle: TextStyle(
-                      //   fontSize: 13,
-                      //   fontWeight: FontWeight.w700,
-                      //   color: Colors.white,
-                      //   fontFamily: 'Noto Sans',
-                      // ),
                       decimalPlaces: 0,
                     ),
-                    totalValue: 100,
+                    totalValue: hasData ? null : 1.0,
                   ),
                 ),
               ),
@@ -172,9 +180,9 @@ class _RoomStatusRatioWidgetState extends State<RoomStatusRatioWidget> {
                   children: [
                     // Đang Thuê
                     _buildLegendItem(
-                      color: colorList[0],
+                      color: rentedColor,
                       label: 'Đang Thuê',
-                      percentage: dataMap["Đang Thuê"]!,
+                      percentage: rentedPercentage,
                       count: widget.rentedCount,
                       icon: Icons.home_rounded,
                     ),
@@ -182,9 +190,9 @@ class _RoomStatusRatioWidgetState extends State<RoomStatusRatioWidget> {
                     
                     // Còn Trống
                     _buildLegendItem(
-                      color: colorList[1],
+                      color: availableColor,
                       label: 'Còn Trống',
-                      percentage: dataMap["Còn Trống"]!,
+                      percentage: availablePercentage,
                       count: widget.availableCount,
                       icon: Icons.door_front_door_rounded,
                     ),

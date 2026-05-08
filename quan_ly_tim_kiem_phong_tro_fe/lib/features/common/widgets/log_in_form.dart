@@ -181,7 +181,7 @@ class _LogInFormState extends State<LogInForm> {
           ),
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
 
         // Password Field
         const Text(
@@ -258,7 +258,7 @@ class _LogInFormState extends State<LogInForm> {
           ),
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
 
         // Forgot Password
         Align(
@@ -281,7 +281,7 @@ class _LogInFormState extends State<LogInForm> {
           ),
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
 
         // Login Button
         Container(

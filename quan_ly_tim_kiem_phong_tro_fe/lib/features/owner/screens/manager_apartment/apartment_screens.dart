@@ -350,7 +350,7 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
               Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TagWithIconWidget(title: "Quảng lý căn hộ"),
+                TagWithIconWidget(title: "Quản lý căn hộ"),
                 ButtonAddWidget(
                   title: "Thêm căn hộ mới", 
                   onPressed: () async {

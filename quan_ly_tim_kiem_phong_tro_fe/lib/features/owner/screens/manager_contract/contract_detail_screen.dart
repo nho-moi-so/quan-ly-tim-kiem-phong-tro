@@ -641,17 +641,17 @@ class _ContractDetailScreenState extends State<ContractDetailScreen> {
                         onTap: () => Navigator.of(context).pop(),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _actionButton(
-                        label: 'Kiểm tra',
-                        icon: Icons.verified_rounded,
-                        bgColor: const Color(0xFF4C6FFF),
-                        textColor: Colors.white,
-                        onTap: _openVerifyModal,
-                        isLoading: _isVerifying,
-                      ),
-                    ),
+                    // const SizedBox(width: 12),
+                    // Expanded(
+                    //   child: _actionButton(
+                    //     label: 'Kiểm tra',
+                    //     icon: Icons.verified_rounded,
+                    //     bgColor: const Color(0xFF4C6FFF),
+                    //     textColor: Colors.white,
+                    //     onTap: _openVerifyModal,
+                    //     isLoading: _isVerifying,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -757,17 +757,17 @@ class _ContractDetailScreenState extends State<ContractDetailScreen> {
                 ),
                 const SizedBox(height: 16),
                 // Nút tải hợp đồng
-                SizedBox(
-                  width: double.infinity,
-                  child: _actionButton(
-                    label: _isDownloading ? 'Đang tải...' : 'Tải hợp đồng',
-                    icon: Icons.download_rounded,
-                    bgColor: const Color(0xFF10B981),
-                    textColor: Colors.white,
-                    onTap: _isDownloading ? () {} : _downloadContract,
-                    isLoading: _isDownloading,
-                  ),
-                ),
+                // SizedBox(
+                //   width: double.infinity,
+                //   child: _actionButton(
+                //     label: _isDownloading ? 'Đang tải...' : 'Tải hợp đồng',
+                //     icon: Icons.download_rounded,
+                //     bgColor: const Color(0xFF10B981),
+                //     textColor: Colors.white,
+                //     onTap: _isDownloading ? () {} : _downloadContract,
+                //     isLoading: _isDownloading,
+                //   ),
+                // ),
               ],
             ),
           ),

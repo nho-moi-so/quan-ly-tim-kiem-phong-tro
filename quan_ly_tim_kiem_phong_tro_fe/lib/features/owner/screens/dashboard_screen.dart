@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/common/screens/login_screens.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/user_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/manager_apartment/detail_apartment_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/profile_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/auth_service.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/dashboard_service.dart';
@@ -8,7 +11,9 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/dashboard_service.da
 import '../widgets/widgets.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final void Function(int index)? onSwitchTab;
+
+  const DashboardScreen({super.key, this.onSwitchTab});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -23,10 +28,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   RoomStatistics? _roomStats;
   Map<String, List<double>> _incomeData = {};
   List<String> _months = [];
-  double _currentMonthRevenue = 0.0;
-  int _expiringContracts = 0;
-  int _pendingBookings = 0;
-  int _newTenants = 0;
+
   List<RecentRoom> _recentRooms = [];
 
   @override
@@ -43,10 +45,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final results = await Future.wait([
         _dashboardService.getRoomStatistics(),
         _dashboardService.getMonthlyIncome(),
-        _dashboardService.getCurrentMonthRevenue(),
-        _dashboardService.getExpiringContractsCount(),
-        _dashboardService.getPendingBookingRequestsCount(),
-        _dashboardService.getNewTenantsThisMonth(),
         _dashboardService.getRecentRooms(),
       ]);
 
@@ -54,11 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _roomStats = results[0] as RoomStatistics;
         _incomeData = results[1] as Map<String, List<double>>;
         _months = _incomeData.keys.toList();
-        _currentMonthRevenue = results[2] as double;
-        _expiringContracts = results[3] as int;
-        _pendingBookings = results[4] as int;
-        _newTenants = results[5] as int;
-        _recentRooms = results[6] as List<RecentRoom>;
+        _recentRooms = results[2] as List<RecentRoom>;
         _isLoading = false;
       });
     } catch (e) {
@@ -86,11 +80,250 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  void _showKYCRequestDialog(String currentStatus) {
+    String title = "Yêu cầu xác minh";
+    String message = "";
+    bool canRequest = false;
+    IconData icon = Icons.verified_user_rounded;
+    Color iconColor = const Color(0xFF4C6FFF);
+
+    switch (currentStatus.toUpperCase()) {
+      case 'ACTIVE':
+        message = "Bạn cần được Admin phê duyệt quyền chủ nhà trước khi thêm phòng.\n\nGửi yêu cầu ngay?";
+        canRequest = true;
+        icon = Icons.verified_user_rounded;
+        iconColor = const Color(0xFF4C6FFF);
+        break;
+      case 'PENDING':
+        title = "Đang chờ duyệt";
+        message = "Yêu cầu của bạn đang được Admin xét duyệt. Vui lòng chờ!";
+        icon = Icons.schedule_rounded;
+        iconColor = const Color(0xFFF59E0B);
+        break;
+      case 'REJECTED':
+        title = "Yêu cầu bị từ chối";
+        message = "Yêu cầu của bạn đã bị từ chối. Vui lòng liên hệ Admin để biết thêm chi tiết.";
+        icon = Icons.cancel_rounded;
+        iconColor = const Color(0xFFEF4444);
+        break;
+      case 'LOCKED':
+        title = "Tài khoản bị khóa";
+        message = "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.";
+        icon = Icons.lock_rounded;
+        iconColor = const Color(0xFFEF4444);
+        break;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFFAFBFF),
+                Color(0xFFFFFFFF),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFFE0E7FF),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [iconColor, iconColor.withOpacity(0.85)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: iconColor.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 48),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Noto Sans',
+                    color: Color(0xFF1F2937),
+                    letterSpacing: -0.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Noto Sans',
+                    color: Color(0xFF6B7280),
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFFE5E7EB),
+                            width: 1,
+                          ),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => Navigator.pop(context),
+                            borderRadius: BorderRadius.circular(12),
+                            child: const Center(
+                              child: Text(
+                                "Đóng",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Inter',
+                                  color: Color(0xFF6B7280),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (canRequest) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF4C6FFF), Color(0xFF6B8AFF)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () async {
+                                final uid = FirebaseAuth.instance.currentUser!.uid;
+                                final success = await UserController().requestOwnerPermission(uid);
+                                Navigator.pop(context);
+                                if (success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Row(
+                                        children: [
+                                          Icon(Icons.check_circle_rounded, color: Colors.white),
+                                          SizedBox(width: 8),
+                                          Text("Đã gửi yêu cầu thành công!"),
+                                        ],
+                                      ),
+                                      backgroundColor: const Color(0xFF10B981),
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Row(
+                                        children: [
+                                          Icon(Icons.error_rounded, color: Colors.white),
+                                          SizedBox(width: 8),
+                                          Text("Có lỗi xảy ra. Vui lòng thử lại!"),
+                                        ],
+                                      ),
+                                      backgroundColor: const Color(0xFFEF4444),
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: const Center(
+                                child: Text(
+                                  "Gửi Yêu Cầu",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'Inter',
+                                    color: Colors.white,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final formatter = NumberFormat('#,###', 'vi_VN');
+
 
     return Scaffold(
       body: _isLoading
@@ -202,57 +435,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       SizedBox(height: screenHeight * 0.02),
                       
-                      // Statistics Cards Grid
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StatisticCardWidget(
-                              title: 'Doanh thu tháng',
-                              value: '${formatter.format(_currentMonthRevenue / 1000000)}M',
-                              icon: Icons.attach_money_rounded,
-                              color: const Color(0xFF10B981),
-                              backgroundColor: const Color(0xFF10B981).withOpacity(0.05),
-                              subtitle: 'VNĐ',
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: StatisticCardWidget(
-                              title: 'Khách mới',
-                              value: '$_newTenants',
-                              icon: Icons.person_add_rounded,
-                              color: const Color(0xFF3B82F6),
-                              backgroundColor: const Color(0xFF3B82F6).withOpacity(0.05),
-                              subtitle: 'Trong tháng',
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StatisticCardWidget(
-                              title: 'HĐ sắp hết hạn',
-                              value: '$_expiringContracts',
-                              icon: Icons.event_busy_rounded,
-                              color: const Color(0xFFF59E0B),
-                              backgroundColor: const Color(0xFFF59E0B).withOpacity(0.05),
-                              subtitle: 'Trong 30 ngày',
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: StatisticCardWidget(
-                              title: 'Yêu cầu chờ',
-                              value: '$_pendingBookings',
-                              icon: Icons.pending_actions_rounded,
-                              color: const Color(0xFFEF4444),
-                              backgroundColor: const Color(0xFFEF4444).withOpacity(0.05),
-                              subtitle: 'Cần xử lý',
-                            ),
-                          ),
-                        ],
+                      // Quick Actions
+                      QuickActionsWidget(
+                        onAddRoom: () async {
+                          final uid = FirebaseAuth.instance.currentUser?.uid;
+                          if (uid == null) return;
+                          final result = await UserController().checkOwnerPermission(uid);
+                          if (!mounted) return;
+                          if (result['canPost'] == true) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const DetailApartmentScreen()),
+                            );
+                          } else {
+                            _showKYCRequestDialog(result['status'] ?? 'ACTIVE');
+                          }
+                        },
+                        onViewBookings: () {
+                          widget.onSwitchTab?.call(2);
+                        },
+                        onViewPosts: () {
+                          widget.onSwitchTab?.call(3);
+                        },
+                        onViewContact: () {
+                          widget.onSwitchTab?.call(4);
+                        },
                       ),
                       SizedBox(height: screenHeight * 0.02),
                       
@@ -263,35 +470,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           availableCount: _roomStats!.availableCount,
                           totalRooms: _roomStats!.totalRooms,
                         ),
-                      SizedBox(height: screenHeight * 0.02),
-                      
-                      // Quick Actions
-                      QuickActionsWidget(
-                        onAddRoom: () {
-                          // TODO: Navigate to add room screen
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Chức năng đang phát triển')),
-                          );
-                        },
-                        onViewBookings: () {
-                          // TODO: Navigate to bookings screen
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Chức năng đang phát triển')),
-                          );
-                        },
-                        onViewContracts: () {
-                          // TODO: Navigate to contracts screen
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Chức năng đang phát triển')),
-                          );
-                        },
-                        onViewReports: () {
-                          // TODO: Navigate to reports screen
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Chức năng đang phát triển')),
-                          );
-                        },
-                      ),
                       SizedBox(height: screenHeight * 0.02),
                       
                       // Monthly Income Chart
@@ -345,14 +523,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: const Text(
                 'Hủy',
                 style: TextStyle(
-                  color: Color(0xFF6B7280),
+                  color: Color(0xFF000000),
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
+                backgroundColor: const Color(0xFF4C6FFF),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -362,6 +540,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: const Text(
                 'Đăng xuất',
                 style: TextStyle(
+                  color: Color(0xFF000000),
                   fontWeight: FontWeight.w600,
                 ),
               ),

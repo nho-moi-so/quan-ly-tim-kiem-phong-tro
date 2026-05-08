@@ -31,24 +31,24 @@ class LogoWidget extends StatelessWidget {
               ),
             ),
           ),
-          // Dòng chữ bên dưới
-          Positioned(
-            left: 0,
-            top: imageSize - 14 * scale,
-            child: SizedBox(
-              width: widgetWidth,
-              child: Text(
-                'Smart rentals, simple living.',
-                style: TextStyle(
-                  color: const Color(0xFF1C421B),
-                  fontSize: textFontSize,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w200,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
+          // // Dòng chữ bên dưới
+          // Positioned(
+          //   left: 0,
+          //   top: imageSize - 14 * scale,
+          //   child: SizedBox(
+          //     width: widgetWidth,
+          //     child: Text(
+          //       'Smart rentals, simple living.',
+          //       style: TextStyle(
+          //         color: const Color(0xFF1C421B),
+          //         fontSize: textFontSize,
+          //         fontFamily: 'Inter',
+          //         fontWeight: FontWeight.w200,
+          //       ),
+          //       textAlign: TextAlign.center,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

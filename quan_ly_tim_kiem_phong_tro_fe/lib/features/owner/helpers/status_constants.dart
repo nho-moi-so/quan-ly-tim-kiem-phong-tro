@@ -56,7 +56,6 @@ class BookingRequestStatus {
   static const localized = {
     pending: "Đang chờ xác nhận",
     approved: "Đã được duyệt",
-    completed: "Hoàn thành",
     cancelled: "Đã hủy",
   };
 
