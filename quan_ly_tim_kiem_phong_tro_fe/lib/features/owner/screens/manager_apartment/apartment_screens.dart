@@ -347,6 +347,7 @@ class _MainApartmentScreenState extends State<ApartmentScreen> {
               height: screenHeight * 0.05,
               ),
               Center(child: LogoWidget()),
+              SizedBox(height: screenHeight * 0.005),
               Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

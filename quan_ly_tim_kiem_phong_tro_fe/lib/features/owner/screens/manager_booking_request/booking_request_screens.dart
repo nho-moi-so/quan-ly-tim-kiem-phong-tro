@@ -81,7 +81,7 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
               Center(
                 child: LogoWidget(),
               ),
-              SizedBox(height: screenHeight * 0.02),
+              SizedBox(height: screenHeight * 0.005),
               Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

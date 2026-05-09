@@ -6,12 +6,19 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/room_deta
 
 import '../../helpers/status_constants.dart';
 import '../../viewmodel/room_card_info.dart';
-class CardRoomWidget extends StatelessWidget {
+class CardRoomWidget extends StatefulWidget {
   final RoomCardInfo data;
 
   const CardRoomWidget({super.key, required this.data});
 
+  @override
+  State<CardRoomWidget> createState() => _CardRoomWidgetState();
+}
 
+class _CardRoomWidgetState extends State<CardRoomWidget> {
+  bool _isLoadingDetail = false;
+  bool _isLoadingPost = false;
+  bool _isLoadingContract = false;
 
   Color _getStatusColor(String status) {
     if (status.contains('Còn trống') || status.contains('Available')) {
@@ -24,6 +31,7 @@ class CardRoomWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final data = widget.data;
     final statusColor = _getStatusColor(data.status);
     
     return Container(
@@ -182,14 +190,23 @@ class CardRoomWidget extends StatelessWidget {
                         icon: Icons.visibility_rounded,
                         bgColor: const Color(0xFF4C6FFF),
                         textColor: Colors.white,
+                        isLoading: _isLoadingDetail,
                         onTap: () async {
-                          RoomDetail roomDetail = await data.onViewDetail();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => DetailApartmentScreen(roomDetail: roomDetail),
-                            ),
-                          );
+                          if (_isLoadingDetail) return;
+                          setState(() => _isLoadingDetail = true);
+                          try {
+                            RoomDetail roomDetail = await data.onViewDetail();
+                            if (mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => DetailApartmentScreen(roomDetail: roomDetail),
+                                ),
+                              );
+                            }
+                          } finally {
+                            if (mounted) setState(() => _isLoadingDetail = false);
+                          }
                         },
                       ),
                     ),
@@ -201,17 +218,26 @@ class CardRoomWidget extends StatelessWidget {
                               icon: Icons.post_add_rounded,
                               bgColor: const Color(0xFF10B981),
                               textColor: Colors.white,
+                              isLoading: _isLoadingPost,
                               onTap: () async {
-                                RoomDetail roomDetail = await data.onViewDetail();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => DetailPostScreen(
-                                      postId: "new",
-                                      apartmentId: roomDetail.roomId,
-                                    ),
-                                  ),
-                                );
+                                if (_isLoadingPost) return;
+                                setState(() => _isLoadingPost = true);
+                                try {
+                                  RoomDetail roomDetail = await data.onViewDetail();
+                                  if (mounted) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => DetailPostScreen(
+                                          postId: "new",
+                                          apartmentId: roomDetail.roomId,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                } finally {
+                                  if (mounted) setState(() => _isLoadingPost = false);
+                                }
                               },
                             )
                           : _actionButton(
@@ -219,14 +245,23 @@ class CardRoomWidget extends StatelessWidget {
                               icon: Icons.description_rounded,
                               bgColor: const Color(0xFF10B981),
                               textColor: Colors.white,
+                              isLoading: _isLoadingContract,
                               onTap: () async {
-                                String contractId = await data.onContract();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ContractDetailScreen(contractId: contractId),
-                                  ),
-                                );
+                                if (_isLoadingContract) return;
+                                setState(() => _isLoadingContract = true);
+                                try {
+                                  String contractId = await data.onContract();
+                                  if (mounted) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ContractDetailScreen(contractId: contractId),
+                                      ),
+                                    );
+                                  }
+                                } finally {
+                                  if (mounted) setState(() => _isLoadingContract = false);
+                                }
                               },
                             ),
                     ),
@@ -321,6 +356,7 @@ class CardRoomWidget extends StatelessWidget {
     required Color bgColor,
     required Color textColor,
     required VoidCallback onTap,
+    bool isLoading = false,
   }) {
     return Container(
       height: 44,
@@ -342,25 +378,36 @@ class CardRoomWidget extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap,
+          onTap: isLoading ? null : onTap,
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 18, color: textColor),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ],
+              children: isLoading
+                  ? [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: textColor,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    ]
+                  : [
+                      Icon(icon, size: 18, color: textColor),
+                      const SizedBox(width: 6),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: textColor,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
             ),
           ),
         ),

@@ -104,6 +104,11 @@ User <|-- Admin: is
 '     PENTHOUSE
 '     DUPLEX
 ' }
+class ApartmentType{
+    - id: string
+    - name: string
+    - description: string
+}
 class Apartment{
     - id: string
     - codeApartment: string
@@ -122,6 +127,7 @@ class Apartment{
 
 
 }
+Apartment "1..*" -- "1" ApartmentType: is
 ' Apartment --> ApartmentStatus
 Owner "1" -right- "0..*" Apartment: owns
 
