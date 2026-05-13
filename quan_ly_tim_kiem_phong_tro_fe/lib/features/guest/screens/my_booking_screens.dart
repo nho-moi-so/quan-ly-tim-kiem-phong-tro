@@ -14,7 +14,7 @@ class MyBookingScreens extends StatefulWidget {
 }
 
 class _MyBookingScreensState extends State<MyBookingScreens> with SingleTickerProviderStateMixin {
-  final _bookingService = BookingRequestService();
+  final _bookingService = BookingService();
 
   final _contractService = ContractService(); 
 
@@ -31,7 +31,7 @@ class _MyBookingScreensState extends State<MyBookingScreens> with SingleTickerPr
     const String currentUserId = "dYSjvUDL2vwRrSgqiDHy"; 
 
 
-    _futureBookings = _bookingService.getBookingRequestsByUser(); 
+    //_futureBookings = _bookingService.getBookingByUser(); 
     _contractStream = _contractService.getContractsByUserId(currentUserId);
   }
   

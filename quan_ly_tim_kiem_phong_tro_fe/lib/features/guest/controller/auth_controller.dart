@@ -1,16 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
 class AuthController {
-  static const bool enableImageUpload = false;
-
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-
   /// ================= REGISTER =================
   Future<Map<String, dynamic>> registerUser({
     required String username,
@@ -36,137 +30,175 @@ class AuthController {
         return {
           'success': false,
           'message': validation['message'],
+          'errorCode': 'VALIDATION_ERROR',
         };
       }
 
-      /// 2. Tạo tài khoản Firebase Authentication
-      final credential = await _auth.createUserWithEmailAndPassword(
-        email: email.trim(),
-        password: password,
-      );
+      final String? serverDomain = dotenv.env['HOST_SERVER'];
 
-      final String uid = credential.user!.uid;
+      if (serverDomain == null || serverDomain.isEmpty) {
+        throw Exception('HOST_SERVER chưa được cấu hình');
+      }
 
+      /// 2. Upload ảnh CCCD
       String? cccdFrontUrl;
       String? cccdBackUrl;
 
-      /// 3. Chỉ upload ảnh khi bật tính năng
-      if (enableImageUpload) {
-        if (cccdFront != null) {
-          cccdFrontUrl = await _uploadImage(
-            file: cccdFront,
-            path: 'users/$uid/cccd_front.jpg',
-          );
-        }
-
-        if (cccdBack != null) {
-          cccdBackUrl = await _uploadImage(
-            file: cccdBack,
-            path: 'users/$uid/cccd_back.jpg',
-          );
-        }
+      if (cccdFront != null) {
+        cccdFrontUrl = await _uploadImage(
+          serverDomain: serverDomain,
+          imageFile: cccdFront,
+        );
       }
 
-      /// 4. Lưu thông tin Firestore
-      await _firestore.collection('users').doc(uid).set({
-        'uid': uid,
-        'fullName': username.trim(),
-        'phone': phone.trim(),
-        'email': email.trim(),
-        'role': role.toUpperCase(),
-        'cccdFront': cccdFrontUrl,
-        'cccdBack': cccdBackUrl,
-        'isVerified': false,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      /// 5. Đăng xuất ngay sau khi đăng ký
-      /// để tránh Firebase tự đăng nhập
-      await _auth.signOut();
-
-      return {
-        'success': true,
-        'message': 'Đăng ký thành công',
-        'uid': uid,
-      };
-    } on FirebaseAuthException catch (e) {
-      return {
-        'success': false,
-        'message': _handleFirebaseAuthError(e),
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'Đã xảy ra lỗi: $e',
-      };
-    }
-  }
-
-  /// ================= LOGIN =================
-  Future<Map<String, dynamic>> loginUser({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      if (email.trim().isEmpty || password.isEmpty) {
-        return {
-          'success': false,
-          'message': 'Vui lòng nhập đầy đủ thông tin',
-        };
+      if (cccdBack != null) {
+        cccdBackUrl = await _uploadImage(
+          serverDomain: serverDomain,
+          imageFile: cccdBack,
+        );
       }
 
-      final credential = await _auth.signInWithEmailAndPassword(
-        email: email.trim(),
-        password: password,
+      /// 3. Gọi API đăng ký
+      final uri = Uri.parse('$serverDomain/api/users');
+
+      final body = {
+        "balance": 0,
+        "cccd": "Chưa cập nhật",
+        "email": email.trim(),
+        "fullName": username.trim(),
+        "password": password,
+        "phone": phone.trim(),
+        "role": role.toUpperCase(),
+        "status": "ACTIVE",
+        "cccdFront": cccdFrontUrl,
+        "cccdBack": cccdBackUrl,
+      };
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
       );
 
-      final uid = credential.user!.uid;
+      final jsonResponse = jsonDecode(response.body);
 
-      final userDoc =
-          await _firestore.collection('users').doc(uid).get();
-
-      if (!userDoc.exists) {
+      if (jsonResponse['status'] == 'success') {
         return {
-          'success': false,
-          'message': 'Không tìm thấy thông tin người dùng',
+          'success': true,
+          'message':
+              jsonResponse['message'] ?? 'Đăng ký thành công',
+          'data': jsonResponse['data'],
         };
       }
 
       return {
-        'success': true,
-        'message': 'Đăng nhập thành công',
-        'user': userDoc.data(),
-      };
-    } on FirebaseAuthException catch (e) {
-      return {
         'success': false,
-        'message': _handleLoginError(e),
+        'message':
+            jsonResponse['message'] ?? 'Đăng ký thất bại',
+        'errorCode': 'REGISTER_FAILED',
       };
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Đã xảy ra lỗi: $e',
-      };
+      return _handleRegistrationError(e);
     }
   }
+  Future<Map<String, dynamic>> loginUser({
+  required String email,
+  required String password,
+}) async {
+  try {
+    final String? serverDomain = dotenv.env['HOST_SERVER'];
 
-  /// ================= LOGOUT =================
-  Future<void> logout() async {
-    await _auth.signOut();
+    if (serverDomain == null || serverDomain.isEmpty) {
+      throw Exception('HOST_SERVER chưa được cấu hình');
+    }
+
+    final uri = Uri.parse('$serverDomain/api/auth/login');
+
+    final response = await http.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'email': email.trim(),
+        'password': password,
+      }),
+    );
+
+    final jsonResponse = jsonDecode(response.body);
+
+    if (response.statusCode == 200 &&
+        jsonResponse['status'] == 'success') {
+      return {
+        'success': true,
+        'message':
+            jsonResponse['message'] ?? 'Đăng nhập thành công',
+        'data': jsonResponse['data'],
+      };
+    }
+
+    return {
+      'success': false,
+      'message':
+          jsonResponse['message'] ?? 'Đăng nhập thất bại',
+      'errorCode': 'LOGIN_FAILED',
+    };
+  } catch (e) {
+    return {
+      'success': false,
+      'message': e.toString(),
+      'errorCode': 'LOGIN_ERROR',
+    };
   }
+}
 
   /// ================= UPLOAD IMAGE =================
   Future<String> _uploadImage({
-    required File file,
-    required String path,
+    required String serverDomain,
+    required File imageFile,
   }) async {
-    final ref = _storage.ref().child(path);
-    final uploadTask = await ref.putFile(file);
-    return await uploadTask.ref.getDownloadURL();
+    final uri = Uri.parse(
+      '$serverDomain/api/util/upload',
+    );
+
+    final request = http.MultipartRequest(
+      'POST',
+      uri,
+    );
+
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'file',
+        imageFile.path,
+      ),
+    );
+
+    final streamedResponse = await request.send();
+    final response =
+        await http.Response.fromStream(
+      streamedResponse,
+    );
+
+    if (response.statusCode == 200 ||
+        response.statusCode == 201) {
+      final jsonResponse =
+          jsonDecode(response.body);
+
+      if (jsonResponse['status'] == 'success') {
+        return jsonResponse['data']['url'];
+      }
+    }
+
+    throw Exception(
+      'Upload ảnh thất bại: ${response.body}',
+    );
   }
 
   /// ================= VALIDATE =================
-  Map<String, dynamic> _validateRegistrationInputs({
+  Map<String, dynamic>
+      _validateRegistrationInputs({
     required String username,
     required String phone,
     required String email,
@@ -211,23 +243,28 @@ class AuthController {
     if (password.length < 6) {
       return {
         'isValid': false,
-        'message': 'Mật khẩu phải có ít nhất 6 ký tự',
+        'message':
+            'Mật khẩu phải có ít nhất 6 ký tự',
       };
     }
 
     if (password != confirmPassword) {
       return {
         'isValid': false,
-        'message': 'Mật khẩu xác nhận không khớp',
+        'message':
+            'Mật khẩu xác nhận không khớp',
       };
     }
 
-    return {'isValid': true};
+    return {
+      'isValid': true,
+    };
   }
 
   bool _isValidEmail(String email) {
-    final regex =
-        RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$');
+    final regex = RegExp(
+      r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$',
+    );
     return regex.hasMatch(email);
   }
 
@@ -236,38 +273,15 @@ class AuthController {
     return regex.hasMatch(phone);
   }
 
-  /// ================= REGISTER ERROR =================
-  String _handleFirebaseAuthError(
-      FirebaseAuthException e) {
-    switch (e.code) {
-      case 'email-already-in-use':
-        return 'Email đã được sử dụng';
-      case 'invalid-email':
-        return 'Email không hợp lệ';
-      case 'weak-password':
-        return 'Mật khẩu quá yếu';
-      case 'network-request-failed':
-        return 'Lỗi kết nối mạng';
-      default:
-        return e.message ?? 'Đăng ký thất bại';
-    }
-  }
-
-  /// ================= LOGIN ERROR =================
-  String _handleLoginError(
-      FirebaseAuthException e) {
-    switch (e.code) {
-      case 'user-not-found':
-        return 'Email chưa được đăng ký';
-      case 'wrong-password':
-      case 'invalid-credential':
-        return 'Mật khẩu không chính xác';
-      case 'invalid-email':
-        return 'Email không hợp lệ';
-      case 'network-request-failed':
-        return 'Lỗi kết nối mạng';
-      default:
-        return e.message ?? 'Đăng nhập thất bại';
-    }
+  /// ================= ERROR HANDLER =================
+  Map<String, dynamic>
+      _handleRegistrationError(
+    dynamic error,
+  ) {
+    return {
+      'success': false,
+      'message': error.toString(),
+      'errorCode': 'REGISTER_ERROR',
+    };
   }
 }

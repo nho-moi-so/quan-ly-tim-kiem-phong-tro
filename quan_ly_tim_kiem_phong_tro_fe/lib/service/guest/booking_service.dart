@@ -1,32 +1,88 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../model/booking_request.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/controller/booking_controller.dart';
 
-class BookingRequestService {
-  final CollectionReference _bookingCollection = FirebaseFirestore.instance
-      .collection('bookingRequest');
+class BookingService {
+  final BookingController _bookingController =
+      BookingController();
 
-  Future<List<BookingRequest>> getBookingRequestsByUser() async {
-  final String testUserId = 'Bq4Z9yMPYQzpFP1WkksN'; // Test thủ công
+  final FirebaseFirestore _firestore =
+      FirebaseFirestore.instance;
 
-  try {
-    final snapshot = await _bookingCollection
-        .where('UserId', isEqualTo: testUserId)
-        .get();
+  final FirebaseAuth _auth =
+      FirebaseAuth.instance;
 
-    print("Đang lấy lịch sử đặt phòng cho UserId: $testUserId");
-    print("Tìm thấy ${snapshot.docs.length} kết quả");
+  /// ================= CREATE BOOKING =================
+  Future<Map<String, dynamic>> createBooking({
+    required String apartmentId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      final user = _auth.currentUser;
 
-    final list = snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>; // Ép kiểu ở đây
-      return BookingRequest.fromFirestore(doc.id, data);
-    }).toList();
+      if (user == null) {
+        return {
+          'success': false,
+          'message': 'Người dùng chưa đăng nhập',
+          'errorCode': 'UNAUTHORIZED',
+        };
+      }
 
-    return list;
-  } catch (e) {
-    print("Lỗi khi lấy booking: $e");
-    return [];
+      /// 1. Gọi API Blockchain
+      final apiResult =
+          await _bookingController.createBooking(
+        apartmentId: apartmentId,
+        startDate: startDate,
+        endDate: endDate,
+        userId: user.uid,
+      );
+
+      if (!apiResult['success']) {
+        return apiResult;
+      }
+
+      final bookingData = apiResult['data'];
+
+      /// 2. Lưu Firebase
+      final bookingRef = _firestore
+          .collection('bookings')
+          .doc();
+
+      await bookingRef.set({
+        'id': bookingRef.id,
+        'apartmentId': apartmentId,
+        'tenantId': user.uid,
+        'blockchainBookingId':
+            bookingData['Id'],
+        'escrowAmount':
+            bookingData['EscrowAmount'],
+        'fabricStatus':
+            bookingData['Status'],
+        'startDate':
+            Timestamp.fromDate(startDate),
+        'endDate':
+            Timestamp.fromDate(endDate),
+        'status': 'PENDING',
+        'createdAt':
+            FieldValue.serverTimestamp(),
+        'updatedAt':
+            FieldValue.serverTimestamp(),
+        'source': 'BLOCKCHAIN',
+      });
+
+      return {
+        'success': true,
+        'message': 'Đặt phòng thành công',
+        'bookingId': bookingRef.id,
+        'blockchainData': bookingData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+        'errorCode': 'BOOKING_SERVICE_ERROR',
+      };
+    }
   }
-}
-
 }

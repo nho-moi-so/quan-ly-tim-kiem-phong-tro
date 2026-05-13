@@ -2,9 +2,10 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class VNPayService {
-  final FirebaseFunctions _functions = FirebaseFunctions.instance;
+  final FirebaseFunctions _functions =
+      FirebaseFunctions.instance;
 
-  Future<void> pay({
+  Future<bool> pay({
     required int amount,
     required String orderInfo,
   }) async {
@@ -16,14 +17,19 @@ class VNPayService {
         'orderInfo': orderInfo,
       });
 
-      final paymentUrl = result.data['paymentUrl'];
+      final paymentUrl =
+          result.data['paymentUrl'];
 
       if (paymentUrl != null) {
         await launchUrl(
           Uri.parse(paymentUrl),
           mode: LaunchMode.externalApplication,
         );
+
+        return true;
       }
+
+      return false;
     } catch (e) {
       throw Exception('Lỗi VNPay: $e');
     }

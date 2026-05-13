@@ -6,9 +6,11 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/signup_emai
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/welcome_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/view_contract_screens.dart';
 import 'firebase_options.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -31,10 +33,10 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      initialRoute: '/home',
+      initialRoute: '/welcomescreen',
 
       routes: {
-        '/welcomscreen': (context) => const WelcomeScreen(),
+        '/welcomescreen': (context) => const WelcomeScreen(),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpEmailScreen(),
         '/home': (context) => const HomePageScreen(),

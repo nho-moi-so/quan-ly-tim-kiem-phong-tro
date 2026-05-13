@@ -65,44 +65,72 @@ class _TotalState extends State<Total> {
 
   Future<void> _handleBooking() async {
     try {
-      if (_selectedPayment == PaymentMethod.vnpay) {
-        await VNPayService().pay(
-          amount: widget.totalAmount.toInt(),
-          orderInfo:
-              'Thanh toán căn hộ ${widget.apartment.ApartmentID ?? ''}',
-        );
+      /// CHECK POLICY
+      if (!_isPolicyAccepted) {
         return;
       }
 
-      await FirebaseFirestore.instance.collection('contract').add({
-        'UserID': 'dYSjvUDL2vwRrSgqiDHy',
-        'ApartmentId': widget.apartment.ApartmentID ?? 'unknown',
-        'StartDate': widget.criteria?.checkIn?.toIso8601String(),
-        'EndDate': widget.criteria?.checkOut?.toIso8601String(),
-        'Total': widget.totalAmount,
-        'PaymentMethod': _selectedPayment.name,
-        'Status': 'Pending',
-        'CreatedDate': FieldValue.serverTimestamp(),
-        'UpdateDate': DateTime.now(),
-      });
+      /// ================= VNPAY =================
+      if (_selectedPayment == PaymentMethod.vnpay) {
+        final success = await VNPayService().pay(
+          amount: widget.totalAmount.toInt(),
+
+          orderInfo: 'Thanh toán căn hộ ${widget.apartment.ApartmentID}',
+        );
+
+        if (success) {
+          /// Lưu booking
+          await _saveBooking();
+
+          if (!mounted) return;
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
+          );
+        }
+
+        return;
+      }
+
+      /// ================= PAYMENT KHÁC =================
+      await _saveBooking();
 
       if (!mounted) return;
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const BookingSuccessScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
       );
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lỗi khi đặt phòng: $e'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi khi đặt phòng: $e')));
     }
+  }
+
+  Future<void> _saveBooking() async {
+    await FirebaseFirestore.instance.collection('contract').add({
+      'UserID': 'dYSjvUDL2vwRrSgqiDHy',
+
+      'ApartmentId': widget.apartment.ApartmentID ?? 'unknown',
+
+      'StartDate': widget.criteria?.checkIn?.toIso8601String(),
+
+      'EndDate': widget.criteria?.checkOut?.toIso8601String(),
+
+      'Total': widget.totalAmount,
+
+      'PaymentMethod': _selectedPayment.name,
+
+      'Status': 'Paid',
+
+      'CreatedDate': FieldValue.serverTimestamp(),
+
+      'UpdateDate': DateTime.now(),
+    });
   }
 
   @override
@@ -111,15 +139,16 @@ class _TotalState extends State<Total> {
     final checkIn = widget.criteria?.checkIn;
     final checkOut = widget.criteria?.checkOut;
 
-    int soNgayO = widget.soNgayO ??
+    int soNgayO =
+        widget.soNgayO ??
         ((checkIn != null && checkOut != null)
             ? checkOut.difference(checkIn).inDays
             : 1);
 
     if (soNgayO <= 0) soNgayO = 1;
 
-    final tongTien = widget.tongTien ??
-        ((widget.apartment.DailyRate ?? 0) * soNgayO);
+    final tongTien =
+        widget.tongTien ?? ((widget.apartment.DailyRate ?? 0) * soNgayO);
 
     return Container(
       width: width,
@@ -135,10 +164,7 @@ class _TotalState extends State<Total> {
         children: [
           const Text(
             "Chi tiết đặt phòng",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
@@ -156,10 +182,7 @@ class _TotalState extends State<Total> {
           const SizedBox(height: 8),
 
           _buildRow("Số ngày ở:", "$soNgayO ngày"),
-          _buildRow(
-            "Giá mỗi ngày:",
-            "${widget.apartment.DailyRate ?? 0} đ",
-          ),
+          _buildRow("Giá mỗi ngày:", "${widget.apartment.DailyRate ?? 0} đ"),
 
           const Divider(),
 
@@ -218,25 +241,18 @@ class _TotalState extends State<Total> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isPolicyAccepted
-                  ? _handleBooking
-                  : null,
+              onPressed: _isPolicyAccepted ? _handleBooking : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _isPolicyAccepted
                     ? Colors.blue
                     : Colors.grey.shade400,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               child: Text(
                 _selectedPayment == PaymentMethod.vnpay
                     ? 'Thanh toán VNPay'
                     : 'Đặt phòng',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
           ),
@@ -254,16 +270,13 @@ class _TotalState extends State<Total> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label),
           Text(
             value,
             style: TextStyle(
-              fontWeight: isBold
-                  ? FontWeight.bold
-                  : FontWeight.normal,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               color: valueColor,
             ),
           ),
