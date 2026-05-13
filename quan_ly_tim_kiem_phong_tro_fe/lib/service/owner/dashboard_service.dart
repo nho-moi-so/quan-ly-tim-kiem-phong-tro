@@ -8,6 +8,13 @@ class DashboardService {
   // Lấy ID của owner hiện tại
   String? get currentUserId => _auth.currentUser?.uid;
 
+  DateTime? _parseDateTime(dynamic val) {
+    if (val == null) return null;
+    if (val is Timestamp) return val.toDate();
+    if (val is String) return DateTime.tryParse(val);
+    return null;
+  }
+
   /// Lấy thống kê tổng quan về phòng
   Future<RoomStatistics> getRoomStatistics() async {
     try {
@@ -18,7 +25,7 @@ class DashboardService {
 
       // Lấy tất cả phòng của owner
       final apartmentsSnapshot = await _firestore
-          .collection('Apartments')
+          .collection('apartment')
           .where('UserID', isEqualTo: userId)
           .get();
 
@@ -39,17 +46,16 @@ class DashboardService {
           );
 
           final contractsSnapshot = await _firestore
-              .collection('Contracts')
+              .collection('contract')
               .where('ApartmentId', whereIn: batchIds)
+              .where('Status', isEqualTo: 'Pending')
               .get();
 
           for (var contract in contractsSnapshot.docs) {
             final data = contract.data();
-            if (data['EndDate'] != null) {
-              final endDate = (data['EndDate'] as Timestamp).toDate();
-              if (endDate.isAfter(DateTime.now())) {
-                rentedApartmentIds.add(data['ApartmentId']);
-              }
+            final endDate = _parseDateTime(data['EndDate']);
+            if (endDate != null && endDate.isAfter(DateTime.now())) {
+              rentedApartmentIds.add(data['ApartmentId']);
             }
           }
         }
@@ -80,8 +86,8 @@ class DashboardService {
     }
   }
 
-  /// Lấy doanh thu theo tháng (3 tháng gần nhất)
-  Future<Map<String, List<double>>> getMonthlyIncome() async {
+  /// Lấy doanh thu theo năm (nhóm theo 12 tháng)
+  Future<Map<String, List<double>>> getYearlyIncome() async {
     try {
       final userId = currentUserId;
       if (userId == null) {
@@ -90,29 +96,29 @@ class DashboardService {
 
       // Lấy tất cả phòng của owner
       final apartmentsSnapshot = await _firestore
-          .collection('Apartments')
+          .collection('apartment')
           .where('UserID', isEqualTo: userId)
           .get();
 
       List<String> apartmentIds = apartmentsSnapshot.docs.map((doc) => doc.id).toList();
 
-      if (apartmentIds.isEmpty) {
-        return {
-          'Tháng 1': List.filled(30, 0.0),
-          'Tháng 2': List.filled(30, 0.0),
-          'Tháng 3': List.filled(30, 0.0),
-        };
-      }
+      print("--1--${apartmentIds}");
 
-      // Lấy invoices của 3 tháng gần nhất
-      DateTime now = DateTime.now();
-      DateTime threeMonthsAgo = DateTime(now.year, now.month - 2, 1);
+      final DateTime now = DateTime.now();
+      // 3 năm gần nhất
+      final List<int> years = [now.year - 2, now.year - 1, now.year];
 
       Map<String, List<double>> incomeData = {
-        'Tháng ${now.month - 2}': List.filled(30, 0.0),
-        'Tháng ${now.month - 1}': List.filled(30, 0.0),
-        'Tháng ${now.month}': List.filled(30, 0.0),
+        'Năm ${years[0]}': List.filled(12, 0.0),
+        'Năm ${years[1]}': List.filled(12, 0.0),
+        'Năm ${years[2]}': List.filled(12, 0.0),
       };
+
+      if (apartmentIds.isEmpty) {
+        return incomeData;
+      }
+
+      final DateTime startDate = DateTime(years[0], 1, 1);
 
       // Chia apartmentIds thành các batch nhỏ (Firestore giới hạn whereIn = 10)
       for (int i = 0; i < apartmentIds.length; i += 10) {
@@ -120,27 +126,23 @@ class DashboardService {
           i,
           i + 10 > apartmentIds.length ? apartmentIds.length : i + 10,
         );
-
         final invoicesSnapshot = await _firestore
-            .collection('Invoices')
+            .collection('invoice')
             .where('ApartmentId', whereIn: batchIds)
-            .where('Status', isEqualTo: 'Đã thanh toán')
-            .where('PaymentDate', isGreaterThanOrEqualTo: Timestamp.fromDate(threeMonthsAgo))
+            .where('Status', isEqualTo: 'PAID')
             .get();
+
 
         for (var invoice in invoicesSnapshot.docs) {
           final data = invoice.data();
-          final paymentDate = (data['PaymentDate'] as Timestamp).toDate();
-          final amount = (data['Total'] as num?)?.toDouble() ?? 0.0;
-
-          // Tính tháng tương ứng
-          int monthDiff = (paymentDate.year - now.year) * 12 + (paymentDate.month - now.month);
-          String monthKey = 'Tháng ${paymentDate.month}';
-
-          if (incomeData.containsKey(monthKey)) {
-            int dayIndex = paymentDate.day - 1;
-            if (dayIndex >= 0 && dayIndex < 30) {
-              incomeData[monthKey]![dayIndex] += amount / 1000000; // Chuyển về triệu đồng
+          final paymentDate = _parseDateTime(data['IssueDate']);
+          if (paymentDate == null) continue;
+          final amount = (data['TotalAmount'] as num?)?.toDouble() ?? 0.0;
+          final String yearKey = 'Năm ${paymentDate.year}';
+          if (incomeData.containsKey(yearKey)) {
+            final monthIndex = paymentDate.month - 1; // 0 to 11
+            if (monthIndex >= 0 && monthIndex < 12) {
+              incomeData[yearKey]![monthIndex] += amount / 1000000; // triệu đồng
             }
           }
         }
@@ -148,15 +150,14 @@ class DashboardService {
 
       return incomeData;
     } catch (e) {
-      print('Error getting monthly income: $e');
-      // Trả về dữ liệu mặc định nếu có lỗi
+      print('Error getting yearly income: $e');
+      final now = DateTime.now();
       return {
-        'Tháng 1': List.filled(30, 0.0),
-        'Tháng 2': List.filled(30, 0.0),
-        'Tháng 3': List.filled(30, 0.0),
+        'Năm ${now.year}': List.filled(12, 0.0),
       };
     }
   }
+
 
   /// Lấy tổng doanh thu trong tháng hiện tại
   Future<double> getCurrentMonthRevenue() async {
@@ -329,9 +330,7 @@ class DashboardService {
           status: data['Status'] ?? '',
           dailyRate: (data['DailyRate'] as num?)?.toDouble() ?? 0.0,
           pathImage: List<String>.from(data['PathImage'] ?? []),
-          createdDate: data['CreatedDate'] != null 
-              ? (data['CreatedDate'] as Timestamp).toDate()
-              : DateTime.now(),
+          createdDate: _parseDateTime(data['CreatedDate']) ?? DateTime.now(),
         ));
       }
 

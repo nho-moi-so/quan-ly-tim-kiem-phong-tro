@@ -44,14 +44,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Load all data in parallel
       final results = await Future.wait([
         _dashboardService.getRoomStatistics(),
-        _dashboardService.getMonthlyIncome(),
+        _dashboardService.getYearlyIncome(),
         _dashboardService.getRecentRooms(),
       ]);
 
       setState(() {
         _roomStats = results[0] as RoomStatistics;
         _incomeData = results[1] as Map<String, List<double>>;
-        _months = _incomeData.keys.toList();
+        _months = _incomeData.keys.toList(); // Note: keys are now years 'Năm 2026'
         _recentRooms = results[2] as List<RecentRoom>;
         _isLoading = false;
       });
