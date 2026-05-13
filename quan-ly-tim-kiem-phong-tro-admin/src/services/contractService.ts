@@ -2,6 +2,7 @@ import { createFabricClient } from "@/lib/fabric/fabricClient";
 import { ApartmentRepository } from "@/repositories/apartmentRepository";
 import { BlockchainFabricRepository } from "@/repositories/blockchainFabricRepository";
 import { ContractRepository } from "@/repositories/contractRepository";
+import { InvoiceRepository } from "@/repositories/invoiceRepository";
 import { UserRepository } from "@/repositories/userRepository";
 import { WalletBlockchainRepository } from "@/repositories/walletBlockchainRepository";
 import { X509Identity } from "fabric-network";
@@ -62,6 +63,14 @@ export const ContractService = {
             Status: "CREATED",
         });
         
+        const invoiceData = await InvoiceRepository.create({
+            ContractId: contractData.Id,
+            IssueDate: admin.firestore.Timestamp.now(),
+            TotalAmount: escrowAmount,
+            Status: "PAID",
+            ApartmentId: data.apartmentId,
+        });
+        await ContractRepository.update(contractData.Id, { InvoiceId: invoiceData.Id });
         
         //tao du lieu tren blockchain
         try{
