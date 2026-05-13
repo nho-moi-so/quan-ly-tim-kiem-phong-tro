@@ -35,7 +35,7 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
     if (unionMonths.isNotEmpty) {
       availableMonths = unionMonths;
     } else {
-      availableMonths = ['Tháng 6'];
+      availableMonths = ['Năm ${DateTime.now().year}'];
     }
 
     // Chọn tháng ban đầu theo thứ tự ưu tiên:
@@ -65,16 +65,18 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
   @override
   Widget build(BuildContext context) {
   // Lấy dữ liệu; đảm bảo luôn có ít nhất một điểm để fl_chart không lỗi
-  var dailyIncome = widget.incomeData[selectedMonth] ?? [];
-  if (dailyIncome.isEmpty) {
-    dailyIncome = [0.0];
+  var monthlyIncome = widget.incomeData[selectedMonth] ?? [];
+  if (monthlyIncome.isEmpty) {
+    monthlyIncome = List.filled(12, 0.0);
   }
 
-  final maxIncome = dailyIncome.isNotEmpty
-    ? dailyIncome.reduce((a, b) => a > b ? a : b)
-    : 100.0;
-  final avgIncome = dailyIncome.isNotEmpty
-    ? dailyIncome.reduce((a, b) => a + b) / dailyIncome.length
+  final maxIncome = monthlyIncome.isNotEmpty
+    ? monthlyIncome.reduce((a, b) => a > b ? a : b)
+    : 0.0;
+  // Tính trung bình chỉ trên các tháng có dữ liệu > 0
+  final nonZeroMonths = monthlyIncome.where((v) => v > 0).toList();
+  final avgIncome = nonZeroMonths.isNotEmpty
+    ? nonZeroMonths.reduce((a, b) => a + b) / nonZeroMonths.length
     : 0.0;
 
     return Container(
@@ -112,7 +114,7 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Thu Nhập Hàng Tháng',
+                    'Thu Nhập Hàng Năm',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -123,7 +125,7 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Trung bình: ${avgIncome.toStringAsFixed(0)} triệu',
+                    'Trung bình tháng: ${avgIncome == 0 ? '0' : avgIncome < 10 ? avgIncome.toStringAsFixed(1) : avgIncome.toStringAsFixed(0)} triệu',
                     style: TextStyle(
                       fontSize: 13,
                       fontFamily: 'Noto Sans',
@@ -173,15 +175,28 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
           // Chart
           SizedBox(
             height: 220,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: (maxIncome * 1.2).ceilToDouble(),
+            child: LineChart(
+              LineChartData(
+                minX: 1,
+                maxX: 12,
                 minY: 0,
+                maxY: maxIncome == 0 ? 5 : (maxIncome * 1.2).ceilToDouble(),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: List.generate(
+                      12,
+                      (index) => FlSpot((index + 1).toDouble(), monthlyIncome.length > index ? monthlyIncome[index] : 0.0),
+                    ),
+                    isCurved: true,
+                    color: const Color(0xFF4C6FFF),
+                    barWidth: 4,
+                    dotData: const FlDotData(show: true),
+                  ),
+                ],
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  horizontalInterval: 50,
+                  horizontalInterval: maxIncome == 0 ? 1 : ((maxIncome * 1.2) / 4).clamp(0.5, double.infinity),
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
                       color: const Color(0xFFE3E8EF),
@@ -193,21 +208,17 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
                 titlesData: FlTitlesData(
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
-                      interval: 5,
+                      interval: 1,
                       showTitles: true,
                       reservedSize: 32,
                       getTitlesWidget: (value, meta) {
-                        if (value == 0 || value > dailyIncome.length) {
-                          return const SizedBox();
-                        }
-                        // Chỉ hiển thị các ngày 5, 10, 15, 20, 25, 30
-                        if (value % 5 != 0) {
+                        if (value == 0 || value > 12) {
                           return const SizedBox();
                         }
                         return Padding(
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
-                            '${value.toInt()}',
+                            'T${value.toInt()}',
                             style: TextStyle(
                               fontSize: 11,
                               fontFamily: 'Noto Sans',
@@ -221,14 +232,20 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
                   ),
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
-                      interval: 50,
+                      interval: maxIncome == 0 ? 1 : ((maxIncome * 1.2) / 4).clamp(0.5, double.infinity),
                       showTitles: true,
-                      reservedSize: 42,
+                      reservedSize: 48,
                       getTitlesWidget: (value, _) {
+                        // Hiển thị với 1 chữ số thập phân nếu giá trị nhỏ hơn 10
+                        final label = value == 0
+                            ? '0'
+                            : value < 10
+                                ? value.toStringAsFixed(1)
+                                : value.toInt().toString();
                         return Padding(
                           padding: const EdgeInsets.only(right: 8.0),
                           child: Text(
-                            '${value.toInt()}',
+                            label,
                             style: TextStyle(
                               fontSize: 11,
                               fontFamily: 'Noto Sans',
@@ -250,48 +267,24 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
                     left: BorderSide(color: const Color(0xFFE3E8EF), width: 1),
                   ),
                 ),
-                barGroups: List.generate(
-                  dailyIncome.length,
-                  (index) => BarChartGroupData(
-                    x: index + 1,
-                    barRods: [
-                      BarChartRodData(
-                        toY: dailyIncome[index],
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF4C6FFF), Color(0xFF7C3AED)],
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                        ),
-                        width: 8,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(4),
-                          topRight: Radius.circular(4),
-                        ),
-                        backDrawRodData: BackgroundBarChartRodData(
-                          show: true,
-                          toY: (maxIncome * 1.2).ceilToDouble(),
-                          color: const Color(0xFFE3E8EF).withOpacity(0.3),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                barTouchData: BarTouchData(
+                lineTouchData: LineTouchData(
                   enabled: true,
-                  touchTooltipData: BarTouchTooltipData(
+                  touchTooltipData: LineTouchTooltipData(
                     tooltipBgColor: const Color(0xFF1A1F36),
                     tooltipRoundedRadius: 8,
                     tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      return BarTooltipItem(
-                        'Ngày ${group.x}\n${rod.toY.toStringAsFixed(1)} triệu',
-                        const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                          fontFamily: 'Noto Sans',
-                        ),
-                      );
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((LineBarSpot touchedSpot) {
+                        return LineTooltipItem(
+                          'Tháng ${touchedSpot.x.toInt()}\n${touchedSpot.y.toStringAsFixed(1)} triệu',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            fontFamily: 'Noto Sans',
+                          ),
+                        );
+                      }).toList();
                     },
                   ),
                 ),

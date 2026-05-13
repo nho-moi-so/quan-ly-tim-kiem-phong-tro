@@ -311,16 +311,20 @@ class _RoomStatusRatioWidgetState extends State<RoomStatusRatioWidget> {
                   height: 1,
                 ),
               ),
-              const SizedBox(width: 6),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 2),
-                child: Text(
-                  '($count phòng)',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontFamily: 'Noto Sans',
-                    color: color.withOpacity(0.7),
-                    fontWeight: FontWeight.w500,
+              const SizedBox(width: 4),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 2),
+                  child: Text(
+                    '($count phòng)',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontFamily: 'Noto Sans',
+                      color: color.withOpacity(0.7),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
