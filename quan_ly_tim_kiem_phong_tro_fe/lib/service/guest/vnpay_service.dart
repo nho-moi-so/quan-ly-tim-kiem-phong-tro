@@ -1,32 +1,44 @@
-import 'package:cloud_functions/cloud_functions.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
 class VNPayService {
-  final FirebaseFunctions _functions =
-      FirebaseFunctions.instance;
-
   Future<bool> pay({
+    required String bookingId,
     required int amount,
     required String orderInfo,
   }) async {
     try {
-      final result = await _functions
-          .httpsCallable('createVNPayUrl')
-          .call({
-        'amount': amount,
-        'orderInfo': orderInfo,
-      });
+      final response = await http.post(
+        Uri.parse(
+          'https://us-central1-management-seeking-apartment.cloudfunctions.net/createVNPayUrl',
+        ),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'bookingId': bookingId,
+          'amount': amount,
+          'orderInfo': orderInfo,
+        }),
+      );
 
-      final paymentUrl =
-          result.data['paymentUrl'];
+      final jsonResponse = jsonDecode(response.body);
 
-      if (paymentUrl != null) {
-        await launchUrl(
-          Uri.parse(paymentUrl),
-          mode: LaunchMode.externalApplication,
-        );
+      if (response.statusCode == 200 &&
+          jsonResponse['success'] == true) {
+        final paymentUrl =
+            jsonResponse['paymentUrl'];
 
-        return true;
+        if (paymentUrl != null) {
+          await launchUrl(
+            Uri.parse(paymentUrl),
+            mode: LaunchMode.externalApplication,
+          );
+
+          return true;
+        }
       }
 
       return false;

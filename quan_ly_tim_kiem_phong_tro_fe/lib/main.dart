@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      initialRoute: '/welcomescreen',
+      initialRoute: '/home',
 
       routes: {
         '/welcomescreen': (context) => const WelcomeScreen(),

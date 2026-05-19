@@ -3,20 +3,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/controller/booking_controller.dart';
 
 class BookingService {
-  final BookingController _bookingController =
-      BookingController();
+  final BookingController _bookingController = BookingController();
 
-  final FirebaseFirestore _firestore =
-      FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  final FirebaseAuth _auth =
-      FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   /// ================= CREATE BOOKING =================
   Future<Map<String, dynamic>> createBooking({
     required String apartmentId,
     required DateTime startDate,
     required DateTime endDate,
+    required double amount,
+    required String paymentMethod,
   }) async {
     try {
       final user = _auth.currentUser;
@@ -30,12 +29,15 @@ class BookingService {
       }
 
       /// 1. Gọi API Blockchain
-      final apiResult =
-          await _bookingController.createBooking(
+      final apiResult = await _bookingController.createBooking(
         apartmentId: apartmentId,
         startDate: startDate,
         endDate: endDate,
         userId: user.uid,
+
+        paymentMethod: paymentMethod,
+
+        amount: amount,
       );
 
       if (!apiResult['success']) {
@@ -45,29 +47,20 @@ class BookingService {
       final bookingData = apiResult['data'];
 
       /// 2. Lưu Firebase
-      final bookingRef = _firestore
-          .collection('bookings')
-          .doc();
+      final bookingRef = _firestore.collection('bookings').doc();
 
       await bookingRef.set({
         'id': bookingRef.id,
         'apartmentId': apartmentId,
         'tenantId': user.uid,
-        'blockchainBookingId':
-            bookingData['Id'],
-        'escrowAmount':
-            bookingData['EscrowAmount'],
-        'fabricStatus':
-            bookingData['Status'],
-        'startDate':
-            Timestamp.fromDate(startDate),
-        'endDate':
-            Timestamp.fromDate(endDate),
+        'blockchainBookingId': bookingData['Id'],
+        'escrowAmount': bookingData['EscrowAmount'],
+        'fabricStatus': bookingData['Status'],
+        'startDate': Timestamp.fromDate(startDate),
+        'endDate': Timestamp.fromDate(endDate),
         'status': 'PENDING',
-        'createdAt':
-            FieldValue.serverTimestamp(),
-        'updatedAt':
-            FieldValue.serverTimestamp(),
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
         'source': 'BLOCKCHAIN',
       });
 

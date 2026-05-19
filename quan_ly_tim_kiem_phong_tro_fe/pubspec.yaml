@@ -82,6 +82,7 @@ flutter:
     - assets/images/tro1-2.png
     - assets/images/tro1-3.png
     - assets/images/vnpay.jpg
+    - assets/images/MoMo.png
     - .env
   # To add assets to your application, add an assets section, like this:
   # assets:

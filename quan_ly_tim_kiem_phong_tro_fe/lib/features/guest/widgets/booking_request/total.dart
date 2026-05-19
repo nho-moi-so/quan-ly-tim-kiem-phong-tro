@@ -3,8 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/search_criteria.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/booking_success_screen.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/thanhtoan_vnpay.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/vnpay_service.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/momo_service.dart';
+
+enum PaymentMethod {
+  vnpay,
+  momo,
+  cash,
+}
 
 class Total extends StatefulWidget {
   final Apartment apartment;
@@ -12,6 +18,7 @@ class Total extends StatefulWidget {
   final int? soNgayO;
   final double? tongTien;
   final double totalAmount;
+  final String? bookingId;
 
   const Total({
     super.key,
@@ -20,6 +27,7 @@ class Total extends StatefulWidget {
     this.soNgayO,
     this.tongTien,
     required this.totalAmount,
+    this.bookingId,
   });
 
   @override
@@ -28,6 +36,7 @@ class Total extends StatefulWidget {
 
 class _TotalState extends State<Total> {
   bool _isPolicyAccepted = false;
+
   PaymentMethod _selectedPayment = PaymentMethod.vnpay;
 
   void _showPolicyDialog() {
@@ -54,6 +63,7 @@ class _TotalState extends State<Total> {
               setState(() {
                 _isPolicyAccepted = true;
               });
+
               Navigator.pop(context);
             },
             child: const Text("Tôi đồng ý"),
@@ -65,49 +75,83 @@ class _TotalState extends State<Total> {
 
   Future<void> _handleBooking() async {
     try {
-      /// CHECK POLICY
-      if (!_isPolicyAccepted) {
-        return;
-      }
-
+      if (!_isPolicyAccepted) return;
+      
       /// ================= VNPAY =================
       if (_selectedPayment == PaymentMethod.vnpay) {
         final success = await VNPayService().pay(
+          bookingId:
+              widget.bookingId ??
+              DateTime.now().millisecondsSinceEpoch.toString(),
           amount: widget.totalAmount.toInt(),
-
-          orderInfo: 'Thanh toán căn hộ ${widget.apartment.ApartmentID}',
+          orderInfo:
+              'Thanh toán căn hộ ${widget.apartment.ApartmentID}',
         );
 
         if (success) {
-          /// Lưu booking
           await _saveBooking();
 
           if (!mounted) return;
 
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
+            MaterialPageRoute(
+              builder: (_) => const BookingSuccessScreen(),
+            ),
           );
         }
 
         return;
       }
 
-      /// ================= PAYMENT KHÁC =================
+      /// ================= MOMO =================
+
+      if (_selectedPayment == PaymentMethod.momo) {
+        final success = await MoMoService().pay(
+          bookingId:
+              widget.bookingId ??
+              DateTime.now().millisecondsSinceEpoch.toString(),
+          amount: widget.totalAmount.toInt(),
+          orderInfo:
+              'Thanh toán căn hộ ${widget.apartment.ApartmentID}',
+        );
+
+        if (success) {
+          await _saveBooking();
+
+          if (!mounted) return;
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const BookingSuccessScreen(),
+            ),
+          );
+        }
+
+        return;
+      }
+
+
+      /// ================= CASH =================
       await _saveBooking();
 
       if (!mounted) return;
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
+        MaterialPageRoute(
+          builder: (_) => const BookingSuccessScreen(),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Lỗi khi đặt phòng: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi khi đặt phòng: $e'),
+        ),
+      );
     }
   }
 
@@ -115,11 +159,14 @@ class _TotalState extends State<Total> {
     await FirebaseFirestore.instance.collection('contract').add({
       'UserID': 'dYSjvUDL2vwRrSgqiDHy',
 
-      'ApartmentId': widget.apartment.ApartmentID ?? 'unknown',
+      'ApartmentId':
+          widget.apartment.ApartmentID ?? 'unknown',
 
-      'StartDate': widget.criteria?.checkIn?.toIso8601String(),
+      'StartDate':
+          widget.criteria?.checkIn?.toIso8601String(),
 
-      'EndDate': widget.criteria?.checkOut?.toIso8601String(),
+      'EndDate':
+          widget.criteria?.checkOut?.toIso8601String(),
 
       'Total': widget.totalAmount,
 
@@ -136,6 +183,7 @@ class _TotalState extends State<Total> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+
     final checkIn = widget.criteria?.checkIn;
     final checkOut = widget.criteria?.checkOut;
 
@@ -148,41 +196,60 @@ class _TotalState extends State<Total> {
     if (soNgayO <= 0) soNgayO = 1;
 
     final tongTien =
-        widget.tongTien ?? ((widget.apartment.DailyRate ?? 0) * soNgayO);
+        widget.tongTien ??
+        ((widget.apartment.DailyRate ?? 0) * soNgayO);
 
     return Container(
       width: width,
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFF4285F4)),
+        border: Border.all(
+          color: const Color(0xFF4285F4),
+        ),
         borderRadius: BorderRadius.circular(8),
         color: Colors.white,
       ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             "Chi tiết đặt phòng",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
 
           const SizedBox(height: 12),
 
           _buildRow(
             "Ngày nhận phòng:",
-            checkIn != null ? _formatDate(checkIn) : "Chưa chọn",
+            checkIn != null
+                ? _formatDate(checkIn)
+                : "Chưa chọn",
           ),
 
           _buildRow(
             "Ngày trả phòng:",
-            checkOut != null ? _formatDate(checkOut) : "Chưa chọn",
+            checkOut != null
+                ? _formatDate(checkOut)
+                : "Chưa chọn",
           ),
 
           const SizedBox(height: 8),
 
-          _buildRow("Số ngày ở:", "$soNgayO ngày"),
-          _buildRow("Giá mỗi ngày:", "${widget.apartment.DailyRate ?? 0} đ"),
+          _buildRow(
+            "Số ngày ở:",
+            "$soNgayO ngày",
+          ),
+
+          _buildRow(
+            "Giá mỗi ngày:",
+            "${widget.apartment.DailyRate ?? 0} đ",
+          ),
 
           const Divider(),
 
@@ -195,6 +262,7 @@ class _TotalState extends State<Total> {
 
           const SizedBox(height: 16),
 
+          /// ================= POLICY =================
           Row(
             children: [
               Checkbox(
@@ -205,17 +273,22 @@ class _TotalState extends State<Total> {
                   });
                 },
               ),
+
               Expanded(
                 child: Wrap(
                   children: [
-                    const Text("Tôi đã đọc và đồng ý "),
+                    const Text(
+                      "Tôi đã đọc và đồng ý ",
+                    ),
+
                     GestureDetector(
                       onTap: _showPolicyDialog,
                       child: const Text(
                         "chính sách thuê phòng",
                         style: TextStyle(
                           color: Colors.blue,
-                          decoration: TextDecoration.underline,
+                          decoration:
+                              TextDecoration.underline,
                         ),
                       ),
                     ),
@@ -227,32 +300,99 @@ class _TotalState extends State<Total> {
 
           const SizedBox(height: 16),
 
-          ThanhtoanVnpay(
-            selectedPayment: _selectedPayment,
-            onChanged: (method) {
+          /// ================= PAYMENT METHOD =================
+          const Text(
+            "Phương thức thanh toán",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          RadioListTile<PaymentMethod>(
+            value: PaymentMethod.vnpay,
+            groupValue: _selectedPayment,
+            onChanged: (value) {
               setState(() {
-                _selectedPayment = method;
+                _selectedPayment = value!;
               });
             },
+            title: const Text("Thanh toán VNPay"),
+            secondary: Image.asset(
+              'assets/images/vnpay.jpg',
+              width: 40,
+            ),
+          ),
+
+          RadioListTile<PaymentMethod>(
+            value: PaymentMethod.momo,
+            groupValue: _selectedPayment,
+            onChanged: (value) {
+              setState(() {
+                _selectedPayment = value!;
+              });
+            },
+            title: const Text("Thanh toán Ví MoMo"),
+            secondary: Image.asset(
+              'assets/images/MoMo.png',
+              width: 40,
+            ),
+          ),
+
+          RadioListTile<PaymentMethod>(
+            value: PaymentMethod.cash,
+            groupValue: _selectedPayment,
+            onChanged: (value) {
+              setState(() {
+                _selectedPayment = value!;
+              });
+            },
+            title: const Text(
+              "Phương thức thanh toán khác",
+            ),
+            secondary: const Icon(
+              Icons.money,
+              color: Colors.green,
+            ),
           ),
 
           const SizedBox(height: 20),
 
+          /// ================= BUTTON =================
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isPolicyAccepted ? _handleBooking : null,
+              onPressed:
+                  _isPolicyAccepted
+                      ? _handleBooking
+                      : null,
+
               style: ElevatedButton.styleFrom(
-                backgroundColor: _isPolicyAccepted
-                    ? Colors.blue
-                    : Colors.grey.shade400,
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                backgroundColor:
+                    _isPolicyAccepted
+                        ? Colors.blue
+                        : Colors.grey.shade400,
+
+                padding:
+                    const EdgeInsets.symmetric(
+                      vertical: 14,
+                    ),
               ),
+
               child: Text(
-                _selectedPayment == PaymentMethod.vnpay
+                _selectedPayment ==
+                        PaymentMethod.vnpay
                     ? 'Thanh toán VNPay'
+                    : _selectedPayment ==
+                          PaymentMethod.momo
+                    ? 'Thanh toán Ví MoMo'
                     : 'Đặt phòng',
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
@@ -268,15 +408,24 @@ class _TotalState extends State<Total> {
     Color? valueColor,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        vertical: 4,
+      ),
+
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment:
+            MainAxisAlignment.spaceBetween,
+
         children: [
           Text(label),
+
           Text(
             value,
             style: TextStyle(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              fontWeight:
+                  isBold
+                      ? FontWeight.bold
+                      : FontWeight.normal,
               color: valueColor,
             ),
           ),
