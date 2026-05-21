@@ -1,0 +1,34 @@
+@startuml taobaidang-sequence-diagram
+title "Sơ đồ trình tự tạo bài đăng"
+actor User as User
+boundary ":Mobile App" as MobileApp
+control ":Mobile Control" as MobileControl
+entity ":Offchain Database" as OffchainDatabase
+
+User -> MobileApp: lấy dữ liệu biểu mẫu tạo bài đăng
+activate User
+activate MobileApp
+MobileApp -> MobileControl: yêu cầu dữ liệu hiển thị biểu mẫu tạo bài đăng
+activate MobileControl
+MobileControl --> MobileApp: hiển thị biểu mẫu tạo bài đăng
+
+User -> MobileApp: nhập thông tin bài đăng và gửi yêu cầu
+MobileApp -> MobileControl: yêu cầu tạo bài đăng
+MobileControl -> OffchainDatabase: xác thực và gửi yêu cầu lưu thông tin bài đăng
+activate OffchainDatabase
+'trường hợp thành công
+    alt Thêm dữ liệu bài đăng thất bại
+        OffchainDatabase --> MobileControl: lỗi thêm bài đăng
+        deactivate OffchainDatabase
+        MobileControl --> MobileApp: thông báo lỗi thêm bài đăng
+        deactivate MobileControl
+    else Thêm dữ liệu bài đăng thành công
+        OffchainDatabase --> MobileControl: thêm bài đăng thành công
+        deactivate OffchainDatabase
+        MobileControl --> MobileApp: thông báo tạo bài đăng thành công
+        deactivate MobileControl
+    end
+    deactivate MobileApp
+    deactivate User
+
+@enduml

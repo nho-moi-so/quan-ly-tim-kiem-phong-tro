@@ -1,0 +1,46 @@
+@startuml duyetbaidang-sequence-diagram
+title "Sơ đồ trình tự duyệt bài đăng"
+actor User as User
+boundary ":Web App" as WebApp
+control ":Web Control" as Control
+entity ":Offchain Database" as OffchainDatabase
+
+'lay danh sach bai dang chua duyet
+'duyet bai dang -> xem bai dang -> dong y/tu choi
+User -> WebApp: chọn bài đăng để xem chi tiết
+activate WebApp
+WebApp -> Control: yêu cầu dữ liệu chi tiết bài đăng
+activate Control
+Control -> OffchainDatabase: truy vấn chi tiết bài đăng
+activate OffchainDatabase
+OffchainDatabase --> Control: trả về chi tiết bài đăng
+deactivate OffchainDatabase
+Control --> WebApp: hiển thị chi tiết bài đăng
+deactivate Control
+deactivate WebApp
+alt Người dùng từ chối duyệt bài đăng
+    User -> WebApp: từ chối duyệt bài đăng
+    activate WebApp
+    WebApp -> Control: yêu cầu từ chối duyệt bài đăng
+    activate Control
+    Control -> OffchainDatabase: cập nhật trạng thái bài đăng thành "bị từ chối"
+    activate OffchainDatabase
+    OffchainDatabase --> Control: xác nhận từ chối duyệt bài đăng thành công
+    deactivate OffchainDatabase
+    Control --> WebApp: thông báo từ chối duyệt bài đăng thành công
+    deactivate Control
+    deactivate WebApp
+else Người dùng đồng ý duyệt bài đăng
+    User -> WebApp: đồng ý duyệt bài đăng
+    activate WebApp
+    WebApp -> Control: yêu cầu duyệt bài đăng
+    activate Control
+    Control -> OffchainDatabase: cập nhật trạng thái bài đăng thành "đã duyệt"
+    activate OffchainDatabase
+    OffchainDatabase --> Control: xác nhận duyệt bài đăng thành công
+    deactivate OffchainDatabase
+    Control --> WebApp: thông báo duyệt bài đăng thành công
+    deactivate Control
+    deactivate WebApp
+end
+@enduml

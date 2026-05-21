@@ -214,7 +214,7 @@ class Contract{
     'ngày checkout ~ ngày trả phòng
     - endDate: datetime
     'danh sách các điều khoản trong hợp đồng
-    - clause: List<string>
+    - clause: List<string> 
     - status: string
     - pathFile: string
     - EscrowAmount: decimal

@@ -24,7 +24,7 @@ activate OffchainDatabase
 'trường hợp thành công
     ' trường hợp offchain
         'thành công
-        alt Thêm dữ liệu offchain thất bại
+        alt Thêm dữ liệu offchain \nthất bại
             OffchainDatabase --> WebControl: lỗi \nthêm căn hộ mới
             deactivate OffchainDatabase
             WebControl --> MobileControl: thông báo lỗi \nthêm căn hộ mới

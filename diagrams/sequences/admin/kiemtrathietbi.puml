@@ -1,0 +1,33 @@
+@startuml kiemtrathietbi-sequence-diagram
+title "Sơ đồ trình tự kiểm tra thiết bị"
+' bam kiem tra thiet bi
+'    control them pingcode vao database
+'    iot get pingcode và gửi pingrely về database
+'    control so sanh pingcode va pingrely trong 5 giây
+'   neu pingcode va pingrely khop nhau -> thiet bi hoat dong
+actor User as User
+boundary ":Web App" as WebApp
+control ":Web Control" as Control
+control ":IoT Device" as IoTDevice
+entity ":Offchain Database" as OffchainDatabase
+
+User -> WebApp: chọn kiểm tra thiết bị
+activate User
+activate WebApp
+WebApp -> Control: yêu cầu kiểm tra thiết bị
+activate Control
+Control -> OffchainDatabase: tạo pingcode và lưu vào database
+
+IoTDevice -> OffchainDatabase: lấy pingcode
+IoTDevice -> Control: gửi pingreply
+Control -> OffchainDatabase: so sánh pingcode và pingreply
+alt Pingcode và pingreply khớp nhau
+    Control --> WebApp: thông báo thiết bị hoạt động
+else Pingcode và pingreply không khớp nhau
+    Control --> WebApp: thông báo thiết bị không hoạt động
+end
+deactivate Control
+deactivate WebApp
+deactivate User
+
+@enduml

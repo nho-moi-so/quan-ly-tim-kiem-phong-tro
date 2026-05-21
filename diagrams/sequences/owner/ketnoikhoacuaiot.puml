@@ -1,0 +1,90 @@
+' vào một căn hộ
+'     nếu căn hộ đã kết nối khóa cửa -> xong quy trình
+'     nếu chưa có khóa cửa
+'         thiết bị iot: nhập mã phòng
+'         server trả otp về app mobile
+'         user nhập mã otp vào iot
+'         iot gửi mã otp lên server để xác thực
+'         nếu thất bại -> xong quy trình
+'         nếu thành công
+'             lưu dữ liệu vào offchain database
+'             lưu dữ liệu vào onchain database
+@startuml ketnoikhoacuaiot-sequence-diagram
+title "Sơ đồ kết nối khóa cửa IoT với căn hộ"
+actor User as User
+boundary ":Mobile App" as MobileApp
+control ":IoT Device" as IoTDevice
+control ":Mobile Control" as MobileControl
+control ":Web Control" as WebControl
+control ":Smart Contract" as SmartContract
+entity ":Offchain Database" as OffchainDatabase
+entity ":Onchain Database" as OnchainDatabase
+
+User -> IoTDevice: nhập mã phòng
+activate User
+activate IoTDevice
+IoTDevice -> WebControl: gửi mã phòng để xác thực
+'có mã phòng
+activate WebControl
+WebControl -> MobileControl: gửi mã OTP về
+activate MobileControl
+MobileControl --> MobileApp: hiển thị mã OTP
+deactivate MobileControl
+User -> IoTDevice: nhập mã OTP
+IoTDevice -> WebControl: gửi mã OTP để xác thực
+'otp không đúng
+alt Xác thực OTP thất bại
+    WebControl --> IoTDevice: thông báo lỗi xác thực OTP
+    deactivate WebControl
+    deactivate IoTDevice
+else Xác thực OTP thành công
+    WebControl -> OffchainDatabase: lưu thông tin kết nối khóa cửa IoT
+    activate OffchainDatabase
+    alt Lưu thông tin kết nối khóa cửa IoT thất bại
+        OffchainDatabase --> WebControl: lỗi lưu thông tin kết nối khóa cửa IoT
+        deactivate OffchainDatabase
+        activate WebControl
+        WebControl --> MobileControl: thông báo lỗi lưu thông tin kết nối khóa cửa IoT
+        deactivate WebControl
+        activate MobileControl
+        MobileControl --> MobileApp: thông báo lỗi kết nối khóa cửa IoT
+        deactivate MobileControl
+    else Lưu thông tin kết nối khóa cửa IoT thành công
+        OffchainDatabase --> WebControl: lưu thông tin kết nối khóa cửa IoT thành công
+        deactivate OffchainDatabase
+        activate WebControl
+        WebControl -> SmartContract: lưu thông tin kết nối khóa cửa IoT
+        deactivate WebControl
+        activate SmartContract
+        SmartContract -> OnchainDatabase: lưu thông tin kết nối khóa cửa IoT
+        activate OnchainDatabase
+        alt Lưu thông tin kết nối khóa cửa IoT onchain thất bại
+            OnchainDatabase --> SmartContract: lỗi lưu thông tin kết nối khóa cửa IoT
+            deactivate OnchainDatabase
+            SmartContract --> WebControl: lỗi lưu thông tin kết nối khóa cửa IoT
+            deactivate SmartContract
+            activate WebControl
+            WebControl --> MobileControl: thông báo lỗi lưu thông tin kết nối khóa cửa IoT
+            deactivate WebControl
+            activate MobileControl
+            MobileControl --> MobileApp: thông báo lỗi kết nối khóa cửa IoT
+            deactivate MobileControl
+        else Lưu thông tin kết nối khóa cửa IoT onchain thành công
+            OnchainDatabase --> SmartContract: lưu thông tin kết nối khóa cửa IoT thành công
+            deactivate OnchainDatabase
+            activate SmartContract
+            SmartContract --> WebControl: lưu thông tin kết nối khóa cửa IoT thành công
+            deactivate SmartContract
+            activate WebControl
+            WebControl --> MobileControl: kết nối khóa cửa IoT thành công
+            deactivate WebControl
+            activate MobileControl
+            MobileControl --> MobileApp: thông báo kết nối khóa cửa IoT thành công
+            deactivate MobileControl
+        end
+    end
+end
+deactivate MobileControl
+deactivate IoTDevice
+
+@enduml
