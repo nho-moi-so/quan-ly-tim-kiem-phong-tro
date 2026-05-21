@@ -38,7 +38,7 @@ rectangle "Ứng dụng quản lý & tìm kiếm căn hộ thông minh tích h�
 usecase "Đăng nhập" as login
 usecase "Đăng ký" as register
 usecase "Quản lý tài khoản" as manage_account
-note bottom of manage_account: Thay đổi, Đổi mật khẩu, Đăng xuất, Xóa tài khoản, Nạp tiền, Rút tiền
+note bottom of manage_account: Thay đổi thông tin, Đổi mật khẩu, Đăng xuất, Xóa tài khoản, Nạp tiền, Rút tiền
 usecase "Yêu cầu xác minh tài khoản" as request_owner_verification
 
 usecase "Quản lý căn hộ" as manage_apartment
@@ -47,17 +47,17 @@ note bottom of manage_apartment: Thêm, Sửa, Xóa căn hộ, Tìm kiếm, Xem
 ' manage_apartment .. connect_iot_lock: extend
 
 usecase "Quản lý đặt phòng" as manage_booking
-note top of manage_booking: Cập nhật đặt phòng, kiểm tra toàn vẹn hợp đồng
+note top of manage_booking: Cập nhật đặt phòng
 usecase "Xem hợp đồng" as view_booking_contract
 manage_booking .. view_booking_contract: extend
 usecase "Quản lý hóa đơn" as manage_invoice
-note bottom of manage_invoice: Hoàn tiền
+' note bottom of manage_invoice: Hoàn tiền
 usecase "Quản lý bài đăng" as manage_post
 note bottom of manage_post: Tạo, Sửa, Ẩn, Xóa bài đăng
 usecase "Nhắn tin" as messaging
 usecase "Thống kê" as statistics
-usecase "Xác thực dữ liệu đặt phòng" as verify_booking_data
-view_booking_contract .. verify_booking_data: extend
+' usecase "Xác thực dữ liệu đặt phòng" as verify_booking_data
+' view_booking_contract .. verify_booking_data: extend
 
 ' Các chức năng của Người thuê
 ' usecase "Quản lý tài khoản" as manage_account
@@ -70,7 +70,7 @@ view_booking_contract .. verify_booking_data: extend
 ' search_apartment . view_apartment_details: extend
 
 usecase "Đặt phòng" as book_apartment
-usecase "Hủy đặt phòng" as cancel_booking
+' usecase "Hủy đặt phòng" as cancel_booking
 
 usecase "Tìm kiếm yêu cầu đặt phòng" as search_booking
 manage_booking .. search_booking: extend
@@ -88,7 +88,7 @@ usecase "Xem chi tiết bài đăng" as view_post_details
 search_posts . view_post_details: extend
 ' usecase "Nhắn tin" as messaging
 
-usecase "Báo cáo vi phạm" as report_violation
+' usecase "Báo cáo vi phạm" as report_violation
 
 ' Các chức năng của Quản trị viên
 usecase "Quản lý tài khoản người dùng" as manage_user_accounts
@@ -125,12 +125,12 @@ note bottom of manage_iot_devices: Thêm, Sửa, Xóa và kiểm tra thiết b�
 (manage_account) -- (Guest)
 (search_posts) -- (Guest)
 (book_apartment) - (Guest)
-(cancel_booking) - (Guest)
+' (cancel_booking) - (Guest)
 (search_booking) -- (Guest)
 (search_invoices) -- (Guest)
 (view_booking_contract) -- (Guest)
 (messaging) - (Guest)
-(report_violation) - (Guest)
+' (report_violation) - (Guest)
 
 'Quản trị viên
 (login) --- (Admin)

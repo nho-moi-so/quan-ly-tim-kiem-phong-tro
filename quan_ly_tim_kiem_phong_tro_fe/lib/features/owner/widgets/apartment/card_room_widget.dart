@@ -14,9 +14,10 @@ class CardRoomWidget extends StatelessWidget {
 
 
   Color _getStatusColor(String status) {
-    if (status.contains('Còn trống') || status.contains('Available')) {
+    final lowerStatus = status.toLowerCase();
+    if (lowerStatus.contains('còn trống') || lowerStatus.contains('available')) {
       return const Color(0xFF10B981);
-    } else if (status.contains('Đang ở') || status.contains('Rented')) {
+    } else if (lowerStatus.contains('đang ở') || lowerStatus.contains('rented')) {
       return const Color(0xFFEF4444);
     }
     return const Color(0xFF6B7280);

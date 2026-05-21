@@ -177,7 +177,7 @@ class Post{
 }
 ' Post --> PostStatus
 Post "1" -left- "0..*" Apartment: advertises
-Admin "1..*" -- "0..*" Post: manages
+Admin "0..*" -- "1" Post: manages
 ' enum ContentVilolationStatus {
 '     REPORTED
 '     UNDER_REVIEW
@@ -188,14 +188,14 @@ Admin "1..*" -- "0..*" Post: manages
 '     FAKE
 '     INCORRECT_INFORMATION
 ' }
-class ContentVilolation{
-    - id: string
-    - description: string
-    - type: string
-    - reportedDate: datetime
-    - status: string
-}
-(Admin, Post) .. ContentVilolation: resolves
+' class ContentVilolation{
+'     - id: string
+'     - description: string
+'     - type: string
+'     - reportedDate: datetime
+'     - status: string
+' }
+' (Admin, Post) .. ContentVilolation: resolves
 ' ContentVilolation --> ContentVilolationStatus
 
 ' enum ContractStatus {

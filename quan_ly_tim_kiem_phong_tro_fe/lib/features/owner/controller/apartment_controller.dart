@@ -113,7 +113,7 @@ class ApartmentController {
         "type": roomCardDetail.roomType,
         "userId": fb_auth.FirebaseAuth.instance.currentUser!.uid,
       };
-      var response = await http.post(
+      var response = await http.post( 
         uri, 
         headers: {'Content-Type': 'application/json'}, 
         body: jsonEncode(body));

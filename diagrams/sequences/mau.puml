@@ -1,0 +1,37 @@
+@startuml order-sequence-diagram
+title "Sơ đồ trình từ đặt hàng"
+actor User as User
+boundary ":Web Browser" as Browser
+control ":Control" as Control
+entity ":Database" as Entity
+
+User -> Browser: chọn \ncác sản phẩm \nmuốn đặt
+activate User
+activate Browser
+Browser -> Control: yêu cầu \nxử lý đơn hàng
+activate Control
+Control -> Entity: kiểm tra \ntồn kho \ncủa sản phẩm
+activate Entity
+deactivate Control
+alt Tồn kho đủ
+    Entity --> Control: đủ hàng
+    activate Control
+    Control --> Browser: hiển thị form \nxác nhận \nđơn hàng
+    deactivate Control
+    User -> Browser: nhấn xác nhận
+    Browser -> Control: xác nhận \nđơn hàng
+    activate Control
+    Control -> Entity: lưu thông tin \nđơn hàng
+    Entity --> Control: đơn hàng \nđã được lưu
+    Control --> Browser: hiển thị thông báo \nđặt hàng thành công
+    deactivate Control
+else Tồn kho không đủ
+    Entity --> Control: không đủ hàng
+    activate Control
+    Control --> Browser: thông báo không đủ hàng
+    deactivate Control
+end
+deactivate Entity
+deactivate User
+deactivate Browser
+@enduml
