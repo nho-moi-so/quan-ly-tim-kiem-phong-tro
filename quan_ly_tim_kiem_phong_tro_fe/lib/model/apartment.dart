@@ -17,6 +17,8 @@ class Apartment {
   final String Bedroom;
   final String Bathroom;
   final List<String>? amenities;
+  final double? latitude;
+  final double? longitude;
 
   Apartment({
     required this.ApartmentID,
@@ -35,7 +37,8 @@ class Apartment {
     required this.Bathroom,
     required this.Bedroom,
     required this.amenities,
-
+    required this.latitude,
+    required this.longitude,
   });
 
   static String _getString(Map<String, dynamic> d, List<String> keys) {
@@ -76,25 +79,37 @@ class Apartment {
     return Apartment(
       ApartmentID: doc.id,
       CodeApartment: _getString(data, ['CodeApartment', 'codeApartment']),
-      description: _getString(data, ['Description', 'Decription', 'description', 'decription']),
+      description: _getString(data, [
+        'Description',
+        'Decription',
+        'description',
+        'decription',
+      ]),
       status: _getString(data, ['Status', 'status']),
       userId: _getString(data, ['UserId', 'userId']),
-      PathImage: (data['PathImage'] is List) ? List<String>.from(data['PathImage']) : <String>[],
+      PathImage: (data['PathImage'] is List)
+          ? List<String>.from(data['PathImage'])
+          : <String>[],
       DailyRate: _getDouble(data, ['DailyRate', 'dailyRate']),
       Deposit: _getDouble(data, ['Deposit', 'deposit']),
       maxOccupancy: _getInt(data, ['MaxOccupancy', 'maxOccupancy']),
       password: _getString(data, ['Password', 'password']),
       address: _getString(data, ['Address', 'address']),
       Type: _getString(data, ['Type', 'type']),
-      Requirements: (data['Requirements'] is List) ? List<String>.from(data['Requirements']) : <String>[],
-      Bathroom: _getString(data, ['Bathroom', 'bathroom']), 
-      Bedroom: _getString(data, ['Bedroom', 'bedroom']), 
+      Requirements: (data['Requirements'] is List)
+          ? List<String>.from(data['Requirements'])
+          : <String>[],
+      Bathroom: _getString(data, ['Bathroom', 'bathroom']),
+      Bedroom: _getString(data, ['Bedroom', 'bedroom']),
       amenities: (data['amenities'] as List<dynamic>?)
           ?.map((e) => e.toString())
           .toList(),
+      latitude: _getDouble(data, ['latitude', 'Latitude']),
+      longitude: _getDouble(data, ['longitude', 'Longitude']),
     );
   }
 }
+
 String formatVND(int? value) {
   if (value == null) return '-';
   final s = value.toString();
