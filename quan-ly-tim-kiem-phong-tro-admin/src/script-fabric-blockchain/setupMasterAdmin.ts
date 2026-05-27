@@ -1,4 +1,4 @@
-// Script tạo admin identity có quyền register users
+import { ca } from '@/lib/fabric/caClient';
 import { WalletBlockchainRepository } from '@/repositories/walletBlockchainRepository';
 import fs from 'fs';
 import path from 'path';
@@ -8,7 +8,36 @@ import path from 'path';
  */
 async function enrollMasterAdminWithRegistrarRights() {
     try {
-        console.log('🔑 Enroll admin với quyền registrar...');
+        console.log('🔑 1. Enroll CA admin (để cấp quyền Registrar)...');
+        let caEnrollment;
+        try {
+            caEnrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
+            await WalletBlockchainRepository.upsertById('ca-admin', {
+                UserID: 'ca-admin',
+                MSPID: 'Org1MSP',
+                Type: 'X.509',
+                CredentialsCertificate: caEnrollment.certificate,
+                CredentialsPrivateKey: caEnrollment.key.toBytes(),
+            });
+            console.log('✅ Đã tạo/cập nhật ca-admin identity trên Firebase');
+        } catch (error: any) {
+             if (error.message && error.message.includes('already enrolled')) {
+                  console.log('⚠️ CA admin đã enrolled trước đó. Tiến hành enroll lại...');
+                  caEnrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
+                  await WalletBlockchainRepository.upsertById('ca-admin', {
+                      UserID: 'ca-admin',
+                      MSPID: 'Org1MSP',
+                      Type: 'X.509',
+                      CredentialsCertificate: caEnrollment.certificate,
+                      CredentialsPrivateKey: caEnrollment.key.toBytes(),
+                  });
+                  console.log('✅ Đã tạo/cập nhật ca-admin identity trên Firebase');
+             } else {
+                  throw error;
+             }
+        }
+
+        console.log('\n🔑 2. Cài đặt MSP Master admin (để ghi dữ liệu lên Ledger)...');
         
         // Đọc admin certificate và private key từ cryptogen
         const cryptoPath = path.resolve(

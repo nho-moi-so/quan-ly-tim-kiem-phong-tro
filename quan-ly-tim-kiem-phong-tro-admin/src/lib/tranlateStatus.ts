@@ -34,6 +34,8 @@ export const tranlateStatus = {
                     return 'Đã hủy';
                 case 'completed':
                     return 'Đã hoàn thành';
+                case 'paid':
+                    return 'Đã thanh toán';
                 default:
                     return status;
             }

@@ -87,6 +87,7 @@ const QuanLyLichDatPhongPage: React.FC = () => {
       approved: { color: 'blue', text: tranlateStatus.tranlateToVietnameseStatusBooking('approved') },
       cancelled: { color: 'red', text: tranlateStatus.tranlateToVietnameseStatusBooking('cancelled') },
       completed: { color: 'green', text: tranlateStatus.tranlateToVietnameseStatusBooking('completed') },
+      paid: { color: 'geekblue', text: tranlateStatus.tranlateToVietnameseStatusBooking('paid') },
     };
     const config = statusConfig[status] || { color: 'default', text: status };
     return <Tag color={config.color}>{config.text}</Tag>;

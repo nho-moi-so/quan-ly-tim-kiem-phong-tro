@@ -77,17 +77,32 @@ export class WalletBlockchainRepository {
             const snapshot = await db.collection(COLLECTION_NAME).where("UserID", "==", userId).get();
 
             if (snapshot.empty) {
+                console.log(`[Wallet] User ${userId} not found in Firebase`);
                 return null;
             }
 
             const doc = snapshot.docs[0];
             const data = doc.data();
 
+            // Convert base64 private key back to PEM string if needed
+            let privateKeyPEM = data.CredentialsPrivateKey;
+            console.log(`[Wallet] Raw private key type for ${userId}: ${privateKeyPEM.substring(0, 50)}...`);
+            
+            if (!privateKeyPEM.startsWith('-----BEGIN')) {
+                // If not PEM format, assume it's base64 and decode it
+                console.log(`[Wallet] Converting base64 to PEM for ${userId}`);
+                privateKeyPEM = Buffer.from(privateKeyPEM, 'base64').toString('utf8');
+            } else {
+                console.log(`[Wallet] Private key already in PEM format for ${userId}`);
+            }
+
+            console.log(`[Wallet] Final private key starts with: ${privateKeyPEM.substring(0, 30)}`);
+
             // Trả về đúng định dạng X.509 mà Fabric SDK yêu cầu
             return {
                 credentials: {
                     certificate: data.CredentialsCertificate,
-                    privateKey: data.CredentialsPrivateKey, // Nếu có mã hóa AES thì giải mã ở đây
+                    privateKey: privateKeyPEM,
                 },
                 mspId: data.MSPID || 'Org1MSP',
                 type: 'X.509',
