@@ -1,9 +1,8 @@
-import { createFabricClient } from "@/lib/fabric/fabricClient";
 import { ApartmentRepository } from "@/repositories/apartmentRepository";
 import { BlockchainFabricRepository } from "@/repositories/blockchainFabricRepository";
 import { WalletBlockchainRepository } from "@/repositories/walletBlockchainRepository";
 import { X509Identity } from "fabric-network";
-
+import { getIO } from "@/lib/socket";
 
 
 export const ApartmentService = {
@@ -36,7 +35,7 @@ export const ApartmentService = {
             MaxOccupancy: data.maxOccupancy,
             Password: data.password,
             PathImage: data.pathImage ?? [],
-            Requirements: (data.requirements ?? []).join(','),
+            Requirements: data.requirements ?? [],
             Status: data.status,
             Type: data.type,
             UserID: data.userId,
@@ -73,7 +72,18 @@ export const ApartmentService = {
             await ApartmentRepository.delete(newApartment.Id);
             throw err;
         }
-
+        // 3. Emit socket event
+        try {
+            const io = getIO();
+            io.emit("apartment_created", {
+                apartmentId: newApartment.Id,
+                codeApartment: newApartment.CodeApartment,
+                userId: data.userId,
+            });
+            console.log("📡 apartment_created emitted");
+        } catch (e) {
+            console.warn("⚠️ Socket emit failed", e);
+        }
         return newApartment;
     },
 }

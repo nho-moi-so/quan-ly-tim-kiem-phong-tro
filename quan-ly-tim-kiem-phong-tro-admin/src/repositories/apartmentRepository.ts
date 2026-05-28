@@ -10,7 +10,7 @@ export interface Apartment{
     MaxOccupancy: number;
     Password: string;
     PathImage: string[];
-    Requirements: string;
+    Requirements: string[];
     Status: string;
     Type: string;
     UserID: string;
