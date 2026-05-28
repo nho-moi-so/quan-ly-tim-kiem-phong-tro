@@ -38,7 +38,7 @@ export const ApartmentService = {
             Requirements: data.requirements ?? [],
             Status: data.status,
             Type: data.type,
-            UserID: data.userId,
+            UserID: data.userId,    
         });
 
         // 2. Tạo apartment trên Blockchain

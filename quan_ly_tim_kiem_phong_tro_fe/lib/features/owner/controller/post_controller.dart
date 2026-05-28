@@ -34,7 +34,7 @@ class PostController {
         apartmentID: postDetail.apartmentId!,
         header: postDetail.postTitle!, //header la title
         description: postDetail.postDescription!,
-        status: "Approved", //===mặc định là Approved
+        status: "Pending",
         creationDate: DateTime.now(),
       ));
       return true;
@@ -82,7 +82,6 @@ class PostController {
     // Gọi service để lấy chi tiết bài đăng
     PostService postService = PostService();
     var post = await postService.getPostById(postId);
-    // print("Post fetched: ${post.postID}, ${post.header}");
     //lay thong tin apartment
     ApartmentService apartmentService = ApartmentService();
     var apartment = await apartmentService.getApartmentById(post.apartmentID!);

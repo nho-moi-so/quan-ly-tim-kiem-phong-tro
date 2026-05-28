@@ -51,8 +51,8 @@ else ([duyệt])
 
 ' --- Luồng 3: Người thuê (Tenant) ---
 |Người thuê|
-    ' :Đăng ký;
-    ' :Đăng nhập;
+    :Đăng ký;
+    :Đăng nhập;
     :Tìm kiếm và Yêu cầu đặt phòng;
 
 ' --- Luồng 4: Hệ thống (Xử lý thanh toán) ---

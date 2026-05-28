@@ -34,7 +34,7 @@ class WalletBlockchain{
     - credentialsCertificate: string
     - credentialsPrivateKey: string
 }
-User "1" -- "0..1" WalletBlockchain: has
+User "1" -up- "0..1" WalletBlockchain: has
 
 ' enum OwnerStatus {
 '     APPROVED
@@ -87,8 +87,8 @@ class Admin{
     
 }
 User <|-- Owner: is
-User <|-- Guest: is
-User <|-- Admin: is
+User <|-right- Guest: is
+User <|-left- Admin: is
 
 
 ' enum ApartmentStatus {
@@ -123,7 +123,7 @@ class Apartment{
 
 }
 ' Apartment --> ApartmentStatus
-Owner "1" -right- "0..*" Apartment: owns
+Owner "1" -- "0..*" Apartment: owns
 
 
 class Amenity{
@@ -176,8 +176,8 @@ class Post{
     - publishedDate: datetime
 }
 ' Post --> PostStatus
-Post "1" -left- "0..*" Apartment: advertises
-Admin "1..*" -- "0..*" Post: manages
+Post "1" -- "0..*" Apartment: advertises
+Admin "0..*" -- "1" Post: manages
 ' enum ContentVilolationStatus {
 '     REPORTED
 '     UNDER_REVIEW
@@ -188,14 +188,14 @@ Admin "1..*" -- "0..*" Post: manages
 '     FAKE
 '     INCORRECT_INFORMATION
 ' }
-class ContentVilolation{
-    - id: string
-    - description: string
-    - type: string
-    - reportedDate: datetime
-    - status: string
-}
-(Admin, Post) .. ContentVilolation: resolves
+' class ContentVilolation{
+'     - id: string
+'     - description: string
+'     - type: string
+'     - reportedDate: datetime
+'     - status: string
+' }
+' (Admin, Post) .. ContentVilolation: resolves
 ' ContentVilolation --> ContentVilolationStatus
 
 ' enum ContractStatus {
@@ -204,7 +204,7 @@ class ContentVilolation{
     ' "OCCUPIED"
 ' }
 
-Guest "0..*" -- "0..*" Apartment: book
+Guest "0..*" --- "0..*" Apartment: book
 class Contract{
     - id: string
     'ngày tạo ~ ngày đặt phòng 
@@ -214,7 +214,7 @@ class Contract{
     'ngày checkout ~ ngày trả phòng
     - endDate: datetime
     'danh sách các điều khoản trong hợp đồng
-    - clause: List<string>
+    - clause: List<string> 
     - status: string
     - pathFile: string
     - EscrowAmount: decimal
@@ -240,7 +240,6 @@ class Invoice{
     - issuedDate: datetime
     ' ngày hủy hóa đơn
     - cancellationDate: datetime
-    - vat: decimal
     ' giá phải trả = tổng chi tiết hóa đơn + VAT
     - totalAmount: decimal
     - note: string
@@ -265,7 +264,7 @@ class Transaction{
     - status: string
 }
 Transaction "1" -- "0..*" User: made
-Invoice "1" -down- "1..*" Transaction: includes
+Invoice "1" -left- "1..*" Transaction: includes
 class InvoiceDetail{
     - id: string
     ' phí thuê phòng, phí dọn dẹp, chăm sóc thú cưng, phí dịch vụ khác
@@ -276,7 +275,7 @@ class InvoiceDetail{
     ' subTotal = quantity * unitPrice
     - subTotal: decimal
 }
-Invoice "1" -left- "1..*" InvoiceDetail: includes
+Invoice "1" -right- "1..*" InvoiceDetail: includes
 ' enum MessageStatus{
 '     SENT
 '     DELIVERED

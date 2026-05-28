@@ -138,7 +138,12 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
 
     // Nếu statusController.text có dữ liệu thì gán cho selectedRoomState
     if (statusController.text.isNotEmpty) {
-      selectedRoomState = statusController.text;
+      String rawStatus = statusController.text;
+      if (rawStatus.length > 1) {
+        selectedRoomState = rawStatus[0].toUpperCase() + rawStatus.substring(1).toLowerCase();
+      } else {
+        selectedRoomState = rawStatus;
+      }
     } else {
       selectedRoomState = null;
     }
@@ -1189,7 +1194,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                                     roomCode: roomCodeController.text,
                                     area: areaController.text,
                                     maxCapacity: capacityController.text,
-                                    room_status: statusController.text,
+                                    room_status: selectedRoomState ?? '',
                                     price: priceController.text.replaceAll(
                                       ',',
                                       '',

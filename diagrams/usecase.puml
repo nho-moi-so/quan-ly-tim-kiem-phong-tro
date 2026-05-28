@@ -38,26 +38,31 @@ rectangle "Ứng dụng quản lý & tìm kiếm căn hộ thông minh tích h�
 usecase "Đăng nhập" as login
 usecase "Đăng ký" as register
 usecase "Quản lý tài khoản" as manage_account
-note bottom of manage_account: Thay đổi, Đổi mật khẩu, Đăng xuất, Xóa tài khoản, Nạp tiền, Rút tiền
+note bottom of manage_account: Xem, Thay đổi thông tin, Đổi mật khẩu, Đăng xuất
 usecase "Yêu cầu xác minh tài khoản" as request_owner_verification
 
+usecase "Nạp tiền" as deposit
+usecase "Rút tiền" as withdraw
+usecase "Xóa tài khoản" as delete_account
 usecase "Quản lý căn hộ" as manage_apartment
 note bottom of manage_apartment: Thêm, Sửa, Xóa căn hộ, Tìm kiếm, Xem
 ' usecase "Kết nối khóa cửa IoT" as connect_iot_lock
 ' manage_apartment .. connect_iot_lock: extend
 
-usecase "Quản lý đặt phòng" as manage_booking
-note top of manage_booking: Cập nhật đặt phòng, kiểm tra toàn vẹn hợp đồng
+usecase "Quản lý yêu cầu đặt phòng" as manage_booking
+note top of manage_booking: Cập nhật yêu cầu đặt phòng
 usecase "Xem hợp đồng" as view_booking_contract
 manage_booking .. view_booking_contract: extend
 usecase "Quản lý hóa đơn" as manage_invoice
-note bottom of manage_invoice: Hoàn tiền
+' note bottom of manage_invoice: Hoàn tiền
 usecase "Quản lý bài đăng" as manage_post
-note bottom of manage_post: Tạo, Sửa, Ẩn, Xóa bài đăng
+note bottom of manage_post: Tạo, Chỉnh sửa, Ẩn
+usecase "Xóa bài đăng" as delete_post
 usecase "Nhắn tin" as messaging
 usecase "Thống kê" as statistics
-usecase "Xác thực dữ liệu đặt phòng" as verify_booking_data
-view_booking_contract .. verify_booking_data: extend
+
+' usecase "Xác thực dữ liệu đặt phòng" as verify_booking_data
+' view_booking_contract .. verify_booking_data: extend
 
 ' Các chức năng của Người thuê
 ' usecase "Quản lý tài khoản" as manage_account
@@ -70,7 +75,7 @@ view_booking_contract .. verify_booking_data: extend
 ' search_apartment . view_apartment_details: extend
 
 usecase "Đặt phòng" as book_apartment
-usecase "Hủy đặt phòng" as cancel_booking
+' usecase "Hủy đặt phòng" as cancel_booking
 
 usecase "Tìm kiếm yêu cầu đặt phòng" as search_booking
 manage_booking .. search_booking: extend
@@ -88,11 +93,11 @@ usecase "Xem chi tiết bài đăng" as view_post_details
 search_posts . view_post_details: extend
 ' usecase "Nhắn tin" as messaging
 
-usecase "Báo cáo vi phạm" as report_violation
+' usecase "Báo cáo vi phạm" as report_violation
 
 ' Các chức năng của Quản trị viên
 usecase "Quản lý tài khoản người dùng" as manage_user_accounts
-note top of manage_user_accounts: Xem, Khóa/Mở khóa, Xóa tài khoản, Duyệt xác minh chủ căn hộ
+note top of manage_user_accounts: Xem, Khóa, Mở khóa, Xóa tài khoản, Duyệt xác minh chủ căn hộ
 ' usecase "Đăng xuất" as logout
 ' usecase "Đăng nhập" as login
 ' usecase "Đổi mật khẩu" as change_password
@@ -102,8 +107,9 @@ usecase "Duyệt bài đăng" as approve_posts
 ' usecase "Thống kê" as statistics
 usecase "Xem thống kê" as view_statistics
 usecase "Quản lý thiết bị IoT" as manage_iot_devices
-note bottom of manage_iot_devices: Thêm, Sửa, Xóa và kiểm tra thiết bị IoT
-
+note bottom of manage_iot_devices: Thêm, Sửa, Xóa, Xem và kiểm tra thiết bị IoT
+usecase "Quản lý giao dịch" as manage_transactions
+note bottom of manage_transactions: Xem lịch sử giao dịch, duyệt yêu cầu rút tiền, từ chối yêu cầu rút tiền
 ' nối các usecase
 'Chủ căn hộ
 (Owner) -- (login)
@@ -117,6 +123,9 @@ note bottom of manage_iot_devices: Thêm, Sửa, Xóa và kiểm tra thiết b�
 (Owner) -- (messaging)
 (Owner) -- (statistics)
 (Owner) -- (manage_iot_devices)
+' (Owner) -- (connect_iot_lock)
+(Owner) -- (withdraw)
+(Owner) -- (delete_account)
 
 
 'Người thuê
@@ -125,26 +134,30 @@ note bottom of manage_iot_devices: Thêm, Sửa, Xóa và kiểm tra thiết b�
 (manage_account) -- (Guest)
 (search_posts) -- (Guest)
 (book_apartment) - (Guest)
-(cancel_booking) - (Guest)
+' (cancel_booking) - (Guest)
 (search_booking) -- (Guest)
 (search_invoices) -- (Guest)
 (view_booking_contract) -- (Guest)
 (messaging) - (Guest)
-(report_violation) - (Guest)
+' (report_violation) - (Guest)
+(deposit) - (Guest)
+(withdraw) - (Guest)
+(delete_account) - (Guest)
 
 'Quản trị viên
 (login) --- (Admin)
 (manage_user_accounts) - (Admin)
 (manage_account) -- (Admin)
-(manage_post) -- (Admin)
+(search_posts) -- (Admin)
 (approve_posts) - (Admin)
+(delete_post) -- (Admin)
 ' (change_password) -- (Admin)
 (statistics) - (Admin)
 (view_statistics) -- (Admin)
 (manage_iot_devices) - (Admin)
-(manage_booking) -- (Admin)
-
-
+(search_booking) -- (Admin)
+(view_booking_contract) -- (Admin)
+(manage_transactions) - (Admin)
 }
 @enduml
 

@@ -122,9 +122,10 @@ class PostStatus {
   }
   
   String getStatusInVietnameseCardRoomWidget(String status) {
-    if (status.contains('Available')) {
+    final lowerStatus = status.toLowerCase();
+    if (lowerStatus.contains('available')) {
       return 'Còn trống';
-    } else if (status.contains('Rented')) {
+    } else if (lowerStatus.contains('rented')) {
       return 'Đang ở';
     }
     return status;
