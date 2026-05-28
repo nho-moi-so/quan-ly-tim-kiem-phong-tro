@@ -31,15 +31,15 @@ Servo myServo;
 const int servoPin = 18; // Chân kết nối servo
 
 // Thông tin mạng WiFi
-const char* ssid = "MINH KHANG";       // Tên WiFi
-const char* password = "20012016";     // Mật khẩu WiFi
+const char* ssid = "vo van hai";       // Tên WiFi
+const char* password = "99999999";     // Mật khẩu WiFi
 
 // Thông tin về căn hộ
 String roomCode = "";
 
 //thông tin host server
-String hostServer = "http://192.168.2.144:3000";
-String blockchainServer = "http://192.168.2.144:4000";
+String hostServer = "https://pluvious-shady-joline.ngrok-free.dev";
+String blockchainServer = "http://zierd-171-252-153-254.run.pinggy-free.link";
 
 //Thông tin của thiết bị iot này
 String type_iot = "smart_lock";
@@ -444,6 +444,8 @@ void loop(){
         
         url = hostServer + "/api/iot/verify-otp";
         http.begin(url);
+        // TĂNG THỜI GIAN CHỜ LÊN 15 GIÂY (15000ms)
+        http.setTimeout(15000);
         http.addHeader("Content-Type", "application/json");
 
         // Dữ liệu JSON để gửi

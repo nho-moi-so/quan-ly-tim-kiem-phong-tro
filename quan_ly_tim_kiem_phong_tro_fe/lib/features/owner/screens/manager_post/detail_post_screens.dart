@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/post_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/main_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/viewmodel/post_detail.dart';
 
 import '../../widgets/widgets.dart';
@@ -55,9 +56,33 @@ class DetailPostScreen extends StatelessWidget {
                         bool result = await _postController.create(data);
                         if(result){
                           print("Tạo bài đăng thành công");
+                          // Hiển thị thông báo thành công
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Tạo bài đăng thành công!'),
+                              backgroundColor: Colors.green,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                          // Chuyển hướng về trang quản lý bài đăng
+                          Future.delayed(const Duration(milliseconds: 500), () {
+                            if(context.mounted) {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const OwnerMainScreen(initialIndex: 3),
+                              ));
+                            }
+                          });
                         }
                         else{
                           print("Tạo bài đăng thất bại");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Tạo bài đăng thất bại, vui lòng thử lại!'),
+                              backgroundColor: Colors.red,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
                         }
                       } else {
                         // Gọi API cập nhật bài đăng
@@ -65,6 +90,33 @@ class DetailPostScreen extends StatelessWidget {
                         bool result = await _postController.updateInfo(data);
                         if(result){
                           print("Cập nhật bài đăng thành công");
+                          // Hiển thị thông báo thành công
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Cập nhật bài đăng thành công!'),
+                              backgroundColor: Colors.green,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                          // Chuyển hướng về trang quản lý bài đăng
+                          Future.delayed(const Duration(milliseconds: 500), () {
+                            if(context.mounted) {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const OwnerMainScreen(initialIndex: 3),
+                              ));
+                            }
+                          });
+                        }
+                        else{
+                          print("Cập nhật bài đăng thất bại");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Cập nhật bài đăng thất bại, vui lòng thử lại!'),
+                              backgroundColor: Colors.red,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
                         }
                       }
                       

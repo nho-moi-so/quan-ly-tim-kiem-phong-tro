@@ -12,6 +12,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/model/amenity_in_apartment.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/contract.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/user.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/socket_service.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/user_service.dart';
 
 import '../../../service/owner/amenity_in_apartment_service.dart';
@@ -30,8 +31,14 @@ class ApartmentController {
   final AmenityService _amenityService = AmenityService();
   final IotOtpService _iotOtpService = IotOtpService();
   final ContractService _contractService = ContractService();
+  late SocketService _socketService;
 
   final ContractController _contractController = ContractController();
+
+  ApartmentController() {
+    _socketService = SocketService();
+    _setupSocketListeners();
+  }
 
   //createApartment(RoomCardDetail) => RoomCardDetail - done without image
   Future<bool> createApartment(RoomDetail roomCardDetail) async {
@@ -437,7 +444,7 @@ class ApartmentController {
     do {
       // Format: P + 3 chữ số ngẫu nhiên (P101, P234, etc.)
       final random = DateTime.now().millisecondsSinceEpoch % 1000;
-      code = 'P${random.toString().padLeft(3, '0')}';
+      code = '${random.toString().padLeft(3, '0')}';
       isUnique = await isRoomCodeUnique(code);
       attempts++;
     } while (!isUnique && attempts < 10);
@@ -527,6 +534,32 @@ class ApartmentController {
     }
     
     return randomName + extension;
+  }
+
+  /// Thiết lập socket listeners để lắng nghe sự kiện từ server
+  void _setupSocketListeners() {
+    print('🔧 Setting up socket listeners...');
+    
+    // Lắng nghe sự kiện apartment_created từ server
+    _socketService.socket.on('apartment_created', (data) {
+      print('📨 Socket event received: apartment_created');
+      print('📊 Data: $data');
+      
+      // Kiểm tra xem event này có phải cho user hiện tại không
+      final String currentUserId = fb_auth.FirebaseAuth.instance.currentUser?.uid ?? '';
+      final String eventUserId = data['userId']?.toString() ?? '';
+      
+      if (currentUserId == eventUserId) {
+        print('✅ Event is for current user');
+        print('🔄 New apartment created: ${data['codeApartment']}');
+        // Refresh UI sẽ được thực hiện từ UI layer thông qua callback
+        // hoặc state management (Provider, GetX, etc.)
+      } else {
+        print('⚠️ Event is not for current user');
+      }
+    });
+    
+    print('✅ Socket listeners setup completed');
   }
 
   

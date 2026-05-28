@@ -11,10 +11,11 @@ class PostService {
       posts.add(
       Post(
         postID: doc.id,
-        header: data['header'] ?? '',
-        status: data['status'] ?? '',
-        description: data['description'] ?? '',
-        creationDate: DateTime(data['creationDate'] ?? '')
+        apartmentID: data['ApartmentID'] ?? '',
+        header: data['Header'] ?? '',
+        status: data['Status'] ?? '',
+        description: data['Description'] ?? '',
+        creationDate: (data['CreationDate'] as Timestamp).toDate()
       ));
 
     }
@@ -24,13 +25,14 @@ class PostService {
   //=========getPostById
   Future<Post> getPostById(String id) async {
     DocumentSnapshot snapshot = await firestore.collection("posts").doc(id).get();
+    print("snapshot.data(): ${snapshot.data()}");
     final data = snapshot.data() as Map<String, dynamic>;
     return Post(
       postID: snapshot.id,
       apartmentID: data['ApartmentID'] ?? '',
       header: data['Header'] ?? '',
       status: data['Status'] ?? '',
-      description: data['Desciption'] ?? '',
+      description: data['Description'] ?? '',
       creationDate: (data['CreationDate'] as Timestamp).toDate(),
     );
   }
@@ -46,10 +48,10 @@ class PostService {
       posts.add(
         Post(
           postID: doc.id,
-          header: data['header'] ?? '',
-          status: data['status'] ?? '',
-          description: data['description'] ?? '',
-          creationDate: (data['creationDate'] as Timestamp).toDate(),
+          header: data['Header'] ?? '',
+          status: data['Status'] ?? '',
+          description: data['Description'] ?? '',
+          creationDate: (data['CreationDate'] as Timestamp).toDate(),
         ),
       );
     }
@@ -69,7 +71,7 @@ class PostService {
       apartmentID: data['ApartmentID'] ?? '',
       header: data['Header'] ?? '',
       status: data['Status'] ?? '',
-      description: data['Desciption'] ?? '',
+      description: data['Description'] ?? '',
       creationDate: (data['CreationDate'] as Timestamp).toDate(),
     );
   }
