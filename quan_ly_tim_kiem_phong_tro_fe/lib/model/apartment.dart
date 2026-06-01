@@ -14,6 +14,8 @@ class Apartment {
   List<String>? requirement;
   String? type;
   String? userID;
+  String? checkInTime;
+  String? checkOutTime;
 
   Apartment({
     this.apartmentID,
@@ -31,6 +33,8 @@ class Apartment {
     this.requirement,
     this.type,
     this.userID,
+    this.checkInTime,
+    this.checkOutTime,
   });
 
   factory Apartment.fromMap(String id, Map<String, dynamic> map) => Apartment(
@@ -49,6 +53,8 @@ class Apartment {
         requirement: List<String>.from(map['Requirements'] ?? []),
         type: map['Type'] ?? '',
         userID: map['UserID'] ?? '',
+        checkInTime: map['CheckInTime'] ?? '',
+        checkOutTime: map['CheckOutTime'] ?? '',
       );
 
   Map<String, dynamic> toMap() => {
@@ -66,5 +72,7 @@ class Apartment {
         'Requirements': requirement,
         'Type': type,
         'UserID': userID,
+        'CheckInTime': checkInTime,
+        'CheckOutTime': checkOutTime,
       };
 }

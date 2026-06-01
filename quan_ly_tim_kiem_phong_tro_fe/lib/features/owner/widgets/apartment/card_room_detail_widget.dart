@@ -477,8 +477,165 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                 ),
               ],
             ),
-            // const SizedBox(height: 16),
-            // _buildLabeledInput('Trạng Thái Phòng', statusController),
+            const SizedBox(height: 16),
+            // Checkin & Checkout Time Row
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Giờ Nhận Phòng',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1F2937),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF4C6FFF).withOpacity(0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: TextFormField(
+                          controller: checkinController,
+                          readOnly: true,
+                          enabled: selectedRoomState != ApartmentStatus.rented,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFBFCDE6),
+                                width: 2,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFBFCDE6),
+                                width: 2,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF4C6FFF),
+                                width: 2,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            suffixIcon: const Icon(Icons.schedule, color: Color(0xFF4C6FFF)),
+                          ),
+                          onTap: selectedRoomState != ApartmentStatus.rented
+                              ? () async {
+                                  final time = await showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.now(),
+                                  );
+                                  if (time != null) {
+                                    setState(() {
+                                      checkinController.text = time.format(context);
+                                    });
+                                  }
+                                }
+                              : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Giờ Trả Phòng',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1F2937),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF4C6FFF).withOpacity(0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: TextFormField(
+                          controller: checkoutController,
+                          readOnly: true,
+                          enabled: selectedRoomState != ApartmentStatus.rented,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFBFCDE6),
+                                width: 2,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFBFCDE6),
+                                width: 2,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF4C6FFF),
+                                width: 2,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            suffixIcon: const Icon(Icons.schedule, color: Color(0xFF4C6FFF)),
+                          ),
+                          onTap: selectedRoomState != ApartmentStatus.rented
+                              ? () async {
+                                  final time = await showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.now(),
+                                  );
+                                  if (time != null) {
+                                    setState(() {
+                                      checkoutController.text = time.format(context);
+                                    });
+                                  }
+                                }
+                              : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1193,6 +1350,8 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                                     roomId: widget.initialData.roomId,
                                     roomCode: roomCodeController.text,
                                     area: areaController.text,
+                                    checkin: checkinController.text,
+                                    checkout: checkoutController.text,
                                     maxCapacity: capacityController.text,
                                     room_status: selectedRoomState ?? '',
                                     price: priceController.text.replaceAll(

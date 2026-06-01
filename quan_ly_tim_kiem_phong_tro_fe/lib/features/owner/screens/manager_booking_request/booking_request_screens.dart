@@ -49,9 +49,11 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
   Widget build(BuildContext context) {
     // Lọc theo status và ngày
     var filteredRequests = allRequests.where((r) {
-      final statusMatch = currentFilter == BookingFilter.approved 
-        ? r.status == 'Approved'
-        : r.status == 'Cancelled';
+    final statusMatch = currentFilter == BookingFilter.approved
+        ? r.status?.toLowerCase() == 'approved' ||
+            r.status?.toLowerCase() == 'completed' ||
+            r.status?.toLowerCase() == 'pending'
+        : r.status?.toLowerCase() == 'cancelled';
       final date = r.checkinDate;
       // Nếu chưa chọn filter ngày thì luôn true
       if (filterFrom == null && filterTo == null) return statusMatch;

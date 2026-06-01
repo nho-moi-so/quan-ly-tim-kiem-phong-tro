@@ -48,12 +48,7 @@ class ContractController {
     final taxRate = 10.0; // 10% VAT
     final discount = 200000.0; // Giảm giá khuyến mãi
     final totalPrice =
-        dailyRate * (numberOfDays > 0 ? numberOfDays : 1) +
-        otherFees +
-        (dailyRate * (numberOfDays > 0 ? numberOfDays : 1) + otherFees) *
-            (taxRate / 100) -
-        discount;
-
+        dailyRate * (numberOfDays > 0 ? numberOfDays : 1);
     var contractDetail = ContractDetail(
       contractId: contract.contractID,
       imageUrl: (apartment.pathImage?.isNotEmpty ?? false)

@@ -119,6 +119,8 @@ class Apartment{
     - requires: List<string>
     ' mật khẩu mở khóa căn hộ cho chủ căn hộ nếu không có người thuê
     - passwordHash: string 
+    - checkInTime: time
+    - checkOutTime: time
 
 
 }

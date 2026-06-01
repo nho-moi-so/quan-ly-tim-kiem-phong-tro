@@ -70,22 +70,22 @@ class SummaryWidget extends StatelessWidget {
                 // Giá cũ + Giá mới + % giảm
                 Row(
                   children: [
-                    Flexible(
-                      flex: 1,
-                      child: Text(
-                        deposit!,
-                        style: TextStyle(
-                          color: Colors.black.withOpacity(0.65),
-                          fontSize: 12,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w600,
-                          // decoration: TextDecoration.lineThrough,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
+                    // Flexible(
+                    //   flex: 1,
+                    //   child: Text(
+                    //     deposit!,
+                    //     style: TextStyle(
+                    //       color: Colors.black.withOpacity(0.65),
+                    //       fontSize: 12,
+                    //       fontFamily: 'Inter',
+                    //       fontWeight: FontWeight.w600,
+                    //       // decoration: TextDecoration.lineThrough,
+                    //     ),
+                    //     overflow: TextOverflow.ellipsis,
+                    //     maxLines: 1,
+                    //   ),
+                    // ),
+                    // const SizedBox(width: 6),
                     Flexible(
                       flex: 2,
                       child: Text(

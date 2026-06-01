@@ -27,9 +27,7 @@ class InvoiceWidget extends StatelessWidget {
   }
 
   double get subtotal => dailyRate * numberOfDays;
-  double get taxAmount => (subtotal + otherFees) * (taxRate / 100);
-  double get totalBeforeDiscount => subtotal + otherFees + taxAmount;
-  double get totalAmount => totalBeforeDiscount - discount;
+  double get totalAmount => subtotal;
 
   @override
   Widget build(BuildContext context) {
@@ -82,40 +80,6 @@ class InvoiceWidget extends StatelessWidget {
                   isSubItem: false,
                   valueColor: Colors.purple.shade700,
                 ),
-
-                if (otherFees > 0) ...[
-                  const SizedBox(height: 12),
-                  _buildInvoiceRow(
-                    icon: Icons.more_horiz_rounded,
-                    iconColor: Colors.orange.shade600,
-                    label: 'Phí khác',
-                    value: formatCurrency(otherFees),
-                    isSubItem: false,
-                  ),
-                ],
-
-                if (taxRate > 0) ...[
-                  const SizedBox(height: 12),
-                  _buildInvoiceRow(
-                    icon: Icons.account_balance_rounded,
-                    iconColor: Colors.amber.shade700,
-                    label: 'Thuế ($taxRate%)',
-                    value: formatCurrency(taxAmount),
-                    isSubItem: false,
-                  ),
-                ],
-
-                if (discount > 0) ...[
-                  const SizedBox(height: 12),
-                  _buildInvoiceRow(
-                    icon: Icons.local_offer_rounded,
-                    iconColor: Colors.red.shade400,
-                    label: 'Giảm giá',
-                    value: '- ${formatCurrency(discount)}',
-                    isSubItem: false,
-                    valueColor: Colors.red.shade600,
-                  ),
-                ],
 
                 const SizedBox(height: 16),
                 Divider(thickness: 2, color: Colors.blue.shade100),

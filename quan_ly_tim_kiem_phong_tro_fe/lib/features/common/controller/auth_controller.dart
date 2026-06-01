@@ -352,7 +352,7 @@ class AuthController {
       message = 'Email không tồn tại';
       errorCode = 'USER_NOT_FOUND';
     } else if (errorString.contains('wrong-password') || 
-               errorString.contains('invalid-credential')) {
+              errorString.contains('invalid-credential')) {
       message = 'Mật khẩu không đúng';
       errorCode = 'WRONG_PASSWORD';
     } else if (errorString.contains('invalid-email')) {

@@ -119,7 +119,11 @@ class ApartmentController {
         "status": "Available",
         "type": roomCardDetail.roomType,
         "userId": fb_auth.FirebaseAuth.instance.currentUser!.uid,
+        "checkInTime": roomCardDetail.checkin,
+        "checkOutTime": roomCardDetail.checkout,
       };
+      print('📤 Sending create apartment request with body: $body');
+      // throw Exception('Dừng lại để debug Payload!'); // Quăng lỗi để chặn đứng luồng code
       var response = await http.post( 
         uri, 
         headers: {'Content-Type': 'application/json'}, 
@@ -230,6 +234,8 @@ class ApartmentController {
         foundApartment.address = roomCardDetail.address;
         foundApartment.latitude = roomCardDetail.latitude;
         foundApartment.longitude = roomCardDetail.longitude;
+        foundApartment.checkInTime = roomCardDetail.checkin;
+        foundApartment.checkOutTime = roomCardDetail.checkout;
 
         Apartment updatedApartment = await _apartmentService.updateApartment(foundApartment);
         print('Apartment updated with ID: ${updatedApartment.apartmentID}');
@@ -279,6 +285,8 @@ class ApartmentController {
                 roomId: apartmentId,
                 roomCode: apartment.codeApartment!,
                 area: '25',
+                checkin: apartment.checkInTime ?? '',
+                checkout: apartment.checkOutTime ?? '',
                 maxCapacity: apartment.maxOccupancy.toString(),
                 room_status: apartment.status!,
                 price: formatCurrency(apartment.dailyRate!).toString(),
