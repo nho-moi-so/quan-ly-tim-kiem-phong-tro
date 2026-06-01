@@ -16,6 +16,8 @@ export interface Apartment{
     UserID: string;
     Latitude?: number;
     Longitude?: number;
+    CheckInTime?: string;
+    CheckOutTime?: string;
 }
 
 export type CreateApartmentData = Omit<Apartment, "Id">;

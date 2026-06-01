@@ -161,7 +161,7 @@ docker compose -f compose/compose-test-net.yaml up -d && docker ps
 > - CAs: `ca_org1`, `ca_org2`, `ca_orderer`
 > - Chaincodes: `dev-peer0.org1...`, `dev-peer0.org2...`
 
-### 1.6 Orderer join channel
+n### 1.6 Orderer join channel
 
 ```bash
 export ORDERER_ADMIN_TLS_CA_FILE=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt

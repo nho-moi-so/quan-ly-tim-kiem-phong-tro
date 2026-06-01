@@ -14,7 +14,7 @@ services:
       - fabric_test
 
   explorer.example.com:
-    image: hyperledger/explorer:latest
+    image: hyperledger/explorer:1.2.0
     container_name: explorer.example.com
     environment:
       - DATABASE_HOST=explorerdb.example.com
@@ -22,10 +22,7 @@ services:
       - DATABASE_NAME=fabricexplorer
       - DATABASE_USERNAME=hppoc
       - DATABASE_PASSWD=password
-      - EXPLORER_CONFIG_FILE_PATH=/opt/explorer/app/platform/fabric/config.json
-      - EXPLORER_APP_ROOT=app
       - DISCOVERY_AS_LOCALHOST=false
-    command: ["./start.sh"]
     working_dir: /opt/explorer
     volumes:
       - ./config/config.json:/opt/explorer/app/platform/fabric/config.json

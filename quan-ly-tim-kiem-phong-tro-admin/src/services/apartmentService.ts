@@ -1,8 +1,8 @@
+import { getIO } from "@/lib/socket";
 import { ApartmentRepository } from "@/repositories/apartmentRepository";
 import { BlockchainFabricRepository } from "@/repositories/blockchainFabricRepository";
 import { WalletBlockchainRepository } from "@/repositories/walletBlockchainRepository";
 import { X509Identity } from "fabric-network";
-import { getIO } from "@/lib/socket";
 
 
 export const ApartmentService = {
@@ -21,6 +21,8 @@ export const ApartmentService = {
         status?: string;
         type?: string;
         userId: string;
+        checkInTime?: string;
+        checkOutTime?: string;
     }) => {
         // BỎ createFabricClient() ở đây vì hàm createApartmentWithUser đã tự mở Gateway riêng rồi
         
@@ -38,7 +40,9 @@ export const ApartmentService = {
             Requirements: data.requirements ?? [],
             Status: data.status,
             Type: data.type,
-            UserID: data.userId,    
+            UserID: data.userId,
+            CheckInTime: data.checkInTime,
+            CheckOutTime: data.checkOutTime,    
         });
 
         // 2. Tạo apartment trên Blockchain
