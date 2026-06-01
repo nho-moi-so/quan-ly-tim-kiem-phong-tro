@@ -1,10 +1,14 @@
 // lib/service/guest/search_service.dart
-import 'package:diacritic/diacritic.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:diacritic/diacritic.dart';
+
 import '../../../model/apartment.dart';
-import '../../../model/amenities.dart';
 import '../../../model/amenity_in_apartment.dart';
+import '../../../model/post.dart';
+import '../../../model/contract.dart';
 import '../../../model/search_criteria.dart';
+import '../../../model/search_result.dart';
 
 class SearchService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -13,28 +17,32 @@ class SearchService {
     return removeDiacritics(input).toLowerCase();
   }
 
-  Future<List<Apartment>> search(SearchCriteria criteria) async {
+  Future<SearchResult> search(SearchCriteria criteria) async {
+    // =========================
+    // QUERY APARTMENT
+    // =========================
+
     Query<Map<String, dynamic>> query = _firestore.collection('apartment');
 
-
+    // CodeApartment
     if (criteria.codeApartment != null && criteria.codeApartment!.isNotEmpty) {
       query = query.where('CodeApartment', isEqualTo: criteria.codeApartment);
     }
 
+    // Status
     if (criteria.status != null && criteria.status!.trim().isNotEmpty) {
-      final s = criteria.status!.trim();
-      final statusQuery = s.length > 0
-          ? (s[0].toUpperCase() + s.substring(1).toLowerCase())
-          : s;
-      query = query.where('Status', isEqualTo: statusQuery);
+      query = query.where('Status', isEqualTo: criteria.status);
     }
 
+    // Min price
     if (criteria.minDailyRate != null) {
       query = query.where(
         'DailyRate',
         isGreaterThanOrEqualTo: criteria.minDailyRate,
       );
     }
+
+    // Max price
     if (criteria.maxDailyRate != null) {
       query = query.where(
         'DailyRate',
@@ -42,13 +50,15 @@ class SearchService {
       );
     }
 
-
+    // Min occupancy
     if (criteria.minOccupancy != null) {
       query = query.where(
         'MaxOccupancy',
         isGreaterThanOrEqualTo: criteria.minOccupancy,
       );
     }
+
+    // Max occupancy
     if (criteria.maxOccupancy != null) {
       query = query.where(
         'MaxOccupancy',
@@ -56,116 +66,160 @@ class SearchService {
       );
     }
 
+    // Apartment type
     if (criteria.apartmentType != null && criteria.apartmentType!.isNotEmpty) {
       query = query.where('Type', isEqualTo: criteria.apartmentType);
     }
+
+    // =========================
+    // GET APARTMENTS
+    // =========================
+
     final snap = await query.get();
+
     List<Apartment> apartments = snap.docs
         .map((d) => Apartment.fromFirestore(d))
         .toList();
 
+    print('Step1 apartments: ${apartments.length}');
 
-    print('Step1 (after firestore query): ${apartments.length}');
-    for (var apt in apartments) {
-      print(
-        '  [S1] id=${apt.ApartmentID}, code=${apt.CodeApartment}, type=${apt.Type}, status=${apt.status}, address=${apt.address}, maxOcc=${apt.maxOccupancy}, dailyRate=${apt.DailyRate}',
-      );
-    }
+    // =========================
+    // FILTER ADDRESS
+    // =========================
 
-    final today = DateTime.now();
-    if (criteria.checkIn != null) {
-     
-      if (criteria.checkIn!.isBefore(
-        DateTime(today.year, today.month, today.day),
-      )) {
-        print(
-          'Warning: checkIn is in the past (${criteria.checkIn}), skipping checkIn filter.',
-        );
-      } else {
-        apartments = apartments.where((apt) {
-          return true;
-        }).toList();
-      }
-    }
-    if (criteria.checkIn != null && criteria.checkOut != null) {
-      if (criteria.checkOut!.isBefore(criteria.checkIn!)) {
-        print('Warning: checkOut < checkIn, skipping date range filter.');
-      } else {
-       
-      }
-    }
-    print('Step2 (after date checks): ${apartments.length}');
-
-    final reqAmenityIds = criteria.amenityIds;
-    if (reqAmenityIds != null && reqAmenityIds.isNotEmpty) {
-
-      final batches = <List<String>>[];
-      for (var i = 0; i < reqAmenityIds.length; i += 10) {
-        batches.add(
-          reqAmenityIds.sublist(
-            i,
-            (i + 10 > reqAmenityIds.length) ? reqAmenityIds.length : i + 10,
-          ),
-        );
-      }
-
-      final Map<String, Set<String>> aptToAmenity = {};
-      for (final batch in batches) {
-        final linkSnap = await _firestore
-            .collection(
-              'amenityInApartment',
-            ) 
-            .where('AmenityId', whereIn: batch)
-            .get();
-
-        for (var doc in linkSnap.docs) {
-          final link = AmenityInApartment.fromFirestore(doc);
-          if (link.isAvailable) {
-            aptToAmenity
-                .putIfAbsent(link.apartmentId, () => <String>{})
-                .add(link.amenityId);
-          }
-        }
-      }
-
-      print('aptToAmenity map (count=${aptToAmenity.length}):');
-      aptToAmenity.forEach((k, v) => print('  $k -> $v'));
-
-      final requiredSet = reqAmenityIds.toSet();
-      apartments = apartments.where((apt) {
-        final have = aptToAmenity[apt.ApartmentID] ?? <String>{};
-        final ok = requiredSet.difference(have).isEmpty;
-        if (!ok) {
-          print(
-            '  [amenity filter] dropping ${apt.ApartmentID} (have=$have, need=$requiredSet)',
-          );
-        }
-        return ok;
-      }).toList();
-    }
-    print('Step3 (after amenities): ${apartments.length}');
-    for (var apt in apartments) {
-      print('  [S3] id=${apt.ApartmentID}, code=${apt.CodeApartment}');
-    }
     if (criteria.address != null && criteria.address!.trim().isNotEmpty) {
       final keyword = normalize(criteria.address!);
+
       apartments = apartments.where((apt) {
-        final addr = apt.address ?? '';
-        final na = normalize(addr);
-        final matched = na.contains(keyword);
-        if (!matched) {
-          print(
-            '  [addr filter] dropping ${apt.ApartmentID} (addr="$na", keyword="$keyword")',
-          );
-        }
-        return matched;
+        final addr = normalize(apt.address ?? '');
+
+        return addr.contains(keyword);
       }).toList();
     }
-    print('Step4 (after address): ${apartments.length}');
-    for (var apt in apartments) {
-      print('  [S4] id=${apt.ApartmentID}, addr=${apt.address}');
+
+    print('Step2 address filter: ${apartments.length}');
+
+    // =========================
+    // FILTER AMENITIES
+    // =========================
+
+    final reqAmenityIds = criteria.amenityIds;
+
+    if (reqAmenityIds != null && reqAmenityIds.isNotEmpty) {
+      final Map<String, Set<String>> aptToAmenity = {};
+
+      final linkSnap = await _firestore
+          .collection('amenityInApartment')
+          .where('AmenityId', whereIn: reqAmenityIds)
+          .get();
+
+      for (var doc in linkSnap.docs) {
+        final link = AmenityInApartment.fromFirestore(doc);
+
+        if (link.isAvailable) {
+          aptToAmenity
+              .putIfAbsent(link.apartmentId, () => <String>{})
+              .add(link.amenityId);
+        }
+      }
+
+      final requiredSet = reqAmenityIds.toSet();
+
+      apartments = apartments.where((apt) {
+        final currentAmenities = aptToAmenity[apt.ApartmentID] ?? <String>{};
+
+        return requiredSet.difference(currentAmenities).isEmpty;
+      }).toList();
     }
 
-    return apartments;
+    print('Step3 amenities filter: ${apartments.length}');
+
+    // =========================
+    // FILTER AVAILABLE DATE
+    // =========================
+
+    if (criteria.checkIn != null && criteria.checkOut != null) {
+      List<Apartment> availableApartments = [];
+
+      for (final apt in apartments) {
+        // Lấy contract của apartment
+
+        final contractSnap = await _firestore
+            .collection('contract')
+            .where('ApartmentId', isEqualTo: apt.ApartmentID)
+            .where('Status', whereIn: ['approved', 'active'])
+            .get();
+
+        bool isConflict = false;
+
+        for (final doc in contractSnap.docs) {
+          final contract = Contract.fromMap(doc.id, doc.data());
+
+          final contractStart = contract.startDate;
+
+          final contractEnd = contract.endDate!;
+
+          // overlap date
+
+          final overlap =
+              contractStart.isBefore(criteria.checkOut!) &&
+              contractEnd.isAfter(criteria.checkIn!);
+
+          if (overlap) {
+            isConflict = true;
+
+            print('Apartment ${apt.ApartmentID} bị trùng lịch');
+
+            break;
+          }
+        }
+
+        // nếu không trùng lịch
+
+        if (!isConflict) {
+          print('Apartment ${apt.ApartmentID} available');
+
+          availableApartments.add(apt);
+        }
+      }
+
+      apartments = availableApartments;
+    }
+
+    print('Step4 available apartments: ${apartments.length}');
+
+    // =========================
+    // GET APARTMENT IDS
+    // =========================
+
+    final apartmentIds = apartments.map((e) => e.ApartmentID).toList();
+
+    if (apartmentIds.isEmpty) {
+      print('Không có apartment khả dụng');
+
+      return SearchResult(posts: [], apartments: []);
+    }
+
+    // =========================
+    // QUERY POSTS
+    // =========================
+
+    final postsSnap = await _firestore
+        .collection('posts')
+        .where('ApartmentID', whereIn: apartmentIds)
+        .get();
+
+    // =========================
+    // FILTER APPROVED POSTS
+    // =========================
+
+    final posts = postsSnap.docs
+        .map((e) => Post.fromFirestore(e))
+        .where((p) => p.status.trim() == 'Approved')
+        .toList();
+
+    print('FINAL POSTS: ${posts.length}');
+
+    return SearchResult(posts: posts, apartments: apartments);
   }
 }

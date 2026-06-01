@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/search_criteria.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/view_contract_screens.dart';
-
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/post.dart';
 class ApartmentDetailContact extends StatelessWidget {
   final Apartment apartment;
+  final Post post;
   final SearchCriteria? criteria;
 
   const ApartmentDetailContact({
     super.key,
     required this.apartment,
+    required this.post,
     this.criteria,
   });
   @override

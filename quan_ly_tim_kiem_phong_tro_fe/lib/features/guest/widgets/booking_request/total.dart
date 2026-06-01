@@ -6,11 +6,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/booking_suc
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/vnpay_service.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/momo_service.dart';
 
-enum PaymentMethod {
-  vnpay,
-  momo,
-  cash,
-}
+enum PaymentMethod { vnpay, momo, cash }
 
 class Total extends StatefulWidget {
   final Apartment apartment;
@@ -76,7 +72,7 @@ class _TotalState extends State<Total> {
   Future<void> _handleBooking() async {
     try {
       if (!_isPolicyAccepted) return;
-      
+
       /// ================= VNPAY =================
       if (_selectedPayment == PaymentMethod.vnpay) {
         final success = await VNPayService().pay(
@@ -84,8 +80,7 @@ class _TotalState extends State<Total> {
               widget.bookingId ??
               DateTime.now().millisecondsSinceEpoch.toString(),
           amount: widget.totalAmount.toInt(),
-          orderInfo:
-              'Thanh toán căn hộ ${widget.apartment.ApartmentID}',
+          orderInfo: 'Thanh toán căn hộ ${widget.apartment.ApartmentID}',
         );
 
         if (success) {
@@ -95,9 +90,7 @@ class _TotalState extends State<Total> {
 
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (_) => const BookingSuccessScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
           );
         }
 
@@ -112,8 +105,7 @@ class _TotalState extends State<Total> {
               widget.bookingId ??
               DateTime.now().millisecondsSinceEpoch.toString(),
           amount: widget.totalAmount.toInt(),
-          orderInfo:
-              'Thanh toán căn hộ ${widget.apartment.ApartmentID}',
+          orderInfo: 'Thanh toán căn hộ ${widget.apartment.ApartmentID}',
         );
 
         if (success) {
@@ -123,15 +115,12 @@ class _TotalState extends State<Total> {
 
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (_) => const BookingSuccessScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
           );
         }
 
         return;
       }
-
 
       /// ================= CASH =================
       await _saveBooking();
@@ -140,18 +129,14 @@ class _TotalState extends State<Total> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const BookingSuccessScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
       );
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lỗi khi đặt phòng: $e'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi khi đặt phòng: $e')));
     }
   }
 
@@ -159,14 +144,11 @@ class _TotalState extends State<Total> {
     await FirebaseFirestore.instance.collection('contract').add({
       'UserID': 'dYSjvUDL2vwRrSgqiDHy',
 
-      'ApartmentId':
-          widget.apartment.ApartmentID ?? 'unknown',
+      'ApartmentId': widget.apartment.ApartmentID ?? 'unknown',
 
-      'StartDate':
-          widget.criteria?.checkIn?.toIso8601String(),
+      'StartDate': widget.criteria?.checkIn?.toIso8601String(),
 
-      'EndDate':
-          widget.criteria?.checkOut?.toIso8601String(),
+      'EndDate': widget.criteria?.checkOut?.toIso8601String(),
 
       'Total': widget.totalAmount,
 
@@ -186,6 +168,9 @@ class _TotalState extends State<Total> {
 
     final checkIn = widget.criteria?.checkIn;
     final checkOut = widget.criteria?.checkOut;
+    print(widget.criteria);
+    print(widget.criteria?.checkIn);
+    print(widget.criteria?.checkOut);
 
     int soNgayO =
         widget.soNgayO ??
@@ -196,8 +181,7 @@ class _TotalState extends State<Total> {
     if (soNgayO <= 0) soNgayO = 1;
 
     final tongTien =
-        widget.tongTien ??
-        ((widget.apartment.DailyRate ?? 0) * soNgayO);
+        widget.tongTien ?? ((widget.apartment.DailyRate ?? 0) * soNgayO);
 
     return Container(
       width: width,
@@ -205,9 +189,7 @@ class _TotalState extends State<Total> {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        border: Border.all(
-          color: const Color(0xFF4285F4),
-        ),
+        border: Border.all(color: const Color(0xFF4285F4)),
         borderRadius: BorderRadius.circular(8),
         color: Colors.white,
       ),
@@ -217,39 +199,26 @@ class _TotalState extends State<Total> {
         children: [
           const Text(
             "Chi tiết đặt phòng",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
 
           _buildRow(
             "Ngày nhận phòng:",
-            checkIn != null
-                ? _formatDate(checkIn)
-                : "Chưa chọn",
+            checkIn != null ? _formatDate(checkIn) : "Chưa chọn",
           ),
 
           _buildRow(
             "Ngày trả phòng:",
-            checkOut != null
-                ? _formatDate(checkOut)
-                : "Chưa chọn",
+            checkOut != null ? _formatDate(checkOut) : "Chưa chọn",
           ),
 
           const SizedBox(height: 8),
 
-          _buildRow(
-            "Số ngày ở:",
-            "$soNgayO ngày",
-          ),
+          _buildRow("Số ngày ở:", "$soNgayO ngày"),
 
-          _buildRow(
-            "Giá mỗi ngày:",
-            "${widget.apartment.DailyRate ?? 0} đ",
-          ),
+          _buildRow("Giá mỗi ngày:", "${widget.apartment.DailyRate ?? 0} đ"),
 
           const Divider(),
 
@@ -277,9 +246,7 @@ class _TotalState extends State<Total> {
               Expanded(
                 child: Wrap(
                   children: [
-                    const Text(
-                      "Tôi đã đọc và đồng ý ",
-                    ),
+                    const Text("Tôi đã đọc và đồng ý "),
 
                     GestureDetector(
                       onTap: _showPolicyDialog,
@@ -287,8 +254,7 @@ class _TotalState extends State<Total> {
                         "chính sách thuê phòng",
                         style: TextStyle(
                           color: Colors.blue,
-                          decoration:
-                              TextDecoration.underline,
+                          decoration: TextDecoration.underline,
                         ),
                       ),
                     ),
@@ -303,9 +269,7 @@ class _TotalState extends State<Total> {
           /// ================= PAYMENT METHOD =================
           const Text(
             "Phương thức thanh toán",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 8),
@@ -319,10 +283,7 @@ class _TotalState extends State<Total> {
               });
             },
             title: const Text("Thanh toán VNPay"),
-            secondary: Image.asset(
-              'assets/images/vnpay.jpg',
-              width: 40,
-            ),
+            secondary: Image.asset('assets/images/vnpay.jpg', width: 40),
           ),
 
           RadioListTile<PaymentMethod>(
@@ -334,10 +295,7 @@ class _TotalState extends State<Total> {
               });
             },
             title: const Text("Thanh toán Ví MoMo"),
-            secondary: Image.asset(
-              'assets/images/MoMo.png',
-              width: 40,
-            ),
+            secondary: Image.asset('assets/images/MoMo.png', width: 40),
           ),
 
           RadioListTile<PaymentMethod>(
@@ -348,13 +306,8 @@ class _TotalState extends State<Total> {
                 _selectedPayment = value!;
               });
             },
-            title: const Text(
-              "Phương thức thanh toán khác",
-            ),
-            secondary: const Icon(
-              Icons.money,
-              color: Colors.green,
-            ),
+            title: const Text("Phương thức thanh toán khác"),
+            secondary: const Icon(Icons.money, color: Colors.green),
           ),
 
           const SizedBox(height: 20),
@@ -363,36 +316,24 @@ class _TotalState extends State<Total> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed:
-                  _isPolicyAccepted
-                      ? _handleBooking
-                      : null,
+              onPressed: _isPolicyAccepted ? _handleBooking : null,
 
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    _isPolicyAccepted
-                        ? Colors.blue
-                        : Colors.grey.shade400,
+                backgroundColor: _isPolicyAccepted
+                    ? Colors.blue
+                    : Colors.grey.shade400,
 
-                padding:
-                    const EdgeInsets.symmetric(
-                      vertical: 14,
-                    ),
+                padding: const EdgeInsets.symmetric(vertical: 14),
               ),
 
               child: Text(
-                _selectedPayment ==
-                        PaymentMethod.vnpay
+                _selectedPayment == PaymentMethod.vnpay
                     ? 'Thanh toán VNPay'
-                    : _selectedPayment ==
-                          PaymentMethod.momo
+                    : _selectedPayment == PaymentMethod.momo
                     ? 'Thanh toán Ví MoMo'
                     : 'Đặt phòng',
 
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
           ),
@@ -408,13 +349,10 @@ class _TotalState extends State<Total> {
     Color? valueColor,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 4),
 
       child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
         children: [
           Text(label),
@@ -422,10 +360,7 @@ class _TotalState extends State<Total> {
           Text(
             value,
             style: TextStyle(
-              fontWeight:
-                  isBold
-                      ? FontWeight.bold
-                      : FontWeight.normal,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               color: valueColor,
             ),
           ),

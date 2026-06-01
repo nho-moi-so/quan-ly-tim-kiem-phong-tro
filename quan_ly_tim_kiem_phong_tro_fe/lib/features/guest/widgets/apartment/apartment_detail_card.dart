@@ -56,7 +56,7 @@ class ApartmentDetailCard extends StatelessWidget {
             context,
             Icons.bed,
             'Giường',
-            "2 Giường", 
+            "2 Giường",
             labelStyle,
             valueStyle,
           ),
@@ -92,7 +92,7 @@ class ApartmentDetailCard extends StatelessWidget {
             context,
             Icons.bathtub,
             'Phòng Tắm',
-            "1 Phòng tắm", 
+            "1 Phòng tắm",
             labelStyle,
             valueStyle,
           ),
@@ -112,12 +112,17 @@ class ApartmentDetailCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: const Color(0xFF4285F4), size: 24),
+
           const SizedBox(width: 10),
-          Expanded(child: Text(label, style: labelStyle)),
-          Text(value, style: valueStyle),
+
+          SizedBox(width: 90, child: Text(label, style: labelStyle)),
+
+          const SizedBox(width: 10),
+
+          Expanded(child: Text(value, style: valueStyle, softWrap: true)),
         ],
       ),
     );

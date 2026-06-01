@@ -7,6 +7,7 @@ export 'tag_with_icon_widget.dart';
 export 'post/search_bar_widget.dart';
 export 'common/loading_widget.dart';
 export 'apartment/label_title_widget.dart';
+export 'message/chat_item_widget.dart';
 //message
 export 'message/chat_item_widget.dart';
 

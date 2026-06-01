@@ -36,9 +36,9 @@ class Apartment {
     required this.Requirements,
     required this.Bathroom,
     required this.Bedroom,
-    required this.amenities,
-    required this.latitude,
-    required this.longitude,
+    this.amenities,
+    this.latitude,
+    this.longitude,
   });
 
   static String _getString(Map<String, dynamic> d, List<String> keys) {
@@ -77,7 +77,7 @@ class Apartment {
     final data = (doc.data() ?? {}) as Map<String, dynamic>;
 
     return Apartment(
-      ApartmentID: doc.id,
+      ApartmentID: data['ApartmentID'] ?? doc.id,
       CodeApartment: _getString(data, ['CodeApartment', 'codeApartment']),
       description: _getString(data, [
         'Description',

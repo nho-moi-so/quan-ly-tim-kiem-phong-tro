@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/search_criteria.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/apartment.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/post.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/search_apartment_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/controller/search_controller.dart'
     as guest;
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/search_result.dart';
 
 class SearchHomeSection extends StatefulWidget {
   const SearchHomeSection({super.key});
@@ -14,6 +17,7 @@ class SearchHomeSection extends StatefulWidget {
 
 class _SearchHomeSectionState extends State<SearchHomeSection> {
   // controllers cho các input
+
   final addressController = TextEditingController();
   final priceController = TextEditingController();
   final occupancyController = TextEditingController();
@@ -240,43 +244,74 @@ class _SearchHomeSectionState extends State<SearchHomeSection> {
     return SizedBox(
       width: double.infinity,
       height: 45,
+
       child: ElevatedButton.icon(
-        onPressed: () async {
-          final address = addressController.text.trim();
-          final price = double.tryParse(priceController.text.trim());
-          final occupancy = int.tryParse(occupancyController.text.trim());
+        onPressed: isLoading
+            ? null
+            : () async {
+                setState(() {
+                  isLoading = true;
+                });
 
-          final criteria = SearchCriteria(
-            address: address.isEmpty ? null : address,
-            maxDailyRate: price,
-            minOccupancy: occupancy,
-            apartmentType: selectedType,
-            checkIn: checkInDate,
-            checkOut: checkOutDate,
-          );
+                try {
+                  final address = addressController.text.trim();
 
-          final controller = guest.SearchController();
-          final results = await controller.search(
-            criteria,
-          ); 
+                  final price = double.tryParse(priceController.text.trim());
 
-          if (context.mounted) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SearchApartmentScreens(
-                  criteria: criteria, 
-                  results: results,
-                  
-                ),
-              ),
-            );
-          }
-        },
-        icon: isLoading
-            ? CircularProgressIndicator()
-            : Icon(Icons.search), 
-        label: const Text("Tìm kiếm"), 
+                  final occupancy = int.tryParse(
+                    occupancyController.text.trim(),
+                  );
+
+                  // TẠO CRITERIA Ở ĐÂY
+                  final criteria = SearchCriteria(
+                    address: address.isEmpty ? null : address,
+
+                    maxDailyRate: price,
+
+                    minOccupancy: occupancy,
+
+                    apartmentType: selectedType,
+
+                    checkIn: checkInDate,
+
+                    checkOut: checkOutDate,
+                  );
+
+                  final controller = guest.SearchController();
+
+                  final searchResult = await controller.search(criteria);
+
+                  if (!mounted) return;
+
+                  Navigator.push(
+                    context,
+
+                    MaterialPageRoute(
+                      builder: (context) => SearchApartmentScreens(
+                        criteria: criteria,
+
+                        results: searchResult.posts,
+
+                        apartments: searchResult.apartments,
+                      ),
+                    ),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text("Lỗi tìm kiếm: $e")));
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }
+                }
+              },
+
+        icon: const Icon(Icons.search),
+
+        label: const Text("Tìm kiếm"),
       ),
     );
   }
