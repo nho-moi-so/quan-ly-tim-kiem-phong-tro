@@ -9,7 +9,7 @@ class AuthService {
     required String password,
     required String phone,
     required String role,
-    String cccd = 'Chưa cập nhật',
+    // String cccd = 'Chưa cập nhật',
     double balance = 0,
   }) async {
     try {
@@ -26,7 +26,7 @@ class AuthService {
 
       final body = {
         "balance": balance,
-        "cccd": cccd,
+        // "cccd": cccd,
         "email": email.trim(),
         "fullName": username.trim(),
         "password": password,

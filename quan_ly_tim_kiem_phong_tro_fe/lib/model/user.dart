@@ -9,9 +9,9 @@ class User {
   final String approvalStatus;
   final bool viewFeedback;
   final bool viewStatistics;
-  final String? adminCCCD;
+  // final String? adminCCCD;
   final String? ownerStatus;
-  final String? ownerCCCD;
+  // final String? ownerCCCD;
   final String? guestStatus;
   final int? reviewCount;
 
@@ -26,9 +26,9 @@ class User {
     required this.approvalStatus,
     required this.viewFeedback,
     required this.viewStatistics,
-    this.adminCCCD,
+    // this.adminCCCD,
     this.ownerStatus,
-    this.ownerCCCD,
+    // this.ownerCCCD,
     this.guestStatus,
     this.reviewCount,
   });

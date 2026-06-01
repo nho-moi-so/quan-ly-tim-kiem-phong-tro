@@ -13,8 +13,8 @@ class AuthController {
     required String password,
     required String confirmPassword,
     String role = 'guest',
-    File? cccdFront,
-    File? cccdBack,
+    //File? cccdFront,
+    //File? cccdBack,
   }) async {
     try {
       /// 1. Validate dữ liệu
@@ -41,37 +41,37 @@ class AuthController {
       }
 
       /// 2. Upload ảnh CCCD
-      String? cccdFrontUrl;
-      String? cccdBackUrl;
+      //String? cccdFrontUrl;
+      //String? cccdBackUrl;
 
-      if (cccdFront != null) {
-        cccdFrontUrl = await _uploadImage(
-          serverDomain: serverDomain,
-          imageFile: cccdFront,
-        );
-      }
+      //if (cccdFront != null) {
+        //cccdFrontUrl = await _uploadImage(
+          //serverDomain: serverDomain,
+          //imageFile: cccdFront,
+        //);
+      //}
 
-      if (cccdBack != null) {
-        cccdBackUrl = await _uploadImage(
-          serverDomain: serverDomain,
-          imageFile: cccdBack,
-        );
-      }
+      //if (cccdBack != null) {
+        //cccdBackUrl = await _uploadImage(
+          //serverDomain: serverDomain,
+          //imageFile: cccdBack,
+        //);
+      //}
 
       /// 3. Gọi API đăng ký
       final uri = Uri.parse('$serverDomain/api/users');
 
       final body = {
         "balance": 0,
-        "cccd": "Chưa cập nhật",
+        //"cccd": " ",
         "email": email.trim(),
         "fullName": username.trim(),
         "password": password,
         "phone": phone.trim(),
         "role": role.toUpperCase(),
         "status": "ACTIVE",
-        "cccdFront": cccdFrontUrl,
-        "cccdBack": cccdBackUrl,
+        //"cccdFront": cccdFrontUrl,
+        //"cccdBack": cccdBackUrl,
       };
 
       final response = await http.post(
@@ -155,46 +155,46 @@ class AuthController {
 }
 
   /// ================= UPLOAD IMAGE =================
-  Future<String> _uploadImage({
-    required String serverDomain,
-    required File imageFile,
-  }) async {
-    final uri = Uri.parse(
-      '$serverDomain/api/util/upload',
-    );
+  // Future<String> _uploadImage({
+  //   required String serverDomain,
+  //   required File imageFile,
+  // }) async {
+  //   final uri = Uri.parse(
+  //     '$serverDomain/api/util/upload',
+  //   );
 
-    final request = http.MultipartRequest(
-      'POST',
-      uri,
-    );
+  //   final request = http.MultipartRequest(
+  //     'POST',
+  //     uri,
+  //   );
 
-    request.files.add(
-      await http.MultipartFile.fromPath(
-        'file',
-        imageFile.path,
-      ),
-    );
+  //   request.files.add(
+  //     await http.MultipartFile.fromPath(
+  //       'file',
+  //       imageFile.path,
+  //     ),
+  //   );
 
-    final streamedResponse = await request.send();
-    final response =
-        await http.Response.fromStream(
-      streamedResponse,
-    );
+  //   final streamedResponse = await request.send();
+  //   final response =
+  //       await http.Response.fromStream(
+  //     streamedResponse,
+  //   );
 
-    if (response.statusCode == 200 ||
-        response.statusCode == 201) {
-      final jsonResponse =
-          jsonDecode(response.body);
+  //   if (response.statusCode == 200 ||
+  //       response.statusCode == 201) {
+  //     final jsonResponse =
+  //         jsonDecode(response.body);
 
-      if (jsonResponse['status'] == 'success') {
-        return jsonResponse['data']['url'];
-      }
-    }
+  //     if (jsonResponse['status'] == 'success') {
+  //       return jsonResponse['data']['url'];
+  //     }
+  //   }
 
-    throw Exception(
-      'Upload ảnh thất bại: ${response.body}',
-    );
-  }
+  //   throw Exception(
+  //     'Upload ảnh thất bại: ${response.body}',
+  //   );
+  // }
 
   /// ================= VALIDATE =================
   Map<String, dynamic>

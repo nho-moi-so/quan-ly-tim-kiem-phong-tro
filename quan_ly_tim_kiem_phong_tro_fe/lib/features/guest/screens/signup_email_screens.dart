@@ -20,8 +20,8 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
   final passwordController = TextEditingController();
   final confirmController = TextEditingController();
 
-  File? cccdFront;
-  File? cccdBack;
+  // File? cccdFront;
+  // File? cccdBack;
 
   final ImagePicker picker = ImagePicker();
   bool hidePassword = true;
@@ -41,8 +41,8 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
       password: passwordController.text,
       confirmPassword: confirmController.text,
       role: selectedRole,
-      cccdFront: cccdFront,
-      cccdBack: cccdBack,
+      // cccdFront: cccdFront,
+      // cccdBack: cccdBack,
     );
 
     if (!mounted) return;
@@ -62,25 +62,25 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
     }
   }
 
-  Future<void> pickFront() async {
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  // Future<void> pickFront() async {
+    // final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
-    if (image != null) {
-      setState(() {
-        cccdFront = File(image.path);
-      });
-    }
-  }
+  //   if (image != null) {
+  //     setState(() {
+  //       cccdFront = File(image.path);
+  //     });
+  //   }
+  // }
 
-  Future<void> pickBack() async {
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  // Future<void> pickBack() async {
+  //   final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
-    if (image != null) {
-      setState(() {
-        cccdBack = File(image.path);
-      });
-    }
-  }
+  //   if (image != null) {
+  //     setState(() {
+  //       cccdBack = File(image.path);
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -228,54 +228,54 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
                 const SizedBox(height: 20),
 
                 /// CCCD UPLOAD
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Upload CCCD (Không Bắt Buộc)",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
+                // Column(
+                //   crossAxisAlignment: CrossAxisAlignment.start,
+                //   children: [
+                //     const Text(
+                //       "Upload CCCD (Không Bắt Buộc)",
+                //       style: TextStyle(
+                //         fontWeight: FontWeight.bold,
+                //         fontSize: 15,
+                //       ),
+                //     ),
 
-                    const SizedBox(height: 10),
+                    // const SizedBox(height: 10),
 
                     /// FRONT
-                    GestureDetector(
-                      onTap: pickFront,
-                      child: Container(
-                        height: 120,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: cccdFront == null
-                            ? const Center(child: Text("Upload CCCD Mặt Trước"))
-                            : Image.file(cccdFront!, fit: BoxFit.cover),
-                      ),
-                    ),
+                    // GestureDetector(
+                    //   onTap: pickFront,
+                    //   child: Container(
+                    //     height: 120,
+                    //     width: double.infinity,
+                    //     decoration: BoxDecoration(
+                    //       border: Border.all(color: Colors.grey),
+                    //       borderRadius: BorderRadius.circular(10),
+                    //     ),
+                    //     child: cccdFront == null
+                    //         ? const Center(child: Text("Upload CCCD Mặt Trước"))
+                    //         : Image.file(cccdFront!, fit: BoxFit.cover),
+                    //   ),
+                    // ),
 
-                    const SizedBox(height: 10),
+                    // const SizedBox(height: 10),
 
-                    /// BACK
-                    GestureDetector(
-                      onTap: pickBack,
-                      child: Container(
-                        height: 120,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: cccdBack == null
-                            ? const Center(child: Text("Upload CCCD Mặt Sau"))
-                            : Image.file(cccdBack!, fit: BoxFit.cover),
-                      ),
-                    ),
-                  ],
-                ),
+                //     /// BACK
+                //     GestureDetector(
+                //       onTap: pickBack,
+                //       child: Container(
+                //         height: 120,
+                //         width: double.infinity,
+                //         decoration: BoxDecoration(
+                //           border: Border.all(color: Colors.grey),
+                //           borderRadius: BorderRadius.circular(10),
+                //         ),
+                //         child: cccdBack == null
+                //             ? const Center(child: Text("Upload CCCD Mặt Sau"))
+                //             : Image.file(cccdBack!, fit: BoxFit.cover),
+                //       ),
+                //     ),
+                //   ],
+                // ),
 
                 /// TERMS
                 Row(

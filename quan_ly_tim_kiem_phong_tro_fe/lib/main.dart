@@ -5,6 +5,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/login_scree
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/signup_email_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/welcome_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/view_contract_screens.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/setting_screens.dart';
 import 'firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -33,13 +34,14 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      initialRoute: '/home',
+      initialRoute: '/setting',
 
       routes: {
         '/welcomescreen': (context) => const WelcomeScreen(),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpEmailScreen(),
         '/home': (context) => const HomePageScreen(),
+        '/setting': (context) => const SettingScreens(),
         //'/contract': (context) => const ViewContractScreens(),
         
       },
