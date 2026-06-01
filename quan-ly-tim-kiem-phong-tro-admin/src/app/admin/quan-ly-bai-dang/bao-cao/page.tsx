@@ -125,33 +125,33 @@ const data = [
   },
 ];
 
-export default function BaoCaoViPham() {
-  return (
-    <div style={{ padding: 24 }}>
-      <h2>Báo cáo vi phạm bài đăng</h2>
+// export default function BaoCaoViPham() {
+//   return (
+//     <div style={{ padding: 24 }}>
+//       <h2>Báo cáo vi phạm bài đăng</h2>
 
-      <div
-        style={{
-          maxWidth: "100%",
-          marginBottom: 16,
-          display: "flex",
-          justifyContent: "flex-end",
-        }}
-      >
-        <Search
-          placeholder="Tìm kiếm bài đăng vi phạm"
-          allowClear
-          onSearch={onSearch}
-          style={{ width: 250 }}
-        />
-      </div>
+//       <div
+//         style={{
+//           maxWidth: "100%",
+//           marginBottom: 16,
+//           display: "flex",
+//           justifyContent: "flex-end",
+//         }}
+//       >
+//         <Search
+//           placeholder="Tìm kiếm bài đăng vi phạm"
+//           allowClear
+//           onSearch={onSearch}
+//           style={{ width: 250 }}
+//         />
+//       </div>
 
-      <Table
-        columns={columns}
-        dataSource={data}
-        rowKey="maViPham"
-        pagination={{ pageSize: 5 }}
-      />
-    </div>
-  );
-}
+//       <Table
+//         columns={columns}
+//         dataSource={data}
+//         rowKey="maViPham"
+//         pagination={{ pageSize: 5 }}
+//       />
+//     </div>
+//   );
+// }

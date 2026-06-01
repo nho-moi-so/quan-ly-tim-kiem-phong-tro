@@ -146,12 +146,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           label: "Danh Sách Bài Đăng",
           onClick: () => router.push("/admin/quan-ly-bai-dang"),
         },
-        {
-          key: "bcvp",
-          label: "Báo cáo vi phạm",
-          onClick: () =>
-            router.push("/admin/quan-ly-bai-dang/bao-cao"),
-        },
+        // {
+        //   key: "bcvp",
+        //   label: "Báo cáo vi phạm",
+        //   onClick: () =>
+        //     router.push("/admin/quan-ly-bai-dang/bao-cao"),
+        // },
       ],
     },
     {

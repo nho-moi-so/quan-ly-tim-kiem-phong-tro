@@ -8,9 +8,6 @@ import { WalletBlockchainRepository } from "@/repositories/walletBlockchainRepos
 import { X509Identity } from "fabric-network";
 import admin from "firebase-admin";
 
-const {contract, close} = await createFabricClient();
-const repoBlockchainFabric = new BlockchainFabricRepository(contract);
-
 export const ContractService = {
     bookApartment: async (data: {
         apartmentId: string;
@@ -20,6 +17,8 @@ export const ContractService = {
         total?: number;
         userId: string;
     }) => {
+        const { contract, gateway, client, close } = await createFabricClient();
+        const repoBlockchainFabric = new BlockchainFabricRepository(contract);
         const startDateMs = data.startDate.toString().length === 10
             ? data.startDate * 1000
             : data.startDate;
@@ -77,6 +76,11 @@ export const ContractService = {
             //lay identity tu firebase de tao tren blockchain
             const walletUser = await WalletBlockchainRepository.getIdentityFromFirebase(data.userId) as X509Identity;
 
+            if (!walletUser) {
+                throw new Error("User wallet not found on blockchain. Please enroll user first via setupMasterAdmin.ts → syncFirebaseToFabricUser.ts");
+            }
+            
+
             await repoBlockchainFabric.bookApartmentWithUser(
                 walletUser,
                 contractData.Id,
@@ -91,7 +95,12 @@ export const ContractService = {
         catch(err){
             //neu tao tren blockchain that bai thi xoa tren firebase
             await ContractRepository.delete(contractData.Id);
+            await InvoiceRepository.delete(invoiceData.Id);
             throw err;
+        }
+        finally {
+            // ✅ FIX: Luôn close connection khi xong
+            close();
         }
         return contractData;
     },

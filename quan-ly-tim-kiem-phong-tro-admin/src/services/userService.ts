@@ -24,7 +24,7 @@ export const UserService = {
         console.log("==1==");
 
         // Khởi tạo fabric client
-        const {contract, close} = await createFabricClient();
+        const { contract, close } = await createFabricClient();
         const repoBlockchainFabric = new BlockchainFabricRepository(contract);
         console.log("==2==");
 
@@ -55,54 +55,58 @@ export const UserService = {
             if (!masterAdmin) {
                 throw new Error("Master admin identity not found in Firebase");
             }
+            const caAdmin = await WalletBlockchainRepository.getIdentityFromFirebase('ca-admin') as X509Identity;
+            if (!caAdmin) {
+                throw new Error("CA admin identity not found in Firebase");
+            }
             console.log("==4==");
-            try{
+            try {
                 //TẠO VÍ TRONG BỘ NHỚ (In-Memory Wallet) để lấy context
                 const memoryWallet = await Wallets.newInMemoryWallet();
-                await memoryWallet.put('admin', masterAdmin);
+                await memoryWallet.put('ca-admin', caAdmin);
 
                 //Lấy provider và adminUser context
-                const provider = memoryWallet.getProviderRegistry().getProvider(masterAdmin.type);
-                const adminUser = await provider.getUserContext(masterAdmin, 'admin');
+                const provider = memoryWallet.getProviderRegistry().getProvider(caAdmin.type);
+                const caAdminUser = await provider.getUserContext(caAdmin, 'ca-admin');
 
-                //Bây giờ mới dùng adminUser này để Register qua CA
+                //Bây giờ mới dùng caAdminUser này để Register qua CA
                 const secret = await ca.register({
-                    affiliation: 'org1.department1',
+                    affiliation: 'org1',
                     enrollmentID: authUid,
                     role: 'client'
-                }, adminUser);
+                }, caAdminUser);
                 const enrollment = await ca.enroll({
                     enrollmentID: authUid,
                     enrollmentSecret: secret
                 });
                 await WalletBlockchainRepository.create({
-                                UserID: authUid,
-                                CredentialsCertificate: enrollment.certificate,
-                                CredentialsPrivateKey: enrollment.key.toBytes(),
-                                MSPID: 'Org1MSP',
-                                Type: 'X.509'
-                            });
+                    UserID: authUid,
+                    CredentialsCertificate: enrollment.certificate,
+                    CredentialsPrivateKey: enrollment.key.toBytes(),
+                    MSPID: 'Org1MSP',
+                    Type: 'X.509'
+                });
             }
-            catch(err){
+            catch (err) {
                 console.error("Failed to register/enroll user with CA, rolling back user creation: ", err);
                 throw new Error("Failed to register/enroll user with CA");
             }
-                       
+
             console.log("==5==");
             // 6. BLOCKCHAIN: Tạo bản ghi User trên Ledger bằng Master Admin identity
-            try{
+            try {
                 await repoBlockchainFabric.createUserWithMasterAdmin(
                     masterAdmin,
-                    newUser.Id, 
-                    data.fullName, 
+                    newUser.Id,
+                    data.fullName,
                     data.balance,
                     data.role.toUpperCase() as any
                 );
-            }catch(err){
+            } catch (err) {
                 console.error("Failed to create user on blockchain, rolling back user creation: ", err);
                 throw new Error("Failed to create user on blockchain");
             }
-            
+
             return newUser;
         } catch (err) {
             if (newUser?.Id) {

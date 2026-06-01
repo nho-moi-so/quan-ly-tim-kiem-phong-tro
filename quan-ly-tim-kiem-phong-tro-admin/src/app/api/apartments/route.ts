@@ -17,6 +17,9 @@ const CreateApartmentSchema = z.object({
     status: z.string().optional(),
     type: z.string().optional(),
     userId: z.string(),
+    checkInTime: z.string().optional(),
+    checkOutTime: z.string().optional(),
+    
 });
 export const POST = async (request: Request) => {
     try{

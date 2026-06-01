@@ -10,12 +10,14 @@ export interface Apartment{
     MaxOccupancy: number;
     Password: string;
     PathImage: string[];
-    Requirements: string;
+    Requirements: string[];
     Status: string;
     Type: string;
     UserID: string;
     Latitude?: number;
     Longitude?: number;
+    CheckInTime?: string;
+    CheckOutTime?: string;
 }
 
 export type CreateApartmentData = Omit<Apartment, "Id">;
