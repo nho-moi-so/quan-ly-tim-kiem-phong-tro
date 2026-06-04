@@ -14,8 +14,9 @@ services:
       - fabric_test
 
   explorer.example.com:
-    image: hyperledger/explorer:1.2.0
+    image: hyperledger/explorer:latest
     container_name: explorer.example.com
+    restart: always  # <--- THÊM DÒNG NÀY VÀO ĐÂY
     environment:
       - DATABASE_HOST=explorerdb.example.com
       - DATABASE_PORT=5432

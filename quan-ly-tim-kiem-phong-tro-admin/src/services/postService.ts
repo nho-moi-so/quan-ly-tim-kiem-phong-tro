@@ -39,7 +39,7 @@ export const PostService = {
         }
         
         const updatedPost = await PostRepository.update(postId, {
-            Status: "approved"
+            Status: "Approved"
         });
         
         return {
@@ -55,7 +55,7 @@ export const PostService = {
         }
         
         const updatedPost = await PostRepository.update(postId, {
-            Status: "rejected"
+            Status: "Rejected"
         });
         
         return {

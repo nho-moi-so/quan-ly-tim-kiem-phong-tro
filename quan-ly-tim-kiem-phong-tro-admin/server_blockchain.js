@@ -113,7 +113,7 @@ app.post('/api/get-password', async (req, res) => {
 		return res.status(400).json({ error: 'Thiếu roomCode' });
 	}
 	const apartment = await ApartmentRepository.getByRoomCode(roomCode);
-	apartmentId = apartment?.Id;
+	const apartmentId = apartment?.Id;
 	if (!apartmentId) {
 		return res.status(404).json({ error: 'Không tìm thấy căn hộ với roomCode đã cho' });
 	}
