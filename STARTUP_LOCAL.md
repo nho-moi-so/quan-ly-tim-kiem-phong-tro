@@ -495,6 +495,8 @@ ls blockchain-fabric-v2/test-network/organizations/peerOrganizations/org1.exampl
 cd blockchain-fabric-explorer
 ./explorer.sh clean   # Xóa data cũ (khuyến nghị khi vừa reset network)
 ./explorer.sh start
+docker-compose restart explorer.example.com
+docker logs explorer.example.com --tail 20
 
 # Truy cập: http://localhost:8080
 # Username: exploreradmin / Password: exploreradminpw

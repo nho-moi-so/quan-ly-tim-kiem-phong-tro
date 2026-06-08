@@ -16,8 +16,8 @@ import { ContractService } from "@/services/contractService";
 import z from "zod";
 const BookApartmentSchema = z.object({
     apartmentId: z.string(),
-    endDate: z.number(),
-    startDate: z.number(),
+    endDate: z.coerce.date(),
+    startDate: z.coerce.date(),
     status: z.string().optional(),
     total: z.number().optional(),
     userId: z.string()
@@ -27,6 +27,7 @@ export const POST = async (request: Request) => {
         const body = await request.json();
         const parsedData = BookApartmentSchema.parse(body);
 
+        
         //call service to book apartment
         const result = await ContractService.bookApartment(parsedData);
 

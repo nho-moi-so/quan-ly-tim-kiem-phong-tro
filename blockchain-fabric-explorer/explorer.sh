@@ -40,9 +40,11 @@ check_fabric_network() {
 }
 
 # Check certificates
+# Check certificates
 check_certificates() {
     print_header "Kiểm tra Certificates"
     
+    # --- 1. KIỂM TRA VÀ CẬP NHẬT PRIVATE KEY ---
     KEYSTORE_DIR="$FABRIC_NET_DIR/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore"
     
     if [ ! -d "$KEYSTORE_DIR" ]; then
@@ -59,11 +61,28 @@ check_certificates() {
     PRIVATE_KEY_NAME=$(basename "$PRIVATE_KEY")
     print_color "✅ Private key: $PRIVATE_KEY_NAME" "$GREEN"
     
-    # Update private key path in network config if needed
     if ! grep -q "$PRIVATE_KEY_NAME" connection-profile/network-config.json; then
         print_color "🔄 Cập nhật private key path..." "$YELLOW"
         sed -i "s|/tmp/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/[^\"]*|/tmp/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/$PRIVATE_KEY_NAME|g" connection-profile/network-config.json
         print_color "✅ Đã cập nhật private key path" "$GREEN"
+    fi
+
+    # --- 2. KIỂM TRA VÀ CẬP NHẬT SIGNED CERTIFICATE ---
+    SIGNCERTS_DIR="$FABRIC_NET_DIR/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts"
+    
+    CERT_FILE=$(ls $SIGNCERTS_DIR/*.pem 2>/dev/null | head -1)
+    if [ -z "$CERT_FILE" ]; then
+        print_color "❌ Không tìm thấy certificate file trong $SIGNCERTS_DIR" "$RED"
+        exit 1
+    fi
+    
+    CERT_FILE_NAME=$(basename "$CERT_FILE")
+    print_color "✅ Certificate: $CERT_FILE_NAME" "$GREEN"
+    
+    if ! grep -q "$CERT_FILE_NAME" connection-profile/network-config.json; then
+        print_color "🔄 Cập nhật signedCert path..." "$YELLOW"
+        sed -i "s|/tmp/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/[^\"]*|/tmp/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/$CERT_FILE_NAME|g" connection-profile/network-config.json
+        print_color "✅ Đã cập nhật signedCert path" "$GREEN"
     fi
 }
 

@@ -11,28 +11,54 @@ import admin from "firebase-admin";
 export const ContractService = {
     bookApartment: async (data: {
         apartmentId: string;
-        endDate: number;
-        startDate: number;
+        endDate: Date;
+        startDate: Date;
         status?: string;
         total?: number;
         userId: string;
     }) => {
+
+        
         const { contract, gateway, client, close } = await createFabricClient();
         const repoBlockchainFabric = new BlockchainFabricRepository(contract);
-        const startDateMs = data.startDate.toString().length === 10
-            ? data.startDate * 1000
-            : data.startDate;
-        const endDateMs = data.endDate.toString().length === 10
-            ? data.endDate * 1000
-            : data.endDate;
-        const startDateSec = Math.floor(startDateMs / 1000);
-        const endDateSec = Math.floor(endDateMs / 1000);
-
-        //tao du lieu tren firebase
+        
         const apartment = await ApartmentRepository.getById(data.apartmentId);
         if(!apartment){
             throw new Error("Apartment not found");
         }
+        // console.log("Apartment data:", apartment);
+        const apartment_check_in_time = apartment.CheckInTime
+        const apartment_check_out_time = apartment.CheckOutTime
+        const booking_start_time = data.startDate;
+        const booking_end_time = data.endDate;
+
+        // BƯỚC 1: Chặt đuôi T...Z, chỉ lấy phần ngày "YYYY-MM-DD"
+        const startDateOnly = booking_start_time.toISOString().split('T')[0]; // "2026-06-10"
+        const endDateOnly = booking_end_time.toISOString().split('T')[0];     // "2026-06-11"
+
+        // BƯỚC 2: Ghép chuỗi Ngày và Giờ lại (định dạng chuẩn ISO ghép)
+        // Thêm :00 ở cuối để tạo thành HH:mm:ss
+        const exactCheckInDate = new Date(`${startDateOnly}T${apartment_check_in_time}:00`); 
+        const exactCheckOutDate = new Date(`${endDateOnly}T${apartment_check_out_time}:00`);
+
+        // BƯỚC 3: Quy đổi ra Unix Timestamp (chia 1000 để chuyển từ mili-giây sang giây)
+        const checkInUnix = Math.floor(exactCheckInDate.getTime() / 1000);
+        const checkOutUnix = Math.floor(exactCheckOutDate.getTime() / 1000);
+
+        // console.log("Check-in Unix:", checkInUnix); 
+        // console.log("Check-out Unix:", checkOutUnix);
+        
+        const startDateMs = checkInUnix.toString().length === 10
+        ? checkInUnix * 1000
+        : checkInUnix;
+        const endDateMs = checkOutUnix.toString().length === 10
+        ? checkOutUnix * 1000
+        : checkOutUnix;
+        const startDateSec = Math.floor(startDateMs / 1000);
+        // throw new Error("Booking failed due to some reason");
+        const endDateSec = Math.floor(endDateMs / 1000);
+
+        //tao du lieu tren firebase
         const apartmentStatus = (apartment.Status || "").toLowerCase();
         if(apartmentStatus !== "available"){
             throw new Error("Apartment is not available for booking");
