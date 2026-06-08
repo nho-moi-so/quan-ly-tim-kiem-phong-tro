@@ -39,6 +39,24 @@ class ApartmentStatus {
         )
         .key;
   }
+
+  /// Map backend status to ApartmentStatus values
+  /// Handles various formats: AVAILABLE, booked, Booked, RENTED, occupied, etc.
+  static String mapBackendStatus(String? backendStatus) {
+    if (backendStatus == null || backendStatus.isEmpty) return available;
+    
+    final normalized = backendStatus.toLowerCase();
+    
+    if (normalized.contains('available')) {
+      return available;
+    } else if (normalized.contains('booked') || normalized.contains('rented') || normalized.contains('occupied')) {
+      return rented;
+    } else if (normalized.contains('fixing') || normalized.contains('maintenance')) {
+      return fixing;
+    }
+    
+    return available; // Default
+  }
 }
 
 //Kiểm tra status của yêu cầu đặt phòng: pending( chờ xác nhận), approved(đã được duyệt), cancelled(đã hủy),
@@ -141,6 +159,8 @@ class PostStatus {
         return 'Đã hủy';
       case 'completed':
         return 'Hoàn thành';
+      case 'created':
+        return 'Đã tạo';
       default:
         return status;
     }

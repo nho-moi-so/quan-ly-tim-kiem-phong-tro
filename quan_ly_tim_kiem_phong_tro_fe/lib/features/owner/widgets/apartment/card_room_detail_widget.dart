@@ -137,13 +137,9 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
     );
 
     // Nếu statusController.text có dữ liệu thì gán cho selectedRoomState
+    // Map backend status to ApartmentStatus values
     if (statusController.text.isNotEmpty) {
-      String rawStatus = statusController.text;
-      if (rawStatus.length > 1) {
-        selectedRoomState = rawStatus[0].toUpperCase() + rawStatus.substring(1).toLowerCase();
-      } else {
-        selectedRoomState = rawStatus;
-      }
+      selectedRoomState = ApartmentStatus.mapBackendStatus(statusController.text);
     } else {
       selectedRoomState = null;
     }

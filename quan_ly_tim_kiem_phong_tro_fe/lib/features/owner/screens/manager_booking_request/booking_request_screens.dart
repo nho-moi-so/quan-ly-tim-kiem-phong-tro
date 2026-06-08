@@ -52,7 +52,9 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
     final statusMatch = currentFilter == BookingFilter.approved
         ? r.status?.toLowerCase() == 'approved' ||
             r.status?.toLowerCase() == 'completed' ||
-            r.status?.toLowerCase() == 'pending'
+            r.status?.toLowerCase() == 'pending' ||
+            r.status?.toLowerCase() == 'active' ||
+            r.status?.toLowerCase() == 'created'
         : r.status?.toLowerCase() == 'cancelled';
       final date = r.checkinDate;
       // Nếu chưa chọn filter ngày thì luôn true

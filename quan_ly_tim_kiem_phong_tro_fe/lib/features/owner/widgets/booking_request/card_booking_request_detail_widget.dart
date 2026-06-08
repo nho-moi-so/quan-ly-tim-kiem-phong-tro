@@ -74,8 +74,10 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
         return const Color(0xFF10B981);
       case 'cancelled':
         return const Color(0xFFEF4444);
-      case 'completed':
+      case 'completed' :
         return const Color(0xFF8B5CF6);
+      case 'created':
+        return const Color(0xFF3B82F6);
       default:
         return const Color(0xFF6B7280);
     }

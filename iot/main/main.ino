@@ -31,15 +31,15 @@ Servo myServo;
 const int servoPin = 18; // Chân kết nối servo
 
 // Thông tin mạng WiFi
-const char* ssid = "vo van hai";       // Tên WiFi
-const char* password = "99999999";     // Mật khẩu WiFi
+const char* ssid = "Là CAFE 24H";       // Tên WiFi
+const char* password = "";     // Mật khẩu WiFi
 
 // Thông tin về căn hộ
 String roomCode = "";
 
 //thông tin host server
 String hostServer = "https://pluvious-shady-joline.ngrok-free.dev";
-String blockchainServer = "http://zierd-171-252-153-254.run.pinggy-free.link";
+String blockchainServer = "https://zvpta-115-75-106-79.run.pinggy-free.link";
 
 //Thông tin của thiết bị iot này
 String type_iot = "smart_lock";
@@ -179,12 +179,26 @@ void pollPasswordHash() {
       if (status == "success" && newPasswordHash.length() > 0) {
         if (newPasswordHash != currentPasswordHash) {
           currentPasswordHash = newPasswordHash;
-          Serial.println("[IoT] Da cap nhat passwordHash moi tu /api/get-password");
+          // // ---- THAY THẾ SERIAL BẰNG LCD (THÀNH CÔNG) ----
+          // lcd.clear();
+          // lcd.setCursor(0, 0);
+          // lcd.print(" nhat MK:"); // 12 ký tự
+          // lcd.setCursor(0, 1);
+          // lcd.print("Thanh cong!"); // 11 ký tự
+          // delay(2000); // Dừng 2 giây để người dùng đọc thông báo
+          // ----------------------------------------------
         }
       }
     }
   } else {
-    Serial.println("[IoT] Loi poll /api/get-password: " + String(httpResponseCode));
+    // ---- THAY THẾ SERIAL BẰNG LCD (BÁO LỖI SERVER) ----
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Loi tai MK:"); // 11 ký tự
+    lcd.setCursor(0, 1);
+    lcd.print("Ma: " + String(httpResponseCode)); // Ví dụ: "Ma: -1" hoặc "Ma: 500"
+    delay(2000); // Dừng 2 giây để xem mã lỗi
+    // ---------------------------------------------------
   }
 
   http.end();
@@ -470,6 +484,7 @@ void loop(){
             roomCode = roomCodeData; // Lưu roomCode
             lcd.setCursor(0, 1);
             lcd.print("Da ket noi!");
+            pollPasswordHash();
           } else {
             lcd.print("OTP sai!");
             lcd.setCursor(0, 1);

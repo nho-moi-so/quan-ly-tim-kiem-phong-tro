@@ -498,15 +498,15 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                                   iconColor: const Color(0xFFFBBC04),
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildInfoRow(
-                                  icon: Icons.savings,
-                                  label: 'Tiền cọc',
-                                  value: depositController.text,
-                                  iconColor: const Color(0xFFFBBC04),
-                                ),
-                              ),
+                              // const SizedBox(width: 12),
+                              // Expanded(
+                              //   child: _buildInfoRow(
+                              //     icon: Icons.savings,
+                              //     label: 'Tiền cọc',
+                              //     value: depositController.text,
+                              //     iconColor: const Color(0xFFFBBC04),
+                              //   ),
+                              // ),
                             ],
                           ),
                           const Divider(height: 20),

@@ -58,7 +58,9 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'approved' || 'completed':
+      case 'approved':
+      case 'completed':
+      case 'created':
         return const Color(0xFF10B981);
       case 'cancelled':
         return const Color(0xFFEF4444);
@@ -71,7 +73,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
 
   String _displayStatus(String status) {
     final s = status.toLowerCase();
-    if (s.contains('approved') || s.contains('completed') || s.contains('duyệt') || s.contains('xác nhận')) return 'Đã thanh toán';
+    if (s.contains('approved') || s.contains('completed') || s.contains('created') || s.contains('active') || s.contains('duyệt') || s.contains('xác nhận')) return 'Đã thanh toán';
     if (s.contains('cancelled') || s.contains('hủy') || s.contains('từ chối')) return 'Đã hủy';
     if (s.contains('pending') || s.contains('chờ')) return 'Chờ xử lý';
     return status;
@@ -368,7 +370,9 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
     List<Widget> actionButtons = [];
   if (widget.status.toLowerCase() == 'approved' || 
       widget.status.toLowerCase() == 'completed' ||
-      widget.status.toLowerCase() == 'pending') {
+      widget.status.toLowerCase() == 'created' ||
+      widget.status.toLowerCase() == 'active'||
+      widget.status.toLowerCase() == 'pending'){
       // Trạng thái Approved/Completed/Pending: Hiển thị nút Hợp đồng
       actionButtons.add(
         Expanded(

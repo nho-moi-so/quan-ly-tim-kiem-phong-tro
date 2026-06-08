@@ -48,11 +48,14 @@ class DashboardService {
           final contractsSnapshot = await _firestore
               .collection('contract')
               .where('ApartmentId', whereIn: batchIds)
-              .where('Status', isEqualTo: 'Pending')
               .get();
 
           for (var contract in contractsSnapshot.docs) {
             final data = contract.data();
+            // Filter statuses client-side since using whereIn on ApartmentId
+            final status = (data['Status'] ?? '').toString().toLowerCase();
+            if (status != 'pending' && status != 'created' && status != 'active') continue;
+
             final endDate = _parseDateTime(data['EndDate']);
             if (endDate != null && endDate.isAfter(DateTime.now())) {
               rentedApartmentIds.add(data['ApartmentId']);

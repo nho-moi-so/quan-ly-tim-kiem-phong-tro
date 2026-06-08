@@ -49,7 +49,7 @@ class BookingRequestController {
         final otherFees = 100000.0; // Phí dịch vụ, điện nước, etc.
         final taxRate = 10.0; // 10% VAT
         final discount = 200000.0; // Giảm giá khuyến mãi
-        final totalPrice = dailyRate * (numberOfDays > 0 ? numberOfDays : 1) + otherFees + (dailyRate * (numberOfDays > 0 ? numberOfDays : 1) + otherFees) * (taxRate / 100) - discount;
+        final totalPrice = dailyRate * (numberOfDays > 0 ? numberOfDays : 1);
         
       try {
         var user = await _userService.getUserById(contract.userId);
