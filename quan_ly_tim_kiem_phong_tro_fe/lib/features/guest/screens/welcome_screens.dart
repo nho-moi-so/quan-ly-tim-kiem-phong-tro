@@ -15,25 +15,27 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
-              Image.asset(
-                "assets/images/logo.png",
-                height: 120,
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Image.asset("assets/images/logo (2).png", height: 120),
               ),
-
-              const SizedBox(height: 20),
-
-              const Text(
-                "Smart rentals, simple living.",
-                style: TextStyle(color: Colors.grey),
-              ),
-
               const SizedBox(height: 50),
 
               SizedBox(
                 width: double.infinity,
                 height: 50,
-                
+
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.push(

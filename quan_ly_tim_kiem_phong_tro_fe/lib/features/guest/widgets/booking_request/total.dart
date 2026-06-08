@@ -5,8 +5,11 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/model/search_criteria.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/booking_success_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/vnpay_service.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/momo_service.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/wallet_service.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/controller/booking_controller.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-enum PaymentMethod { vnpay, momo, cash }
+enum PaymentMethod { wallet, vnpay, momo, cash }
 
 class Total extends StatefulWidget {
   final Apartment apartment;
@@ -31,9 +34,36 @@ class Total extends StatefulWidget {
 }
 
 class _TotalState extends State<Total> {
-  bool _isPolicyAccepted = false;
+  PaymentMethod _selectedPayment = PaymentMethod.wallet;
 
-  PaymentMethod _selectedPayment = PaymentMethod.vnpay;
+  double walletBalance = 0;
+  bool _isPolicyAccepted = false;
+  @override
+  void initState() {
+    super.initState();
+    loadWalletBalance();
+  }
+
+  Future<void> loadWalletBalance() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    if (doc.exists) {
+      final data = doc.data();
+
+      setState(() {
+        walletBalance = (data?['Balance'] as num?)?.toDouble() ?? 0;
+      });
+
+      print("Wallet Balance = $walletBalance");
+    }
+  }
+
+  //PaymentMethod _selectedPayment = PaymentMethod.vnpay;
 
   void _showPolicyDialog() {
     showDialog(
@@ -70,10 +100,38 @@ class _TotalState extends State<Total> {
   }
 
   Future<void> _handleBooking() async {
+    print("Payment Method = $_selectedPayment");
+
     try {
       if (!_isPolicyAccepted) return;
 
-      /// ================= VNPAY =================
+      // ================= WALLET =================
+      if (_selectedPayment == PaymentMethod.wallet) {
+        final result = await BookingController().createBooking(
+          apartmentId: widget.apartment.ApartmentID!,
+          startDate: widget.criteria!.checkIn!,
+          endDate: widget.criteria!.checkOut!,
+          userId: FirebaseAuth.instance.currentUser!.uid,
+        );
+
+        print(result);
+
+        if (!result['success']) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(result['message'])));
+          return;
+        }
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
+        );
+
+        return;
+      }
+
+      // ================= VNPAY =================
       if (_selectedPayment == PaymentMethod.vnpay) {
         final success = await VNPayService().pay(
           bookingId:
@@ -83,22 +141,31 @@ class _TotalState extends State<Total> {
           orderInfo: 'Thanh toán căn hộ ${widget.apartment.ApartmentID}',
         );
 
-        if (success) {
-          await _saveBooking();
+        if (!success) return;
 
-          if (!mounted) return;
+        final result = await BookingController().createBooking(
+          apartmentId: widget.apartment.ApartmentID!,
+          startDate: widget.criteria!.checkIn!,
+          endDate: widget.criteria!.checkOut!,
+          userId: FirebaseAuth.instance.currentUser!.uid,
+        );
 
-          Navigator.pushReplacement(
+        if (!result['success']) {
+          ScaffoldMessenger.of(
             context,
-            MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
-          );
+          ).showSnackBar(SnackBar(content: Text(result['message'])));
+          return;
         }
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
+        );
 
         return;
       }
 
-      /// ================= MOMO =================
-
+      // ================= MOMO =================
       if (_selectedPayment == PaymentMethod.momo) {
         final success = await MoMoService().pay(
           bookingId:
@@ -108,58 +175,58 @@ class _TotalState extends State<Total> {
           orderInfo: 'Thanh toán căn hộ ${widget.apartment.ApartmentID}',
         );
 
-        if (success) {
-          await _saveBooking();
+        if (!success) return;
 
-          if (!mounted) return;
+        final result = await BookingController().createBooking(
+          apartmentId: widget.apartment.ApartmentID!,
+          startDate: widget.criteria!.checkIn!,
+          endDate: widget.criteria!.checkOut!,
+          userId: FirebaseAuth.instance.currentUser!.uid,
+        );
 
-          Navigator.pushReplacement(
+        if (!result['success']) {
+          ScaffoldMessenger.of(
             context,
-            MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
-          );
+          ).showSnackBar(SnackBar(content: Text(result['message'])));
+          return;
         }
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
+        );
 
         return;
       }
 
-      /// ================= CASH =================
-      await _saveBooking();
+      // ================= CASH =================
+      if (_selectedPayment == PaymentMethod.cash) {
+        final result = await BookingController().createBooking(
+          apartmentId: widget.apartment.ApartmentID!,
+          startDate: widget.criteria!.checkIn!,
+          endDate: widget.criteria!.checkOut!,
+          userId: FirebaseAuth.instance.currentUser!.uid,
+        );
 
-      if (!mounted) return;
+        if (!result['success']) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(result['message'])));
+          return;
+        }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
-      );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const BookingSuccessScreen()),
+        );
+
+        return;
+      }
     } catch (e) {
-      if (!mounted) return;
-
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Lỗi khi đặt phòng: $e')));
+      ).showSnackBar(SnackBar(content: Text("Lỗi khi đặt phòng: $e")));
     }
-  }
-
-  Future<void> _saveBooking() async {
-    await FirebaseFirestore.instance.collection('contract').add({
-      'UserID': 'dYSjvUDL2vwRrSgqiDHy',
-
-      'ApartmentId': widget.apartment.ApartmentID ?? 'unknown',
-
-      'StartDate': widget.criteria?.checkIn?.toIso8601String(),
-
-      'EndDate': widget.criteria?.checkOut?.toIso8601String(),
-
-      'Total': widget.totalAmount,
-
-      'PaymentMethod': _selectedPayment.name,
-
-      'Status': 'Paid',
-
-      'CreatedDate': FieldValue.serverTimestamp(),
-
-      'UpdateDate': DateTime.now(),
-    });
   }
 
   @override
@@ -273,6 +340,38 @@ class _TotalState extends State<Total> {
           ),
 
           const SizedBox(height: 8),
+
+          // Ví nội bộ
+          RadioListTile<PaymentMethod>(
+            value: PaymentMethod.wallet,
+            groupValue: _selectedPayment,
+            onChanged: (value) {
+              setState(() {
+                _selectedPayment = value!;
+              });
+            },
+            title: const Text(
+              "Ví Tiền Của Tôi",
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser!.uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Text("Số dư: 0đ");
+                }
+
+                final data = snapshot.data!.data() as Map<String, dynamic>?;
+
+                final balance = (data?['Balance'] as num?)?.toDouble() ?? 0;
+
+                return Text("Số dư: ${formatVND(balance.toInt())}");
+              },
+            ),
+          ),
 
           RadioListTile<PaymentMethod>(
             value: PaymentMethod.vnpay,

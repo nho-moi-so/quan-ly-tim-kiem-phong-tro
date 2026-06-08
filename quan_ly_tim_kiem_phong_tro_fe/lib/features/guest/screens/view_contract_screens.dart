@@ -70,3 +70,4 @@ class ViewContractScreens extends StatelessWidget {
     );
   }
 }
+

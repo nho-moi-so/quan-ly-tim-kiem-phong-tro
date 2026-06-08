@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Contract {
   final String contractID;
   final String userId;
+  final String? fullName; 
   final String? ApartmentId;
   
   final DateTime startDate;
@@ -22,6 +23,7 @@ class Contract {
     required this.total,
     required this.userId,
     this.ApartmentId,
+    this.fullName,
   });
 
   static DateTime _getDateTime(dynamic value) {
@@ -40,6 +42,10 @@ class Contract {
 
 
   static int _getTotalAsInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is String) {
+      return int.tryParse(value) ?? 0;
+    }
     if (value is int) {
       return value;
     }
@@ -63,8 +69,10 @@ class Contract {
  
       total: _getTotalAsInt(map['Total']), 
       
+      
       userId: map['UserID'] ?? "",
       ApartmentId: map['ApartmentId'],
+      fullName: map['FullName'],
     );
   }
   
@@ -80,5 +88,6 @@ class Contract {
     
     'UserID': userId,
     if (ApartmentId != null) 'ApartmentId': ApartmentId,
+    if (fullName != null) 'FullName': fullName,
   };
 }

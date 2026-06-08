@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/booking_request.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/booking_request/booking_detail_dialog.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/contract.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/contract_service.dart';
 
 class BookingCard extends StatelessWidget {
   final dynamic data;
@@ -18,7 +19,7 @@ class BookingCard extends StatelessWidget {
   });
 
   bool get _isContract => data is Contract;
-  bool get _isBooking => data is BookingRequest;
+  //bool get _isBooking => data is BookingRequest;
 
   String _formatDate(DateTime date) {
     return DateFormat('dd/MM/yyyy').format(date);
@@ -35,6 +36,7 @@ class BookingCard extends StatelessWidget {
       case 'thành công':
         return const Color.fromARGB(255, 87, 172, 44);
       case 'active':
+        return Colors.green;
       case 'approved':
       case 'đang hoạt động':
         return Colors.green;
@@ -134,14 +136,15 @@ class BookingCard extends StatelessWidget {
         _buildRow(Icons.attach_money, "Tổng Tiền:", fontSize),
         _buildRow(Icons.circle, "Trạng Thái:", fontSize),
       ];
-    } else if (_isBooking) {
-      return [
-        _buildRow(Icons.home, "Mã Đơn:", fontSize),
-        _buildRow(Icons.person, "Tên Khách:", fontSize),
-        _buildRow(Icons.calendar_today, "Checkin-Checkout:", fontSize),
-        _buildRow(Icons.circle, "Trạng Thái:", fontSize),
-      ];
     }
+    // } else if (_isBooking) {
+    //   return [
+    //     _buildRow(Icons.home, "Mã Đơn:", fontSize),
+    //     _buildRow(Icons.person, "Tên Khách:", fontSize),
+    //     _buildRow(Icons.calendar_today, "Checkin-Checkout:", fontSize),
+    //     _buildRow(Icons.circle, "Trạng Thái:", fontSize),
+    //   ];
+    // }
     return [];
   }
 
@@ -155,7 +158,12 @@ class BookingCard extends StatelessWidget {
 
       return [
         _buildValue(contract.contractID, fontSize),
-        _buildValue(contract.userId, fontSize),
+        _buildValue(
+          (contract.fullName?.isNotEmpty ?? false)
+              ? contract.fullName!
+              : 'Ngooi',
+          fontSize,
+        ),
         _buildValue(
           "${_formatDate(contract.startDate)} - $endDateDisplay",
           fontSize,
@@ -167,22 +175,23 @@ class BookingCard extends StatelessWidget {
           statusColor: _getStatusColor(contract.status),
         ),
       ];
-    } else if (_isBooking) {
-      BookingRequest booking = data as BookingRequest;
-      return [
-        _buildValue(booking.id ?? "", fontSize),
-        _buildValue(booking.userId ?? "Không rõ", fontSize),
-        _buildValue(
-          "${booking.checkinDate} - ${booking.checkoutDate}",
-          fontSize,
-        ),
-        _buildValue(
-          booking.status ?? "Chờ duyệt",
-          fontSize,
-          statusColor: _getStatusColor(booking.status ?? "pending"),
-        ),
-      ];
     }
+    // } else if (_isBooking) {
+    //   BookingRequest booking = data as BookingRequest;
+    //   return [
+    //     _buildValue(booking.id ?? "", fontSize),
+    //     _buildValue(booking.userId ?? "Không rõ", fontSize),
+    //     _buildValue(
+    //       "${booking.checkinDate} - ${booking.checkoutDate}",
+    //       fontSize,
+    //     ),
+    //     _buildValue(
+    //       booking.status ?? "Chờ duyệt",
+    //       fontSize,
+    //       statusColor: _getStatusColor(booking.status ?? "pending"),
+    //     ),
+    //   ];
+    // }
     return [];
   }
 
@@ -233,13 +242,7 @@ class BookingCard extends StatelessWidget {
   void _defaultDelete() {}
 
   void _defaultView(BuildContext context) {
-    if (_isBooking) {
-      BookingRequest booking = data as BookingRequest;
-      showDialog(
-        context: context,
-        builder: (context) => BookingDetailDialog(booking: booking),
-      );
-    } else if (_isContract) {
+    if (_isContract) {
       _showContractDetailDialog(context);
     }
   }
@@ -264,7 +267,7 @@ class BookingCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildDetailRow('Mã hợp đồng:', contract.contractID),
-              _buildDetailRow('Người thuê:', contract.userId),
+              _buildDetailRow('Người thuê:', contract.fullName ?? 'Ngooi'),
               _buildDetailRow('Ngày bắt đầu:', _formatDate(contract.startDate)),
               _buildDetailRow('Ngày kết thúc:', endDateDetail),
               _buildDetailRow('Tổng tiền:', _formatCurrency(contract.total)),

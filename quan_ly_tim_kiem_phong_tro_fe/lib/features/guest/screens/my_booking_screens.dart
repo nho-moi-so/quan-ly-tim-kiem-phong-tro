@@ -4,8 +4,9 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/booking_req
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/booking_request.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/contract.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/booking_service.dart';
-import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/contract_service.dart'; 
-import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/my_back_button.dart'; 
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/guest/contract_service.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/widgets/my_back_button.dart';
+
 class MyBookingScreens extends StatefulWidget {
   const MyBookingScreens({super.key});
 
@@ -13,40 +14,42 @@ class MyBookingScreens extends StatefulWidget {
   State<MyBookingScreens> createState() => _MyBookingScreensState();
 }
 
-class _MyBookingScreensState extends State<MyBookingScreens> with SingleTickerProviderStateMixin {
+class _MyBookingScreensState extends State<MyBookingScreens>
+    with SingleTickerProviderStateMixin {
   final _bookingService = BookingService();
 
-  final _contractService = ContractService(); 
+  final _contractService = ContractService();
+  final currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
-  late Future<List<BookingRequest>> _futureBookings;
+  late Future<List<Contract>> _futureBookings;
   late Stream<List<Contract>> _contractStream;
-  
+
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+
     _tabController = TabController(length: 2, vsync: this);
-    
-    const String currentUserId = "dYSjvUDL2vwRrSgqiDHy"; 
 
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-    //_futureBookings = _bookingService.getBookingByUser(); 
-    _contractStream = _contractService.getContractsByUserId(currentUserId);
+    _futureBookings = _contractService.getBookingByUser(user.uid);
+    _contractStream = _contractService.getContractsByUserId(user.uid);
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const MyBackButton(), 
+        leading: const MyBackButton(),
         title: const Text("Quản Lý Đặt Phòng & Hợp Đồng"),
         bottom: TabBar(
           controller: _tabController,
@@ -58,10 +61,7 @@ class _MyBookingScreensState extends State<MyBookingScreens> with SingleTickerPr
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildBookingList(),
-          _buildContractList(), 
-        ],
+        children: [_buildBookingList(), _buildContractList()],
       ),
     );
   }
@@ -74,7 +74,7 @@ class _MyBookingScreensState extends State<MyBookingScreens> with SingleTickerPr
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         if (snapshot.hasError) {
           print('Lỗi tải hợp đồng: ${snapshot.error}');
           return Center(child: Text("Lỗi tải dữ liệu: ${snapshot.error}"));
@@ -102,7 +102,7 @@ class _MyBookingScreensState extends State<MyBookingScreens> with SingleTickerPr
 
   // Widget hiển thị danh sách Đặt phòng (FutureBuilder)
   Widget _buildBookingList() {
-    return FutureBuilder<List<BookingRequest>>(
+    return FutureBuilder<List<Contract>>(
       future: _futureBookings,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -117,8 +117,8 @@ class _MyBookingScreensState extends State<MyBookingScreens> with SingleTickerPr
           padding: const EdgeInsets.all(16),
           itemCount: bookings.length,
           itemBuilder: (context, index) {
-            final booking = bookings[index];
-            return BookingCard(data: booking);
+            final contract = bookings[index];
+            return BookingCard(data: contract);
           },
         );
       },

@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/controller/booking_controller.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/model/contract.dart';
 
 class BookingService {
   final BookingController _bookingController = BookingController();
@@ -14,8 +17,8 @@ class BookingService {
     required String apartmentId,
     required DateTime startDate,
     required DateTime endDate,
-    required double amount,
-    required String paymentMethod,
+    // required double amount,
+    // required String paymentMethod,
   }) async {
     try {
       final user = _auth.currentUser;
@@ -35,9 +38,9 @@ class BookingService {
         endDate: endDate,
         userId: user.uid,
 
-        paymentMethod: paymentMethod,
+        // paymentMethod: paymentMethod,
 
-        amount: amount,
+        // amount: amount,
       );
 
       if (!apiResult['success']) {
@@ -76,6 +79,22 @@ class BookingService {
         'message': e.toString(),
         'errorCode': 'BOOKING_SERVICE_ERROR',
       };
+    }
+  }
+
+  Future<List<Contract>> getBookingByUser(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('contract')
+          .where('UserID', isEqualTo: userId)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        return Contract.fromMap(doc.id, doc.data());
+      }).toList();
+    } catch (e) {
+      print("GET CONTRACT ERROR: $e");
+      return [];
     }
   }
 }

@@ -63,7 +63,7 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
   }
 
   // Future<void> pickFront() async {
-    // final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  // final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
   //   if (image != null) {
   //     setState(() {
@@ -93,15 +93,21 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               children: [
-                const SizedBox(height: 60),
-
-                Image.asset("assets/images/logo.png", height: 120),
-
-                const SizedBox(height: 15),
-
-                const Text(
-                  "Smart rentals, simple living.",
-                  style: TextStyle(color: Colors.grey),
+                
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Image.asset("assets/images/logo (2).png", height: 120),
                 ),
 
                 const SizedBox(height: 40),
@@ -136,7 +142,7 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
                 TextField(
                   controller: phoneController,
                   decoration: InputDecoration(
-                    hintText: "Số điện thoại",
+                    hintText: "Phone Number",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -239,25 +245,25 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
                 //       ),
                 //     ),
 
-                    // const SizedBox(height: 10),
+                // const SizedBox(height: 10),
 
-                    /// FRONT
-                    // GestureDetector(
-                    //   onTap: pickFront,
-                    //   child: Container(
-                    //     height: 120,
-                    //     width: double.infinity,
-                    //     decoration: BoxDecoration(
-                    //       border: Border.all(color: Colors.grey),
-                    //       borderRadius: BorderRadius.circular(10),
-                    //     ),
-                    //     child: cccdFront == null
-                    //         ? const Center(child: Text("Upload CCCD Mặt Trước"))
-                    //         : Image.file(cccdFront!, fit: BoxFit.cover),
-                    //   ),
-                    // ),
+                /// FRONT
+                // GestureDetector(
+                //   onTap: pickFront,
+                //   child: Container(
+                //     height: 120,
+                //     width: double.infinity,
+                //     decoration: BoxDecoration(
+                //       border: Border.all(color: Colors.grey),
+                //       borderRadius: BorderRadius.circular(10),
+                //     ),
+                //     child: cccdFront == null
+                //         ? const Center(child: Text("Upload CCCD Mặt Trước"))
+                //         : Image.file(cccdFront!, fit: BoxFit.cover),
+                //   ),
+                // ),
 
-                    // const SizedBox(height: 10),
+                // const SizedBox(height: 10),
 
                 //     /// BACK
                 //     GestureDetector(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/message_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/setting_screens.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/my_booking_screens.dart';
 
 class BottomTabbar extends StatelessWidget {
   const BottomTabbar({super.key});
@@ -33,6 +34,16 @@ class BottomTabbar extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const SettingScreens()),
+              );
+            },
+          ),
+          _BottomNavItem(
+            icon: Icons.person,
+            label: 'Lịch Sử',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MyBookingScreens()),
               );
             },
           ),

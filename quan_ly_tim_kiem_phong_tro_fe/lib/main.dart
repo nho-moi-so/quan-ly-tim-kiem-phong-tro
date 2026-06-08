@@ -6,6 +6,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/signup_emai
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/welcome_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/view_contract_screens.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/setting_screens.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/features/guest/screens/my_booking_screens.dart';
 import 'firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      initialRoute: '/setting',
+      initialRoute: '/welcomescreen',
 
       routes: {
         '/welcomescreen': (context) => const WelcomeScreen(),
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignUpEmailScreen(),
         '/home': (context) => const HomePageScreen(),
         '/setting': (context) => const SettingScreens(),
+        '/mybooking': (context) => const MyBookingScreens(),
         //'/contract': (context) => const ViewContractScreens(),
         
       },

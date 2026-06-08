@@ -17,20 +17,11 @@ class Logo extends StatelessWidget {
             child: Column(
               children: [
                 Image.asset(
-                  'assets/images/logo.png',
+                  'assets/images/logo (2).png',
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 8),
               ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Smart rentals, simple living.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.black87,
             ),
           ),
         ],

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthController {
   /// ================= REGISTER =================
@@ -45,17 +46,17 @@ class AuthController {
       //String? cccdBackUrl;
 
       //if (cccdFront != null) {
-        //cccdFrontUrl = await _uploadImage(
-          //serverDomain: serverDomain,
-          //imageFile: cccdFront,
-        //);
+      //cccdFrontUrl = await _uploadImage(
+      //serverDomain: serverDomain,
+      //imageFile: cccdFront,
+      //);
       //}
 
       //if (cccdBack != null) {
-        //cccdBackUrl = await _uploadImage(
-          //serverDomain: serverDomain,
-          //imageFile: cccdBack,
-        //);
+      //cccdBackUrl = await _uploadImage(
+      //serverDomain: serverDomain,
+      //imageFile: cccdBack,
+      //);
       //}
 
       /// 3. Gọi API đăng ký
@@ -76,9 +77,7 @@ class AuthController {
 
       final response = await http.post(
         uri,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode(body),
       );
 
@@ -87,72 +86,47 @@ class AuthController {
       if (jsonResponse['status'] == 'success') {
         return {
           'success': true,
-          'message':
-              jsonResponse['message'] ?? 'Đăng ký thành công',
+          'message': jsonResponse['message'] ?? 'Đăng ký thành công',
           'data': jsonResponse['data'],
         };
       }
 
       return {
         'success': false,
-        'message':
-            jsonResponse['message'] ?? 'Đăng ký thất bại',
+        'message': jsonResponse['message'] ?? 'Đăng ký thất bại',
         'errorCode': 'REGISTER_FAILED',
       };
     } catch (e) {
       return _handleRegistrationError(e);
     }
   }
+
   Future<Map<String, dynamic>> loginUser({
-  required String email,
-  required String password,
-}) async {
-  try {
-    final String? serverDomain = dotenv.env['HOST_SERVER'];
+    required String email,
+    required String password,
+  }) async {
+    try {
+      UserCredential credential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email.trim(), password: password);
 
-    if (serverDomain == null || serverDomain.isEmpty) {
-      throw Exception('HOST_SERVER chưa được cấu hình');
-    }
-
-    final uri = Uri.parse('$serverDomain/api/auth/login');
-
-    final response = await http.post(
-      uri,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'email': email.trim(),
-        'password': password,
-      }),
-    );
-
-    final jsonResponse = jsonDecode(response.body);
-
-    if (response.statusCode == 200 &&
-        jsonResponse['status'] == 'success') {
       return {
         'success': true,
-        'message':
-            jsonResponse['message'] ?? 'Đăng nhập thành công',
-        'data': jsonResponse['data'],
+        'message': 'Đăng nhập thành công',
+        'uid': credential.user!.uid,
+        'email': credential.user!.email,
       };
-    }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-credential') {
+        return {'success': false, 'message': 'Email hoặc mật khẩu không đúng'};
+      }
 
-    return {
-      'success': false,
-      'message':
-          jsonResponse['message'] ?? 'Đăng nhập thất bại',
-      'errorCode': 'LOGIN_FAILED',
-    };
-  } catch (e) {
-    return {
-      'success': false,
-      'message': e.toString(),
-      'errorCode': 'LOGIN_ERROR',
-    };
+      if (e.code == 'user-not-found') {
+        return {'success': false, 'message': 'Tài khoản không tồn tại'};
+      }
+
+      return {'success': false, 'message': e.message};
+    }
   }
-}
 
   /// ================= UPLOAD IMAGE =================
   // Future<String> _uploadImage({
@@ -197,8 +171,7 @@ class AuthController {
   // }
 
   /// ================= VALIDATE =================
-  Map<String, dynamic>
-      _validateRegistrationInputs({
+  Map<String, dynamic> _validateRegistrationInputs({
     required String username,
     required String phone,
     required String email,
@@ -206,65 +179,38 @@ class AuthController {
     required String confirmPassword,
   }) {
     if (username.trim().isEmpty) {
-      return {
-        'isValid': false,
-        'message': 'Vui lòng nhập họ tên',
-      };
+      return {'isValid': false, 'message': 'Vui lòng nhập họ tên'};
     }
 
     if (phone.trim().isEmpty) {
-      return {
-        'isValid': false,
-        'message': 'Vui lòng nhập số điện thoại',
-      };
+      return {'isValid': false, 'message': 'Vui lòng nhập số điện thoại'};
     }
 
     if (!_isValidPhone(phone)) {
-      return {
-        'isValid': false,
-        'message': 'Số điện thoại không hợp lệ',
-      };
+      return {'isValid': false, 'message': 'Số điện thoại không hợp lệ'};
     }
 
     if (email.trim().isEmpty) {
-      return {
-        'isValid': false,
-        'message': 'Vui lòng nhập email',
-      };
+      return {'isValid': false, 'message': 'Vui lòng nhập email'};
     }
 
     if (!_isValidEmail(email)) {
-      return {
-        'isValid': false,
-        'message': 'Email không hợp lệ',
-      };
+      return {'isValid': false, 'message': 'Email không hợp lệ'};
     }
 
     if (password.length < 6) {
-      return {
-        'isValid': false,
-        'message':
-            'Mật khẩu phải có ít nhất 6 ký tự',
-      };
+      return {'isValid': false, 'message': 'Mật khẩu phải có ít nhất 6 ký tự'};
     }
 
     if (password != confirmPassword) {
-      return {
-        'isValid': false,
-        'message':
-            'Mật khẩu xác nhận không khớp',
-      };
+      return {'isValid': false, 'message': 'Mật khẩu xác nhận không khớp'};
     }
 
-    return {
-      'isValid': true,
-    };
+    return {'isValid': true};
   }
 
   bool _isValidEmail(String email) {
-    final regex = RegExp(
-      r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$',
-    );
+    final regex = RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$');
     return regex.hasMatch(email);
   }
 
@@ -274,10 +220,7 @@ class AuthController {
   }
 
   /// ================= ERROR HANDLER =================
-  Map<String, dynamic>
-      _handleRegistrationError(
-    dynamic error,
-  ) {
+  Map<String, dynamic> _handleRegistrationError(dynamic error) {
     return {
       'success': false,
       'message': error.toString(),

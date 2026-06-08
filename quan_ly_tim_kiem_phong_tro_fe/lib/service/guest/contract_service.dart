@@ -7,9 +7,17 @@ class ContractService {
 
   // Lấy tất cả contracts (ít dùng, chủ yếu để test)
   Stream<List<Contract>> getAllContracts() {
-    return _firestore.collection(collectionName).snapshots().map(
+    return _firestore
+        .collection(collectionName)
+        .snapshots()
+        .map(
           (snapshot) => snapshot.docs
-              .map((doc) => Contract.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+              .map(
+                (doc) => Contract.fromMap(
+                  doc.id,
+                  doc.data() as Map<String, dynamic>,
+                ),
+              )
               .toList(),
         );
   }
@@ -22,7 +30,12 @@ class ContractService {
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
-              .map((doc) => Contract.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+              .map(
+                (doc) => Contract.fromMap(
+                  doc.id,
+                  doc.data() as Map<String, dynamic>,
+                ),
+              )
               .toList(),
         );
   }
@@ -35,7 +48,12 @@ class ContractService {
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
-              .map((doc) => Contract.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+              .map(
+                (doc) => Contract.fromMap(
+                  doc.id,
+                  doc.data() as Map<String, dynamic>,
+                ),
+              )
               .toList(),
         );
   }
@@ -43,8 +61,10 @@ class ContractService {
   // Lấy một contract theo ID
   Future<Contract?> getContractById(String contractId) async {
     try {
-      DocumentSnapshot doc =
-          await _firestore.collection(collectionName).doc(contractId).get();
+      DocumentSnapshot doc = await _firestore
+          .collection(collectionName)
+          .doc(contractId)
+          .get();
       if (doc.exists) {
         return Contract.fromMap(doc.id, doc.data() as Map<String, dynamic>);
       }
@@ -58,8 +78,9 @@ class ContractService {
   // Tạo contract mới
   Future<String?> createContract(Contract contract) async {
     try {
-      DocumentReference docRef =
-          await _firestore.collection(collectionName).add(contract.toMap());
+      DocumentReference docRef = await _firestore
+          .collection(collectionName)
+          .add(contract.toMap());
       return docRef.id;
     } catch (e) {
       print('Error creating contract: $e');
@@ -68,9 +89,15 @@ class ContractService {
   }
 
   // Cập nhật contract
-  Future<bool> updateContract(String contractId, Map<String, dynamic> updates) async {
+  Future<bool> updateContract(
+    String contractId,
+    Map<String, dynamic> updates,
+  ) async {
     try {
-      await _firestore.collection(collectionName).doc(contractId).update(updates);
+      await _firestore
+          .collection(collectionName)
+          .doc(contractId)
+          .update(updates);
       return true;
     } catch (e) {
       print('Error updating contract: $e');
@@ -100,6 +127,38 @@ class ContractService {
     } catch (e) {
       print('Error deleting contract: $e');
       return false;
+    }
+  }
+
+  Future<List<Contract>> getBookingByUser(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('contract')
+          .where('UserID', isEqualTo: userId)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        return Contract.fromMap(doc.id, doc.data());
+      }).toList();
+    } catch (e) {
+      print("GET CONTRACT ERROR: $e");
+      return [];
+    }
+  }
+
+  Future<String> getUserName(String userId) async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (!doc.exists) return "Không xác định";
+
+      return doc.data()?['Fullname'] ?? "Không có tên";
+    } catch (e) {
+      print("Lỗi lấy tên user: $e");
+      return "Lỗi";
     }
   }
 }

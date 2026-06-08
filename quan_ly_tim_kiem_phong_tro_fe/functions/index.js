@@ -14,8 +14,8 @@ exports.createVNPayUrl = functions.https.onRequest(async (req, res) => {
   try {
     const { bookingId, amount, orderInfo } = req.body;
 
-    const tmnCode = "CZ6I9GH2";
-    const secretKey = "D6WRGMTJECYT8PEXM6AMARRG2MFEGZCQ";
+    const tmnCode = "LOIOXZT8";
+    const secretKey = "GSMXV0OQ3CUMVJXMLLE9G1R84OP3HKXU";
 
     const ipAddr = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
@@ -41,7 +41,7 @@ exports.createVNPayUrl = functions.https.onRequest(async (req, res) => {
       vnp_OrderInfo: orderInfo,
       vnp_OrderType: "billpayment",
       vnp_Amount: amount * 100,
-      vnp_ReturnUrl: "https://google.com",
+      vnp_ReturnUrl: "https://sandbox.vnpayment.vn/apis/vnpay-demo/",
       vnp_IpAddr: ipAddr,
       vnp_CreateDate: vnp_CreateDate,
     };
