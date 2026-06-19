@@ -166,13 +166,9 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(child: _infoField(label: 'Phòng', controller: roomController, icon: Icons.meeting_room, hint: 'Số phòng...', readOnly: true)),
-                      const SizedBox(width: 16),
-                      Expanded(child: _infoField(label: 'Trạng Thái', controller: statusController, icon: Icons.info_outline, hint: 'Nhập trạng thái...', readOnly: true)),
-                    ],
-                  ),
+                  _infoField(label: 'Phòng', controller: roomController, icon: Icons.meeting_room, hint: 'Số phòng...', readOnly: true),
+                  const SizedBox(height: 16),
+                  _infoField(label: 'Trạng Thái', controller: statusController, icon: Icons.info_outline, hint: 'Nhập trạng thái...', readOnly: true),
                   const SizedBox(height: 16),
                   _infoField(
                     label: 'Tiền Phòng (1 ngày):',

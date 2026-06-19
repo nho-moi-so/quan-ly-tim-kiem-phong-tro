@@ -157,7 +157,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                               ),
                             ),
                             Text(
-                              '#${widget.bookingId}',
+                              '#${widget.bookingId.length > 10 ? '${widget.bookingId.substring(0, 5)}${widget.bookingId.substring(widget.bookingId.length - 5)}' : widget.bookingId}',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -228,7 +228,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                 _buildInfoRow(
                   icon: Icons.login_rounded,
                   iconColor: const Color(0xFF10B981),
-                  label: 'Check-in',
+                  label: 'Nhận phòng',
                   value: _formatDateTime(widget.checkinDate)
                 ),
                 const SizedBox(height: 12),
@@ -237,7 +237,7 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
                 _buildInfoRow(
                   icon: Icons.logout_rounded,
                   iconColor: const Color(0xFFEF4444),
-                  label: 'Check-out',
+                  label: 'Trả phòng',
                   value: _formatDateTime(widget.checkoutDate)
                 ),
                 const SizedBox(height: 12),

@@ -1,8 +1,14 @@
+// Cách chạy file
+// 1. Thay ssid, password wifi
+// 2. Thay hostServer, blockchainServer
+// 3. Thay device_id
+
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 #include <string>
 #include <ESP32Servo.h>
 #include <Keypad.h>
@@ -31,7 +37,7 @@ Servo myServo;
 const int servoPin = 18; // Chân kết nối servo
 
 // Thông tin mạng WiFi
-const char* ssid = "Là CAFE 24H";       // Tên WiFi
+const char* ssid = "abcxyz";       // Tên WiFi
 const char* password = "";     // Mật khẩu WiFi
 
 // Thông tin về căn hộ
@@ -39,11 +45,14 @@ String roomCode = "";
 
 //thông tin host server
 String hostServer = "https://pluvious-shady-joline.ngrok-free.dev";
-String blockchainServer = "https://zvpta-115-75-106-79.run.pinggy-free.link";
+String blockchainServer = "https://emazp-115-75-106-79.run.pinggy-free.link";
 
 //Thông tin của thiết bị iot này
 String type_iot = "smart_lock";
-String device_id = "LOCK001";
+String device_id = "LOCK003";
+
+// WiFiClientSecure dùng chung cho tất cả HTTPS request
+WiFiClientSecure secureClient;
 
 // Trạng thái ping từ server
 String lastPingCode = "";
@@ -88,7 +97,8 @@ void pollPingCode() {
   HTTPClient http;
   String url = hostServer + "/api/iot/devices/" + roomCode + "/ping?deviceId=" + device_id;
 
-  http.begin(url);
+  http.begin(secureClient, url);
+  http.setTimeout(20000);
   int httpResponseCode = http.GET();
 
   if (httpResponseCode == 200) {
@@ -117,7 +127,8 @@ void updatePingReply(String pingCode) {
   HTTPClient http;
   String url = hostServer + "/api/iot/devices/" + roomCode + "/ping";
 
-  http.begin(url);
+  http.begin(secureClient, url);
+  http.setTimeout(20000);
   http.addHeader("Content-Type", "application/json");
 
   String postData = "{\"deviceId\":\"" + device_id + "\",\"pingReply\":\"" + pingCode + "\"}";
@@ -138,7 +149,7 @@ void updatePingReply(String pingCode) {
 void pollPasswordHash();
 
 void delayWithPoll() {
-      // Kiểm tra và poll PingCode trong khi chờ nhập
+      // Kiểm tra và poll PingCode trong khi chờ nhập 2 giây
   if (millis() - lastPollTime > 2000) {
     pollPingCode();
     lastPollTime = millis();
@@ -160,7 +171,8 @@ void pollPasswordHash() {
   HTTPClient http;
   String url = blockchainServer + "/api/get-password";
 
-  http.begin(url);
+  http.begin(secureClient, url);
+  http.setTimeout(20000);
   http.addHeader("Content-Type", "application/json");
 
   String postData = "{\"roomCode\":\"" + roomCode + "\"}";
@@ -226,7 +238,7 @@ void setup(){
   WiFi.begin(ssid, password);
 
   int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+  while (WiFi.status() != WL_CONNECTED && attempts < 40) {
     delay(500);
     lcd.print(".");
     attempts++;
@@ -239,6 +251,9 @@ void setup(){
     lcd.setCursor(0, 1);
     lcd.print(WiFi.localIP());
     delay(2000);
+
+    // Bỏ qua xác thực SSL certificate (cần cho ngrok HTTPS)
+    secureClient.setInsecure();
   } else {
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -266,7 +281,8 @@ void setup(){
   
   HTTPClient http;
   String url = hostServer + "/api/iot/re-connect";
-  http.begin(url);
+  http.begin(secureClient, url);
+  http.setTimeout(20000);
   http.addHeader("Content-Type", "application/json");
   
   String postData = "{\"deviceId\":\"" + device_id + "\"}";
@@ -368,7 +384,8 @@ void loop(){
     
     HTTPClient http;
     String url = hostServer + "/api/iot/connect-room";
-    http.begin(url);
+    http.begin(secureClient, url);
+    http.setTimeout(20000);
     http.addHeader("Content-Type", "application/json");
 
     // Dữ liệu JSON để gửi
@@ -457,9 +474,9 @@ void loop(){
         lcd.print("Xac thuc OTP...");
         
         url = hostServer + "/api/iot/verify-otp";
-        http.begin(url);
-        // TĂNG THỜI GIAN CHỜ LÊN 15 GIÂY (15000ms)
-        http.setTimeout(15000);
+        http.begin(secureClient, url);
+        // TĂNG THỜI GIAN CHỜ LÊN 20 GIÂY (20000ms)
+        http.setTimeout(20000);
         http.addHeader("Content-Type", "application/json");
 
         // Dữ liệu JSON để gửi
@@ -527,97 +544,7 @@ void loop(){
         delay(2000);
     }
     http.end();
-  }
-  else{
-    // Hiển thị mã phòng + hướng dẫn, chờ nhấn '#' để vào nhập mật khẩu
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    String line1 = "Ma phong:" + roomCode;
-    if (line1.length() > 16) line1 = line1.substring(0, 16);
-    lcd.print(line1);
-    lcd.setCursor(0, 1);
-    lcd.print("Nhan # de nhap MK");
-
-    // Chờ '#'
-    while (true) {
-      // Kiểm tra và poll PingCode trong khi chờ nhập
-      delayWithPoll();
-      
-      char k = keypad.getKey();
-      if (k == '#') break;
-      delay(50);
-    }
-
-    // Màn hình nhập mật khẩu
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Nhap mat khau:");
-    String inputPassword = "";
-    lcd.setCursor(0, 1);
-    lcd.print("#:OK *:Xoa");
-    delay(1500);
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Mat khau:");
-    lcd.setCursor(0, 1);
-    inputPassword = "";
-    bool inputComplete = false;
-    while (!inputComplete) {
-      // Kiểm tra và poll PingCode trong khi chờ nhập
-      delayWithPoll();
-      
-      char key = keypad.getKey();
-      if (key) {
-        if (key == '#') {
-          if (inputPassword.length() > 0) inputComplete = true;
-        } else if (key == '*') {
-          if (inputPassword.length() > 0) {
-            inputPassword.remove(inputPassword.length() - 1);
-            lcd.setCursor(0, 1);
-            lcd.print("                ");
-            lcd.setCursor(0, 1);
-            lcd.print(inputPassword);
-          }
-        } else {
-          if (inputPassword.length() < 16) {
-            inputPassword += key;
-            lcd.print(key);
-          }
-        }
-      }
-    }
-
-    // Xác thực offline: chỉ hash và so sánh với currentPasswordHash đã lưu
-    lcd.clear();
-    lcd.setCursor(0, 0);
-
-    if (currentPasswordHash.length() == 0) {
-      lcd.print("Chua co du lieu");
-      lcd.setCursor(0, 1);
-      lcd.print("hash mat khau");
-      delay(2000);
-    } else {
-      String inputPasswordHash = hashPassword(inputPassword);
-
-      if (inputPasswordHash == currentPasswordHash) {
-        if (currentAngle != 90) {
-          lcd.print("Mo cua...");
-          myServo.write(90);      // xoay đến 90° và giữ
-          currentAngle = 90;
-          delay(500);
-          lcd.clear();
-          lcd.setCursor(0, 0);
-          lcd.print("Cua da mo!");
-        } else {
-          lcd.print("Da mo roi!");
-        }
-      } else {
-        lcd.print("Sai mat khau!");
-      }
-      lcd.setCursor(0, 1);
-      lcd.print("Offline compare");
-      delay(2000);
-    }
+    if (roomCode == "") return;
   }
 
   // =================================================================================

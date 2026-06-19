@@ -578,9 +578,12 @@ class _ContractDetailScreenState extends State<ContractDetailScreen> {
 
                     // 3. Header Row
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        TagWithIconWidget(title: 'Chi tiết hợp đồng'),
+                        Expanded(
+                          child: TagWithIconWidget(title: 'Chi tiết hợp đồng'),
+                        ),
+                        const SizedBox(width: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -600,7 +603,7 @@ class _ContractDetailScreenState extends State<ContractDetailScreen> {
                             ],
                           ),
                           child: Text(
-                            '#${widget.contractId}',
+                            '#${widget.contractId.length > 10 ? '${widget.contractId.substring(0, 5)}${widget.contractId.substring(widget.contractId.length - 5)}' : widget.contractId}',
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,

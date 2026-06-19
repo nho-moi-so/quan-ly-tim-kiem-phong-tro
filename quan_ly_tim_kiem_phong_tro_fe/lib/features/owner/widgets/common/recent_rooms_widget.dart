@@ -13,30 +13,7 @@ class RecentRoomsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (rooms.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey[200]!),
-        ),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(Icons.apartment_rounded, size: 48, color: Colors.grey[400]),
-              const SizedBox(height: 12),
-              Text(
-                'Chưa có phòng nào',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                  fontFamily: 'Inter',
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
     return Container(

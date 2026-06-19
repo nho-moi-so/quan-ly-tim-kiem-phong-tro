@@ -29,7 +29,6 @@ class _OtpDisplayScreenState extends State<OtpDisplayScreen> {
     if (socketService.otp == null && _dialogShown) {
       _dialogShown = false;
     }
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
@@ -513,13 +512,18 @@ class _OtpDisplayScreenState extends State<OtpDisplayScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  socketService.otp ?? '',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 42,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 10,
+                                Flexible(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      socketService.otp ?? '',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 42,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 10,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 8),

@@ -66,9 +66,11 @@ class ContractController {
       longitude: apartment.longitude,
       checkInTime: contract.startDate,
       checkOutTime: contract.endDate,
-      extraInfo: "Không có thêm thông tin",
+      extraInfo: apartment.requirement != null && apartment.requirement!.isNotEmpty 
+          ? apartment.requirement!.join(', ') 
+          : 'Không có thêm thông tin',
       description: apartment.description,
-      password: "12345678",
+      password: apartment.password,
       // Invoice data
       dailyRate: dailyRate,
       numberOfDays: numberOfDays > 0 ? numberOfDays : 1,

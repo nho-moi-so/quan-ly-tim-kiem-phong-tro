@@ -52,16 +52,29 @@ class ExtendInfoWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Nhận phòng - Trả phòng",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    // const Text(
+                    //   "Nhận phòng - Trả phòng",
+                    //   style: TextStyle(
+                    //     fontSize: 15,
+                    //     fontWeight: FontWeight.w500,
+                    //   ),
+                    // ),
                     const SizedBox(height: 2),
-                    Text(
-                      "Nhận phòng - ${formatDateTime(DateTime.parse(checkInTime))}\nTrả phòng - ${formatDateTime(DateTime.parse(checkOutTime))}",
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          const TextSpan(text: "Nhận phòng - "),
+                          TextSpan(
+                            text: formatDateTime(DateTime.parse(checkInTime)),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const TextSpan(text: "\nTrả phòng - "),
+                          TextSpan(
+                            text: formatDateTime(DateTime.parse(checkOutTime)),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w400,

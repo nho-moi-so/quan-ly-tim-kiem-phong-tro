@@ -258,7 +258,13 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
                     ),
                     child: Column(
                       children: [
-                        buildInfoRow('Mã đơn phòng', bookingRequestDetail!.bookingCode ?? '', Icons.qr_code_2_rounded),
+                        buildInfoRow(
+                          'Mã đơn phòng',
+                          (bookingRequestDetail!.bookingCode?.isNotEmpty ?? false)
+                              ? '#${bookingRequestDetail!.bookingCode!.length > 10 ? '${bookingRequestDetail!.bookingCode!.substring(0, 5)}${bookingRequestDetail!.bookingCode!.substring(bookingRequestDetail!.bookingCode!.length - 5)}' : bookingRequestDetail!.bookingCode}'
+                              : '',
+                          Icons.qr_code_2_rounded,
+                        ),
                         const Divider(height: 24),
                         buildInfoRow('Email', bookingRequestDetail!.email!, Icons.email_rounded),
                         const Divider(height: 24),
@@ -266,9 +272,9 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
                         const Divider(height: 24),
                         buildInfoRow('Số người ở tối đa', '${bookingRequestDetail!.numberOfPeople} Người', Icons.groups_rounded),
                         const Divider(height: 24),
-                        buildInfoRow('Check-in', _formatDateTime(bookingRequestDetail!.checkInDate!), Icons.login_rounded),
+                        buildInfoRow('Nhận phòng', _formatDateTime(bookingRequestDetail!.checkInDate!), Icons.login_rounded),
                         const Divider(height: 24),
-                        buildInfoRow('Check-out', _formatDateTime(bookingRequestDetail!.checkOutDate!), Icons.logout_rounded),
+                        buildInfoRow('Trả phòng', _formatDateTime(bookingRequestDetail!.checkOutDate!), Icons.logout_rounded),
                         const Divider(height: 24),
                         buildInfoRowWithStatus('Trạng thái', getStatusInVietnameseCardBookingRequestDetailWidget(bookingRequestDetail!.status ?? ''), statusColor),
                         const Divider(height: 24),

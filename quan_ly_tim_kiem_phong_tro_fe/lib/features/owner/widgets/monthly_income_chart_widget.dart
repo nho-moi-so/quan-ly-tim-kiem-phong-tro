@@ -33,6 +33,7 @@ class _MonthlyIncomeChartState extends State<MonthlyIncomeChartWidget> {
       if (!unionMonths.contains(k)) unionMonths.add(k);
     }
     if (unionMonths.isNotEmpty) {
+      unionMonths.sort((a, b) => b.compareTo(a));
       availableMonths = unionMonths;
     } else {
       availableMonths = ['Năm ${DateTime.now().year}'];

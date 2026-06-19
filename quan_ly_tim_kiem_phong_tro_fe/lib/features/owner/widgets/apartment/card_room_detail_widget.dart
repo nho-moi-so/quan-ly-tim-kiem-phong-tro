@@ -482,7 +482,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Giờ Nhận Phòng',
+                        'Nhận Phòng',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -559,7 +559,7 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Giờ Trả Phòng',
+                        'Trả Phòng',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,

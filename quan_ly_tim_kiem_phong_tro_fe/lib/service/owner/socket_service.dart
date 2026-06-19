@@ -18,7 +18,14 @@ class SocketService with ChangeNotifier {
   String? get apartmentName => _apartmentName;
   String? get connectionStatus => _connectionStatus;
 
-  SocketService() {
+  // Singleton pattern
+  static final SocketService _instance = SocketService._internal();
+
+  factory SocketService() {
+    return _instance;
+  }
+
+  SocketService._internal() {
     // Khởi tạo và kết nối ngay khi service được tạo
     initSocket();
   }
@@ -61,6 +68,8 @@ class SocketService with ChangeNotifier {
       socket.on('otp_received', (data) {
         print('🔑 OTP Received from server: $data');
         
+        bool isAlreadyReady = _connectionStatus == 'OTP Ready';
+
         // Server trả về { otp, roomCode }
         _otp = data['otp']?.toString();  // Đổi từ 'otpCode' thành 'otp'
         _roomCode = data['roomCode']?.toString();
@@ -70,9 +79,11 @@ class SocketService with ChangeNotifier {
         
         notifyListeners();
         
-        // Tự động navigate đến màn hình OTP bằng named route
-        print('🚀 Navigating to /iot-test screen...');
-        navigationService.navigatorKey.currentState?.pushNamed('/iot-test');
+        if (!isAlreadyReady) {
+          // Tự động navigate đến màn hình OTP bằng named route
+          print('🚀 Navigating to /iot-test screen...');
+          navigationService.navigatorKey.currentState?.pushNamed('/iot-test');
+        }
       });
 
       // Event khi verify thành công

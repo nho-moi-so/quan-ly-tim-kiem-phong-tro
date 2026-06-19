@@ -17,7 +17,7 @@ class PostController {
     ApartmentService apartmentService = ApartmentService();
     var apartment = await apartmentService.getApartmentById(apartmentID);
     postDetail.roomNumber = apartment.codeApartment;
-    postDetail.status = ApartmentStatus.toVietnamese(apartment.status!);
+    postDetail.status = ApartmentStatus.toVietnamese(ApartmentStatus.mapBackendStatus(apartment.status));
     postDetail.price = formatCurrency(apartment.dailyRate!);
     postDetail.deposit = formatCurrency(apartment.deposit!);
     postDetail.apartmentId = apartmentID;
@@ -86,19 +86,21 @@ class PostController {
     ApartmentService apartmentService = ApartmentService();
     var apartment = await apartmentService.getApartmentById(post.apartmentID!);
     // tao PostDetail
+    // print("post.status: ${post.status}");
     postDetail = PostDetail(
       postId: post.postID,
       apartmentId: post.apartmentID,
-      roomNumber: "Phòng ${apartment.codeApartment}",
+      roomNumber: apartment.codeApartment!,
       price: formatCurrency(apartment.dailyRate!),
       deposit: formatCurrency(apartment.deposit!),
       address: apartment.address,
-      status: ApartmentStatus.toVietnamese(apartment.status!),
+      status: ApartmentStatus.toVietnamese(ApartmentStatus.mapBackendStatus(apartment.status)),
       postTitle: post.header,
       postDescription: post.description,
-      postStatus: post.status,
+      postStatus: PostStatus.toVietnamese(post.status ?? ''),
       imageUrls: apartment.pathImage,
     );
+    // print("postDetail.postStatus: ${postDetail.postStatus}");
 
     //==hiện tại cho dữ liệu giả
     // postDetail = PostDetail(

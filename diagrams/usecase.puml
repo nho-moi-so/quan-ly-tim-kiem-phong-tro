@@ -32,7 +32,7 @@ actor "Quản trị viên" as Admin
 actor "Người thuê" as Guest
 actor "Chủ căn hộ" as Owner
 
-rectangle "Ứng dụng quản lý & tìm kiếm căn hộ thông minh tích hợp IoT"{
+rectangle "Ứng dụng quản lý & tìm kiếm căn hộ"{
 ' Các chức năng của Chủ căn hộ
 ' usecase "Đăng xuất" as logout
 usecase "Đăng nhập" as login
