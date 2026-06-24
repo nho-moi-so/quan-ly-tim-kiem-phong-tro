@@ -265,8 +265,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               left: "50%",
               transform: "translateX(-50%)",
               width: "400px",
-              display:"flex",
-              justifyContent:"center"
+              display: "flex",
+              justifyContent: "center"
             }}
           >
             <Search
@@ -279,7 +279,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </div>
 
           {/* Avatar */}
-          <UserAvatar 
+          <UserAvatar
             userName={userName}
             onProfileClick={handleProfileClick}
             onLogoutClick={handleLogoutClick}
