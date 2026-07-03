@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
-    const bookings = await BookingService.getBookingsLimit(5);
+    const bookings = await BookingService.getBookingsLimit();
     return NextResponse.json(
       {
         success: true,
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-  
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

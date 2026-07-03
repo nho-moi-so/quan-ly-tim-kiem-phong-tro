@@ -85,7 +85,7 @@ export default function DanhSachTaiKhoanGuest() {
       item.email.toLowerCase().includes(value.toLowerCase()) ||
       item.maTaiKhoan.toLowerCase().includes(value.toLowerCase())
     );
-    
+
     setData(filtered);
   };
 
@@ -124,8 +124,8 @@ export default function DanhSachTaiKhoanGuest() {
             ? "green"
             : record.trangThai === "Bị khóa" ||
               record.trangThai === "Bị Khóa"
-            ? "red"
-            : "orange";
+              ? "red"
+              : "orange";
         return (
           <Space>
             <Tag color={color}>{record.trangThai}</Tag>
@@ -172,6 +172,7 @@ export default function DanhSachTaiKhoanGuest() {
           ) : (
             <Button
               type="primary"
+              danger
               onClick={async () => {
                 try {
                   const res = await fetch(`/api/users/guests/${record.userId}/lock`, { method: 'POST' });
@@ -204,7 +205,7 @@ export default function DanhSachTaiKhoanGuest() {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2>Danh sách quản lý tài khoản khách thuê</h2>
+      <h2>Danh sách tài khoản khách thuê</h2>
 
       <div
         style={{
@@ -228,7 +229,7 @@ export default function DanhSachTaiKhoanGuest() {
         dataSource={data}
         rowKey="maTaiKhoan"
         loading={loading}
-        pagination={{ 
+        pagination={{
           pageSize: 5,
           showTotal: (total) => `Tổng số ${total} tài khoản`
         }}

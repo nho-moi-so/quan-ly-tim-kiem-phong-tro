@@ -87,7 +87,7 @@ export default function DanhSachTaiKhoanOwner() {
       item.email.toLowerCase().includes(value.toLowerCase()) ||
       item.maTaiKhoan.toLowerCase().includes(value.toLowerCase())
     );
-    
+
     setData(filtered);
   };
 
@@ -124,10 +124,10 @@ export default function DanhSachTaiKhoanOwner() {
         let color = "orange";
         if (record.trangThai === "Hoạt động") color = "green";
         else if (record.trangThai === "Bị khóa") color = "red";
-        else if (record.trangThai === "Chờ duyệt") color = "blue";
-        else if (record.trangThai === "Đã duyệt") color = "green";
+        else if (record.trangThai === "Chờ duyệt") color = "orange";
+        else if (record.trangThai === "Đã duyệt") color = "cyan";
         else if (record.trangThai === "Đã từ chối") color = "volcano";
-        
+
         return (
           <Space>
             <Tag color={color}>{record.trangThai}</Tag>
@@ -218,6 +218,7 @@ export default function DanhSachTaiKhoanOwner() {
           ) : (
             <Button
               type="primary"
+              danger
               onClick={async () => {
                 try {
                   const res = await fetch(`/api/users/owners/${record.userId}/lock`, { method: 'POST' });
@@ -244,7 +245,8 @@ export default function DanhSachTaiKhoanOwner() {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2>Danh sách quản lý tài khoản chủ căn hộ</h2>
+      <h2>Danh sách tài khoản chủ căn hộ</h2>
+
       <div
         style={{
           maxWidth: "100%",
@@ -267,7 +269,7 @@ export default function DanhSachTaiKhoanOwner() {
         dataSource={data}
         rowKey="maTaiKhoan"
         loading={loading}
-        pagination={{ 
+        pagination={{
           pageSize: 5,
           showTotal: (total) => `Tổng số ${total} tài khoản`
         }}

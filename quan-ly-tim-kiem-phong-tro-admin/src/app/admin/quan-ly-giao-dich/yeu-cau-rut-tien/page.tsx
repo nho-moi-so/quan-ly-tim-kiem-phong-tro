@@ -169,26 +169,8 @@ export default function YeuCauRutTienPage() {
         </Text>
       ),
     },
-    {
-      title: "Thông tin nhận",
-      dataIndex: "bank_summary",
-      key: "bank_summary",
-      width: 220,
-      render: (bankSummary: string) => (
-        <Tooltip title={bankSummary || "—"}>
-          <Text ellipsis style={{ maxWidth: 190 }}>
-            {bankSummary || "—"}
-          </Text>
-        </Tooltip>
-      ),
-    },
-    {
-      title: "Thời gian duyệt",
-      dataIndex: "completed_at",
-      key: "completed_at",
-      width: 180,
-      render: (completedAt: string | null) => formatDateTime(completedAt),
-    },
+
+
     {
       title: "Trạng thái",
       dataIndex: "status",
@@ -196,25 +178,7 @@ export default function YeuCauRutTienPage() {
       width: 170,
       render: (status: WithdrawStatus) => getStatusTag(status),
     },
-    {
-      title: "Blockchain Hash",
-      dataIndex: "tx_hash",
-      key: "tx_hash",
-      width: 240,
-      render: (hash: string | null) => {
-        if (!hash) {
-          return "—";
-        }
 
-        return (
-          <Tooltip title={hash}>
-            <Text copyable>
-              {hash.slice(0, 8)}...{hash.slice(-8)}
-            </Text>
-          </Tooltip>
-        );
-      },
-    },
     {
       title: "Hành động",
       key: "actions",
@@ -279,7 +243,7 @@ export default function YeuCauRutTienPage() {
         dataSource={data}
         loading={loading}
         pagination={{ pageSize: 10, showSizeChanger: true }}
-        scroll={{ x: 1550 }}
+        scroll={{ x: "max-content" }}
       />
 
       <Modal
@@ -297,10 +261,8 @@ export default function YeuCauRutTienPage() {
                 - {formatCurrency(viewingItem.amount)}
               </Text>
             </Descriptions.Item>
-            <Descriptions.Item label="Thông tin nhận">{viewingItem.bank_summary || "—"}</Descriptions.Item>
-            <Descriptions.Item label="Thời gian duyệt">{formatDateTime(viewingItem.completed_at)}</Descriptions.Item>
+
             <Descriptions.Item label="Trạng thái">{getStatusTag(viewingItem.status)}</Descriptions.Item>
-            <Descriptions.Item label="Blockchain Hash">{viewingItem.tx_hash || "—"}</Descriptions.Item>
           </Descriptions>
         )}
       </Modal>

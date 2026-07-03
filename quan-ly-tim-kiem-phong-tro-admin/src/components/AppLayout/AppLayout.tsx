@@ -140,19 +140,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       key: "quan-ly-bai-dang",
       label: "Quản Lý Bài Đăng",
       icon: <AppstoreOutlined />,
-      children: [
-        {
-          key: "ds-baidang",
-          label: "Danh Sách Bài Đăng",
-          onClick: () => router.push("/admin/quan-ly-bai-dang"),
-        },
-        // {
-        //   key: "bcvp",
-        //   label: "Báo cáo vi phạm",
-        //   onClick: () =>
-        //     router.push("/admin/quan-ly-bai-dang/bao-cao"),
-        // },
-      ],
+      onClick: () => router.push("/admin/quan-ly-bai-dang"),
     },
     {
       key: "quan-ly-iot",

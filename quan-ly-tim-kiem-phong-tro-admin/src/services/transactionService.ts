@@ -5,7 +5,7 @@ import { UserRepository } from "@/repositories/userRepository";
 import { WalletBlockchainRepository } from "@/repositories/walletBlockchainRepository";
 import { Wallets, X509Identity } from "fabric-network";
 
-const {contract, close} = await createFabricClient();
+const { contract, close } = await createFabricClient();
 const repoBlockchainFabric = new BlockchainFabricRepository(contract);
 
 export const TransactionService = {
@@ -17,7 +17,7 @@ export const TransactionService = {
     }) => {
         try {
             const masterAdmin = await WalletBlockchainRepository.getIdentityFromFirebase('master-admin') as X509Identity;
-             if (!masterAdmin) {
+            if (!masterAdmin) {
                 throw new Error("Master admin identity not found in Firebase");
             }
             //TẠO VÍ TRONG BỘ NHỚ (In-Memory Wallet) để lấy context
@@ -31,7 +31,7 @@ export const TransactionService = {
             // Tạo giao dịch nạp tiền trên blockchain
             await repoBlockchainFabric.depositWithMasterAdmin(
                 masterAdmin,
-                data.userId, 
+                data.userId,
                 data.amount
             );
         } catch (err) {
@@ -81,24 +81,24 @@ export const TransactionService = {
     requestWithdraw: async (data: {
         amount: number;
         userId: string;
-     }) => {
+    }) => {
         const { contract: withdrawContract, close: closeWithdraw } = await createFabricClient();
         const withdrawRepo = new BlockchainFabricRepository(withdrawContract);
 
         // Tạo giao dịch rút tiền trên blockchain
-        try{
+        try {
             //lay identity tu firebase de tao tren blockchain
             const walletUser = await WalletBlockchainRepository.getIdentityFromFirebase(data.userId) as X509Identity;
             await withdrawRepo.requestWithdrawWithUser(
                 walletUser,
-                data.userId, 
+                data.userId,
                 data.amount);
         }
-        catch(err){
+        catch (err) {
             console.error("Error during blockchain withdraw transaction:", err);
-            throw new Error("Failed to create withdraw transaction on blockchain"); 
+            throw new Error("Failed to create withdraw transaction on blockchain");
         }
-        finally{
+        finally {
             await closeWithdraw();
         }
         // luu giao dich vao firebase sau khi giao dich tren blockchain thanh cong
@@ -122,7 +122,7 @@ export const TransactionService = {
     },
     approveWithdraw: async (data: {
         transactionId: string;
-     }) => {
+    }) => {
         // Hoàn thành giao dịch rút tiền trên blockchain
         const transaction = await TransactionRepository.getById(data.transactionId);
         if (!transaction) {
@@ -134,35 +134,35 @@ export const TransactionService = {
         if (transaction.Status !== "PENDING") {
             throw new Error("Withdraw transaction is not in pending status");
         }
-        try{
+        try {
             const masterAdmin = await WalletBlockchainRepository.getIdentityFromFirebase('master-admin') as X509Identity;
             if (!masterAdmin) {
                 throw new Error("Master admin identity not found in Firebase");
             }
-             //TẠO VÍ TRONG BỘ NHỚ (In-Memory Wallet) để lấy context
-             const memoryWallet = await Wallets.newInMemoryWallet();
-             await memoryWallet.put('admin', masterAdmin);
- 
-             //Lấy provider và adminUser context
-             const provider = memoryWallet.getProviderRegistry().getProvider(masterAdmin.type);
-             const adminUser = await provider.getUserContext(masterAdmin, 'admin');
+            //TẠO VÍ TRONG BỘ NHỚ (In-Memory Wallet) để lấy context
+            const memoryWallet = await Wallets.newInMemoryWallet();
+            await memoryWallet.put('admin', masterAdmin);
+
+            //Lấy provider và adminUser context
+            const provider = memoryWallet.getProviderRegistry().getProvider(masterAdmin.type);
+            const adminUser = await provider.getUserContext(masterAdmin, 'admin');
             await repoBlockchainFabric.finishWithdrawWithMasterAdmin(
                 masterAdmin,
-                transaction.UserID, 
+                transaction.UserID,
                 transaction.Amount);
         }
-        catch(err){
+        catch (err) {
             console.error("Error during blockchain approve withdraw transaction:", err);
             throw new Error("Failed to approve withdraw transaction on blockchain");
         }
-        finally{
+        finally {
             await close();
         }
         // Cập nhật trạng thái giao dịch rút tiền trong database thành COMPLETED
         try {
             await TransactionRepository.updateWithdrawTransactionStatus(data.transactionId, "COMPLETED");
         }
-        catch(err){
+        catch (err) {
             throw new Error("Failed to update withdraw transaction status in database");
         }
         // tru balance cho user
@@ -232,7 +232,7 @@ export const TransactionService = {
 
             return normalized;
         }
-        catch(err){
+        catch (err) {
             throw new Error("Failed to retrieve withdraw transactions from database");
         }
     },
@@ -266,7 +266,7 @@ export const TransactionService = {
 
                     return {
                         id: transaction.Id,
-                        trans_code: `TX_${transaction.Id.slice(0, 6).toUpperCase()}`,
+                        trans_code: `${transaction.Id.slice(0, 6).toUpperCase()}`,
                         type,
                         amount: Number(transaction.Amount) || 0,
                         status,
