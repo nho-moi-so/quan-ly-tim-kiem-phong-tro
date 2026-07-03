@@ -140,7 +140,7 @@ class LoginScreens extends StatelessWidget {
                       const SizedBox(width: 12),
                       const Expanded(
                         child: Text(
-                          'Hệ thống quản lý và tìm kiếm phòng trọ thông minh',
+                          'Hệ thống quản lý và tìm kiếm phòng trọ thông minh tích hợp IoT và Blockchain',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,

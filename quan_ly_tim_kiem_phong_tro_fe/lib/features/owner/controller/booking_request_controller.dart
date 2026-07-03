@@ -41,9 +41,13 @@ class BookingRequestController {
       // lay thong tin cua apartment
       var apartment = await _apartmentService.getApartmentById(contract.apartmentId);
 
-          // Calculate number of days
-        final numberOfDays = contract.endDate.difference(contract.startDate).inDays;
+          // Calculate number of days (làm tròn lên để tính đủ số ngày thuê)
+        final numberOfDays = (contract.endDate.difference(contract.startDate).inHours / 24).ceil();
         
+        // print("==số ngày==$numberOfDays");
+        // print("==ngày bắt đầu==${contract.startDate}");
+        // print("==ngày kết thúc==${contract.endDate}");
+
         // Mock invoice data (you can calculate these from real data)
         final dailyRate = apartment.dailyRate ?? 0.0;
         final otherFees = 100000.0; // Phí dịch vụ, điện nước, etc.
@@ -78,25 +82,29 @@ class BookingRequestController {
   Future<BookingRequestDetail> getBookingRequestById(String bookingRequestId) async{
     //lấy bookingRequestId -> lấy bookingRequest 
     var contract = await _contractService.getContractById(bookingRequestId);
-    print("==1==${contract.apartmentId}");
+//    print("==1==${contract.apartmentId}");
     //trong bookingRequest có apartmentId -> lấy thông tin của phòng đó
     var apartment = await _apartmentService.getApartmentById(contract.apartmentId);
-    print("==2==${apartment.maxOccupancy}");
+//    print("==2==${apartment.maxOccupancy}");
     //-> trong cái bookingRequest có userId là của người thuê -> lấy userId đó để lấy thông tin user 
     var user = await _userService.getUserById(contract.userId);
-    print("==3==${user.fullName}");
+//    print("==3==${user.fullName}");
     //-> trả về BookingRequestDetail
 
         // Calculate number of days
-    final numberOfDays = contract.endDate.difference(contract.startDate).inDays;
+    final numberOfDays = (contract.endDate.difference(contract.startDate).inHours / 24).ceil();
     
+    // print("==số ngày==$numberOfDays");
+    // print("==ngày bắt đầu==${contract.startDate}");
+    // print("==ngày kết thúc==${contract.endDate}");
     // Mock invoice data (you can calculate these from real data)
     final dailyRate = apartment.dailyRate ?? 0.0;
     final otherFees = 100000.0; // Phí dịch vụ, điện nước, etc.
     final taxRate = 10.0; // 10% VAT
     final discount = 200000.0; // Giảm giá khuyến mãi
-    final totalPrice = dailyRate * (numberOfDays > 0 ? numberOfDays : 1) + otherFees + (dailyRate * (numberOfDays > 0 ? numberOfDays : 1) + otherFees) * (taxRate / 100) - discount;
+    final totalPrice = dailyRate * (numberOfDays > 0 ? numberOfDays : 1);
 
+//    print("==tổng tiền==$totalPrice");
     BookingRequestDetail bookingRequestDetail = BookingRequestDetail(
       fullName: user.fullName,
       roomNumber: apartment.codeApartment,
@@ -114,7 +122,7 @@ class BookingRequestController {
       totalPrice: formatCurrency(totalPrice),
       
     );
-    print("==4==${bookingRequestDetail.checkinCheckout}");
+//    print("==4==${bookingRequestDetail.checkinCheckout}");
     return bookingRequestDetail;
   }
 

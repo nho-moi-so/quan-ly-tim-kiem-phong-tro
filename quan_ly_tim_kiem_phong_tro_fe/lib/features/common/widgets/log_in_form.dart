@@ -258,28 +258,28 @@ class _LogInFormState extends State<LogInForm> {
           ),
         ),
 
-        const SizedBox(height: 8),
+        // const SizedBox(height: 8),
 
-        // Forgot Password
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Chức năng quên mật khẩu')),
-              );
-            },
-            child: const Text(
-              'Quên mật khẩu?',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Noto Sans',
-                color: Color(0xFF4C6FFF),
-              ),
-            ),
-          ),
-        ),
+        // // Forgot Password
+        // Align(
+        //   alignment: Alignment.centerRight,
+        //   child: TextButton(
+        //     onPressed: () {
+        //       ScaffoldMessenger.of(context).showSnackBar(
+        //         const SnackBar(content: Text('Chức năng quên mật khẩu')),
+        //       );
+        //     },
+        //     child: const Text(
+        //       'Quên mật khẩu?',
+        //       style: TextStyle(
+        //         fontSize: 13,
+        //         fontWeight: FontWeight.w600,
+        //         fontFamily: 'Noto Sans',
+        //         color: Color(0xFF4C6FFF),
+        //       ),
+        //     ),
+        //   ),
+        // ),
 
         const SizedBox(height: 16),
 

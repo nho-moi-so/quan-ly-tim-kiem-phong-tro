@@ -193,23 +193,23 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                                       onConfirm: (action) async {
                                           if (action == BookingAction.viewContract) {
                                             //== Hiển thị màn hình hợp đồng
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Row(
-                                                  children: [
-                                                    const Icon(Icons.description, color: Colors.white),
-                                                    const SizedBox(width: 12),
-                                                    Text('Xem hợp đồng: ${req.bookingCode}'),
-                                                  ],
-                                                ),
-                                                backgroundColor: const Color(0xFF10B981),
-                                                duration: const Duration(seconds: 2),
-                                                behavior: SnackBarBehavior.floating,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(10),
-                                                ),
-                                              ),
-                                            );
+                                            // ScaffoldMessenger.of(context).showSnackBar(
+                                            //   SnackBar(
+                                            //     content: Row(
+                                            //       children: [
+                                            //         const Icon(Icons.description, color: Colors.white),
+                                            //         const SizedBox(width: 12),
+                                            //         Text('Xem hợp đồng: ${req.bookingCode}'),
+                                            //       ],
+                                            //     ),
+                                            //     backgroundColor: const Color(0xFF10B981),
+                                            //     duration: const Duration(seconds: 2),
+                                            //     behavior: SnackBarBehavior.floating,
+                                            //     shape: RoundedRectangleBorder(
+                                            //       borderRadius: BorderRadius.circular(10),
+                                            //     ),
+                                            //   ),
+                                            // );
                                             //== Hiển thị màn hình hợp đồng
                                             Navigator.push(
                                               context,
