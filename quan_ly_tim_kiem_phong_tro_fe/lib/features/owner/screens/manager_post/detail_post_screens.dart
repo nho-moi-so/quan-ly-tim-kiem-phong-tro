@@ -35,17 +35,18 @@ class DetailPostScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           final postDetail = snapshot.data!;
-          return SingleChildScrollView(
-            child: Container(
-              width: screenWidth,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              color: Colors.white,
-              
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: screenHeight * 0.03),
-                  Center(child: LogoWidget()),
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Container(
+                width: screenWidth,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                color: Colors.white,
+                
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16),
+                    Center(child: LogoWidget()),
                   // LabelTitleWidget(title: "Thông tin bài đăng"),
                   Center(child: RoomDetailCardWidget(
                     postDetail,
@@ -129,7 +130,7 @@ class DetailPostScreen extends StatelessWidget {
                 ],
               ),
             ),
-          );
+          ));
         },
       ),
     );

@@ -452,23 +452,23 @@ class _CardBookingRequestWidgetState extends State<CardBookingRequestWidget> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Icon(icon, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Text('Bạn đã nhấn "$label"'),
-                  ],
-                ),
-                backgroundColor: bgColor,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                duration: const Duration(seconds: 1),
-              ),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(
+            //     content: Row(
+            //       children: [
+            //         Icon(icon, color: Colors.white, size: 20),
+            //         const SizedBox(width: 8),
+            //         Text('Bạn đã nhấn "$label"'),
+            //       ],
+            //     ),
+            //     backgroundColor: bgColor,
+            //     behavior: SnackBarBehavior.floating,
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(12),
+            //     ),
+            //     duration: const Duration(seconds: 1),
+            //   ),
+            // );
             onTap();
           },
           borderRadius: BorderRadius.circular(12),

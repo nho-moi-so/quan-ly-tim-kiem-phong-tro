@@ -278,7 +278,7 @@ class _CardBookingRequestDetailWidgetState extends State<CardBookingRequestDetai
                         const Divider(height: 24),
                         buildInfoRowWithStatus('Trạng thái', getStatusInVietnameseCardBookingRequestDetailWidget(bookingRequestDetail!.status ?? ''), statusColor),
                         const Divider(height: 24),
-                        buildInfoRow('Tiền phòng', '${formatCurrency(bookingRequestDetail!.price ?? 0.0)} VND', Icons.attach_money_rounded),
+                        buildInfoRow('Tổng tiền', '${bookingRequestDetail!.totalPrice} VND', Icons.attach_money_rounded),
                       ],
                     ),
                   ),
