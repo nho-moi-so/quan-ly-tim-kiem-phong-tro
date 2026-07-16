@@ -100,7 +100,7 @@ class _BookingRequestScreensState extends State<BookingRequestScreens> {
                 currentFilter: currentFilter,
                 options: [
                   FilterOption(
-                    label: 'Đã duyệt',
+                    label: 'Đã thanh toán',
                     icon: Icons.check_circle_rounded,
                     color: const Color(0xFF10B981),
                     value: BookingFilter.approved,

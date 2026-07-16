@@ -1,0 +1,108 @@
+authentication:
+    Identifier
+    Providers
+    Created
+    Signed In
+    User UID
+
+user:
+    Document ID	
+    Balance	
+    CCCD	
+    Email	
+    FullName	
+    Password	
+    Phone	
+    Role	
+    Status
+amenity:
+    Document ID	
+    Description	
+    Name
+amenityInApartment:
+    Document ID	
+    AmenityID	
+    ApartmentID	
+    IsAvailable
+apartment:
+    Document ID	
+    Address	
+    CheckInTime	
+    CheckOutTime	
+    CodeApartment	
+    DailyRate	
+    Description	
+    Latitude	
+    Longitude	
+    MaxOccupancy	
+    Password
+contract:
+    Document ID	
+    ApartmentId	
+    CreatedDate	
+    EndDate	
+    EscrowAmount	
+    StartDate	
+    Status	
+    UserID
+invoice:
+    Document ID		
+    ApartmentId		
+    Code	
+    ContractId	
+    IssueDate	
+    Note	
+    Status	
+    TotalAmount
+invoiceDetail:
+    Document ID	
+    Description	
+    Quantity	
+    Subtotal	
+    UnitPrice
+iot_device_in_apartment:
+    Document ID	
+    ApartmentID	
+    CreationDate	
+    DeviceID	
+    IoTDeviceID	
+    Otp	
+    PingCode	
+    RoomCode	
+    Status
+iot_devices:
+    Document ID	
+    Description	
+    Name
+message:
+    Document ID	
+    Content	
+    ReceiverID	
+    SenderID	
+    SentDate	
+    Status
+posts:
+    Document ID	
+    ApartmentID	
+    CreationDate	
+    Description	
+    Header	
+    Status
+    postID
+transaction:
+    Document ID	
+    Amount	
+    GatewayTransactionId	
+    InvoiceID	
+    PaymentDate	
+    PaymentMethod	
+    Status	
+    Type	
+    UserID
+walletBlockchains:
+    Document ID	
+    CredentialsCertificate	
+    CredentialsPrivateKey	
+    MSPID	
+    Type	
+    UserID

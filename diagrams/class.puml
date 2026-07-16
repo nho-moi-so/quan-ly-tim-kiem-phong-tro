@@ -30,11 +30,11 @@ class User{
 class WalletBlockchain{
     - mspId: string
     - type: string
-    - version: string
+    ' - version: string
     - credentialsCertificate: string
     - credentialsPrivateKey: string
 }
-User "1" -up- "0..1" WalletBlockchain: has
+User "1" -up- "1..*" WalletBlockchain: has
 
 ' enum OwnerStatus {
 '     APPROVED
@@ -118,7 +118,7 @@ class Apartment{
     - type: string
     - requires: List<string>
     ' mật khẩu mở khóa căn hộ cho chủ căn hộ nếu không có người thuê
-    - passwordHash: string 
+    - password: string 
     - checkInTime: time
     - checkOutTime: time
 
@@ -166,7 +166,7 @@ class IoTDeviceInApartment{
     - otp: string
     - status: string
     - pingCode: string
-    - pingReply: string    
+    ' - pingReply: string    
 }
 (Apartment, IoTDevice) .. IoTDeviceInApartment: contains
 
@@ -175,7 +175,7 @@ class Post{
     - header: string
     - description: string
     - status: string
-    - publishedDate: datetime
+    ' - publishedDate: datetime
 }
 ' Post --> PostStatus
 Post "1" -- "0..*" Apartment: advertises
@@ -218,7 +218,7 @@ class Contract{
     'danh sách các điều khoản trong hợp đồng
     - clause: List<string> 
     - status: string
-    - pathFile: string
+    ' - pathFile: string
     - EscrowAmount: decimal
 
 
@@ -287,6 +287,7 @@ class Message{
     - id: string
     - content: string
     - status: string
+    - sentDate: datetime
 }
 (Guest, Owner) .. Message: exchange
 ' Message --> MessageStatus

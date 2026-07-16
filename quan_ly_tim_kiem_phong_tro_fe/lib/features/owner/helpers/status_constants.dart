@@ -158,7 +158,7 @@ class PostStatus {
       case 'cancelled':
         return 'Đã hủy';
       case 'completed':
-        return 'Hoàn thành';
+        return 'Đã thanh toán';
       case 'created':
         return 'Đã tạo';
       default:
