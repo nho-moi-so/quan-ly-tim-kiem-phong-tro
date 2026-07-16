@@ -1,7 +1,7 @@
 "use client";
 import { tranlateStatus } from "@/lib/tranlateStatus";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
-import { Button, message, Modal, Popconfirm, Space, Spin, Table, Tag, Typography } from "antd";
+import { Button, message, Modal, Popconfirm, Progress, Space, Spin, Table, Tag, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 
@@ -24,6 +24,7 @@ export default function ThietBiDaKetNoiPage() {
   const [isCheckingDevice, setIsCheckingDevice] = useState(false);
   const [checkResultVisible, setCheckResultVisible] = useState(false);
   const [checkResult, setCheckResult] = useState<{ device: DeviceRow; isOnline: boolean } | null>(null);
+  const [countdown, setCountdown] = useState(5);
 
   const fetchDevices = async () => {
     setLoading(true);
@@ -70,6 +71,12 @@ export default function ThietBiDaKetNoiPage() {
     // Use rowId (document id) to track which row is being checked for button/loading state
     setCheckingDeviceId(rowId || deviceId);
     setIsCheckingDevice(true);
+    setCountdown(5);
+
+    const interval = setInterval(() => {
+      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
     const device = rows.find(
       (r) => (rowId && r.Id === rowId) || r.DeviceID === deviceId || r.ApartmentCode === roomCode
     );
@@ -86,18 +93,19 @@ export default function ThietBiDaKetNoiPage() {
     } catch (e: any) {
       message.error(e?.message || "Không thể kiểm tra trạng thái thiết bị.");
     } finally {
+      clearInterval(interval);
       setCheckingDeviceId(null);
       setIsCheckingDevice(false);
     }
   };
 
-  const handleDelete = async (roomCode: string) => {
+  const handleDelete = async (roomCode: string, deviceId: string) => {
     try {
-      const res = await fetch(`/api/iot/devices/${roomCode}/delete`, { method: "DELETE" });
+      const res = await fetch(`/api/iot/devices/${roomCode}/delete?deviceId=${deviceId}`, { method: "DELETE" });
       const json = await res.json();
       if (json.status === "success") {
         showNotice("success", "Đã xóa thiết bị", "Bản ghi thiết bị đã bị loại bỏ.");
-        setRows((prev) => prev.filter((r) => r.Id !== roomCode));
+        fetchDevices();
       } else {
         showNotice("error", "Xóa thất bại", json.message || "Không thể xóa thiết bị.");
       }
@@ -147,7 +155,7 @@ export default function ThietBiDaKetNoiPage() {
       render: (_, record) => (
         <Space>
           {record.StatusRaw !== "pending" && (
-            <Button 
+            <Button
               onClick={() => handleCheck(record.ApartmentCode!, record.DeviceID, record.Id)}
               loading={checkingDeviceId === record.Id}
               disabled={checkingDeviceId === record.Id}
@@ -155,7 +163,7 @@ export default function ThietBiDaKetNoiPage() {
               Kiểm tra
             </Button>
           )}
-          <Popconfirm title="Xác nhận xóa thiết bị?" onConfirm={() => handleDelete(record.Id)}>
+          <Popconfirm title="Xác nhận xóa thiết bị?" onConfirm={() => handleDelete(record.ApartmentCode!, record.DeviceID)}>
             <Button danger type="primary">Xóa</Button>
           </Popconfirm>
         </Space>
@@ -169,7 +177,31 @@ export default function ThietBiDaKetNoiPage() {
       <Space style={{ marginBottom: 12 }}>
         <Button onClick={fetchDevices} loading={loading}>Làm mới</Button>
       </Space>
-      <Spin spinning={isCheckingDevice} tip={`Đang kiểm tra thiết bị ${rows.find(r => r.Id === checkingDeviceId)?.DeviceType || ''} của căn hộ ${rows.find(r => r.Id === checkingDeviceId)?.ApartmentCode || ''}...`}>
+      <Spin
+        spinning={isCheckingDevice}
+        indicator={<span />}
+        tip={
+          <div style={{
+            padding: '16px 32px',
+            background: 'rgba(255, 255, 255, 0.98)',
+            borderRadius: '16px',
+            boxShadow: '0 12px 48px rgba(0,0,0,0.15)',
+            display: 'inline-block',
+            border: '1px solid #f0f0f0',
+            width: 'max-content',
+            maxWidth: '90vw'
+          }}>
+            <Typography.Text style={{ fontSize: '16px', whiteSpace: 'nowrap' }}>
+              Đang kiểm tra thiết bị <Typography.Text strong type="warning" style={{ fontSize: '16px' }}>{rows.find(r => r.Id === checkingDeviceId)?.DeviceType || ''}</Typography.Text>
+              {' '}của căn hộ <Typography.Text strong style={{ color: '#1890ff', fontSize: '16px' }}>{rows.find(r => r.Id === checkingDeviceId)?.ApartmentCode || ''}</Typography.Text>
+            </Typography.Text>
+            <br />
+            <Typography.Text style={{ fontSize: '15px', color: '#595959', marginTop: '12px', display: 'inline-block', whiteSpace: 'nowrap' }}>
+              Vui lòng đợi.
+            </Typography.Text>
+          </div>
+        }
+      >
         <Table
           rowKey={(r) => r.Id}
           columns={columns}
@@ -201,7 +233,7 @@ export default function ThietBiDaKetNoiPage() {
               </p>
             ) : (
               <p style={{ color: "#ff4d4f", marginTop: "12px" }}>
-                <CloseCircleOutlined /> Thiết bị không phản hồi sau 5 giây kiểm tra
+                <CloseCircleOutlined /> Thiết bị không phản hồi.
               </p>
             )}
           </div>

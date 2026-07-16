@@ -26,16 +26,14 @@ export const tranlateStatus = {
 
         tranlateToVietnameseStatusBooking: (status: string): string => {
             switch (status.toLowerCase()) {
-                case 'pending':
-                    return 'Đang chờ xác nhận';
-                case 'approved':
-                    return 'Đã thanh toán';
-                case 'cancelled':
-                    return 'Đã hủy';
+                case 'created':
+                    return 'Đã đặt & thanh toán';
+                case 'active':
+                    return 'Đang lưu trú';
                 case 'completed':
                     return 'Đã hoàn thành';
-                case 'paid':
-                    return 'Đã thanh toán';
+                case 'cancelled':
+                    return 'Đã hủy';
                 default:
                     return status;
             }
