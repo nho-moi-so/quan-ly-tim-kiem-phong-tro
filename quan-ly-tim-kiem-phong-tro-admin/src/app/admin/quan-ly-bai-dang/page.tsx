@@ -103,7 +103,7 @@ export default function Page() {
       render: (status: string) => {
         let color = 'default';
         if (status === 'Đang chờ duyệt') color = 'orange';
-        else if (status === 'Đã duyệt') color = 'green';
+        else if (status === 'Đã duyệt') color = 'cyan';
         else if (status === 'Đã từ chối') color = 'red';
         else if (status === 'Đã ẩn') color = 'gray';
         return <Tag color={color}>{status}</Tag>;
@@ -174,6 +174,7 @@ export default function Page() {
           )}
           {record.trangThai === "Đã duyệt" && (
             <Button
+              style={{ color: '#faad14', borderColor: '#faad14' }}
               onClick={async () => {
                 try {
                   const response = await fetch(`/api/posts/${record.postId}/hide`, {
@@ -249,7 +250,7 @@ export default function Page() {
   ];
   const onSearch = (value: string) => {
     console.log("Tìm kiếm:", value);
-    
+
     if (!value.trim()) {
       // If search is empty, restore original data
       setData(originalData);
@@ -262,7 +263,7 @@ export default function Page() {
       item.maBaiDang.toLowerCase().includes(value.toLowerCase()) ||
       item.nguoiDang.toLowerCase().includes(value.toLowerCase())
     );
-    
+
     setData(filtered);
   };
 

@@ -246,57 +246,8 @@ export default function LichSuGiaoDichPage() {
         );
       },
     },
-    {
-      title: "Chi tiết thanh toán",
-      key: "payment_detail",
-      width: 280,
-      render: (_, record) => {
-        const isDeposit = record.type.toUpperCase() === "DEPOSIT";
-        const detail = record.payment_detail || {};
 
-        if (isDeposit) {
-          return (
-            <div>
-              <div>{getTypeText(detail.method)}</div>
-              <div style={{ fontSize: 12, color: "#8c8c8c" }}>Ref: {detail.gateway_ref || "—"}</div>
-            </div>
-          );
-        }
 
-        return (
-          <Space direction="vertical" size={0}>
-            <Text>{getTypeText(detail.method)}</Text>
-            <Space size={8}>
-              <Text>{detail.account_number || "—"}</Text>
-              {detail.account_number && <Text copyable={{ text: detail.account_number }} />}
-            </Space>
-            <Text type="secondary">{detail.account_holder || "—"}</Text>
-          </Space>
-        );
-      },
-    },
-    {
-      title: "Blockchain",
-      dataIndex: "tx_hash",
-      key: "tx_hash",
-      width: 110,
-      render: (hash: string | null) => {
-        if (!hash) {
-          return "—";
-        }
-
-        const explorerBase = process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL || "";
-        const href = explorerBase ? `${explorerBase}${hash}` : "#";
-
-        return (
-          <Tooltip title={hash}>
-            <a href={href} target="_blank" rel="noreferrer">
-              🔗 Xem
-            </a>
-          </Tooltip>
-        );
-      },
-    },
     {
       title: "Thời gian",
       dataIndex: "created_at",
@@ -422,7 +373,7 @@ export default function LichSuGiaoDichPage() {
         dataSource={data}
         loading={loading}
         pagination={{ pageSize: 10, showSizeChanger: true }}
-        scroll={{ x: 1800 }}
+        scroll={{ x: "max-content" }}
       />
 
       <Modal
@@ -468,10 +419,7 @@ export default function LichSuGiaoDichPage() {
                 )}
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "1px solid #f0f0f0" }}>
-              <Text><b>Chuỗi khối:</b></Text>
-              <Text>{viewingItem.tx_hash ? <Tooltip title={viewingItem.tx_hash}><a href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL || "#"}${viewingItem.tx_hash}`} target="_blank" rel="noreferrer">🔗 Xem</a></Tooltip> : "—"}</Text>
-            </div>
+
             <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "1px solid #f0f0f0" }}>
               <Text><b>Thời gian:</b></Text>
               <Text>{formatDateTime(viewingItem.created_at)}</Text>

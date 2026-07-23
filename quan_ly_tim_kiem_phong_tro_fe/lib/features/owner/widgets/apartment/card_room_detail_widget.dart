@@ -1325,17 +1325,17 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                                   }
                                 }
 
-                                final message =
-                                    '''Mã Phòng: ${roomCodeController.text}\nDiện Tích: ${areaController.text}\nCheckin: ${checkinController.text}\nCheckout: ${checkoutController.text}\nSức Chứa Tối Đa: ${capacityController.text}\nTrạng Thái Phòng: ${statusController.text}\nGiá Phòng: ${priceController.text}\nMô Tả Thêm: ${descriptionController.text}\nTiện Ích: ${selectedUtilities.join(', ')}\nLoại Phòng: $selectedRoomType\nTrạng Thái Phòng: $selectedRoomState''';
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      message,
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                    duration: const Duration(seconds: 3),
-                                  ),
-                                );
+                                // final message =
+                                //     '''Mã Phòng: ${roomCodeController.text}\nDiện Tích: ${areaController.text}\nCheckin: ${checkinController.text}\nCheckout: ${checkoutController.text}\nSức Chứa Tối Đa: ${capacityController.text}\nTrạng Thái Phòng: ${statusController.text}\nGiá Phòng: ${priceController.text}\nMô Tả Thêm: ${descriptionController.text}\nTiện Ích: ${selectedUtilities.join(', ')}\nLoại Phòng: $selectedRoomType\nTrạng Thái Phòng: $selectedRoomState''';
+                                // ScaffoldMessenger.of(context).showSnackBar(
+                                //   SnackBar(
+                                //     content: Text(
+                                //       message,
+                                //       style: const TextStyle(fontSize: 14),
+                                //     ),
+                                //     duration: const Duration(seconds: 3),
+                                //   ),
+                                // );
                                 // Gọi service để cập nhật thông tin phòng
                                 try {
                                   setState(() {

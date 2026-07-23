@@ -98,8 +98,8 @@ export default function Page() {
           (acc: any, owner: any) => {
             acc.total++;
             const status = (owner.status || '').toLowerCase();
-            if (status === "active") acc.active++;
-            else if (status === "locked") acc.locked++;
+            if (status === "active" || status === "approved") acc.active++;
+            else if (status === "locked" || status === "rejected") acc.locked++;
             return acc;
           },
           { total: 0, active: 0, locked: 0 }

@@ -666,8 +666,8 @@ void loop(){
       } else {
         lcd.print("Sai mat khau!");
       }
-      lcd.setCursor(0, 1);
-      lcd.print("Offline compare");
+      // lcd.setCursor(0, 1);
+      // lcd.print("Offline compare");
       delay(2000);
     }
   }

@@ -58,13 +58,11 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-        child: Center(
-          child: Container(
-            width: screenWidth < 400 ? screenWidth * 0.98 : 378,
-            decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Container(
+        width: screenWidth < 400 ? screenWidth * 0.98 : 378,
+        decoration: BoxDecoration(
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -344,8 +342,6 @@ class _RoomDetailCardWidgetState extends State<RoomDetailCardWidget> {
               ),
             ),
           ),
-        ),
-      ),
     );
   }
   File? imageFile;

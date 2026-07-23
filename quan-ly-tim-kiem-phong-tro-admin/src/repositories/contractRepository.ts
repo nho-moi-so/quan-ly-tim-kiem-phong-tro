@@ -130,4 +130,46 @@ export class ContractRepository {
             throw error;
         }
     }
+    
+    static async getLatestContracts(limitNumber?: number): Promise<Contract[]> {
+        try {
+            // Lấy tất cả hoặc một lượng lớn để sort ở Javascript
+            const query: FirebaseFirestore.Query = db.collection(COLLECTION_NAME);
+
+            const snapshot = await query.get();
+            const items: Contract[] = [];
+
+            snapshot.forEach((doc) => {
+                items.push({ Id: doc.id, ...doc.data() } as Contract);
+            });
+
+            // Lọc và sắp xếp (Sort) đầu ra bằng Javascript
+            items.sort((a, b) => {
+                const getTime = (dateVal: any) => {
+                    if (!dateVal) return 0;
+                    // Nếu là Firebase Timestamp (có hàm toMillis)
+                    if (typeof dateVal.toMillis === "function") {
+                        return dateVal.toMillis();
+                    }
+                    // Nếu là dạng chuỗi ISO string hoặc định dạng khác
+                    return new Date(dateVal).getTime();
+                };
+
+                const timeA = getTime(a.StartDate);
+                const timeB = getTime(b.StartDate);
+                
+                return timeB - timeA; // Sắp xếp giảm dần (Mới nhất lên đầu)
+            });
+
+            // Cắt mảng (Limit) sau khi đã sort xong toàn bộ dữ liệu
+            if (limitNumber !== undefined) {
+                return items.slice(0, limitNumber);
+            }
+
+            return items;
+        } catch (error) {
+            console.error("Error getting latest contracts:", error);
+            throw error;
+        }
+    }
 }

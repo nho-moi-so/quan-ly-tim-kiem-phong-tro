@@ -40,7 +40,7 @@ class ContractController {
     }
 
     // Calculate number of days
-    final numberOfDays = contract.endDate.difference(contract.startDate).inDays;
+    final numberOfDays = (contract.endDate.difference(contract.startDate).inHours / 24).ceil();
 
     // Mock invoice data (you can calculate these from real data)
     final dailyRate = apartment.dailyRate ?? 0.0;
@@ -49,6 +49,9 @@ class ContractController {
     final discount = 200000.0; // Giảm giá khuyến mãi
     final totalPrice =
         dailyRate * (numberOfDays > 0 ? numberOfDays : 1);
+    
+    print("==Chi tiết hóa đơn==$totalPrice");
+
     var contractDetail = ContractDetail(
       contractId: contract.contractID,
       imageUrl: (apartment.pathImage?.isNotEmpty ?? false)

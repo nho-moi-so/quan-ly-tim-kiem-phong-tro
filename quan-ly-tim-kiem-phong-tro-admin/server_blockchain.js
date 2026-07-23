@@ -180,7 +180,11 @@ async function scanAndProcess() {
 						}
 						const firestoreContract = await ContractRepository.getById(booking.id);
 						if (firestoreContract) {
-							await ContractRepository.update(firestoreContract.Id, { Status: 'ACTIVE' });
+							await ContractRepository.update(firestoreContract.Id, 
+								{ 
+									Status: 'ACTIVE', 
+									UpdateDate: admin.firestore.Timestamp.now()
+								});
 						}
 						console.log(`       [CLOCKER] AUTO CHECK-IN THÀNH CÔNG: ${booking.id}`);
 						console.log(`       [CLOCKER] Mật khẩu cho khách: ${newPass}`);
@@ -213,6 +217,7 @@ async function scanAndProcess() {
 							await ContractRepository.update(firestoreContract.Id, {
 								EscrowAmount: 0,
 								Status: 'COMPLETED',
+								UpdateDate: admin.firestore.Timestamp.now(),
 							});
 						}
 						if (apartment) {
