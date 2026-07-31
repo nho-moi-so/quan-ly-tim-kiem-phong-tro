@@ -1,74 +1,74 @@
 @startuml datphong-sequence-diagram
 title "Sơ đồ trình tự đặt phòng"
 actor User as User
-boundary ":Mobile App" as MobileApp
-control ":Mobile Control" as MobileControl
-control ":Web Control" as WebControl
-control ":Smart Contract" as SmartContract
-entity ":Offchain Database" as OffchainDatabase
-entity ":Onchain Database" as OnchainDatabase
+boundary ":Mobile \nApp" as MobileApp
+control ":Mobile \nControl" as MobileControl
+control ":Web \nControl" as WebControl
+control ":Smart \nContract" as SmartContract
+entity ":Offchain \nDatabase" as OffchainDatabase
+entity ":Onchain \nDatabase" as OnchainDatabase
 
-User -> MobileApp: lấy dữ liệu biểu mẫu đặt phòng
+User -> MobileApp: lấy dữ liệu \nbiểu mẫu đặt phòng
 activate User
 activate MobileApp
-MobileApp -> MobileControl: yêu cầu dữ liệu hiển thị biểu mẫu đặt phòng
+MobileApp -> MobileControl: yêu cầu dữ liệu hiển thị \nbiểu mẫu đặt phòng
 activate MobileControl
-MobileControl --> MobileApp: hiển thị biểu mẫu đặt phòng
+MobileControl --> MobileApp: hiển thị \nbiểu mẫu đặt phòng
 
-User -> MobileApp: nhập thông tin đặt phòng và gửi yêu cầu
+User -> MobileApp: nhập thông tin \nđặt phòng và gửi yêu cầu
 MobileApp -> MobileControl: yêu cầu đặt phòng
 MobileControl -> WebControl: gửi yêu cầu đặt phòng
 activate WebControl
-WebControl -> OffchainDatabase: xác thực và gửi yêu cầu lưu thông tin đặt phòng
+WebControl -> OffchainDatabase: xác thực và gửi yêu cầu \nlưu thông tin đặt phòng
 activate OffchainDatabase
 
-alt Lỗi xác thực hoặc thêm dữ liệu offchain thất bại
-    OffchainDatabase --> WebControl: lỗi xác thực, lỗi thêm dữ liệu
+alt Lỗi xác thực hoặc \nthêm dữ liệu offchain thất bại
+    OffchainDatabase --> WebControl: lỗi xác thực, \nlỗi thêm dữ liệu
     deactivate OffchainDatabase
-    WebControl --> MobileControl: thông báo lỗi đặt phòng
+    WebControl --> MobileControl: thông báo lỗi \nđặt phòng
     deactivate WebControl
-    MobileControl --> MobileApp: thông báo lỗi đặt phòng
+    MobileControl --> MobileApp: thông báo lỗi \nđặt phòng
     deactivate MobileControl
-else Thêm dữ liệu offchain thành công
-    OffchainDatabase --> WebControl: thêm hợp đồng, hóa đơn thành công
+else Thêm dữ liệu offchain \nthành công
+    OffchainDatabase --> WebControl: thêm hợp đồng, \nhóa đơn thành công
     deactivate OffchainDatabase
     
     activate WebControl
-    WebControl -> SmartContract: tạo giao dịch đặt phòng
+    WebControl -> SmartContract: tạo giao dịch \nđặt phòng
     activate SmartContract
     alt Xác nhận giao dịch thất bại
-        SmartContract --> WebControl: lỗi giao dịch đặt phòng
+        SmartContract --> WebControl: lỗi giao dịch \nđặt phòng
         deactivate SmartContract
         
-        WebControl -> OffchainDatabase: xóa hợp đồng và hóa đơn
+        WebControl -> OffchainDatabase: xóa hợp đồng và \nhóa đơn
         activate OffchainDatabase
         OffchainDatabase --> WebControl: xóa thành công
         deactivate OffchainDatabase
 
         activate MobileControl
-        WebControl --> MobileControl: thông báo lỗi giao dịch đặt phòng
+        WebControl --> MobileControl: thông báo lỗi \ngiao dịch đặt phòng
         deactivate WebControl
-        MobileControl --> MobileApp: thông báo lỗi đặt phòng
+        MobileControl --> MobileApp: thông báo lỗi \nđặt phòng
         deactivate MobileControl
     else Xác nhận giao dịch thành công
-        SmartContract --> WebControl: xác nhận giao dịch đặt phòng thành công
+        SmartContract --> WebControl: xác nhận giao dịch \nđặt phòng thành công
         deactivate SmartContract
         activate WebControl
         
-        WebControl -> OnchainDatabase: lưu thông tin giao dịch đặt phòng
+        WebControl -> OnchainDatabase: lưu thông tin \ngiao dịch đặt phòng
         activate OnchainDatabase
-        OnchainDatabase --> WebControl: thêm giao dịch đặt phòng thành công
+        OnchainDatabase --> WebControl: thêm giao dịch \nđặt phòng thành công
         deactivate OnchainDatabase
         
-        WebControl -> OffchainDatabase: cập nhật trạng thái căn hộ
+        WebControl -> OffchainDatabase: cập nhật \ntrạng thái căn hộ
         activate OffchainDatabase
-        OffchainDatabase --> WebControl: cập nhật thành công
+        OffchainDatabase --> WebControl: cập nhật \nthành công
         deactivate OffchainDatabase
 
         activate MobileControl
-        WebControl --> MobileControl: đặt phòng thành công
+        WebControl --> MobileControl: đặt phòng \nthành công
         deactivate WebControl
-        MobileControl --> MobileApp: thông báo đặt phòng thành công
+        MobileControl --> MobileApp: thông báo \nđặt phòng thành công
         deactivate MobileControl
     end
 end

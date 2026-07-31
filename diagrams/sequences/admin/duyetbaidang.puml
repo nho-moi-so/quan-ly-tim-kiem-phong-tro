@@ -7,39 +7,39 @@ entity ":Offchain Database" as OffchainDatabase
 
 'lay danh sach bai dang chua duyet
 'duyet bai dang -> xem bai dang -> dong y/tu choi
-User -> WebApp: chọn bài đăng để xem chi tiết
+User -> WebApp: chọn bài đăng \nđể xem chi tiết
 activate WebApp
-WebApp -> Control: yêu cầu dữ liệu chi tiết bài đăng
+WebApp -> Control: yêu cầu dữ liệu \nchi tiết bài đăng
 activate Control
-Control -> OffchainDatabase: truy vấn chi tiết bài đăng
+Control -> OffchainDatabase: truy vấn chi tiết \nbài đăng
 activate OffchainDatabase
-OffchainDatabase --> Control: trả về chi tiết bài đăng
+OffchainDatabase --> Control: trả về chi tiết \nbài đăng
 deactivate OffchainDatabase
-Control --> WebApp: hiển thị chi tiết bài đăng
+Control --> WebApp: hiển thị chi tiết \nbài đăng
 deactivate Control
 deactivate WebApp
-alt Người dùng từ chối duyệt bài đăng
-    User -> WebApp: từ chối duyệt bài đăng
+alt Người dùng từ chối duyệt \nbài đăng
+    User -> WebApp: từ chối duyệt \nbài đăng
     activate WebApp
-    WebApp -> Control: yêu cầu từ chối duyệt bài đăng
+    WebApp -> Control: yêu cầu từ chối duyệt \nbài đăng
     activate Control
-    Control -> OffchainDatabase: cập nhật trạng thái bài đăng thành "bị từ chối"
+    Control -> OffchainDatabase: cập nhật trạng thái \nbài đăng thành "bị từ chối"
     activate OffchainDatabase
-    OffchainDatabase --> Control: xác nhận từ chối duyệt bài đăng thành công
+    OffchainDatabase --> Control: xác nhận từ chối duyệt \nbài đăng thành công
     deactivate OffchainDatabase
-    Control --> WebApp: thông báo từ chối duyệt bài đăng thành công
+    Control --> WebApp: thông báo từ chối duyệt \nbài đăng thành công
     deactivate Control
     deactivate WebApp
-else Người dùng đồng ý duyệt bài đăng
-    User -> WebApp: đồng ý duyệt bài đăng
+else Người dùng \nđồng ý duyệt bài đăng
+    User -> WebApp: đồng ý duyệt \nbài đăng
     activate WebApp
-    WebApp -> Control: yêu cầu duyệt bài đăng
+    WebApp -> Control: yêu cầu duyệt \nbài đăng
     activate Control
-    Control -> OffchainDatabase: cập nhật trạng thái bài đăng thành "đã duyệt"
+    Control -> OffchainDatabase: cập nhật trạng thái \nbài đăng thành "đã duyệt"
     activate OffchainDatabase
-    OffchainDatabase --> Control: xác nhận duyệt bài đăng thành công
+    OffchainDatabase --> Control: xác nhận duyệt \nbài đăng thành công
     deactivate OffchainDatabase
-    Control --> WebApp: thông báo duyệt bài đăng thành công
+    Control --> WebApp: thông báo duyệt bài đăng \nthành công
     deactivate Control
     deactivate WebApp
 end

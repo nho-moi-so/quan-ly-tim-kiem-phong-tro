@@ -11,20 +11,19 @@ control ":Web Control" as Control
 control ":IoT Device" as IoTDevice
 entity ":Offchain Database" as OffchainDatabase
 
-User -> WebApp: chọn kiểm tra thiết bị
+User -> WebApp: chọn kiểm tra \nthiết bị
 activate User
 activate WebApp
-WebApp -> Control: yêu cầu kiểm tra thiết bị
+WebApp -> Control: yêu cầu kiểm tra \nthiết bị
 activate Control
-Control -> OffchainDatabase: tạo pingcode và lưu vào database
-
+Control -> OffchainDatabase: tạo pingcode và \nlưu vào database
 IoTDevice -> OffchainDatabase: lấy pingcode
 IoTDevice -> Control: gửi pingreply
-Control -> OffchainDatabase: so sánh pingcode và pingreply
-alt Pingcode và pingreply khớp nhau
-    Control --> WebApp: thông báo thiết bị hoạt động
-else Pingcode và pingreply không khớp nhau
-    Control --> WebApp: thông báo thiết bị không hoạt động
+Control -> OffchainDatabase: so sánh pingcode và \npingreply
+alt Pingcode và pingreply \nkhớp nhau
+    Control --> WebApp: thông báo \nthiết bị hoạt động
+else Pingcode và pingreply \nkhông khớp nhau
+    Control --> WebApp: thông báo \nthiết bị không hoạt động
 end
 deactivate Control
 deactivate WebApp
