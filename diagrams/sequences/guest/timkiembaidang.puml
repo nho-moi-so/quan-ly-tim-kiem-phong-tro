@@ -1,0 +1,34 @@
+@startuml timkiembaidang-sequence-diagram
+title "Sơ đồ trình tự tìm kiếm bài đăng"
+actor User as User
+boundary ":Mobile App" as MobileApp
+control ":Mobile Control" as MobileControl
+entity ":Offchain Database" as OffchainDatabase
+
+User -> MobileApp: lấy dữ liệu biểu mẫu tìm kiếm bài đăng
+activate User
+activate MobileApp
+MobileApp -> MobileControl: yêu cầu ddữ liệu hiển thị biểu mẫu tìm kiếm bài đăng
+activate MobileControl
+MobileControl --> MobileApp: hiển thị biểu mẫu tìm kiếm bài đăng
+
+User -> MobileApp: nhập thông tin tìm kiếm và gửi yêu cầu
+MobileApp -> MobileControl: yêu cầu tìm kiếm bài đăng
+MobileControl -> OffchainDatabase: xác thực và gửi yêu cầu tìm kiếm bài đăng
+activate OffchainDatabase
+'trường hợp thành công
+    alt Lỗi tìm kiếm
+        OffchainDatabase --> MobileControl: lỗi tìm kiếm bài đăng
+        deactivate OffchainDatabase
+        MobileControl --> MobileApp: thông báo lỗi tìm kiếm bài đăng
+        deactivate MobileControl
+    else Tìm kiếm thành công
+        OffchainDatabase --> MobileControl: trả về danh sách bài đăng
+        deactivate OffchainDatabase
+        MobileControl --> MobileApp: hiển thị danh sách bài đăng kết quả
+        deactivate MobileControl
+    end
+    deactivate MobileApp
+    deactivate User
+
+@enduml

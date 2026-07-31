@@ -1,0 +1,81 @@
+@startuml datphong-sequence-diagram
+title "Sơ đồ trình tự đặt phòng"
+actor User as User
+boundary ":Mobile App" as MobileApp
+control ":Mobile Control" as MobileControl
+control ":Web Control" as WebControl
+control ":Smart Contract" as SmartContract
+entity ":Offchain Database" as OffchainDatabase
+entity ":Onchain Database" as OnchainDatabase
+
+User -> MobileApp: lấy dữ liệu biểu mẫu đặt phòng
+activate User
+activate MobileApp
+MobileApp -> MobileControl: yêu cầu dữ liệu hiển thị biểu mẫu đặt phòng
+activate MobileControl
+MobileControl --> MobileApp: hiển thị biểu mẫu đặt phòng
+
+User -> MobileApp: nhập thông tin đặt phòng và gửi yêu cầu
+MobileApp -> MobileControl: yêu cầu đặt phòng
+MobileControl -> WebControl: gửi yêu cầu đặt phòng
+activate WebControl
+WebControl -> OffchainDatabase: xác thực và gửi yêu cầu lưu thông tin đặt phòng
+activate OffchainDatabase
+
+alt Lỗi xác thực hoặc thêm dữ liệu offchain thất bại
+    OffchainDatabase --> WebControl: lỗi xác thực, lỗi thêm dữ liệu
+    deactivate OffchainDatabase
+    WebControl --> MobileControl: thông báo lỗi đặt phòng
+    deactivate WebControl
+    MobileControl --> MobileApp: thông báo lỗi đặt phòng
+    deactivate MobileControl
+else Thêm dữ liệu offchain thành công
+    OffchainDatabase --> WebControl: thêm hợp đồng, hóa đơn thành công
+    deactivate OffchainDatabase
+    
+    activate WebControl
+    WebControl -> SmartContract: tạo giao dịch đặt phòng
+    activate SmartContract
+    alt Xác nhận giao dịch thất bại
+        SmartContract --> WebControl: lỗi giao dịch đặt phòng
+        deactivate SmartContract
+        
+        WebControl -> OffchainDatabase: xóa hợp đồng và hóa đơn
+        activate OffchainDatabase
+        OffchainDatabase --> WebControl: xóa thành công
+        deactivate OffchainDatabase
+
+        activate MobileControl
+        WebControl --> MobileControl: thông báo lỗi giao dịch đặt phòng
+        deactivate WebControl
+        MobileControl --> MobileApp: thông báo lỗi đặt phòng
+        deactivate MobileControl
+    else Xác nhận giao dịch thành công
+        SmartContract --> WebControl: xác nhận giao dịch đặt phòng thành công
+        deactivate SmartContract
+        activate WebControl
+        
+        WebControl -> OnchainDatabase: lưu thông tin giao dịch đặt phòng
+        activate OnchainDatabase
+        OnchainDatabase --> WebControl: thêm giao dịch đặt phòng thành công
+        deactivate OnchainDatabase
+        
+        WebControl -> OffchainDatabase: cập nhật trạng thái căn hộ
+        activate OffchainDatabase
+        OffchainDatabase --> WebControl: cập nhật thành công
+        deactivate OffchainDatabase
+
+        activate MobileControl
+        WebControl --> MobileControl: đặt phòng thành công
+        deactivate WebControl
+        MobileControl --> MobileApp: thông báo đặt phòng thành công
+        deactivate MobileControl
+    end
+end
+
+deactivate WebControl
+deactivate MobileControl
+deactivate MobileApp
+deactivate User
+
+@enduml

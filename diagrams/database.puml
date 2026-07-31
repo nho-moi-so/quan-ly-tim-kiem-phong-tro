@@ -1,9 +1,9 @@
 authentication:
-    Identifier
-    Providers
-    Created
-    Signed In
-    User UID
+    Identifier: String
+    Providers: String
+    Created: Datetime
+    Signed In: Datetime
+    User UID: String
 
 user:
     Document ID	

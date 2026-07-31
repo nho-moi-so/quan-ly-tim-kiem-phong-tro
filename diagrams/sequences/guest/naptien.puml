@@ -1,0 +1,72 @@
+@startuml naptien-sequence-diagram
+title "Sơ đồ trình tự nạp tiền"
+actor User as User
+boundary ":Mobile App" as MobileApp
+control ":Mobile Control" as MobileControl
+control ":Web Control" as WebControl
+control ":Smart Contract" as SmartContract
+entity ":Offchain Database" as OffchainDatabase
+entity ":Onchain Database" as OnchainDatabase
+
+User -> MobileApp: lấy dữ liệu biểu mẫu nạp tiền
+activate User
+activate MobileApp
+MobileApp -> MobileControl: yêu cầu dữ liệu hiển thị biểu mẫu nạp tiền
+activate MobileControl
+MobileControl --> MobileApp: hiển thị biểu mẫu nạp tiền
+
+User -> MobileApp: nhập thông tin nạp tiền và gửi yêu cầu
+MobileApp -> MobileControl: yêu cầu nạp tiền
+MobileControl -> WebControl: gửi yêu cầu nạp tiền
+activate WebControl
+WebControl -> OffchainDatabase: xác thực và gửi yêu cầu lưu thông tin nạp tiền
+activate OffchainDatabase
+'trường hợp thành công
+    ' trường hợp offchain
+        'thành công
+        alt Thêm dữ liệu offchain thất bại
+            OffchainDatabase --> WebControl: lỗi thêm thông tin nạp tiền
+            deactivate OffchainDatabase
+            WebControl --> MobileControl: thông báo lỗi thêm thông tin nạp tiền
+            deactivate WebControl
+            MobileControl --> MobileApp: thông báo lỗi thêm thông tin nạp tiền
+            deactivate MobileControl
+        else Thêm dữ liệu offchain thành công
+            OffchainDatabase --> WebControl: thêm thông tin nạp tiền thành công
+            deactivate OffchainDatabase
+            'trường hợp onchain
+            activate WebControl
+            WebControl -> SmartContract: tạo giao dịch nạp tiền
+            activate SmartContract
+                'thất bại
+            alt Xác nhận giao dịch thất bại
+                SmartContract --> WebControl: lỗi giao dịch nạp tiền
+                deactivate SmartContract
+                activate MobileControl
+                WebControl --> MobileControl: thông báo lỗi giao dịch nạp tiền
+                deactivate WebControl
+                MobileControl --> MobileApp: thông báo lỗi nạp tiền
+                deactivate MobileControl
+            else Xác nhận giao dịch thành công
+                'thành công
+                SmartContract --> WebControl: xác nhận giao dịch nạp tiền thành công
+                deactivate SmartContract
+                activate WebControl
+                WebControl -> OnchainDatabase: lưu thông tin giao dịch nạp tiền
+                activate OnchainDatabase
+                OnchainDatabase --> WebControl: thêm giao dịch nạp tiền thành công
+                deactivate OnchainDatabase
+                activate MobileControl
+                WebControl --> MobileControl: nạp tiền thành công
+                deactivate WebControl
+                MobileControl --> MobileApp: nạp tiền thành công
+                deactivate MobileControl
+            end
+        end
+
+    deactivate WebControl
+    deactivate MobileControl
+    deactivate MobileApp
+    deactivate User
+
+@enduml
