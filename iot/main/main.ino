@@ -261,6 +261,12 @@ void setup(){
     delay(2000);
   }
 
+  // Cấu hình timer PWM cho ESP32
+  ESP32PWM::allocateTimer(0);
+  ESP32PWM::allocateTimer(1);
+  ESP32PWM::allocateTimer(2);
+  ESP32PWM::allocateTimer(3);
+
   // Khởi tạo Servo
   myServo.setPeriodHertz(50);
   myServo.attach(servoPin, 500, 2400);
@@ -555,7 +561,7 @@ void loop(){
   lcd.clear();
   lcd.setCursor(0, 0);
 
-  if (currentAngle == 90) {
+  if (currentAngle == 60) {
     // Cửa đang MỞ
     lcd.print("Cua dang MO");
     lcd.setCursor(0, 1);
@@ -579,7 +585,7 @@ void loop(){
     char k = keypad.getKey();
 
     if (k == '#') {
-      if (currentAngle == 90) {
+      if (currentAngle == 60) {
         // --- TRƯỜNG HỢP CỬA ĐANG MỞ -> ĐÓNG CỬA ---
         lcd.clear();
         lcd.setCursor(0, 0);
@@ -657,8 +663,8 @@ void loop(){
 
       if (inputPasswordHash == currentPasswordHash) {
           lcd.print("Mo cua...");
-          myServo.write(90);      // xoay đến 90°
-          currentAngle = 90;      // Lưu trạng thái mở
+          myServo.write(60);      // xoay đến 60°
+          currentAngle = 60;      // Lưu trạng thái mở
           delay(500);
           lcd.clear();
           lcd.setCursor(0, 0);
