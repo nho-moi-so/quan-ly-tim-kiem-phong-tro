@@ -70,7 +70,7 @@ class AuthController {
         "password": password,
         "phone": phone.trim(),
         "role": role.toUpperCase(),
-        "status": "ACTIVE",
+        "status": "Hoạt động",
         //"cccdFront": cccdFrontUrl,
         //"cccdBack": cccdBackUrl,
       };

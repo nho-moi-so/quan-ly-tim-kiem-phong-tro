@@ -366,7 +366,17 @@ class _TotalState extends State<Total> {
 
                 final data = snapshot.data!.data() as Map<String, dynamic>?;
 
-                final balance = (data?['Balance'] as num?)?.toDouble() ?? 0;
+                final rawBalance = data?['Balance'];
+
+                double balance = 0;
+
+                if (rawBalance is num) {
+                  final value = rawBalance.toDouble();
+
+                  if (value.isFinite) {
+                    balance = value;
+                  }
+                }
 
                 return Text("Số dư: ${formatVND(balance.toInt())}");
               },

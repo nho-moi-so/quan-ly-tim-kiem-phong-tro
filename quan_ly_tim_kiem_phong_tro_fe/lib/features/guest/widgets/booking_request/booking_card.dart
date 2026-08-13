@@ -32,25 +32,37 @@ class BookingCard extends StatelessWidget {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'Approved':
-      case 'thành công':
+      case 'approved':
         return const Color.fromARGB(255, 87, 172, 44);
-      case 'active':
+      case 'Hoạt động':
         return Colors.green;
       case 'approved':
-      case 'đang hoạt động':
         return Colors.green;
       case 'expired':
-      case 'hết hạn':
         return Colors.red;
       case 'cancelled':
       case 'rejected':
-      case 'đã hủy':
         return Colors.grey;
+      case 'completed':
+        return Colors.green;
       default:
         return Colors.blue;
     }
   }
+  String _getStatusText(String status) {
+  switch (status.toLowerCase()) {
+    case 'active':
+      return 'Hoạt động';
+    case 'created':
+      return 'Đã tạo';
+
+    case 'completed':
+      return 'Hoàn thành';
+
+    default:
+      return 'Không xác định';
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +145,7 @@ class BookingCard extends StatelessWidget {
         _buildRow(Icons.description, "Mã Hợp Đồng:", fontSize),
         _buildRow(Icons.person, "Người Thuê:", fontSize),
         _buildRow(Icons.calendar_today, "Thời Hạn:", fontSize),
-        _buildRow(Icons.attach_money, "Tổng Tiền:", fontSize),
+        // _buildRow(Icons.attach_money, "Tổng Tiền:", fontSize),
         _buildRow(Icons.circle, "Trạng Thái:", fontSize),
       ];
     }
@@ -157,20 +169,26 @@ class BookingCard extends StatelessWidget {
           : "Không giới hạn";
 
       return [
-        _buildValue(contract.contractID, fontSize),
+        _buildValue(
+          contract.contractID.length > 7
+              ? contract.contractID.substring(0, 7).toUpperCase()
+              : contract.contractID,
+          fontSize,
+        ),
+
         _buildValue(
           (contract.fullName?.isNotEmpty ?? false)
               ? contract.fullName!
-              : 'Ngooi',
+              : 'Lý Thụy Mỹ Ngọc',
           fontSize,
         ),
         _buildValue(
           "${_formatDate(contract.startDate)} - $endDateDisplay",
           fontSize,
         ),
-        _buildValue(_formatCurrency(contract.total), fontSize),
+        // _buildValue(_formatCurrency(contract.total), fontSize),
         _buildValue(
-          contract.status,
+          _getStatusText(contract.status),
           fontSize,
           statusColor: _getStatusColor(contract.status),
         ),
@@ -266,12 +284,17 @@ class BookingCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildDetailRow('Mã hợp đồng:', contract.contractID),
-              _buildDetailRow('Người thuê:', contract.fullName ?? 'Ngooi'),
+              _buildDetailRow(
+                'Mã hợp đồng:',
+                contract.contractID.length > 7
+                    ? contract.contractID.substring(0, 7).toUpperCase()
+                    : contract.contractID,
+              ),
+              _buildDetailRow('Người thuê:', contract.fullName ?? 'Lý Thụy Mỹ Ngọc'),
               _buildDetailRow('Ngày bắt đầu:', _formatDate(contract.startDate)),
               _buildDetailRow('Ngày kết thúc:', endDateDetail),
-              _buildDetailRow('Tổng tiền:', _formatCurrency(contract.total)),
-              _buildDetailRow('Trạng thái:', contract.status),
+              // _buildDetailRow('Tổng tiền:', _formatCurrency(contract.total)),
+              _buildDetailRow('Trạng thái:', _getStatusText(contract.status)),
               _buildDetailRow('Mật khẩu phòng:', roomPassword ?? 'Không có'),
               _buildDetailRow('Ngày tạo:', _formatDate(contract.createdDate)),
               _buildDetailRow('Cập nhật:', _formatDate(contract.updateDate)),
