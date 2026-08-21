@@ -1,0 +1,76 @@
+' alt + d
+@startuml usecase_owner-diagram
+' skinparam shadowing false
+' skinparam backgroundColor #f9f9f9
+' skinparam usecase {
+'     BackgroundColor #e6f7ff
+'     BorderColor #1890ff
+'     FontColor #000000
+'     FontSize 14
+'     Shadowing true
+' }
+' skinparam actor {
+'     BackgroundColor #fff2e8
+'     BorderColor #fa8c16
+'     FontColor #000000
+'     FontSize 14
+' }
+' skinparam rectangle {
+'     BackgroundColor #fffbe6
+'     BorderColor #d48806
+'     FontColor #000000
+'     FontSize 18
+'     Shadowing true
+' }
+' skinparam note{
+'     BackgroundColor #faf2b9
+'     BorderColor #c51c1c
+' }
+left to right direction
+
+actor "Chủ căn hộ" as Owner
+
+rectangle "  "{
+usecase "Đăng nhập" as login
+usecase "Đăng ký" as register
+usecase "Quản lý tài khoản" as manage_account
+note bottom of manage_account: Xem, Thay đổi thông tin, Đổi mật khẩu, Đăng xuất, Xóa tài khoản
+
+usecase "Yêu cầu xác minh tài khoản" as request_owner_verification
+
+usecase "Rút tiền" as withdraw
+
+usecase "Quản lý căn hộ" as manage_apartment
+note bottom of manage_apartment: Thêm, Chỉnh sửa, Xóa, Tìm kiếm, Xem
+
+usecase "Quản lý yêu cầu đặt phòng" as manage_booking
+note bottom of manage_booking: Tìm kiếm, xem, cập nhật, xem hợp đồng
+
+
+
+usecase "Quản lý hóa đơn" as manage_invoice
+note bottom of manage_invoice: Tìm kiếm, xem
+
+usecase "Quản lý bài đăng" as manage_post
+note top of manage_post: Tìm kiếm, Xem, Tạo, Chỉnh sửa, Ẩn
+
+usecase "Nhắn tin" as messaging
+usecase "Thống kê" as statistics
+
+usecase "Quản lý thiết bị IoT" as manage_iot_devices
+note bottom of manage_iot_devices: Thêm, Sửa, Xóa, Xem và kiểm tra trạng thái kết nối
+
+(Owner) -- (login)
+(Owner) -- (register)
+(Owner) -- (manage_account)
+(Owner) -- (request_owner_verification)
+(Owner) -- (manage_apartment)
+(Owner) -- (manage_booking)
+(Owner) -- (manage_invoice)
+(manage_post) --- (Owner)
+(messaging) --- (Owner)
+(statistics) -- (Owner)
+(manage_iot_devices) -- (Owner)
+(withdraw) -- (Owner)
+}
+@enduml
