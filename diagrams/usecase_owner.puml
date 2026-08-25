@@ -49,10 +49,10 @@ note bottom of manage_booking: Tìm kiếm, xem, cập nhật, xem hợp đồng
 
 
 usecase "Quản lý hóa đơn" as manage_invoice
-note bottom of manage_invoice: Tìm kiếm, xem
+note right of manage_invoice: Tìm kiếm, xem
 
 usecase "Quản lý bài đăng" as manage_post
-note top of manage_post: Tìm kiếm, Xem, Tạo, Chỉnh sửa, Ẩn
+note top of manage_post: Tìm kiếm, Xem, Tạo, Chỉnh sửa, Ẩn, Xóa
 
 usecase "Nhắn tin" as messaging
 usecase "Thống kê" as statistics

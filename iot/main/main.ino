@@ -28,7 +28,7 @@ char keys[ROWS][COLS] = {
   {'*','0','#','D'}
 };
 byte rowPins[ROWS] = {32, 33, 25, 26}; // R1-R4
-byte colPins[COLS] = {27, 14, 12, 13}; // C1-C4
+byte colPins[COLS] = {27, 4, 12, 13}; // C1-C4
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 // Servo
@@ -45,7 +45,7 @@ String roomCode = "";
 
 //thông tin host server
 String hostServer = "https://pluvious-shady-joline.ngrok-free.dev";
-String blockchainServer = "https://emazp-115-75-106-79.run.pinggy-free.link";
+String blockchainServer = "https://highs-ellis-biological-situated.trycloudflare.com";
 
 //Thông tin của thiết bị iot này
 String type_iot = "smart_lock";
@@ -54,9 +54,6 @@ String device_id = "LOCK003";
 // WiFiClientSecure dùng chung cho tất cả HTTPS request
 WiFiClientSecure secureClient;
 
-// Trạng thái ping từ server
-String lastPingCode = "";
-unsigned long lastPollTime = 0;
 unsigned long lastPasswordPollTime = 0;
 
 //biến lưu mật khẩu
@@ -88,75 +85,11 @@ String hashPassword(String rawInput) {
     return hashHex;
 }
 
-// Poll server lấy PingCode, nếu đổi thì gửi PingReply
-void pollPingCode() {
-  if (roomCode == "") {
-    return; // Chỉ poll khi đã connect thành công
-  }
-
-  HTTPClient http;
-  String url = hostServer + "/api/iot/devices/" + roomCode + "/ping?deviceId=" + device_id;
-
-  http.begin(secureClient, url);
-  http.setTimeout(20000);
-  int httpResponseCode = http.GET();
-
-  if (httpResponseCode == 200) {
-    String payload = http.getString();
-
-    StaticJsonDocument<200> doc;
-    DeserializationError error = deserializeJson(doc, payload);
-
-    if (!error) {
-      String currentPingCode = doc["pingCode"] | "";
-
-      // Nếu PingCode mới thì phản hồi lại
-      if (currentPingCode.length() > 0 && currentPingCode != lastPingCode) {
-        lastPingCode = currentPingCode;
-        updatePingReply(currentPingCode);
-      }
-
-    }
-  }
-
-  http.end();
-}
-
-// Gửi PingReply về server để xác nhận online
-void updatePingReply(String pingCode) {
-  HTTPClient http;
-  String url = hostServer + "/api/iot/devices/" + roomCode + "/ping";
-
-  http.begin(secureClient, url);
-  http.setTimeout(20000);
-  http.addHeader("Content-Type", "application/json");
-
-  String postData = "{\"deviceId\":\"" + device_id + "\",\"pingReply\":\"" + pingCode + "\"}";
-  int httpResponseCode = http.POST(postData);
-
-  if (httpResponseCode == 200) {
-
-  } else {
-    lcd.setCursor(0, 0);
-    lcd.println("[IoT] Error sending PingReply: " + String(httpResponseCode));
-    delay(1000);
-    lcd.clear();
-  }
-
-  http.end();
-}
-
 void pollPasswordHash();
 
 void delayWithPoll() {
-      // Kiểm tra và poll PingCode trong khi chờ nhập 2 giây
-  if (millis() - lastPollTime > 2000) {
-    pollPingCode();
-    lastPollTime = millis();
-  }
-
-  // Poll password hash mỗi 1 phút
-  if (millis() - lastPasswordPollTime > 60000) {
+  // Poll password hash mỗi 10s
+  if (millis() - lastPasswordPollTime > 10000) {
     pollPasswordHash();
     lastPasswordPollTime = millis();
   }
@@ -203,13 +136,8 @@ void pollPasswordHash() {
       }
     }
   } else {
-    // ---- THAY THẾ SERIAL BẰNG LCD (BÁO LỖI SERVER) ----
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Loi tai MK:"); // 11 ký tự
-    lcd.setCursor(0, 1);
-    lcd.print("Ma: " + String(httpResponseCode)); // Ví dụ: "Ma: -1" hoặc "Ma: 500"
-    delay(2000); // Dừng 2 giây để xem mã lỗi
+    // ---- BÁO LỖI SERVER (KHÔNG HIỂN THỊ LCD ĐỂ TRÁNH GIÁN ĐOẠN) ----
+    Serial.println("Loi tai MK, Ma: " + String(httpResponseCode));
     // ---------------------------------------------------
   }
 
@@ -278,57 +206,70 @@ void setup(){
   delay(1000);
 
   // ================ GỌI API RE-CONNECT ================
-  // Kiểm tra xem device đã được kết nối với phòng nào chưa
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Kiem tra ket noi");
-  lcd.setCursor(0, 1);
-  lcd.print("...");
-  
+  // Chờ WiFi stack ổn định hoàn toàn trước khi gọi HTTPS
+  delay(1500);
+  Serial.println("Goi API re-connect...");
+
   HTTPClient http;
+
   String url = hostServer + "/api/iot/re-connect";
-  http.begin(secureClient, url);
-  http.setTimeout(20000);
-  http.addHeader("Content-Type", "application/json");
-  
   String postData = "{\"deviceId\":\"" + device_id + "\"}";
-  int httpResponseCode = http.POST(postData);
-  
-  if (httpResponseCode > 0) {
-    String payload = http.getString();
-    StaticJsonDocument<200> doc;
-    DeserializationError error = deserializeJson(doc, payload);
+
+  bool reconnected = false;
+  while (!reconnected) {
+    http.begin(secureClient, url);
+    http.setTimeout(20000);
+    http.addHeader("Content-Type", "application/json");
     
-    if (!error) {
-      String status = doc["status"];
+    int httpResponseCode = http.POST(postData);
+    
+    if (httpResponseCode > 0) {
+      String payload = http.getString();
+      StaticJsonDocument<200> doc;
+      DeserializationError error = deserializeJson(doc, payload);
       
-      if (status == "success") {
-        // Device đã được kết nối trước đó
-        roomCode = doc["roomCode"].as<String>();
+      if (!error) {
+        String status = doc["status"];
         
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Da ket noi!");
-        lcd.setCursor(0, 1);
-        lcd.print("Phong: " + roomCode);
-        delay(2000);
+        if (status == "success") {
+          // Device đã được kết nối trước đó
+          roomCode = doc["roomCode"].as<String>();
+          
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Da ket noi!");
+          lcd.setCursor(0, 1);
+          lcd.print("Phong: " + roomCode);
+          delay(2000);
+          pollPasswordHash();
+        } else {
+          // Device chưa được kết nối
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Chua ket noi!");
+          lcd.setCursor(0, 1);
+          lcd.print("Can nhap ma phong");
+          delay(2000);
+        }
+        reconnected = true; // Nhận được phản hồi hợp lệ, thoát vòng lặp
       } else {
-        // Device chưa được kết nối
         lcd.clear();
         lcd.setCursor(0, 0);
-        lcd.print("Chua ket noi!");
+        lcd.print("Loi du lieu API");
         lcd.setCursor(0, 1);
-        lcd.print("Can nhap ma phong");
-        delay(2000);
+        lcd.print("Thu lai sau 5s");
+        delay(5000);
       }
+    } else {
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Loi reconnect API");
+      lcd.setCursor(0, 1);
+      lcd.print("Thu lai sau 5s");
+      delay(5000);
     }
-  } else {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Loi reconnect API");
-    delay(1500);
+    http.end();
   }
-  http.end();
 }
 void loop(){
   // Poll PingCode mỗi 500ms để cập nhật PingReply
@@ -561,7 +502,7 @@ void loop(){
   lcd.clear();
   lcd.setCursor(0, 0);
 
-  if (currentAngle == 60) {
+  if (currentAngle == 45) {
     // Cửa đang MỞ
     lcd.print("Cua dang MO");
     lcd.setCursor(0, 1);
@@ -585,7 +526,7 @@ void loop(){
     char k = keypad.getKey();
 
     if (k == '#') {
-      if (currentAngle == 60) {
+      if (currentAngle ==45) {
         // --- TRƯỜNG HỢP CỬA ĐANG MỞ -> ĐÓNG CỬA ---
         lcd.clear();
         lcd.setCursor(0, 0);
@@ -663,8 +604,8 @@ void loop(){
 
       if (inputPasswordHash == currentPasswordHash) {
           lcd.print("Mo cua...");
-          myServo.write(60);      // xoay đến 60°
-          currentAngle = 60;      // Lưu trạng thái mở
+          myServo.write(45);      // xoay đến 45°
+          currentAngle = 45;      // Lưu trạng thái mở
           delay(500);
           lcd.clear();
           lcd.setCursor(0, 0);

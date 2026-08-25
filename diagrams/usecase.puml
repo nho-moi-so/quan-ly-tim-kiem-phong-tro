@@ -50,13 +50,13 @@ note bottom of manage_apartment: Thêm, Sửa, Xóa căn hộ, Tìm kiếm, Xem
 ' manage_apartment .. connect_iot_lock: extend
 
 usecase "Quản lý yêu cầu đặt phòng" as manage_booking
-note top of manage_booking: Cập nhật yêu cầu đặt phòng
+note bottom of manage_booking: Cập nhật yêu cầu đặt phòng
 usecase "Xem hợp đồng" as view_booking_contract
 manage_booking .. view_booking_contract: extend
 usecase "Quản lý hóa đơn" as manage_invoice
 ' note bottom of manage_invoice: Hoàn tiền
 usecase "Quản lý bài đăng" as manage_post
-note bottom of manage_post: Tạo, Chỉnh sửa, Ẩn
+note top of manage_post: Tạo, Chỉnh sửa, Ẩn
 usecase "Xóa bài đăng" as delete_post
 manage_post ..delete_post: extend
 usecase "Nhắn tin" as messaging

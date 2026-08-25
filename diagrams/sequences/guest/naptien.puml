@@ -8,53 +8,53 @@ control ":Smart Contract" as SmartContract
 entity ":Offchain Database" as OffchainDatabase
 entity ":Onchain Database" as OnchainDatabase
 
-User -> MobileApp: lấy dữ liệu biểu mẫu nạp tiền
+User -> MobileApp: lấy dữ liệu \nbiểu mẫu nạp tiền
 activate User
 activate MobileApp
-MobileApp -> MobileControl: yêu cầu dữ liệu hiển thị biểu mẫu nạp tiền
+MobileApp -> MobileControl: yêu cầu hiển thị \nbiểu mẫu nạp tiền
 activate MobileControl
 MobileControl --> MobileApp: hiển thị biểu mẫu nạp tiền
 
-User -> MobileApp: nhập thông tin nạp tiền và gửi yêu cầu
+User -> MobileApp: nhập thông tin \nnạp tiền và gửi yêu cầu
 MobileApp -> MobileControl: yêu cầu nạp tiền
 MobileControl -> WebControl: gửi yêu cầu nạp tiền
 activate WebControl
-WebControl -> OffchainDatabase: xác thực và gửi yêu cầu lưu thông tin nạp tiền
+WebControl -> OffchainDatabase: xác thực và gửi \nyêu cầu lưu thông tin \nnạp tiền
 activate OffchainDatabase
 'trường hợp thành công
     ' trường hợp offchain
         'thành công
-        alt Thêm dữ liệu offchain thất bại
-            OffchainDatabase --> WebControl: lỗi thêm thông tin nạp tiền
+        alt Thêm dữ liệu offchain \nthất bại
+            OffchainDatabase --> WebControl: lỗi thêm thông tin \nnạp tiền
             deactivate OffchainDatabase
-            WebControl --> MobileControl: thông báo lỗi thêm thông tin nạp tiền
+            WebControl --> MobileControl: thông báo lỗi \nthêm thông tin nạp tiền
             deactivate WebControl
-            MobileControl --> MobileApp: thông báo lỗi thêm thông tin nạp tiền
+            MobileControl --> MobileApp: thông báo lỗi thêm \nthông tin nạp tiền
             deactivate MobileControl
-        else Thêm dữ liệu offchain thành công
-            OffchainDatabase --> WebControl: thêm thông tin nạp tiền thành công
+        else Thêm dữ liệu offchain \nthành công
+            OffchainDatabase --> WebControl: thêm thông tin nạp tiền \nthành công
             deactivate OffchainDatabase
             'trường hợp onchain
             activate WebControl
-            WebControl -> SmartContract: tạo giao dịch nạp tiền
+            WebControl -> SmartContract: tạo giao dịch \nnạp tiền
             activate SmartContract
                 'thất bại
-            alt Xác nhận giao dịch thất bại
+            alt Xác nhận giao dịch \nthất bại
                 SmartContract --> WebControl: lỗi giao dịch nạp tiền
                 deactivate SmartContract
                 activate MobileControl
-                WebControl --> MobileControl: thông báo lỗi giao dịch nạp tiền
+                WebControl --> MobileControl: thông báo lỗi \ngiao dịch nạp tiền
                 deactivate WebControl
                 MobileControl --> MobileApp: thông báo lỗi nạp tiền
                 deactivate MobileControl
-            else Xác nhận giao dịch thành công
+            else Xác nhận giao dịch \nthành công
                 'thành công
-                SmartContract --> WebControl: xác nhận giao dịch nạp tiền thành công
+                SmartContract --> WebControl: xác nhận giao dịch \nnạp tiền thành công
                 deactivate SmartContract
                 activate WebControl
-                WebControl -> OnchainDatabase: lưu thông tin giao dịch nạp tiền
+                WebControl -> OnchainDatabase: lưu thông tin \ngiao dịch nạp tiền
                 activate OnchainDatabase
-                OnchainDatabase --> WebControl: thêm giao dịch nạp tiền thành công
+                OnchainDatabase --> WebControl: thêm giao dịch \nnạp tiền thành công
                 deactivate OnchainDatabase
                 activate MobileControl
                 WebControl --> MobileControl: nạp tiền thành công

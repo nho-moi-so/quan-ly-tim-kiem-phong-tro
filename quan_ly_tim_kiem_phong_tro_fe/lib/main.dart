@@ -37,6 +37,7 @@ import 'service/navigation_service.dart';
     @override
     Widget build(BuildContext context) {
       return MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Quản lý phòng trọ',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

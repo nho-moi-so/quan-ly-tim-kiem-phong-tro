@@ -388,11 +388,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -567,30 +568,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: noteController,
-                    maxLines: 2,
-                    decoration: InputDecoration(
-                      labelText: 'Ghi chú (không bắt buộc)',
-                      hintText: 'VD: Rút về tài khoản chính',
-                      filled: true,
-                      fillColor: Colors.white,
-                      labelStyle: const TextStyle(color: Color(0xFF6B7280)),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 1.5),
-                      ),
-                    ),
-                  ),
+                  // const SizedBox(height: 12),
+                  // TextField(
+                  //   controller: noteController,
+                  //   maxLines: 2,
+                  //   decoration: InputDecoration(
+                  //     labelText: 'Thông tin tài khoản ngân hàng',
+                  //     hintText: 'STK:0123456789\nTên tài khoản: NGUYEN VAN A',
+                  //     filled: true,
+                  //     fillColor: Colors.white,
+                  //     labelStyle: const TextStyle(color: Color(0xFF6B7280)),
+                  //     border: OutlineInputBorder(
+                  //       borderRadius: BorderRadius.circular(12),
+                  //       borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                  //     ),
+                  //     enabledBorder: OutlineInputBorder(
+                  //       borderRadius: BorderRadius.circular(12),
+                  //       borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                  //     ),
+                  //     focusedBorder: OutlineInputBorder(
+                  //       borderRadius: BorderRadius.circular(12),
+                  //       borderSide: const BorderSide(color: Color(0xFF4C6FFF), width: 1.5),
+                  //     ),
+                  //   ),
+                  // ),
                   const SizedBox(height: 24),
                   Row(
                     children: [
@@ -748,6 +749,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ),
