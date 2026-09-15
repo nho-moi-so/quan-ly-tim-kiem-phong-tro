@@ -31,7 +31,7 @@ export const tranlateStatus = {
                 case 'active':
                     return 'Đang lưu trú';
                 case 'completed':
-                    return 'Đã hoàn thành';
+                    return 'Hoàn thành';
                 case 'cancelled':
                     return 'Đã hủy';
                 default:

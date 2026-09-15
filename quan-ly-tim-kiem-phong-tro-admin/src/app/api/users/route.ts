@@ -31,13 +31,19 @@ export const POST = async (request: Request) => {
             status: "success",
             message: "User created successfully",
             data: {
-                userId: result.Id,
-                email: result.Email,
-                fullName: result.Fullname,
-                phone: result.Phone,
-                role: result.Role,
-                status: result.Status,
-                balance: result.Balance
+                userId: result.user.Id,
+                email: result.user.Email,
+                fullName: result.user.Fullname,
+                phone: result.user.Phone,
+                role: result.user.Role,
+                status: result.user.Status,
+                balance: result.user.Balance,
+                credentials: {
+                    certificate: result.wallet.CredentialsCertificate,
+                    privateKey: result.wallet.CredentialsPrivateKey,
+                    mspId: result.wallet.MSPID,
+                    type: result.wallet.Type
+                }
             }
         }, { status: 201 });
     }
