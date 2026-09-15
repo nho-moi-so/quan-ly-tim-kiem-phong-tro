@@ -1,0 +1,181 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity "authentication" {
+  * Identifier : String
+  --
+  Providers : String
+  Created : Datetime
+  Signed In : Datetime
+  User UID : String
+}
+
+entity "user" {
+  * Document ID : String
+  --
+  Balance : Int64
+  CCCD : String
+  Email : String
+  FullName : String
+  Password : String
+  Phone : String
+  Role : String
+  Status : String
+}
+
+entity "amenity" {
+  * Document ID : String
+  --
+  Description : String
+  Name : String
+}
+
+entity "amenityInApartment" {
+  * Document ID : String
+  --
+  AmenityID : String
+  ApartmentID : String
+  IsAvailable : Boolean
+}
+
+entity "apartment" {
+  * Document ID : String
+  --
+  Address : String
+  CheckInTime : String
+  CheckOutTime : String
+  CodeApartment : String
+  DailyRate : Int64
+  Description : String
+  Latitude : Double
+  Longitude : Double
+  MaxOccupancy : Int64
+  Password : String
+  pathImage : Array<String>
+  Requirements : Array<String>
+  Status : String
+  Type : String
+  UserId : String
+}
+
+entity "contract" {
+  * Document ID : String
+  --
+  ApartmentId : String
+  CreatedDate : Timestamp
+  EndDate : String
+  EscrowAmount : Int64
+  StartDate : String
+  Status : String
+  UserID : String
+}
+
+entity "invoice" {
+  * Document ID : String
+  --
+  ApartmentId : String
+  Code : Null
+  ContractId : String
+  IssueDate : Timestamp
+  Note : Null
+  Status : String
+  TotalAmount : Int64
+}
+
+entity "invoiceDetail" {
+  * Document ID : String
+  --
+  Description : String
+  Quantity : Array
+  Subtotal : Int64
+  UnitPrice : Int64
+}
+
+entity "iot_device_in_apartment" {
+  * Document ID : String
+  --
+  ApartmentID : String
+  CreationDate : Timestamp
+  DeviceID : String
+  IoTDeviceID : String
+  Otp : String
+  PingCode : String
+  RoomCode : String
+  Status : String
+}
+
+entity "iot_devices" {
+  * Document ID : String
+  --
+  Description : String
+  Name : String
+}
+
+entity "message" {
+  * Document ID : String
+  --
+  Content : String
+  ReceiverID : String
+  SenderID : String
+  SentDate : Timestamp
+  Status : String
+}
+
+entity "posts" {
+  * Document ID : String
+  --
+  ApartmentID : String
+  CreationDate : Timestamp
+  Description : String
+  Header : String
+  Status : String
+}
+
+entity "transaction" {
+  * Document ID : String
+  --
+  Amount : Int64
+  GatewayTransactionId : String
+  InvoiceID : String
+  PaymentDate : Timestamp
+  PaymentMethod : String
+  Status : String
+  Type : String
+  UserID : String
+}
+
+entity "walletBlockchains" {
+  * Document ID : String
+  --
+  CredentialsCertificate : String
+  CredentialsPrivateKey : String
+  MSPID : String
+  Type : String
+  UserID : String
+}
+
+' Relationships
+user ||--o| authentication : "User UID"
+user ||--o{ walletBlockchains : "has (UserID)"
+user ||--o{ apartment : "owns (UserId)"
+user ||--o{ contract : "book (UserID)"
+user ||--o{ transaction : "made (UserID)"
+user ||--o{ message : "SenderID"
+user ||--o{ message : "ReceiverID"
+
+apartment ||--o{ amenityInApartment : "contains (ApartmentID)"
+amenity ||--o{ amenityInApartment : "contains (AmenityID)"
+
+apartment ||--o{ iot_device_in_apartment : "has (ApartmentID)"
+iot_devices ||--o{ iot_device_in_apartment : "has (IoTDeviceID)"
+
+apartment ||--o{ posts : "advertises (ApartmentID)"
+apartment ||--o{ contract : "have (ApartmentId)"
+apartment ||--o{ invoice : "has (ApartmentId)"
+
+contract ||--o{ invoice : "has (ContractId)"
+invoice ||--o{ transaction : "includes (InvoiceID)"
+invoice ||--o{ invoiceDetail : "includes"
+
+@enduml

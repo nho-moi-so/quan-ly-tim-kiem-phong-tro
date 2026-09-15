@@ -8,58 +8,58 @@ control ":Smart Contract" as SmartContract
 entity ":Offchain Database" as OffchainDatabase
 entity ":Onchain Database" as OnchainDatabase
 
-User -> MobileApp: lấy dữ liệu biểu mẫu yêu cầu rút tiền
+User -> MobileApp: lấy dữ liệu biểu mẫu \nyêu cầu rút tiền
 activate User
 activate MobileApp
-MobileApp -> MobileControl: yêu cầu dữ liệu hiển thị biểu mẫu yêu cầu rút tiền
+MobileApp -> MobileControl: yêu cầu hiển thị \nbiểu mẫu yêu cầu rút tiền
 activate MobileControl
-MobileControl --> MobileApp: hiển thị biểu mẫu yêu cầu rút tiền
+MobileControl --> MobileApp: hiển thị biểu mẫu \nyêu cầu rút tiền
 
-User -> MobileApp: nhập thông tin yêu cầu rút tiền và gửi yêu cầu
+User -> MobileApp: nhập thông tin yêu cầu rút tiền \nvà gửi yêu cầu
 MobileApp -> MobileControl: yêu cầu rút tiền
 MobileControl -> WebControl: gửi yêu cầu rút tiền
 activate WebControl
-WebControl -> OffchainDatabase: xác thực và gửi yêu cầu lưu thông tin yêu cầu rút tiền
+WebControl -> OffchainDatabase: xác thực và gửi yêu cầu \nlưu thông tin \nyêu cầu rút tiền
 activate OffchainDatabase
 'trường hợp thành công
     ' trường hợp offchain
         'thành công
-        alt Thêm dữ liệu offchain thất bại
-            OffchainDatabase --> WebControl: lỗi thêm yêu cầu rút tiền
+        alt Thêm dữ liệu offchain \nthất bại
+            OffchainDatabase --> WebControl: lỗi thêm \nyêu cầu rút tiền
             deactivate OffchainDatabase
-            WebControl --> MobileControl: thông báo lỗi thêm yêu cầu rút tiền
+            WebControl --> MobileControl: thông báo lỗi \nthêm yêu cầu rút tiền
             deactivate WebControl
-            MobileControl --> MobileApp: thông báo lỗi thêm yêu cầu rút tiền
+            MobileControl --> MobileApp: thông báo lỗi \nthêm yêu cầu rút tiền
             deactivate MobileControl
-        else Thêm dữ liệu offchain thành công
-            OffchainDatabase --> WebControl: thêm yêu cầu rút tiền thành công
+        else Thêm dữ liệu offchain \nthành công
+            OffchainDatabase --> WebControl: thêm yêu cầu rút tiền \nthành công
             deactivate OffchainDatabase
             'trường hợp onchain
             activate WebControl
-            WebControl -> SmartContract: tạo giao dịch yêu cầu rút tiền
+            WebControl -> SmartContract: tạo giao dịch \nyêu cầu rút tiền
             activate SmartContract
                 'thất bại
-            alt Xác nhận giao dịch thất bại
-                SmartContract --> WebControl: lỗi giao dịch yêu cầu rút tiền
+            alt Xác nhận giao dịch \nthất bại
+                SmartContract --> WebControl: lỗi giao dịch \nyêu cầu rút tiền
                 deactivate SmartContract
                 activate MobileControl
-                WebControl --> MobileControl: thông báo lỗi giao dịch yêu cầu rút tiền
+                WebControl --> MobileControl: thông báo lỗi giao dịch \nyêu cầu rút tiền
                 deactivate WebControl
-                MobileControl --> MobileApp: thông báo lỗi yêu cầu rút tiền
+                MobileControl --> MobileApp: thông báo lỗi \nyêu cầu rút tiền
                 deactivate MobileControl
-            else Xác nhận giao dịch thành công
+            else Xác nhận giao dịch \nthành công
                 'thành công
-                SmartContract --> WebControl: xác nhận giao dịch yêu cầu rút tiền thành công
+                SmartContract --> WebControl: xác nhận giao dịch \nyêu cầu rút tiền thành công
                 deactivate SmartContract
                 activate WebControl
-                WebControl -> OnchainDatabase: lưu thông tin giao dịch yêu cầu rút tiền
+                WebControl -> OnchainDatabase: lưu thông tin giao dịch \nyêu cầu rút tiền
                 activate OnchainDatabase
-                OnchainDatabase --> WebControl: thêm giao dịch yêu cầu rút tiền thành công
+                OnchainDatabase --> WebControl: thêm giao dịch \nyêu cầu rút tiền thành công
                 deactivate OnchainDatabase
                 activate MobileControl
-                WebControl --> MobileControl: yêu cầu rút tiền thành công
+                WebControl --> MobileControl: yêu cầu rút tiền \nthành công
                 deactivate WebControl
-                MobileControl --> MobileApp: yêu cầu rút tiền thành công
+                MobileControl --> MobileApp: yêu cầu rút tiền \nthành công
                 deactivate MobileControl
             end
         end

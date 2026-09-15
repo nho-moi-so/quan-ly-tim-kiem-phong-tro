@@ -229,7 +229,7 @@ class _SignupFormState extends State<SignupForm> {
           _buildLabel('Mật khẩu'),
           const SizedBox(height: 8),
           _buildInputField(
-            'Nhập mật khẩu (tối thiểu 6 ký tự)',
+            'Nhập mật khẩu',
             _passwordController,
             Icons.lock_outline,
             isPassword: true,

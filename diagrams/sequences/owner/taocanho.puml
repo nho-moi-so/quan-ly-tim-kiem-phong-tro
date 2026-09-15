@@ -1,17 +1,17 @@
 @startuml taocanho-sequence-diagram
-title "Sơ đồ trình tự \ntạo căn hộ"
+title "Sơ đồ trình tự tạo căn hộ"
 actor User as User
-boundary ":Mobile \nApp" as MobileApp
-control ":Mobile \nControl" as MobileControl
-control ":Web \nControl" as WebControl
-control ":Smart \nContract" as SmartContract
-entity ":Offchain \nDatabase" as OffchainDatabase
-entity ":Onchain \nDatabase" as OnchainDatabase
+boundary ":Mobile App" as MobileApp
+control ":Mobile Control" as MobileControl
+control ":Web Control" as WebControl
+control ":Smart Contract" as SmartContract
+entity ":Offchain Database" as OffchainDatabase
+entity ":Onchain Database" as OnchainDatabase
 
 User -> MobileApp: lấy dữ liệu \nbiểu mẫu \nthêm căn hộ
 activate User
 activate MobileApp
-MobileApp -> MobileControl: yêu cầu dữ liệu \nhiển thị biểu mẫu \nthêm căn hộ
+MobileApp -> MobileControl: yêu cầu hiển thị \nbiểu mẫu thêm căn hộ
 activate MobileControl
 MobileControl -->MobileApp: hiển thị biểu mẫu \nthêm căn hộ
 
@@ -19,13 +19,13 @@ User -> MobileApp: nhập thông tin \ncăn hộ mới \nvà gửi yêu cầu
 MobileApp -> MobileControl: yêu cầu thêm \ncăn hộ mới
 MobileControl -> WebControl: gửi yêu cầu \nthêm căn hộ mới
 activate WebControl
-WebControl -> OffchainDatabase: xác thực và \ngửi yêu cầu \nlưu thông tin \ncăn hộ mới
+WebControl -> OffchainDatabase: xác thực và gửi yêu cầu \nlưu thông tin \ncăn hộ mới
 activate OffchainDatabase
 'trường hợp thành công
     ' trường hợp offchain
         'thành công
         alt Thêm dữ liệu offchain \nthất bại
-            OffchainDatabase --> WebControl: lỗi \nthêm căn hộ mới
+            OffchainDatabase --> WebControl: lỗi thêm căn hộ mới
             deactivate OffchainDatabase
             WebControl --> MobileControl: thông báo lỗi \nthêm căn hộ mới
             deactivate WebControl
@@ -43,7 +43,7 @@ activate OffchainDatabase
                 SmartContract --> WebControl: lỗi giao dịch \nthêm căn hộ mới
                 deactivate SmartContract
                 activate MobileControl
-                WebControl --> MobileControl: thông báo lỗi \ngiao dịch \nthêm căn hộ mới
+                WebControl --> MobileControl: thông báo lỗi \nthêm căn hộ mới
                 deactivate WebControl
                 MobileControl --> MobileApp: thông báo lỗi \nthêm căn hộ mới
                 deactivate MobileControl
@@ -52,9 +52,9 @@ activate OffchainDatabase
                 SmartContract --> WebControl: xác nhận giao dịch \nthêm căn hộ mới \nthành công
                 deactivate SmartContract
                 activate WebControl
-                WebControl -> OnchainDatabase: lưu thông tin \ngiao dịch \nthêm căn hộ mới
+                WebControl -> OnchainDatabase: lưu thông tin giao dịch \nthêm căn hộ mới
                 activate OnchainDatabase
-                OnchainDatabase --> WebControl: thêm giao dịch \nthêm căn hộ mới \nthành công
+                OnchainDatabase --> WebControl: thêm giao dịch thêm căn hộ mới \nthành công
                 deactivate OnchainDatabase
                 activate MobileControl
                 WebControl --> MobileControl: thêm căn hộ mới \nthành công

@@ -1,12 +1,12 @@
 @startuml datphong-sequence-diagram
 title "Sơ đồ trình tự đặt phòng"
 actor User as User
-boundary ":Mobile \nApp" as MobileApp
-control ":Mobile \nControl" as MobileControl
-control ":Web \nControl" as WebControl
-control ":Smart \nContract" as SmartContract
-entity ":Offchain \nDatabase" as OffchainDatabase
-entity ":Onchain \nDatabase" as OnchainDatabase
+boundary ":Mobile App" as MobileApp
+control ":Mobile Control" as MobileControl
+control ":Web Control" as WebControl
+control ":Smart Contract" as SmartContract
+entity ":Offchain Database" as OffchainDatabase
+entity ":Onchain Database" as OnchainDatabase
 
 User -> MobileApp: lấy dữ liệu \nbiểu mẫu đặt phòng
 activate User

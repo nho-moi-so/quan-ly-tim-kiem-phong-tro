@@ -58,11 +58,6 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
   bool? isRoomCodeUnique;
   bool isCheckingRoomCode = false;
 
-  // Trạng thái check IOT device
-  final Map<String, bool> _deviceCheckingMap =
-      {}; // deviceId -> đang check hay không
-  final Map<String, String> _deviceStatusMap =
-      {}; // deviceId -> "online"/"offline"/""
 
   // Biến lưu tọa độ
   double? _selectedLatitude;
@@ -1857,10 +1852,6 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
               connectionMap[connected.iotDeviceId] = connected;
             }
 
-            // Tự động check trạng thái các thiết bị đã kết nối khi mới load trang
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _autoCheckConnectedDevices(connectedDevices);
-            });
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1873,9 +1864,6 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                     device: device,
                     connected: connected,
                     roomCode: roomCodeController.text,
-                    deviceCheckingMap: _deviceCheckingMap,
-                    deviceStatusMap: _deviceStatusMap,
-                    onStatusUpdate: () => setState(() {}),
                     onDeviceTap: (deviceId) => _handleDeviceTap(deviceId),
                   );
                 }).toList(),
@@ -2210,48 +2198,6 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
           ],
         ),
       );
-    }
-  }
-
-  /// Tự động check trạng thái các thiết bị đã kết nối
-  Future<void> _autoCheckConnectedDevices(
-    List<ConnectedIotDevice> connectedDevices,
-  ) async {
-    final iotService = IotDeviceService();
-
-    for (var connected in connectedDevices) {
-      // Chỉ check những thiết bị đã verified và chưa được check
-      if (connected.isConnected &&
-          !_deviceStatusMap.containsKey(connected.iotDeviceId)) {
-        try {
-          _deviceCheckingMap[connected.iotDeviceId] = true;
-
-          final status = await iotService.callAPICheckIOTDevice(
-            connected.connectionId,
-          );
-          print(
-            "status auto-check: $status for device ${connected.iotDeviceId}",
-          );
-
-          if (mounted) {
-            setState(() {
-              _deviceStatusMap[connected.iotDeviceId] = status;
-              _deviceCheckingMap[connected.iotDeviceId] = false;
-            });
-          }
-        } catch (e) {
-          print('❌ Error auto-checking device ${connected.iotDeviceId}: $e');
-          if (mounted) {
-            setState(() {
-              _deviceStatusMap[connected.iotDeviceId] = 'offline';
-              _deviceCheckingMap[connected.iotDeviceId] = false;
-            });
-          }
-        }
-
-        // Delay nhỏ giữa các request để tránh quá tải
-        await Future.delayed(const Duration(milliseconds: 300));
-      }
     }
   }
 
@@ -2717,9 +2663,6 @@ class IotDeviceCard extends StatefulWidget {
   final IotDevice device;
   final ConnectedIotDevice? connected;
   final String roomCode;
-  final Map<String, bool> deviceCheckingMap;
-  final Map<String, String> deviceStatusMap;
-  final VoidCallback onStatusUpdate;
   final Function(String)? onDeviceTap;
 
   const IotDeviceCard({
@@ -2727,9 +2670,6 @@ class IotDeviceCard extends StatefulWidget {
     required this.device,
     required this.connected,
     required this.roomCode,
-    required this.deviceCheckingMap,
-    required this.deviceStatusMap,
-    required this.onStatusUpdate,
     this.onDeviceTap,
   });
 
@@ -2737,12 +2677,8 @@ class IotDeviceCard extends StatefulWidget {
   State<IotDeviceCard> createState() => _IotDeviceCardState();
 }
 
-class _IotDeviceCardState extends State<IotDeviceCard> {
-  bool get isChecking =>
-      widget.deviceCheckingMap[widget.device.deviceId] ?? false;
-  String get deviceStatus =>
-      widget.deviceStatusMap[widget.device.deviceId] ?? '';
 
+class _IotDeviceCardState extends State<IotDeviceCard> {
   IconData _getDeviceIcon(String deviceId) {
     switch (deviceId.toLowerCase()) {
       case 'smart_lock':
@@ -2766,97 +2702,35 @@ class _IotDeviceCardState extends State<IotDeviceCard> {
     }
   }
 
-  Future<void> _checkDeviceStatus() async {
-    widget.deviceCheckingMap[widget.device.deviceId] = true;
-    widget.onStatusUpdate();
-
-    try {
-      final iotService = IotDeviceService();
-      final status = await iotService.callAPICheckIOTDevice(
-        // widget.roomCode,
-        widget.connected!.connectionId,
-      );
-
-      widget.deviceStatusMap[widget.device.deviceId] = status;
-      widget.deviceCheckingMap[widget.device.deviceId] = false;
-      widget.onStatusUpdate();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              status == 'online'
-                  ? '✓ ${widget.device.name} đang hoạt động'
-                  : '✗ ${widget.device.name} không phản hồi',
-            ),
-            backgroundColor: status == 'online'
-                ? const Color(0xFF10B981)
-                : const Color(0xFFEF4444),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    } catch (e) {
-      widget.deviceStatusMap[widget.device.deviceId] = 'offline';
-      widget.deviceCheckingMap[widget.device.deviceId] = false;
-      widget.onStatusUpdate();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✗ ${widget.device.name} không thể kết nối'),
-            backgroundColor: const Color(0xFFEF4444),
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final bool isConnected = widget.connected?.isConnected ?? false;
     final bool isPending =
         widget.connected != null && !widget.connected!.isConnected;
-    final bool isReady = deviceStatus == 'online';
 
     Color bg;
     Color borderColor;
     IconData statusIcon;
     String statusText;
-    String statusSubtitle;
 
-    // Chỉ màu xanh khi đã kết nối VÀ đã sẵn sàng (online)
-    if (isConnected && isReady) {
+    // Màu xanh ngay khi đã kết nối
+    if (isConnected) {
       bg = const Color(0xFF10B981).withOpacity(0.05);
       borderColor = const Color(0xFF10B981);
       statusIcon = Icons.check_circle;
       statusText = 'Đã kết nối';
-      statusSubtitle = 'Thiết bị sẵn sàng hoạt động';
-    } else if (isConnected) {
-      // Đã kết nối nhưng chưa sẵn sàng hoặc offline
-      bg = const Color(0xFF6B7280).withOpacity(0.05);
-      borderColor = const Color(0xFF6B7280);
-      statusIcon = Icons.check_circle;
-      statusText = 'Đã kết nối';
-      if (deviceStatus == 'offline') {
-        statusSubtitle = 'Thiết bị không phản hồi';
-      } else {
-        statusSubtitle = 'Đang kiểm tra trạng thái...';
-      }
     } else if (isPending) {
       // Chờ xác nhận
       bg = const Color(0xFF6B7280).withOpacity(0.05);
       borderColor = const Color(0xFF6B7280);
       statusIcon = Icons.pending;
       statusText = 'Chờ xác nhận';
-      statusSubtitle = 'Đang chờ thiết bị phản hồi';
     } else {
       // Chưa kết nối
       bg = const Color(0xFF6B7280).withOpacity(0.05);
       borderColor = const Color(0xFF6B7280);
       statusIcon = Icons.link_off;
       statusText = 'Chưa kết nối';
-      statusSubtitle = 'Thiết bị chưa được liên kết';
     }
 
     IconData deviceIcon = _getDeviceIcon(widget.device.deviceId);
@@ -2945,47 +2819,6 @@ class _IotDeviceCardState extends State<IotDeviceCard> {
                       ],
                     ),
                   ),
-                  // Badge trạng thái sẵn sàng (chỉ hiển thị khi đã kết nối)
-                  if (isConnected && deviceStatus.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: deviceStatus == 'online'
-                            ? const Color(0xFF10B981).withOpacity(0.15)
-                            : const Color(0xFFEF4444).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            deviceStatus == 'online'
-                                ? Icons.check_circle_outline
-                                : Icons.warning_amber_rounded,
-                            size: 14,
-                            color: deviceStatus == 'online'
-                                ? const Color(0xFF10B981)
-                                : const Color(0xFFEF4444),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            deviceStatus == 'online'
-                                ? 'Đã sẵn sàng'
-                                : 'Chưa sẵn sàng',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: deviceStatus == 'online'
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFFEF4444),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                 ],
               ),
               // Nút xem mật khẩu cho smart lock đã kết nối
@@ -3027,24 +2860,6 @@ class _IotDeviceCardState extends State<IotDeviceCard> {
           ),
         ),
 
-        // Nút refresh trạng thái
-        Tooltip(
-          message: statusSubtitle,
-          child: IconButton(
-            onPressed: isChecking ? null : _checkDeviceStatus,
-            icon: isChecking
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(borderColor),
-                    ),
-                  )
-                : Icon(Icons.refresh, color: borderColor),
-            tooltip: 'Kiểm tra trạng thái thiết bị',
-          ),
-        ),
       ],
     ),
     );

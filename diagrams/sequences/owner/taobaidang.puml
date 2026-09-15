@@ -5,16 +5,16 @@ boundary ":Mobile App" as MobileApp
 control ":Mobile Control" as MobileControl
 entity ":Offchain Database" as OffchainDatabase
 
-User -> MobileApp: lấy dữ liệu biểu mẫu tạo bài đăng
+User -> MobileApp: lấy dữ liệu \nbiểu mẫu tạo bài đăng
 activate User
 activate MobileApp
-MobileApp -> MobileControl: yêu cầu dữ liệu hiển thị biểu mẫu tạo bài đăng
+MobileApp -> MobileControl: yêu cầu dữ liệu hiển thị \nbiểu mẫu tạo bài đăng
 activate MobileControl
-MobileControl --> MobileApp: hiển thị biểu mẫu tạo bài đăng
+MobileControl --> MobileApp: hiển thị biểu mẫu \ntạo bài đăng
 
-User -> MobileApp: nhập thông tin bài đăng và gửi yêu cầu
+User -> MobileApp: nhập thông tin bài đăng \nvà gửi yêu cầu
 MobileApp -> MobileControl: yêu cầu tạo bài đăng
-MobileControl -> OffchainDatabase: xác thực và gửi yêu cầu lưu thông tin bài đăng
+MobileControl -> OffchainDatabase: xác thực và gửi yêu cầu \nlưu thông tin bài đăng
 activate OffchainDatabase
 'trường hợp thành công
     alt Thêm dữ liệu bài đăng thất bại

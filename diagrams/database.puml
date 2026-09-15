@@ -6,103 +6,108 @@ authentication:
     User UID: String
 
 user:
-    Document ID	
-    Balance	
-    CCCD	
-    Email	
-    FullName	
-    Password	
-    Phone	
-    Role	
-    Status
+    Document ID	: Sting
+    Balance	: Int64
+    CCCD	: String
+    Email	: String
+    FullName	: String
+    Password	: String
+    Phone	: String
+    Role   : String
+    Status : String
 amenity:
-    Document ID	
-    Description	
-    Name
+    Document ID	: String
+    Description	: String
+    Name : String
 amenityInApartment:
-    Document ID	
-    AmenityID	
-    ApartmentID	
-    IsAvailable
+    Document ID	: String
+    AmenityID	: String
+    ApartmentID	: String
+    IsAvailable : Boolean
 apartment:
-    Document ID	
-    Address	
-    CheckInTime	
-    CheckOutTime	
-    CodeApartment	
-    DailyRate	
-    Description	
-    Latitude	
-    Longitude	
-    MaxOccupancy	
-    Password
+    Document ID	: String
+    Address	: String
+    CheckInTime	: String
+    CheckOutTime	: String
+    CodeApartment	: String
+    DailyRate	: Int64
+    Description	: String
+    Latitude	: Double
+    Longitude	: Double
+    MaxOccupancy	: Int64
+    Password : String
+    pathImage: Array<String>
+    Requirements: Array<String>
+    Status: String
+    Type: String
+    UserId: String
+
 contract:
-    Document ID	
-    ApartmentId	
-    CreatedDate	
-    EndDate	
+    Document ID	: String
+    ApartmentId	: String
+    CreatedDate	:Timestamp
+    EndDate	: String
     EscrowAmount	
-    StartDate	
-    Status	
-    UserID
+    StartDate	: String
+    Status	: String
+    UserID : String
 invoice:
-    Document ID		
-    ApartmentId		
-    Code	
-    ContractId	
-    IssueDate	
-    Note	
-    Status	
-    TotalAmount
+    Document ID	: String
+    ApartmentId	: String	
+    Code	    : Null
+    ContractId	: String
+    IssueDate	:Timestamp
+    Note	    :Null
+    Status	    : String
+    TotalAmount : Int64
 invoiceDetail:
-    Document ID	
-    Description	
-    Quantity	
-    Subtotal	
-    UnitPrice
+    Document ID	: String
+    Description	: String
+    Quantity	: Int64
+    Subtotal	: Int64
+    UnitPrice   : Int64
 iot_device_in_apartment:
-    Document ID	
-    ApartmentID	
-    CreationDate	
-    DeviceID	
-    IoTDeviceID	
-    Otp	
-    PingCode	
-    RoomCode	
-    Status
+    Document ID	: String
+    ApartmentID	: String
+    CreationDate:Timestamp
+    DeviceID	: String
+    IoTDeviceID	: String
+    Otp	        : String
+    PingCode	: String
+    RoomCode	: String
+    Status      : String
 iot_devices:
-    Document ID	
-    Description	
-    Name
+    Document ID	: String
+    Description	: String
+    Name        : String
 message:
-    Document ID	
-    Content	
-    ReceiverID	
-    SenderID	
-    SentDate	
-    Status
+    Document ID	: String
+    Content	    : String
+    ReceiverID	: String
+    SenderID	: String
+    SentDate	:Timestamp
+    Status      : String
 posts:
-    Document ID	
-    ApartmentID	
-    CreationDate	
-    Description	
-    Header	
-    Status
-    postID
+    Document ID	: String
+    ApartmentID	: String
+    CreationDate: Timestamp
+    Description	: String
+    Header	    : String
+    Status      : String
 transaction:
-    Document ID	
-    Amount	
-    GatewayTransactionId	
-    InvoiceID	
-    PaymentDate	
-    PaymentMethod	
-    Status	
-    Type	
-    UserID
+    Document ID	: String
+    Amount	    : Int64
+    GatewayTransactionId : String
+    InvoiceID	: String
+    PaymentDate	: Timestamp
+    PaymentMethod : String
+    Status	    : String
+    Type	    : String
+    UserID      : String
 walletBlockchains:
-    Document ID	
-    CredentialsCertificate	
-    CredentialsPrivateKey	
-    MSPID	
-    Type	
-    UserID
+    Document ID	: String
+    CredentialsCertificate	: String
+    CredentialsPrivateKey	: String
+    MSPID	                : String
+    Type	                : String
+    UserID                  : String

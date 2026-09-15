@@ -5,16 +5,16 @@ boundary ":Mobile App" as MobileApp
 control ":Mobile Control" as MobileControl
 entity ":Offchain Database" as OffchainDatabase
 
-User -> MobileApp: lấy dữ liệu biểu mẫu tìm kiếm bài đăng
+User -> MobileApp: lấy dữ liệu biểu mẫu \ntìm kiếm bài đăng
 activate User
 activate MobileApp
-MobileApp -> MobileControl: yêu cầu ddữ liệu hiển thị biểu mẫu tìm kiếm bài đăng
+MobileApp -> MobileControl: yêu cầu dữ liệu hiển thị \nbiểu mẫu tìm kiếm bài đăng
 activate MobileControl
-MobileControl --> MobileApp: hiển thị biểu mẫu tìm kiếm bài đăng
+MobileControl --> MobileApp: hiển thị biểu mẫu tìm kiếm \nbài đăng
 
-User -> MobileApp: nhập thông tin tìm kiếm và gửi yêu cầu
+User -> MobileApp: nhập thông tin \ntìm kiếm và gửi yêu cầu
 MobileApp -> MobileControl: yêu cầu tìm kiếm bài đăng
-MobileControl -> OffchainDatabase: xác thực và gửi yêu cầu tìm kiếm bài đăng
+MobileControl -> OffchainDatabase: xác thực và gửi yêu cầu \ntìm kiếm bài đăng
 activate OffchainDatabase
 'trường hợp thành công
     alt Lỗi tìm kiếm

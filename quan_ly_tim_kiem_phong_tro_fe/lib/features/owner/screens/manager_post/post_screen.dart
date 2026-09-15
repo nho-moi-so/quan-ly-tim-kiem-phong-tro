@@ -136,7 +136,7 @@ class _PostScreenState extends State<PostScreen> {
                 currentFilter: currentFilter,
                 options: [
                   FilterOption(
-                    label: 'Chờ duyệt',
+                    label: 'Chờ',
                     icon: Icons.schedule_rounded,
                     color: const Color(0xFFF59E0B),
                     value: PostFilter.pending,

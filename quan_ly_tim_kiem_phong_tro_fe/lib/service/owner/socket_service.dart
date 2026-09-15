@@ -73,8 +73,8 @@ class SocketService with ChangeNotifier {
         // Server trả về { otp, roomCode }
         _otp = data['otp']?.toString();  // Đổi từ 'otpCode' thành 'otp'
         _roomCode = data['roomCode']?.toString();
-        _roomName = 'Phòng ${data['roomCode']}';  // Tạm thời generate
-        _apartmentName = 'Tòa nhà A';  // Tạm thời hardcode
+        _roomName = '${data['roomCode']}';  // Tạm thời generate
+        // _apartmentName = 'Tòa nhà A';  // Tạm thời hardcode
         _connectionStatus = 'OTP Ready';
         
         notifyListeners();
