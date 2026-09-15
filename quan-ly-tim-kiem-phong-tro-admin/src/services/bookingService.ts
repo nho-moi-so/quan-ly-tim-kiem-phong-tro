@@ -117,6 +117,12 @@ export class BookingService {
 
       for (const contract of contracts) {
         try {
+          // Loại bỏ các contract có trạng thái: paid, pending, approved
+          const currentStatus = contract.Status ? contract.Status.toLowerCase() : "pending";
+          if (["paid", "pending", "approved"].includes(currentStatus)) {
+            continue;
+          }
+
           // Get apartment info from ApartmentId
           const apartment = contract.ApartmentId
             ? await ApartmentRepository.getById(contract.ApartmentId)

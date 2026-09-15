@@ -170,9 +170,17 @@ async function scanAndProcess() {
 
 					const newPass = randomPassword(6);
 					const newPassHash = hashPassword(newPass);
-
+					console.log(`       [CLOCKER] Mật khẩu cho khách: ${newPass}`);
 					try {
-						await contract.submitTransaction('CheckIn', booking.id, newPassHash);
+						const commit = await contract.submitAsync('CheckIn', { arguments: [booking.id, newPassHash] });
+						const txId = commit.getTransactionId();
+						console.log(`       [CLOCKER] Đã tạo transaction CheckIn. Hash: ${txId}`);
+						
+						const status = await commit.getStatus();
+						if (!status.successful) {
+							throw new Error(`Transaction CheckIn thất bại với mã lỗi ${status.code}`);
+						}
+
 						// Cập nhật Firebase: căn hộ OCCUPIED, hợp đồng ACTIVE
 						const apartment = await ApartmentRepository.getById(booking.ApartmentID);
 						if (apartment) {
@@ -183,11 +191,10 @@ async function scanAndProcess() {
 							await ContractRepository.update(firestoreContract.Id, 
 								{ 
 									Status: 'ACTIVE', 
-									UpdateDate: admin.firestore.Timestamp.now()
+									UpdateDate: new Date()
 								});
 						}
-						console.log(`       [CLOCKER] AUTO CHECK-IN THÀNH CÔNG: ${booking.id}`);
-						console.log(`       [CLOCKER] Mật khẩu cho khách: ${newPass}`);
+						console.log(`       [CLOCKER] AUTO CHECK-IN THÀNH CÔNG: ${booking.id}`);						
 					} catch (err) {
 						console.error(`       [CLOCKER] Lỗi khi Check-in ${booking.id}: ${err.message}`);
 					}
@@ -201,7 +208,15 @@ async function scanAndProcess() {
 					const resetPassHash = hashPassword(resetPass);
 
 					try {
-						await contract.submitTransaction('CheckOut', booking.id, resetPassHash);
+						const commit = await contract.submitAsync('CheckOut', { arguments: [booking.id, resetPassHash] });
+						const txId = commit.getTransactionId();
+						console.log(`       [CLOCKER] Đã tạo transaction CheckOut. Hash: ${txId}`);
+						
+						const status = await commit.getStatus();
+						if (!status.successful) {
+							throw new Error(`Transaction CheckOut thất bại với mã lỗi ${status.code}`);
+						}
+
 						// Cập nhật Firebase: giải ngân, hoàn tất hợp đồng, căn hộ AVAILABLE
 						const firestoreContract = await ContractRepository.getById(booking.id);
 						const apartment = await ApartmentRepository.getById(booking.ApartmentID);
@@ -217,7 +232,7 @@ async function scanAndProcess() {
 							await ContractRepository.update(firestoreContract.Id, {
 								EscrowAmount: 0,
 								Status: 'COMPLETED',
-								UpdateDate: admin.firestore.Timestamp.now(),
+								UpdateDate: new Date(),
 							});
 						}
 						if (apartment) {

@@ -132,4 +132,81 @@ export const ContractService = {
         }
         return contractData;
     },
+
+    bookApartmentTest: async (data: {
+        apartmentId: string;
+        endDateSec: number;
+        startDateSec: number;
+        userId: string;
+    }) => {
+        const { contract, gateway, client, close } = await createFabricClient();
+        const repoBlockchainFabric = new BlockchainFabricRepository(contract);
+
+        const apartment = await ApartmentRepository.getById(data.apartmentId);
+        if (!apartment) {
+            throw new Error("Apartment not found");
+        }
+
+        const diffSec = data.endDateSec - data.startDateSec;
+        const days = Math.ceil(diffSec / (24 * 60 * 60)); // 24 giờ * 60 phút * 60 giây
+        const escrowAmount = apartment.DailyRate * Math.max(1, days);
+
+        const startDateMs = data.startDateSec * 1000;
+        const endDateMs = data.endDateSec * 1000;
+        const startDateSec = data.startDateSec;
+        const endDateSec = data.endDateSec;
+
+        const contractData = await ContractRepository.create({
+            ApartmentId: data.apartmentId,
+            UserID: data.userId,
+            CreatedDate: admin.firestore.Timestamp.now(),
+            UpdateDate: admin.firestore.Timestamp.now(),
+            StartDate: admin.firestore.Timestamp.fromMillis(startDateMs),
+            EndDate: admin.firestore.Timestamp.fromMillis(endDateMs),
+            EscrowAmount: escrowAmount,
+            Status: "CREATED",
+        });
+
+        const invoiceData = await InvoiceRepository.create({
+            ContractId: contractData.Id,
+            IssueDate: admin.firestore.Timestamp.now(),
+            TotalAmount: escrowAmount,
+            Status: "PAID",
+            ApartmentId: data.apartmentId,
+        });
+        await ContractRepository.update(contractData.Id, { InvoiceId: invoiceData.Id });
+
+        //tao du lieu tren blockchain
+        try {
+            //lay identity tu firebase de tao tren blockchain
+            const walletUser = await WalletBlockchainRepository.getIdentityFromFirebase(data.userId) as X509Identity;
+
+            if (!walletUser) {
+                throw new Error("User wallet not found on blockchain. Please enroll user first via setupMasterAdmin.ts → syncFirebaseToFabricUser.ts");
+            }
+
+
+            await repoBlockchainFabric.bookApartmentWithUser(
+                walletUser,
+                contractData.Id,
+                data.apartmentId,
+                data.userId,
+                startDateSec,
+                endDateSec
+            );
+
+            await ApartmentRepository.update(data.apartmentId, { Status: "booked" });
+        }
+        catch (err) {
+            //neu tao tren blockchain that bai thi xoa tren firebase
+            await ContractRepository.delete(contractData.Id);
+            await InvoiceRepository.delete(invoiceData.Id);
+            throw err;
+        }
+        finally {
+            // ✅ FIX: Luôn close connection khi xong
+            close();
+        }
+        return contractData;
+    },
 }

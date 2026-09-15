@@ -3,6 +3,7 @@
 [terminal_3]: ssh -p 443 -R0:localhost:3001 a.pinggy.io -> này cho blockchain
 copy cai ngrok link vao file .env cua app mobile
 
-date -d "+2 minutes" +%s
+date -d "+70 seconds" +%s
+date -d "+140 seconds" +%s
 
 echo "YOUR_BASE64_HERE" | base64 -d | openssl x509 -noout -subject

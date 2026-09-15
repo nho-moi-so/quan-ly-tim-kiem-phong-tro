@@ -21,6 +21,16 @@ export const UserService = {
     }) => {
         let authUid: string | null = null;
         let newUser: Awaited<ReturnType<typeof UserRepository.create>> | null = null;
+        let result: {
+            user: typeof newUser;
+            wallet: {
+                UserID: string;
+                CredentialsCertificate: string;
+                CredentialsPrivateKey: string;
+                MSPID: string;
+                Type: string;
+            };
+        } | null = null;
         console.log("==1==");
 
         // Khởi tạo fabric client
@@ -50,6 +60,10 @@ export const UserService = {
                 Role: data.role.toLocaleLowerCase(),
                 Status: data.status.toLocaleLowerCase(),
             });
+            result = {
+                user: newUser,
+                wallet: null as any
+            };
             //lay idenity cua admin tren firebase de tao user tren blockchain
             const masterAdmin = await WalletBlockchainRepository.getIdentityFromFirebase('master-admin') as X509Identity; //== Hardcoded master admin ID
             if (!masterAdmin) {
@@ -79,13 +93,20 @@ export const UserService = {
                     enrollmentID: authUid,
                     enrollmentSecret: secret
                 });
-                await WalletBlockchainRepository.create({
+                // await WalletBlockchainRepository.create({
+                //     UserID: authUid,
+                //     CredentialsCertificate: enrollment.certificate,
+                //     CredentialsPrivateKey: enrollment.key.toBytes(),
+                //     MSPID: 'Org1MSP',
+                //     Type: 'X.509'
+                // });
+                result.wallet = {
                     UserID: authUid,
                     CredentialsCertificate: enrollment.certificate,
                     CredentialsPrivateKey: enrollment.key.toBytes(),
                     MSPID: 'Org1MSP',
                     Type: 'X.509'
-                });
+                };
             }
             catch (err) {
                 console.error("Failed to register/enroll user with CA, rolling back user creation: ", err);
@@ -107,7 +128,7 @@ export const UserService = {
                 throw new Error("Failed to create user on blockchain");
             }
 
-            return newUser;
+            return result;
         } catch (err) {
             if (newUser?.Id) {
                 await UserRepository.delete(newUser.Id).catch(() => undefined);

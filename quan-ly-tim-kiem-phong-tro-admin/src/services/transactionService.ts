@@ -50,7 +50,7 @@ export const TransactionService = {
         // luu giao dich vao firebase sau khi giao dich tren blockchain thanh cong
         const transactionData = {
             Amount: data.amount,
-            PaymentMethod: data.paymentMethod ?? "BANK_TRANSFER",
+            PaymentMethod: data.paymentMethod ?? "Chuyển khoản",
             PaymentDate: new Date(),
             Type: "DEPOSIT",
             Status: "COMPLETED",

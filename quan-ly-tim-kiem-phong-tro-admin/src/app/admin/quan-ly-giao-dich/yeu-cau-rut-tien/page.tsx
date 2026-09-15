@@ -148,13 +148,13 @@ export default function YeuCauRutTienPage() {
       key: "id",
       width: 160,
       fixed: "left",
-      render: (id: string) => <Text strong>{id.slice(0, 10).toUpperCase()}</Text>,
+      render: (id: string) => <Text strong>{id.slice(0, 6).toUpperCase()}</Text>,
     },
     {
       title: "Người rút",
       dataIndex: "user_name",
       key: "user_name",
-      width: 200,
+      width: 150,
       render: (name: string) => name || "—",
     },
     {
@@ -183,38 +183,32 @@ export default function YeuCauRutTienPage() {
       ),
     },
     {
-      title: "Thời gian duyệt",
-      dataIndex: "completed_at",
-      key: "completed_at",
-      width: 180,
-      render: (completedAt: string | null) => formatDateTime(completedAt),
-    },
-    {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       width: 170,
       render: (status: WithdrawStatus) => getStatusTag(status),
     },
-    {
-      title: "Blockchain Hash",
-      dataIndex: "tx_hash",
-      key: "tx_hash",
-      width: 240,
-      render: (hash: string | null) => {
-        if (!hash) {
-          return "—";
-        }
+    // {
+    //   title: "Blockchain Hash",
+    //   dataIndex: "tx_hash",
+    //   key: "tx_hash",
+    //   width: 240,
+    //   fixed: "right",
+    //   render: (hash: string | null) => {
+    //     if (!hash) {
+    //       return "—";
+    //     }
 
-        return (
-          <Tooltip title={hash}>
-            <Text copyable>
-              {hash.slice(0, 8)}...{hash.slice(-8)}
-            </Text>
-          </Tooltip>
-        );
-      },
-    },
+    //     return (
+    //       <Tooltip title={hash}>
+    //         <Text copyable>
+    //           {hash.slice(0, 8)}...{hash.slice(-8)}
+    //         </Text>
+    //       </Tooltip>
+    //     );
+    //   },
+    // },
     {
       title: "Hành động",
       key: "actions",
@@ -279,7 +273,7 @@ export default function YeuCauRutTienPage() {
         dataSource={data}
         loading={loading}
         pagination={{ pageSize: 10, showSizeChanger: true }}
-        scroll={{ x: 1550 }}
+        scroll={{ x: 'max-content' }}
       />
 
       <Modal
@@ -290,7 +284,7 @@ export default function YeuCauRutTienPage() {
       >
         {viewingItem && (
           <Descriptions bordered column={1} size="small">
-            <Descriptions.Item label="Mã giao dịch">{viewingItem.id}</Descriptions.Item>
+            <Descriptions.Item label="Mã giao dịch">{String(viewingItem.id).slice(0, 6)}</Descriptions.Item>
             <Descriptions.Item label="Người rút">{viewingItem.user_name || "—"}</Descriptions.Item>
             <Descriptions.Item label="Số tiền">
               <Text strong style={{ color: "#ff4d4f" }}>

@@ -146,7 +146,7 @@ const QuanLyLichDatPhongPage: React.FC = () => {
           title: '✅ Kiểm tra tính toàn vẹn thành công',
           content: (
             <div>
-              <p><strong>Booking ID:</strong> {formatId.formatBookingId(values.booking_id)}</p>
+              <p><strong>ID:</strong> {formatId.formatBookingId(values.booking_id)}</p>
               <p><strong>Trạng thái:</strong> <span style={{ color: '#52c41a', fontWeight: 'bold' }}>Đã xác minh</span></p>
               <p style={{ color: '#52c41a', marginTop: '12px' }}>
                 <CheckCircleOutlined /> Dữ liệu trên blockchain khớp với dữ liệu hệ thống
@@ -162,7 +162,7 @@ const QuanLyLichDatPhongPage: React.FC = () => {
           title: '⚠️ Cảnh báo: Phát hiện bất thường',
           content: (
             <div>
-              <p><strong>Booking ID:</strong> {values.booking_id}</p>
+              <p><strong>ID:</strong> {values.booking_id}</p>
               <p><strong>Trạng thái:</strong> <span style={{ color: '#ff4d4f', fontWeight: 'bold' }}>Không khớp</span></p>
               <p style={{ color: '#ff4d4f', marginTop: '12px' }}>
                 <CloseCircleOutlined /> Dữ liệu trên blockchain không khớp với dữ liệu hệ thống
@@ -225,7 +225,7 @@ const QuanLyLichDatPhongPage: React.FC = () => {
           title: 'Cảnh báo: Phát hiện bất thường',
           content: (
             <div>
-              <p><strong>Booking ID:</strong> {record.booking_id}</p>
+              <p><strong>ID:</strong> {record.booking_id}</p>
               <p style={{ color: '#ff4d4f', marginTop: '12px' }}>
                 <CloseCircleOutlined /> Dữ liệu trên blockchain không khớp với dữ liệu hệ thống
               </p>
@@ -394,7 +394,7 @@ const QuanLyLichDatPhongPage: React.FC = () => {
       >
         {selectedBooking && (
           <Descriptions bordered size="small" column={2} labelStyle={{ width: '130px' }}>
-            <Descriptions.Item label="Booking ID" span={2}>
+            <Descriptions.Item label="ID" span={2}>
               {formatId.formatBookingId(selectedBooking.booking_id)}
             </Descriptions.Item>
 
