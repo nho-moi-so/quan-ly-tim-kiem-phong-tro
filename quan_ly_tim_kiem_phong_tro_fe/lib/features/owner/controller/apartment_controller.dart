@@ -215,7 +215,91 @@ class ApartmentController {
     }
   }
 
-  
+  /// Giống createApartment() nhưng trả về apartmentId (String?) thay vì bool.
+  /// Dùng cho luồng blockchain để lấy ID của căn hộ vừa tạo.
+  Future<String?> createApartmentGetId(RoomDetail roomCardDetail) async {
+    try {
+      String cleanPrice = roomCardDetail.price.replaceAll(RegExp(r'[^0-9.]'), '');
+
+      if (cleanPrice.isEmpty) throw Exception('Giá phòng không hợp lệ');
+
+      List<String> finalImageUrls = [];
+      if (roomCardDetail.images.isNotEmpty) {
+        for (String localPath in roomCardDetail.images) {
+          String? serverUrl = await _uploadImageToServer(localPath);
+          if (serverUrl != null) finalImageUrls.add(serverUrl);
+        }
+      }
+
+      final String? serverDomain = dotenv.env['HOST_SERVER'];
+      if (serverDomain == null) throw Exception('HOST_SERVER not defined in .env file');
+
+      final uri = Uri.parse('$serverDomain/api/apartments');
+      final body = {
+        'address': roomCardDetail.address,
+        'codeApartment': roomCardDetail.roomCode,
+        'dailyRate': double.parse(cleanPrice),
+        'decription': roomCardDetail.description,
+        'latitude': roomCardDetail.latitude,
+        'longitude': roomCardDetail.longitude,
+        'maxOccupancy': int.parse(roomCardDetail.maxCapacity),
+        'password': '',
+        'pathImage': finalImageUrls,
+        'requirements': roomCardDetail.requirement.split(',').map((e) => e.trim()).toList(),
+        'status': 'Available',
+        'type': roomCardDetail.roomType,
+        'userId': fb_auth.FirebaseAuth.instance.currentUser!.uid,
+        'checkInTime': roomCardDetail.checkin,
+        'checkOutTime': roomCardDetail.checkout,
+      };
+
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        final apiStatus = (jsonResponse['status'] ?? '').toString().toLowerCase();
+        if (apiStatus != 'success') return null;
+
+        final data = jsonResponse['data'];
+        if (data is! Map<String, dynamic>) return null;
+
+        final createdApartmentId =
+            (data['Id'] ?? data['id'] ?? data['apartmentID'] ?? data['apartmentId'] ?? '')
+                .toString();
+
+        if (createdApartmentId.isEmpty) return null;
+
+        print('✅ [GetId] Apartment created with ID: $createdApartmentId');
+
+        // Thêm tiện nghi
+        for (String amenityName in roomCardDetail.utilities) {
+          try {
+            Amenity? amenity = await _amenityService.getAmenityByName(amenityName);
+            if (amenity != null) {
+              await _amenityInApartmentService.createAmenityInApartment(
+                AmenityInApartment(
+                  apartmentId: createdApartmentId,
+                  amenityId: amenity.amenityID,
+                  isAvailable: true,
+                ),
+              );
+            }
+          } catch (_) {}
+        }
+
+        return createdApartmentId; // ← trả về ID
+      }
+      return null;
+    } catch (e) {
+      print('Error createApartmentGetId: $e');
+      return null;
+    }
+  }
+
   //updateApartment
   Future<bool> updateApartment(RoomDetail roomCardDetail) async{
       try {

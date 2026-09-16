@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -12,6 +13,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/model/iot_device.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/owner/iot_device_service.dart';
 
 import '../../viewmodel/room_detail.dart';
+import 'blockchain_tx_dialog.dart';
 import 'map_picker_dialog.dart';
 
 class CardRoomDetailWidget extends StatefulWidget {
@@ -1380,12 +1382,12 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                                   );
                                   if (widget.initialData.roomCode.isNotEmpty) {
                                     // Cập nhật phòng
+                                    final messenger = ScaffoldMessenger.of(context);
+                                    final nav = Navigator.of(context);
                                     final success = await ApartmentController()
                                         .updateApartment(createOrUpdateRoom);
                                     if (mounted && success) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
+                                      messenger.showSnackBar(
                                         const SnackBar(
                                           content: Row(
                                             children: [
@@ -1403,47 +1405,60 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                                         ),
                                       );
                                       // Pop về màn hình trước (giữ nguyên bottom nav)
-                                      Navigator.of(context).pop(
-                                        true,
-                                      ); // true = có thay đổi, cần refresh
+                                      nav.pop(true); // true = có thay đổi, cần refresh
                                     }
                                   } else {
                                     // Tạo phòng mới
-                                    final success = await ApartmentController()
-                                        .createApartment(createOrUpdateRoom);
-                                    if (mounted && success) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
+                                    final messenger = ScaffoldMessenger.of(context);
+                                    final nav = Navigator.of(context);
+                                    final createdApartmentId =
+                                        await ApartmentController()
+                                            .createApartmentGetId(
+                                              createOrUpdateRoom,
+                                            );
+                                    if (mounted && createdApartmentId != null) {
+                                      // ✅ Tạo căn hộ thành công → mở dialog blockchain
+                                      messenger.showSnackBar(
                                         const SnackBar(
                                           content: Row(
                                             children: [
-                                              Icon(
-                                                Icons.check_circle,
-                                                color: Colors.white,
-                                              ),
+                                              Icon(Icons.check_circle, color: Colors.white),
                                               SizedBox(width: 12),
                                               Text('Tạo phòng thành công!'),
                                             ],
                                           ),
                                           backgroundColor: Color(0xFF10B981),
+                                          duration: Duration(seconds: 2),
                                         ),
                                       );
-                                      // Pop về màn hình trước (giữ nguyên bottom nav)
-                                      Navigator.of(context).pop(
-                                        true,
-                                      ); // true = có thay đổi, cần refresh
-                                    } else if (mounted && !success) {
-                                      ScaffoldMessenger.of(
+
+                                      final ownerId =
+                                          FirebaseAuth.instance.currentUser?.uid ?? '';
+                                      final dailyRate = createOrUpdateRoom.price
+                                          .replaceAll(RegExp(r'[^0-9]'), '');
+
+                                      // Mở dialog blockchain 2 bước
+                                      // ignore: use_build_context_synchronously
+                                      final txId = await BlockchainTxDialog.show(
                                         context,
-                                      ).showSnackBar(
+                                        apartmentId: createdApartmentId,
+                                        ownerId: ownerId,
+                                        dailyRate: dailyRate,
+                                      );
+
+                                      if (txId != null && txId.isNotEmpty) {
+                                        print('✅ Blockchain TX: $txId');
+                                      }
+
+                                      if (mounted) {
+                                        nav.pop(true);
+                                      }
+                                    } else if (mounted) {
+                                      messenger.showSnackBar(
                                         const SnackBar(
                                           content: Row(
                                             children: [
-                                              Icon(
-                                                Icons.error,
-                                                color: Colors.white,
-                                              ),
+                                              Icon(Icons.error, color: Colors.white),
                                               SizedBox(width: 12),
                                               Text('Tạo phòng thất bại!'),
                                             ],
