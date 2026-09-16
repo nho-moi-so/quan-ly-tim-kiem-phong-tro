@@ -143,12 +143,28 @@ class _BlockchainTxDialogState extends State<BlockchainTxDialog>
         _errorMsg = result['message'] as String? ?? 'Lỗi không xác định';
       });
     }
+    
+    /*
+    // =========================
+    // code test ui
+    // ==========================
+    await Future.delayed(const Duration(seconds: 1)); // giả lập thời gian gọi prepare-tx
+    if (!mounted) return;
+    setState(() {
+      _certificate = '-----BEGIN CERTIFICATE-----\nMIICVjCC...MockCert... \n-----END CERTIFICATE-----';
+      _mspId = 'Org1MSP';
+      _privateKey = 'mock_private_key';
+      _proposalBytes = 'mock_proposal_bytes';
+      _digestHex = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+      _step = _TxStep.awaitingConfirm;
+    });
+    // =========================
+    */
   }
 
   /// Ký local + endorse + ký local + submit — gọi khi user bấm "Xác nhận"
   Future<void> _confirmAndSign() async {
     setState(() => _step = _TxStep.signingAndSubmit);
-
     // ==========================================
     // LẦN 1: KÝ PROPOSAL VÀ GỌI ENDORSE
     // ==========================================
@@ -221,6 +237,21 @@ class _BlockchainTxDialogState extends State<BlockchainTxDialog>
         _errorMsg = submitResult['message'] as String? ?? 'Lỗi submit-tx';
       });
     }
+    
+    /*
+    // =========================
+    // code test ui
+    // ==========================
+    await Future.delayed(const Duration(seconds: 2)); // giả lập thời gian sign và submit
+    if (!mounted) return;
+    
+    setState(() {
+      _transactionId = 'tx_mock_1234567890abcdef1234567890abcdef';
+      _blockStatus = 'VALID';
+      _step = _TxStep.success;
+    });
+    // =========================
+    */
   }
 
   void _copyToClipboard(String text, String label) {
@@ -322,7 +353,7 @@ class _BlockchainTxDialogState extends State<BlockchainTxDialog>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Ký giao dịch Blockchain',
+                  'Ký giao dịch Fabric',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -332,7 +363,7 @@ class _BlockchainTxDialogState extends State<BlockchainTxDialog>
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'CreateApartment · Hyperledger Fabric · $_mspId',
+                  'Hyperledger Fabric - ${_mspId }',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.4),
                     fontSize: 11,
@@ -645,37 +676,37 @@ class _BlockchainTxDialogState extends State<BlockchainTxDialog>
 
         const SizedBox(height: 14),
 
-        // === Cảnh báo bảo mật ===
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: const Color(0xFFF59E0B).withValues(alpha: 0.25),
-            ),
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.lock_rounded,
-                color: Color(0xFFFBBF24),
-                size: 16,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Private key sẽ ký cục bộ trên thiết bị. Không được truyền ra ngoài.',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontSize: 11,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        // // === Cảnh báo bảo mật ===
+        // Container(
+        //   padding: const EdgeInsets.all(12),
+        //   decoration: BoxDecoration(
+        //     color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
+        //     borderRadius: BorderRadius.circular(12),
+        //     border: Border.all(
+        //       color: const Color(0xFFF59E0B).withValues(alpha: 0.25),
+        //     ),
+        //   ),
+        //   // child: Row(
+        //   //   children: [
+        //   //     const Icon(
+        //   //       Icons.lock_rounded,
+        //   //       color: Color(0xFFFBBF24),
+        //   //       size: 16,
+        //   //     ),
+        //   //     const SizedBox(width: 10),
+        //   //     // Expanded(
+        //   //     //   child: Text(
+        //   //     //     'Private key sẽ ký cục bộ trên thiết bị. Không được truyền ra ngoài.',
+        //   //     //     style: TextStyle(
+        //   //     //       color: Colors.white.withValues(alpha: 0.6),
+        //   //     //       fontSize: 11,
+        //   //     //       height: 1.5,
+        //   //     //     ),
+        //   //     //   ),
+        //   //     // ),
+        //   //   ],
+        //   // ),
+        // ),
 
         const SizedBox(height: 16),
       ],

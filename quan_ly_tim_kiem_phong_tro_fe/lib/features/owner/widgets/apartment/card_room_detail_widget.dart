@@ -1416,6 +1416,14 @@ class _CardRoomDetailWidgetState extends State<CardRoomDetailWidget> {
                                             .createApartmentGetId(
                                               createOrUpdateRoom,
                                             );
+                                    /*
+                                    // =========================
+                                    // code test ui
+                                    // ==========================
+                                    await Future.delayed(const Duration(seconds: 1));
+                                    final createdApartmentId = 'mock_apartment_id';
+                                    // =========================
+                                    */
                                     if (mounted && createdApartmentId != null) {
                                       // ✅ Tạo căn hộ thành công → mở dialog blockchain
                                       messenger.showSnackBar(

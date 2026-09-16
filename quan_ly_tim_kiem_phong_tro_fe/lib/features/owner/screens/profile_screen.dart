@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/controller/user_controller.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/format_currency.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_constants.dart';
@@ -271,7 +272,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 24),
 
                     // ─── Section: Ví Blockchain ───
-                    _buildSectionTitle('Ví Blockchain'),
+                    _buildSectionTitle('Ví Fabric'),
                     const SizedBox(height: 12),
                     _buildWalletSection(),
 
@@ -1311,7 +1312,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ] else
                         const Text(
-                          'Đăng ký tài khoản để có ví Blockchain',
+                          '',
                           style: TextStyle(
                             fontSize: 12,
                             color: Color(0xFF9CA3AF),
@@ -1373,11 +1374,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // ── Action buttons ──
           if (hasWallet) ...[
             _buildWalletActionTile(
-              icon: Icons.upload_file_rounded,
+              icon: Icons.visibility_rounded,
               iconColor: const Color(0xFF4C6FFF),
-              label: 'Xuất file backup (keystore.json)',
-              subtitle: 'Lưu ví ra ngoài thiết bị',
-              onTap: _exportWallet,
+              label: 'Xem thông tin & Xuất Backup',
+              subtitle: 'Xem chi tiết ví và lưu file an toàn',
+              onTap: _showSecurityQuizDialog,
             ),
             Container(height: 1, color: const Color(0xFFF3F4F6)),
           ],
@@ -1518,6 +1519,366 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ─────────────────────────────────────────────────────
   // WALLET ACTIONS
   // ─────────────────────────────────────────────────────
+
+  Future<void> _showSecurityQuizDialog() async {
+    int currentStep = 0;
+    int? selectedAnswer;
+    bool showError = false;
+    
+    final questions = [
+      {
+        'question': '1. Ví này mất rồi có thể nhờ quản trị viên cung cấp lại không?',
+        'options': [
+          'Có, tôi có thể nhờ quản trị viên khôi phục',
+          'Không, chỉ có tôi mới có thể khôi phục bằng file backup',
+        ],
+        'correctIndex': 1,
+        'explanation': 'Sai rồi! Ví Fabric hoạt động theo cơ chế bảo mật nghiêm ngặt. Quản trị viên không hề giữ hay biết private key của bạn, nên KHÔNG THỂ khôi phục ví giúp bạn nếu bạn làm mất file backup.',
+      },
+      {
+        'question': '2. Nếu có người nào đó yêu cầu bạn cung cấp file backup hoặc private key, bạn có cung cấp không?',
+        'options': [
+          'Có, nếu họ là quản trị viên hoặc nhân viên hỗ trợ',
+          'Không, tuyệt đối không cung cấp cho bất kỳ ai',
+        ],
+        'correctIndex': 1,
+        'explanation': 'Sai rồi! Không một ai (kể cả quản trị viên hay nhân viên hỗ trợ) có quyền yêu cầu bạn cung cấp file backup hoặc private key. Bất kỳ ai yêu cầu đều là lừa đảo. Nếu bạn cung cấp, họ có thể chiếm quyền điều khiển ví của bạn.',
+      }
+    ];
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) {
+          final currentQ = questions[currentStep];
+          final isAnswered = selectedAnswer != null;
+
+          return Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            backgroundColor: Colors.white,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.security_rounded, color: Color(0xFF4C6FFF), size: 28),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text(
+                            'Kiểm tra bảo mật',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1F2937),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, color: Color(0xFF9CA3AF)),
+                          onPressed: () => Navigator.pop(ctx),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Để bảo vệ an toàn cho bạn, vui lòng trả lời các câu hỏi sau trước khi xem hoặc xuất thông tin ví:',
+                      style: TextStyle(fontSize: 14, color: Color(0xFF4B5563)),
+                    ),
+                    const SizedBox(height: 16),
+                    LinearProgressIndicator(
+                      value: (currentStep + 1) / questions.length,
+                      backgroundColor: const Color(0xFFE5E7EB),
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF4C6FFF)),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    Text(
+                      currentQ['question'] as String,
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF1F2937), height: 1.4),
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    ...(currentQ['options'] as List<String>).asMap().entries.map((entry) {
+                      return _buildRadioOption(
+                        title: entry.value,
+                        value: entry.key,
+                        groupValue: selectedAnswer,
+                        onChanged: (val) => setState(() { selectedAnswer = val; showError = false; }),
+                      );
+                    }).toList(),
+
+                    if (showError) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFFCA5A5)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444), size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                currentQ['explanation'] as String,
+                                style: const TextStyle(color: Color(0xFFB91C1C), fontSize: 13, height: 1.4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: !isAnswered ? null : () {
+                          if (selectedAnswer == currentQ['correctIndex']) {
+                            if (currentStep < questions.length - 1) {
+                              setState(() {
+                                currentStep++;
+                                selectedAnswer = null;
+                                showError = false;
+                              });
+                            } else {
+                              WalletService().loadKeystore().then((keystore) {
+                                if (keystore != null && mounted) {
+                                  Navigator.pop(ctx);
+                                  _showWalletInfoAndExport(keystore);
+                                }
+                              });
+                            }
+                          } else {
+                            setState(() { showError = true; });
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4C6FFF),
+                          disabledBackgroundColor: const Color(0xFFE5E7EB),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(
+                          currentStep < questions.length - 1 ? 'Tiếp theo' : 'Hoàn thành',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRadioOption({
+    required String title,
+    required int value,
+    required int? groupValue,
+    required ValueChanged<int?> onChanged,
+  }) {
+    final isSelected = value == groupValue;
+    return InkWell(
+      onTap: () => onChanged(value),
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+          border: Border.all(
+            color: isSelected ? const Color(0xFF4C6FFF) : const Color(0xFFE5E7EB),
+            width: isSelected ? 1.5 : 1,
+          ),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
+              color: isSelected ? const Color(0xFF4C6FFF) : const Color(0xFF9CA3AF),
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFF4B5563),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showWalletInfoAndExport(Map<String, dynamic> keystore) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF0FDF4),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 36),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Thông tin ví Fabric',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF1F2937)),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF9FAFB),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildInfoRow('Loại ví', keystore['type']?.toString() ?? 'Fabric Keystore'),
+                      const SizedBox(height: 12),
+                      _buildInfoRow('MSP ID', keystore['mspId']?.toString() ?? 'N/A'),
+                      const SizedBox(height: 12),
+                      _buildInfoRow('Trạng thái', 'Đang hoạt động'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildKeyDisplay('Public Key (Certificate)', keystore['certificate']?.toString(), isPrivate: false),
+                const SizedBox(height: 16),
+                _buildKeyDisplay('Private Key', keystore['privateKey']?.toString(), isPrivate: true),
+                const SizedBox(height: 24),
+                const Text(
+                  'Vui lòng lưu trữ file backup (keystore.json) ở nơi an toàn. Không chia sẻ file này cho bất kỳ ai!',
+                  style: TextStyle(fontSize: 13, color: Color(0xFF6B7280), height: 1.5),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      _exportWallet();
+                    },
+                    icon: const Icon(Icons.download_rounded, color: Colors.white),
+                    label: const Text(
+                      'Xuất file Backup',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF10B981),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildKeyDisplay(String label, String? keyContent, {bool isPrivate = false}) {
+    if (keyContent == null || keyContent.isEmpty) return const SizedBox();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1F2937))),
+            IconButton(
+              icon: const Icon(Icons.copy_rounded, size: 18, color: Color(0xFF4C6FFF)),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: keyContent));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(Icons.check_circle_rounded, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Text('Đã sao chép $label'),
+                      ],
+                    ),
+                    backgroundColor: const Color(0xFF10B981),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              splashRadius: 20,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isPrivate ? const Color(0xFFFEF2F2) : const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: isPrivate ? const Color(0xFFFCA5A5) : const Color(0xFFE5E7EB)),
+          ),
+          child: SelectableText(
+            keyContent,
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 11,
+              color: isPrivate ? const Color(0xFF991B1B) : const Color(0xFF4B5563),
+            ),
+            maxLines: 4,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280))),
+        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1F2937))),
+      ],
+    );
+  }
 
   Future<void> _exportWallet() async {
     _showLoadingSnackBar('Đang xuất file ví...');

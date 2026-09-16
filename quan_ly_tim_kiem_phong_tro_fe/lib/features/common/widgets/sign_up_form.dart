@@ -35,6 +35,10 @@ class _SignupFormState extends State<SignupForm> {
   }
 
   Future<void> _signUp() async {
+    // CHỈ ĐỂ TEST UI: Bỏ qua logic đăng ký thật, hiển thị dialog trực tiếp
+    // await _showWalletCreatedDialog();
+    // return;
+
     // Check terms acceptance
     if (!_acceptTerms) {
       _showErrorSnackBar('Bạn phải chấp nhận điều khoản để tiếp tục');
@@ -89,30 +93,26 @@ class _SignupFormState extends State<SignupForm> {
     }
   }
 
-  /// Dialog thông báo ví Blockchain đã được tạo
+  /// Dialog thông báo ví Fabric đã được tạo
   Future<void> _showWalletCreatedDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         elevation: 0,
         backgroundColor: Colors.transparent,
         child: Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFFFAFBFF), Color(0xFFFFFFFF)],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE0E7FF), width: 2),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFE0E7FF), width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+                color: const Color(0xFF4C6FFF).withOpacity(0.12),
+                blurRadius: 28,
+                offset: const Offset(0, 12),
               ),
             ],
           ),
@@ -121,8 +121,8 @@ class _SignupFormState extends State<SignupForm> {
             children: [
               // Icon
               Container(
-                width: 80,
-                height: 80,
+                width: 88,
+                height: 88,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFF10B981), Color(0xFF34D399)],
@@ -132,71 +132,107 @@ class _SignupFormState extends State<SignupForm> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF10B981).withOpacity(0.35),
+                      color: const Color(0xFF10B981).withOpacity(0.3),
                       blurRadius: 16,
-                      offset: const Offset(0, 6),
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
                 child: const Icon(
                   Icons.account_balance_wallet_rounded,
                   color: Colors.white,
-                  size: 40,
+                  size: 44,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               // Title
               const Text(
-                '🎉 Ví Blockchain đã được tạo!',
+                'Đăng ký thành công!',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
                   fontFamily: 'Noto Sans',
-                  color: Color(0xFF1F2937),
+                  color: Color(0xFF1E293B),
+                  letterSpacing: -0.5,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
-              // Description
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF7ED),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFFED7AA), width: 1),
+              const SizedBox(height: 8),
+              const Text(
+                'Ví Fabric của bạn đã sẵn sàng',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Noto Sans',
+                  color: Color(0xFF64748B),
                 ),
-                child: const Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              // Description Box
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFF1F5F9), width: 2),
+                ),
+                child: const Column(
                   children: [
-                    Text('⚠️', style: TextStyle(fontSize: 16)),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Ví Blockchain của bạn đã được lưu an toàn trên thiết bị này.\n\n'
-                        'Hãy vào Hồ sơ → Ví Blockchain để export file keystore.json làm backup. '
-                        'Nếu mất thiết bị mà không có backup, ví sẽ không thể khôi phục!',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'Noto Sans',
-                          color: Color(0xFF92400E),
-                          height: 1.5,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.shield_rounded, color: Color(0xFF10B981), size: 20),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Ví hiện đã được lưu trữ an toàn ngay trên thiết bị này.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Noto Sans',
+                              color: Color(0xFF334155),
+                              height: 1.4,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
+                    ),
+                    SizedBox(height: 12),
+                    Divider(color: Color(0xFFE2E8F0), height: 1),
+                    SizedBox(height: 12),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.lightbulb_outline_rounded, color: Color(0xFFF59E0B), size: 20),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Mẹo nhỏ: Đừng quên vào mục Hồ sơ → Ví Fabric để sao lưu nhé. Việc này giúp bạn khôi phục ví dễ dàng nếu đổi điện thoại!',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'Noto Sans',
+                              color: Color(0xFF475569),
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 28),
               // Button
               SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: 52,
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () => Navigator.pop(ctx),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                     child: Ink(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
@@ -204,24 +240,24 @@ class _SignupFormState extends State<SignupForm> {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0xFF4C6FFF).withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
                           ),
                         ],
                       ),
                       child: const Center(
                         child: Text(
-                          'Đã hiểu, chuyển đến đăng nhập',
+                          'Hoàn tất & Đăng nhập',
                           style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
                             fontFamily: 'Noto Sans',
                             color: Colors.white,
-                            letterSpacing: 0.2,
+                            letterSpacing: 0.3,
                           ),
                         ),
                       ),
