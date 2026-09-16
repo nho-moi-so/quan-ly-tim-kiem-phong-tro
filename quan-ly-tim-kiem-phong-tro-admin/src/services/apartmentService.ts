@@ -45,37 +45,37 @@ export const ApartmentService = {
             CheckOutTime: data.checkOutTime,    
         });
 
-        // 2. Tạo apartment trên Blockchain
-        try {
-            // Lấy id từ firebase dưới dạng dữ liệu thô (Raw Data)
-            const rawWallet: any = await WalletBlockchainRepository.getIdentityFromFirebase(data.userId);
+        // // 2. Tạo apartment trên Blockchain
+        // try {
+        //     // Lấy id từ firebase dưới dạng dữ liệu thô (Raw Data)
+        //     const rawWallet: any = await WalletBlockchainRepository.getIdentityFromFirebase(data.userId);
             
-            // BẮT BUỘC: Map dữ liệu thô sang đúng chuẩn X509Identity của Fabric SDK
-            const walletUser: X509Identity = {
-                credentials: {
-                    // Ưu tiên đọc cấu trúc lồng nhau (nếu có), không thì đọc cấu trúc phẳng
-                    certificate: rawWallet.credentials?.certificate || rawWallet.CredentialsCertificate,
-                    privateKey: rawWallet.credentials?.privateKey || rawWallet.CredentialsPrivateKey,
-                },
-                mspId: rawWallet.mspId || rawWallet.MSPID || 'Org1MSP',
-                type: rawWallet.type || rawWallet.Type || 'X.509',
-            };
+        //     // BẮT BUỘC: Map dữ liệu thô sang đúng chuẩn X509Identity của Fabric SDK
+        //     const walletUser: X509Identity = {
+        //         credentials: {
+        //             // Ưu tiên đọc cấu trúc lồng nhau (nếu có), không thì đọc cấu trúc phẳng
+        //             certificate: rawWallet.credentials?.certificate || rawWallet.CredentialsCertificate,
+        //             privateKey: rawWallet.credentials?.privateKey || rawWallet.CredentialsPrivateKey,
+        //         },
+        //         mspId: rawWallet.mspId || rawWallet.MSPID || 'Org1MSP',
+        //         type: rawWallet.type || rawWallet.Type || 'X.509',
+        //     };
 
-            // Khởi tạo repo (truyền null vào vì ta không dùng chung contract ở tầng này nữa)
-            const repoBlockchainFabric = new BlockchainFabricRepository(null as any);
+        //     // Khởi tạo repo (truyền null vào vì ta không dùng chung contract ở tầng này nữa)
+        //     const repoBlockchainFabric = new BlockchainFabricRepository(null as any);
 
-            await repoBlockchainFabric.createApartmentWithUser(
-                walletUser,
-                newApartment.Id, 
-                data.userId, 
-                data.dailyRate
-            );
+        //     await repoBlockchainFabric.createApartmentWithUser(
+        //         walletUser,
+        //         newApartment.Id, 
+        //         data.userId, 
+        //         data.dailyRate
+        //     );
 
-        } catch(err) {
-            // Nếu tạo trên blockchain thất bại thì xóa trên firebase
-            await ApartmentRepository.delete(newApartment.Id);
-            throw err;
-        }
+        // } catch(err) {
+        //     // Nếu tạo trên blockchain thất bại thì xóa trên firebase
+        //     await ApartmentRepository.delete(newApartment.Id);
+        //     throw err;
+        // }
         // 3. Emit socket event
         try {
             const io = getIO();
