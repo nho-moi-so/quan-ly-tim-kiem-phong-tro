@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http; // Để gọi API upload
 import 'package:quan_ly_tim_kiem_phong_tro_fe/service/auth_service.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/wallet_service.dart';
 /// Controller quản lý logic authentication
 /// Tách biệt logic nghiệp vụ khỏi UI
 class AuthController {
@@ -77,10 +78,33 @@ class AuthController {
       print("response status: ${response.statusCode}");
       print("8");
       if(response.statusCode == 200 || response.statusCode == 201) {
-        print("4");
+        print("4 - thành công");
+
+        // Parse response để lấy credentials ví Blockchain
+        bool keystoreSaved = false;
+        try {
+          final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+          final data = responseData['data'] as Map<String, dynamic>?;
+          final credentials = data?['credentials'] as Map<String, dynamic>?;
+          final userId = data?['userId'] as String?;
+          final emailVal = data?['email'] as String?;
+
+          if (credentials != null) {
+            keystoreSaved = await WalletService().saveKeystore(
+              credentials: credentials,
+              userId: userId,
+              email: emailVal,
+            );
+            print('Keystore saved: $keystoreSaved');
+          }
+        } catch (e) {
+          print('Lỗi lưu keystore: $e');
+        }
+
         return {
           'success': true,
           'message': 'Đăng ký thành công! Vui lòng đăng nhập.',
+          'keystoreSaved': keystoreSaved,
         };
       } else if (response.statusCode == 400) {
         print("5");

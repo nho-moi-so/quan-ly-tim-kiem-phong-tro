@@ -60,14 +60,18 @@ class _SignupFormState extends State<SignupForm> {
       if (!mounted) return;
 
       if (result['success']) {
-        // Show success message
-        _showSuccessSnackBar(result['message']);
-        
-        // Wait a bit then navigate to login
-        await Future.delayed(const Duration(seconds: 1));
+        // Kiểm tra ví blockchain đã được lưu chưa
+        final bool keystoreSaved = result['keystoreSaved'] == true;
+
+        if (keystoreSaved) {
+          // Hiển thị dialog thông báo ví đã được tạo
+          await _showWalletCreatedDialog();
+        } else {
+          _showSuccessSnackBar(result['message']);
+          await Future.delayed(const Duration(seconds: 1));
+        }
+
         if (!mounted) return;
-        
-        // Navigate to login screen
         Navigator.pushReplacementNamed(context, '/login');
       } else {
         // Show error message
@@ -84,6 +88,154 @@ class _SignupFormState extends State<SignupForm> {
       }
     }
   }
+
+  /// Dialog thông báo ví Blockchain đã được tạo
+  Future<void> _showWalletCreatedDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFFAFBFF), Color(0xFFFFFFFF)],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFE0E7FF), width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF10B981), Color(0xFF34D399)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF10B981).withOpacity(0.35),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.account_balance_wallet_rounded,
+                  color: Colors.white,
+                  size: 40,
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Title
+              const Text(
+                '🎉 Ví Blockchain đã được tạo!',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Noto Sans',
+                  color: Color(0xFF1F2937),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              // Description
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF7ED),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFFED7AA), width: 1),
+                ),
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('⚠️', style: TextStyle(fontSize: 16)),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Ví Blockchain của bạn đã được lưu an toàn trên thiết bị này.\n\n'
+                        'Hãy vào Hồ sơ → Ví Blockchain để export file keystore.json làm backup. '
+                        'Nếu mất thiết bị mà không có backup, ví sẽ không thể khôi phục!',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Noto Sans',
+                          color: Color(0xFF92400E),
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => Navigator.pop(ctx),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF4C6FFF), Color(0xFF6B8AFF)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Đã hiểu, chuyển đến đăng nhập',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Noto Sans',
+                            color: Colors.white,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(

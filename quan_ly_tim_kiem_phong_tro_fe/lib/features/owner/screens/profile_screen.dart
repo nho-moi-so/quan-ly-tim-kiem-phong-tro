@@ -7,6 +7,7 @@ import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/helpers/status_cons
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/change_password_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/features/owner/screens/edit_profile_screen.dart';
 import 'package:quan_ly_tim_kiem_phong_tro_fe/model/transaction.dart';
+import 'package:quan_ly_tim_kiem_phong_tro_fe/service/wallet_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -21,11 +22,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   
   Map<String, dynamic>? userData;
   bool isLoading = true;
+  Map<String, dynamic> walletInfo = {'hasWallet': false};
+  bool isWalletLoading = true;
   
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadWalletInfo();
   }
   
   Future<void> _loadUserData() async {
@@ -45,6 +49,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
         isLoading = false;
       });
       debugPrint('Error loading user data: $e');
+    }
+  }
+
+  Future<void> _loadWalletInfo() async {
+    try {
+      final info = await WalletService().getKeystoreDisplayInfo();
+      if (mounted) {
+        setState(() {
+          walletInfo = info;
+          isWalletLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isWalletLoading = false;
+        });
+      }
     }
   }
   
@@ -245,7 +267,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 12),
                       _buildVerificationButton(),
                     ],
-                    
+
+                    const SizedBox(height: 24),
+
+                    // ─── Section: Ví Blockchain ───
+                    _buildSectionTitle('Ví Blockchain'),
+                    const SizedBox(height: 12),
+                    _buildWalletSection(),
+
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -1134,4 +1163,552 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return const Color(0xFF6B7280);
     }
   }
+
+  // ─────────────────────────────────────────────────────
+  // WALLET SECTION WIDGETS
+  // ─────────────────────────────────────────────────────
+
+  Widget _buildSectionTitle(String title) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 20,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF4C6FFF), Color(0xFF8B5CF6)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1F2937),
+            letterSpacing: -0.3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWalletSection() {
+    if (isWalletLoading) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: SizedBox(
+            height: 24,
+            width: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
+
+    final bool hasWallet = walletInfo['hasWallet'] == true;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // ── Wallet status card ──
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: hasWallet
+                          ? [const Color(0xFF10B981), const Color(0xFF34D399)]
+                          : [const Color(0xFF9CA3AF), const Color(0xFFD1D5DB)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (hasWallet
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFF9CA3AF))
+                            .withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    hasWallet
+                        ? Icons.account_balance_wallet_rounded
+                        : Icons.wallet_outlined,
+                    color: Colors.white,
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        hasWallet ? 'Ví đã được cài đặt' : 'Chưa có ví',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: hasWallet
+                              ? const Color(0xFF065F46)
+                              : const Color(0xFF6B7280),
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      if (hasWallet) ...[
+                        Text(
+                          'MSP: ${walletInfo['mspId'] ?? 'N/A'}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF6B7280),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          'Loại: ${walletInfo['type'] ?? 'N/A'}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF6B7280),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ] else
+                        const Text(
+                          'Đăng ký tài khoản để có ví Blockchain',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF9CA3AF),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                // Badge trạng thái
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: hasWallet
+                        ? const Color(0xFFD1FAE5)
+                        : const Color(0xFFF3F4F6),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    hasWallet ? '✓ Active' : 'None',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: hasWallet
+                          ? const Color(0xFF065F46)
+                          : const Color(0xFF6B7280),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          if (hasWallet) ...[
+            // ── Key status indicators ──
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  _buildKeyBadge(
+                    '🔑 Private Key',
+                    walletInfo['hasPrivateKey'] == true,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildKeyBadge(
+                    '📜 Certificate',
+                    walletInfo['hasCertificate'] == true,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
+
+          // ── Divider ──
+          Container(height: 1, color: const Color(0xFFF3F4F6)),
+
+          // ── Action buttons ──
+          if (hasWallet) ...[
+            _buildWalletActionTile(
+              icon: Icons.upload_file_rounded,
+              iconColor: const Color(0xFF4C6FFF),
+              label: 'Xuất file backup (keystore.json)',
+              subtitle: 'Lưu ví ra ngoài thiết bị',
+              onTap: _exportWallet,
+            ),
+            Container(height: 1, color: const Color(0xFFF3F4F6)),
+          ],
+          _buildWalletActionTile(
+            icon: Icons.download_rounded,
+            iconColor: const Color(0xFF10B981),
+            label: 'Nhập ví từ file backup',
+            subtitle: 'Khôi phục ví từ keystore.json',
+            onTap: _importWallet,
+          ),
+          if (hasWallet) ...[
+            Container(height: 1, color: const Color(0xFFF3F4F6)),
+            _buildWalletActionTile(
+              icon: Icons.delete_outline_rounded,
+              iconColor: const Color(0xFFEF4444),
+              label: 'Xoá ví khỏi thiết bị',
+              subtitle: 'Chỉ xoá local, không xoá tài khoản',
+              onTap: _confirmDeleteWallet,
+              isDestructive: true,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKeyBadge(String label, bool isPresent) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: BoxDecoration(
+          color: isPresent
+              ? const Color(0xFFECFDF5)
+              : const Color(0xFFFEF2F2),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isPresent
+                ? const Color(0xFF6EE7B7)
+                : const Color(0xFFFCA5A5),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isPresent ? Icons.check_circle_rounded : Icons.cancel_rounded,
+              size: 14,
+              color: isPresent
+                  ? const Color(0xFF059669)
+                  : const Color(0xFFDC2626),
+            ),
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isPresent
+                      ? const Color(0xFF065F46)
+                      : const Color(0xFF991B1B),
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWalletActionTile({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: iconColor, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDestructive
+                            ? const Color(0xFFEF4444)
+                            : const Color(0xFF1F2937),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF9CA3AF),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: isDestructive
+                    ? const Color(0xFFEF4444).withOpacity(0.6)
+                    : const Color(0xFF9CA3AF),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────
+  // WALLET ACTIONS
+  // ─────────────────────────────────────────────────────
+
+  Future<void> _exportWallet() async {
+    _showLoadingSnackBar('Đang xuất file ví...');
+    final result = await WalletService().exportKeystoreFile();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    _showResultSnackBar(result['success'] == true, result['message'] ?? '');
+  }
+
+  Future<void> _importWallet() async {
+    final result = await WalletService().importKeystoreFile();
+    if (!mounted) return;
+    _showResultSnackBar(result['success'] == true, result['message'] ?? '');
+    if (result['success'] == true) {
+      _loadWalletInfo(); // Reload wallet info
+    }
+  }
+
+  void _confirmDeleteWallet() {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.delete_forever_rounded,
+                  color: Color(0xFFEF4444),
+                  size: 32,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Xoá ví khỏi thiết bị?',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2937),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF7ED),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFFED7AA)),
+                ),
+                child: const Text(
+                  '⚠️ Hành động này sẽ xoá ví khỏi thiết bị này. Nếu bạn chưa backup file keystore.json, ví sẽ không thể khôi phục!',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF92400E),
+                    fontWeight: FontWeight.w500,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        side: const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                      child: const Text(
+                        'Huỷ',
+                        style: TextStyle(
+                          color: Color(0xFF6B7280),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pop(ctx);
+                        final ok = await WalletService().deleteKeystore();
+                        if (!mounted) return;
+                        _showResultSnackBar(
+                          ok,
+                          ok ? 'Đã xoá ví khỏi thiết bị.' : 'Xoá ví thất bại.',
+                        );
+                        if (ok) _loadWalletInfo();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEF4444),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Xoá ví',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLoadingSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(message),
+          ],
+        ),
+        backgroundColor: const Color(0xFF4C6FFF),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 30),
+      ),
+    );
+  }
+
+  void _showResultSnackBar(bool success, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              success ? Icons.check_circle_rounded : Icons.error_rounded,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor:
+            success ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
 }
+
